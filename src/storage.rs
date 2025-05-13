@@ -11,7 +11,8 @@ use uuid::Uuid;
 
 /// Access storage bucket if it exists and add new entry to it.
 pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
-    let date = UtcDateTime::now().date();
+    let now = UtcDateTime::now();
+    let date = now.date();
 
     let (mut bucket, path) = fetch_new_bucket(&date, config)?;
 
@@ -28,6 +29,14 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
         Some(t) => t.clone(),
         None => String::new(),
     };
+    new_entry.status = match &entry.status {
+        Some(s) => s.clone(),
+        None => String::new(),
+    };
+
+    let ts = now.unix_timestamp();
+    new_entry.created = ts;
+    new_entry.modified = ts;
 
     write_bucket(&bucket, &path)
 }

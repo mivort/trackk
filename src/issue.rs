@@ -8,14 +8,23 @@ pub struct Issue {
     /// Issue main title.
     pub title: String,
 
-    /// Issue description text.
-    pub description: String,
+    /// List of issue's tags.
+    pub tags: Vec<String>,
 
     /// Entry status string.
     pub status: String,
 
     /// Last modify timestamp.
-    pub modified: u64,
+    pub modified: i64,
+
+    /// Creation date/time.
+    pub created: i64,
+
+    /// Due date/time.
+    pub due: i64,
+
+    /// Last modify timestamp.
+    pub status_changed: i64,
 }
 
 #[derive(Serialize, Deserialize)]
