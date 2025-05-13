@@ -19,10 +19,21 @@ pub struct Issue {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct Storage {
+pub struct Bucket {
     /// Storage bucket schema version.
     version: i64,
 
     /// Entry IDs.
     entries: HashMap<Uuid, Issue>,
+}
+
+impl Bucket {
+    const VERSION: i64 = 1;
+
+    pub fn new() -> Self {
+        Self {
+            version: Self::VERSION,
+            entries: Default::default(),
+        }
+    }
 }

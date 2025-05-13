@@ -10,4 +10,5 @@ clap_derive = "4.5.32"
 log = "0.4.27"
 serde = "1.0.219"
 serde_derive = "1.0.219"
+time = "0.3.41"
 uuid = { version = "1.16.0", features = ["v4", "serde"] }

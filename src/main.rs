@@ -1,4 +1,5 @@
 mod args;
+mod config;
 mod issue;
 mod prelude;
 mod repo;
@@ -6,19 +7,24 @@ mod storage;
 
 use args::{Args, Command};
 use clap::Parser;
+use config::Config;
 use prelude::*;
 
 fn main() -> Result<()> {
     let args = Args::parse();
 
+    let mut config = Config::default(); // TODO: use argument to read config
+    config.set_data_directory(args.data);
+    config.fallback_values();
+
     let command = args.command.unwrap_or_default();
     match command {
         Command::List(_f) => {}
         Command::Add(e) => {
-            storage::add_entry(&e);
+            storage::add_entry(&e, &config)?;
         }
         Command::Modify(e) => {
-            storage::modify_entry(&e);
+            storage::modify_entry(&e, &config)?;
         }
         Command::CheckRepo => {
             repo::check_repo();
