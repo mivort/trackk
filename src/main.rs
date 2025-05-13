@@ -1,8 +1,18 @@
-use clap::Parser;
-
 mod args;
 mod issue;
+mod prelude;
+
+use args::{Args, Command};
+use clap::Parser;
 
 fn main() {
-    let _args = args::Args::parse();
+    let args = Args::parse();
+
+    let command = args.command.unwrap_or_default();
+    match command {
+        Command::List(_f) => {}
+        Command::Add(_e) => {},
+        _ => {}
+    }
+
 }
