@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use uuid::Uuid;
 
 use serde_derive::{Deserialize, Serialize};
 
@@ -9,6 +10,12 @@ pub struct Issue {
 
     /// Issue description text.
     description: String,
+
+    /// Entry status string.
+    status: String,
+
+    /// Last modify timestamp.
+    modified: u64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -17,5 +24,5 @@ pub struct Storage {
     version: i64,
 
     /// Entry IDs.
-    entries: HashMap<i64, Issue>,
+    entries: HashMap<Uuid, Issue>,
 }

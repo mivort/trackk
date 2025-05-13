@@ -11,6 +11,10 @@ pub struct Args {
     /// Path to an external configuration file.
     #[arg(short, long)]
     pub config: Option<String>,
+
+    /// Path to data storage.
+    #[arg(long)]
+    pub data: Option<String>,
 }
 
 #[derive(Subcommand)]
@@ -34,6 +38,12 @@ pub enum Command {
     /// Show info about specified entry
     #[command(visible_aliases(["inf", "i"]))]
     Info(FilterArgs),
+
+    /// Merge two JSON storage buckets.
+    Merge,
+
+    /// Check data repository status.
+    CheckRepo,
 }
 
 impl Default for Command {
