@@ -3,28 +3,28 @@ use uuid::Uuid;
 
 use serde_derive::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default)]
 pub struct Issue {
     /// Issue main title.
-    title: String,
+    pub title: String,
 
     /// Issue description text.
-    description: String,
+    pub description: String,
 
     /// Entry status string.
-    status: String,
+    pub status: String,
 
     /// Last modify timestamp.
-    modified: u64,
+    pub modified: u64,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Bucket {
     /// Storage bucket schema version.
-    version: i64,
+    pub version: i64,
 
     /// Entry IDs.
-    entries: HashMap<Uuid, Issue>,
+    pub entries: HashMap<Uuid, Issue>,
 }
 
 impl Bucket {
