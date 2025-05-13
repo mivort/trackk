@@ -1,3 +1,8 @@
+use clap::Parser;
+
+mod args;
+mod issue;
+
 fn main() {
-    println!("Hello, world!");
+    let _args = args::Args::parse();
 }
