@@ -1,5 +1,6 @@
 use crate::args::{EntryArgs, FilterArgs, ModArgs};
 use crate::config::Config;
+use crate::index::Index;
 use crate::issue::{Bucket, Issue};
 use crate::prelude::*;
 
@@ -21,7 +22,7 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
 
     let new_uuid = Uuid::new_v4().to_string();
 
-    if bucket.entries.iter().find(|e| e.id == new_uuid).is_some() {
+    if bucket.entries.iter().any(|e| e.id == new_uuid) {
         bail!("collision has occured: task uuid exists");
     }
 
@@ -40,6 +41,10 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
         modified: ts,
         ..Default::default()
     };
+
+    let mut index = Index::load(config)?;
+    index.update_status(&path, &new_entry);
+    index.write()?;
 
     let insert = bucket.entries.iter().position(|e| new_entry.id < e.id);
     if let Some(insert) = insert {
@@ -110,10 +115,7 @@ fn fetch_bucket(path: &String) -> Result<Bucket> {
     };
 
     let reader = BufReader::new(data);
-    Ok(
-        serde_json::from_reader(reader)
-            .with_context(|| format!("Unable to read bucket: {path}"))?,
-    )
+    serde_json::from_reader(reader).with_context(|| format!("Unable to read bucket: {path}"))
 }
 
 /// Serialize bucket data and store in provided path.
@@ -131,7 +133,7 @@ fn filter_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc
     for entry in WalkDir::new(&config.data) {
         let entry = entry?;
 
-        if entry.file_type().is_dir() {
+        if entry.depth() < 2 || entry.file_type().is_dir() {
             continue;
         }
 

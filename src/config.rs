@@ -11,7 +11,7 @@ pub struct Config {
     pub defaults: DefaultsConfig,
 
     /// Issue values config.
-    pub _values: ValuesConfig,
+    pub values: ValuesConfig,
 }
 
 #[derive(Deserialize, Default)]
@@ -26,7 +26,7 @@ pub struct DefaultsConfig {
 #[derive(Deserialize, Default)]
 pub struct ValuesConfig {
     /// List of statuses which are considered as 'active'.
-    pub _active_status: HashSet<String>,
+    pub active_status: HashSet<String>,
 
     /// Only allow to assign tags from this list. Allow any tag if empty.
     pub _permit_tags: HashSet<String>,
@@ -51,6 +51,11 @@ impl Config {
 
         if self.defaults.status.is_empty() {
             self.defaults.status = "pending".into();
+        }
+
+        if self.values.active_status.is_empty() {
+            self.values.active_status.insert("pending".into());
+            self.values.active_status.insert("wip".into());
         }
     }
 }
