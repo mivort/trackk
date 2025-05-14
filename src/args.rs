@@ -88,6 +88,14 @@ pub struct EntryArgs {
     #[arg(short, long)]
     pub status: Option<String>,
 
+    /// Tag to apply to the record.
+    #[clap(short, long)]
+    pub tag: Vec<String>,
+
+    /// Remove tag from the record.
+    #[clap(short, long)]
+    pub untag: Vec<String>,
+
     /// Repeat time specifier.
     #[arg(short, long)]
     pub repeat: Option<String>,
