@@ -3,6 +3,7 @@ use crate::config::Config;
 use crate::issue::{Bucket, Issue};
 use crate::prelude::*;
 
+use anyhow::Context;
 use std::fs::{self, File};
 use std::io::BufReader;
 use std::rc::Rc;
@@ -109,7 +110,10 @@ fn fetch_bucket(path: &String) -> Result<Bucket> {
     };
 
     let reader = BufReader::new(data);
-    Ok(serde_json::from_reader(reader)?)
+    Ok(
+        serde_json::from_reader(reader)
+            .with_context(|| format!("Unable to read bucket: {path}"))?,
+    )
 }
 
 /// Serialize bucket data and store in provided path.
@@ -133,7 +137,12 @@ fn filter_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc
 
         let data = File::open(entry.path())?;
         let reader = BufReader::new(data);
-        let bucket: Bucket = serde_json::from_reader(reader)?;
+        let bucket: Bucket = serde_json::from_reader(reader).with_context(|| {
+            format!(
+                "Unable to display the bucket: {}",
+                entry.path().to_string_lossy()
+            )
+        })?;
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
         if let Some(id) = &filter.id {
