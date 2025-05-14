@@ -6,6 +6,7 @@ use crate::prelude::*;
 use anyhow::Context;
 use std::fs::{self, File};
 use std::io::BufReader;
+use std::path::Path;
 use std::rc::Rc;
 use time::{Date, UtcDateTime};
 use uuid::Uuid;
@@ -63,14 +64,13 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
 
         let data = File::open(entry.path())?;
         let reader = BufReader::new(data);
-        let bucket: Bucket = serde_json::from_reader(reader)?;
+        let mut bucket: Bucket = serde_json::from_reader(reader)?;
 
         if let Some(id) = &args.filter.id {
-            for mut entry in bucket.entries {
-                if entry.id.starts_with(id) {
-                    entry.apply_args(&args.entry);
-
-                    // TODO: store bucket
+            for issue in &mut bucket.entries {
+                if issue.id.starts_with(id) {
+                    issue.apply_args(&args.entry);
+                    write_bucket(&bucket, entry.path())?;
 
                     return Ok(());
                 }
@@ -117,7 +117,7 @@ fn fetch_bucket(path: &String) -> Result<Bucket> {
 }
 
 /// Serialize bucket data and store in provided path.
-fn write_bucket(data: &Bucket, path: &String) -> Result<()> {
+fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
     fs::write(path, output)?;
 
