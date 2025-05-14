@@ -1,4 +1,4 @@
-use crate::args::{EntryArgs, ModArgs};
+use crate::args::{EntryArgs, FilterArgs, ModArgs};
 use crate::config::Config;
 use crate::issue::{Bucket, Issue};
 use crate::prelude::*;
@@ -8,6 +8,7 @@ use std::fs::{self, File};
 use std::io::BufReader;
 use time::{Date, UtcDateTime};
 use uuid::Uuid;
+use walkdir::WalkDir;
 
 /// Access storage bucket if it exists and add new entry to it.
 pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
@@ -31,7 +32,7 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
     };
     new_entry.status = match &entry.status {
         Some(s) => s.clone(),
-        None => String::new(),
+        None => config.defaults.status.clone(),
     };
 
     let ts = now.unix_timestamp();
@@ -42,8 +43,17 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entry(_entry: &ModArgs, _config: &Config) -> Result<()> {
+pub fn modify_entry(_entry: &ModArgs, config: &Config) -> Result<()> {
+    let _entries = filter_entries(config);
+
     Ok(())
+}
+
+/// Produce the list of entries to display or modify.
+pub fn fetch_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, String)>> {
+    let _entries = filter_entries(config)?;
+
+    Ok(Default::default())
 }
 
 /// Create the storage bucket using the current date.
@@ -77,6 +87,29 @@ fn fetch_bucket(path: &String) -> Result<Bucket> {
 fn write_bucket(data: &Bucket, path: &String) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
     fs::write(path, output)?;
+
+    Ok(())
+}
+
+/// Iterate over buckets and produce the list of entries which qualify.
+fn filter_entries(config: &Config) -> Result<()> {
+    for entry in WalkDir::new(&config.data) {
+        let entry = entry?;
+
+        if entry.file_type().is_dir() {
+            continue;
+        }
+
+        let data = File::open(entry.path())?;
+        let reader = BufReader::new(data);
+        let bucket: Bucket = serde_json::from_reader(reader)?;
+
+        println!(
+            "{}: {}",
+            entry.path().to_string_lossy(),
+            bucket.entries.len()
+        );
+    }
 
     Ok(())
 }
