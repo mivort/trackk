@@ -6,6 +6,7 @@ use crate::prelude::*;
 use std::collections::hash_map::Entry;
 use std::fs::{self, File};
 use std::io::BufReader;
+use std::rc::Rc;
 use time::{Date, UtcDateTime};
 use uuid::Uuid;
 use walkdir::WalkDir;
@@ -43,17 +44,17 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entry(_entry: &ModArgs, config: &Config) -> Result<()> {
-    let _entries = filter_entries(config);
+pub fn modify_entry(entry: &ModArgs, config: &Config) -> Result<()> {
+    let _entries = filter_entries(&entry.filter, config)?;
+
+    // TODO: ask if multiple entries are expected
 
     Ok(())
 }
 
 /// Produce the list of entries to display or modify.
-pub fn fetch_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, String)>> {
-    let _entries = filter_entries(config)?;
-
-    Ok(Default::default())
+pub fn fetch_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Uuid, Issue, Rc<str>)>> {
+    filter_entries(filter, config)
 }
 
 /// Create the storage bucket using the current date.
@@ -92,7 +93,9 @@ fn write_bucket(data: &Bucket, path: &String) -> Result<()> {
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_entries(config: &Config) -> Result<()> {
+fn filter_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Uuid, Issue, Rc<str>)>> {
+    let mut output = Vec::new();
+
     for entry in WalkDir::new(&config.data) {
         let entry = entry?;
 
@@ -103,13 +106,12 @@ fn filter_entries(config: &Config) -> Result<()> {
         let data = File::open(entry.path())?;
         let reader = BufReader::new(data);
         let bucket: Bucket = serde_json::from_reader(reader)?;
+        let path = Rc::<str>::from(entry.path().to_string_lossy());
 
-        println!(
-            "{}: {}",
-            entry.path().to_string_lossy(),
-            bucket.entries.len()
-        );
+        for (uuid, issue) in bucket.entries {
+            output.push((uuid, issue, path.clone()));
+        }
     }
 
-    Ok(())
+    Ok(output)
 }

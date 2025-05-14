@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use serde_derive::Deserialize;
 
 #[derive(Deserialize, Default)]
@@ -7,12 +9,27 @@ pub struct Config {
 
     /// New issue default values.
     pub defaults: DefaultsConfig,
+
+    /// Issue values config.
+    pub _values: ValuesConfig,
 }
 
 #[derive(Deserialize, Default)]
 pub struct DefaultsConfig {
     /// Default status to assign upon creation.
     pub status: String,
+
+    /// Default time string to assign as 'due'.
+    pub _due: String,
+}
+
+#[derive(Deserialize, Default)]
+pub struct ValuesConfig {
+    /// List of statuses which are considered as 'active'.
+    pub _active_statuses: HashSet<String>,
+
+    /// Only allow to assign tags from this list.
+    pub _permit_tags: HashSet<String>,
 }
 
 impl Config {

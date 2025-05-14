@@ -1,5 +1,6 @@
 mod args;
 mod config;
+mod display;
 mod issue;
 mod prelude;
 mod repo;
@@ -20,7 +21,7 @@ fn main() -> Result<()> {
     let command = args.command.unwrap_or_default();
     match command {
         Command::List(f) => {
-            storage::fetch_entries(&f, &config)?;
+            display::show_entries(&storage::fetch_entries(&f, &config)?);
         }
         Command::Add(e) => {
             storage::add_entry(&e, &config)?;
