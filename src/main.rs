@@ -27,7 +27,7 @@ fn main() -> Result<()> {
             storage::add_entry(&e, &config)?;
         }
         Command::Modify(e) => {
-            storage::modify_entry(&e, &config)?;
+            storage::modify_entries(&e, &config)?;
         }
         Command::CheckRepo => {
             repo::check_repo();

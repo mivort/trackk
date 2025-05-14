@@ -3,7 +3,6 @@ use crate::config::Config;
 use crate::issue::{Bucket, Issue};
 use crate::prelude::*;
 
-use std::collections::hash_map::Entry;
 use std::fs::{self, File};
 use std::io::BufReader;
 use std::rc::Rc;
@@ -20,40 +19,51 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
 
     let new_uuid = Uuid::new_v4();
 
-    let mut new_entry = match bucket.entries.entry(new_uuid) {
-        Entry::Occupied(_) => {
-            bail!("collision has occured: task uuid exists");
-        }
-        Entry::Vacant(entry) => entry.insert_entry(Issue::default()),
-    };
-    let new_entry = new_entry.get_mut();
-    new_entry.title = match &entry.title {
-        Some(t) => t.clone(),
-        None => String::new(),
-    };
-    new_entry.status = match &entry.status {
-        Some(s) => s.clone(),
-        None => config.defaults.status.clone(),
-    };
+    if bucket.entries.iter().find(|e| e.id == new_uuid).is_some() {
+        bail!("collision has occured: task uuid exists");
+    }
 
     let ts = now.unix_timestamp();
-    new_entry.created = ts;
-    new_entry.modified = ts;
+    let new_entry = Issue {
+        id: new_uuid,
+        title: match &entry.title {
+            Some(t) => t.clone(),
+            None => String::new(),
+        },
+        status: match &entry.status {
+            Some(s) => s.clone(),
+            None => config.defaults.status.clone(),
+        },
+        created: ts,
+        modified: ts,
+        ..Default::default()
+    };
 
+    bucket.entries.push(new_entry);
     write_bucket(&bucket, &path)
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entry(entry: &ModArgs, config: &Config) -> Result<()> {
-    let _entries = filter_entries(&entry.filter, config)?;
-
+pub fn modify_entries(_args: &ModArgs, config: &Config) -> Result<()> {
     // TODO: ask if multiple entries are expected
+
+    for entry in WalkDir::new(&config.data) {
+        let entry = entry?;
+
+        if entry.file_type().is_dir() {
+            continue;
+        }
+
+        let data = File::open(entry.path())?;
+        let reader = BufReader::new(data);
+        let _bucket: Bucket = serde_json::from_reader(reader)?;
+    }
 
     Ok(())
 }
 
 /// Produce the list of entries to display or modify.
-pub fn fetch_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Uuid, Issue, Rc<str>)>> {
+pub fn fetch_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
     filter_entries(filter, config)
 }
 
@@ -93,7 +103,7 @@ fn write_bucket(data: &Bucket, path: &String) -> Result<()> {
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Uuid, Issue, Rc<str>)>> {
+fn filter_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut output = Vec::new();
 
     for entry in WalkDir::new(&config.data) {
@@ -108,8 +118,8 @@ fn filter_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Uuid, Is
         let bucket: Bucket = serde_json::from_reader(reader)?;
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
-        for (uuid, issue) in bucket.entries {
-            output.push((uuid, issue, path.clone()));
+        for issue in bucket.entries {
+            output.push((issue, path.clone()));
         }
     }
 

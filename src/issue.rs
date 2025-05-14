@@ -1,10 +1,12 @@
-use std::collections::HashMap;
 use uuid::Uuid;
 
 use serde_derive::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Issue {
+    /// Entry unique ID used for merging.
+    pub id: Uuid,
+
     /// Issue main title.
     pub title: String,
 
@@ -43,7 +45,7 @@ pub struct Bucket {
     pub version: i64,
 
     /// Entry IDs.
-    pub entries: HashMap<Uuid, Issue>,
+    pub entries: Vec<Issue>,
 }
 
 impl Bucket {
