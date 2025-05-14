@@ -54,24 +54,32 @@ impl Default for Command {
 
 #[derive(Parser, Default)]
 pub struct FilterArgs {
-    /// Entry reference (UUID, number, latest)
+    /// Entry reference (UUID or shorthand).
     pub id: Option<String>,
 
-    /// Filter by entry title content
+    /// List both active and inactive entries.
+    #[arg(long, short)]
+    pub all: bool,
+
+    /// Filter by entry title content.
     #[arg(long)]
     pub contains: Option<String>,
 
-    /// Filter by max due date
+    /// Filter by max due date.
     #[arg(long)]
     pub due_before: Option<String>,
 
-    /// Filter by min due date
+    /// Filter by min due date.
     #[arg(long)]
     pub due_after: Option<String>,
 
-    /// Filter by status
+    /// Filter by status.
     #[arg(long)]
     pub has_status: Option<String>,
+
+    /// Filter by tag.
+    #[arg(long)]
+    pub has_tag: Vec<String>,
 }
 
 #[derive(Parser)]
