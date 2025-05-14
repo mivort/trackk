@@ -39,7 +39,13 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
         ..Default::default()
     };
 
-    bucket.entries.push(new_entry);
+    let insert = bucket.entries.iter().position(|e| new_uuid < e.id);
+    if let Some(insert) = insert {
+        bucket.entries.insert(insert, new_entry);
+    } else {
+        bucket.entries.push(new_entry);
+    };
+
     write_bucket(&bucket, &path)
 }
 
