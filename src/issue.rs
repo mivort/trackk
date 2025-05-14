@@ -1,11 +1,11 @@
-use uuid::Uuid;
-
 use serde_derive::{Deserialize, Serialize};
+
+use crate::args::EntryArgs;
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct Issue {
     /// Entry unique ID used for merging.
-    pub id: Uuid,
+    pub id: String,
 
     /// Issue main title.
     pub title: String,
@@ -22,21 +22,21 @@ pub struct Issue {
     #[serde(default)]
     pub repeat: String,
 
-    /// Last modify timestamp.
-    #[serde(default)]
-    pub modified: i64,
-
     /// Creation date/time.
     #[serde(default)]
     pub created: i64,
 
-    /// Due date/time.
-    #[serde(default)]
-    pub due: i64,
-
     /// Last modify timestamp.
     #[serde(default)]
-    pub status_changed: i64,
+    pub modified: i64,
+
+    /// Due date/time.
+    #[serde(default)]
+    pub due: Option<i64>,
+
+    /// Last status change timestamp.
+    #[serde(default)]
+    pub complete: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -55,6 +55,21 @@ impl Bucket {
         Self {
             version: Self::VERSION,
             entries: Default::default(),
+        }
+    }
+}
+
+impl Issue {
+    /// Take values from provided arguments and apply to the issue.
+    pub fn apply_args(&mut self, args: &EntryArgs) {
+        if let Some(title) = &args.title {
+            self.title = title.clone();
+        }
+        if let Some(status) = &args.status {
+            self.status = status.clone();
+        }
+        if let Some(repeat) = &args.repeat {
+            self.repeat = repeat.clone();
         }
     }
 }

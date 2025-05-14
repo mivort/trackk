@@ -1,6 +1,7 @@
 mod args;
 mod config;
 mod display;
+mod index;
 mod issue;
 mod prelude;
 mod repo;

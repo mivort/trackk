@@ -26,10 +26,13 @@ pub struct DefaultsConfig {
 #[derive(Deserialize, Default)]
 pub struct ValuesConfig {
     /// List of statuses which are considered as 'active'.
-    pub _active_statuses: HashSet<String>,
+    pub _active_status: HashSet<String>,
 
-    /// Only allow to assign tags from this list.
+    /// Only allow to assign tags from this list. Allow any tag if empty.
     pub _permit_tags: HashSet<String>,
+
+    /// Only allow one of the provided statuses.
+    pub _permit_status: HashSet<String>,
 }
 
 impl Config {

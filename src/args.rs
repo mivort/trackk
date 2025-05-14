@@ -87,6 +87,10 @@ pub struct EntryArgs {
     /// Entry status
     #[arg(short, long)]
     pub status: Option<String>,
+
+    /// Repeat time specifier.
+    #[arg(short, long)]
+    pub repeat: Option<String>,
 }
 
 #[derive(Parser)]
