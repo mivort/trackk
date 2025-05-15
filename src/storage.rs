@@ -5,6 +5,7 @@ use crate::issue::{Bucket, Issue};
 use crate::prelude::*;
 
 use anyhow::Context;
+use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::BufReader;
 use std::path::Path;
@@ -29,14 +30,8 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
     let ts = now.unix_timestamp();
     let new_entry = Issue {
         id: new_uuid,
-        title: match &entry.title {
-            Some(t) => t.clone(),
-            None => String::new(),
-        },
-        status: match &entry.status {
-            Some(s) => s.clone(),
-            None => config.defaults.status.clone(),
-        },
+        title: entry.title.clone().unwrap_or_default(),
+        status: unwrap_some_or!(&entry.status, { &config.defaults.status }).clone(),
         created: ts,
         modified: ts,
         ..Default::default()
@@ -88,7 +83,11 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
 
 /// Produce the list of entries to display or modify.
 pub fn fetch_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
-    filter_entries(filter, config)
+    if filter.all {
+        return filter_all_entries(filter, config);
+    }
+
+    filter_active_entries(filter, config)
 }
 
 /// Create the storage bucket using the current date.
@@ -127,7 +126,7 @@ fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut output = Vec::new();
 
     for entry in WalkDir::new(&config.data) {
@@ -163,4 +162,20 @@ fn filter_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc
     }
 
     Ok(output)
+}
+
+/// Iterate over entries from the active index.
+fn filter_active_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
+    let _cache = HashMap::<String, Bucket>::new();
+
+    let index = Index::load(config)?;
+    for e in index.active() {
+        let _pointer = unwrap_some_or!(e.rsplit_once("/"), {
+            bail!("Active index entry has missing path");
+        });
+
+        // TODO: get last part of the path and use as ID
+    }
+
+    Ok(Default::default())
 }

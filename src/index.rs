@@ -60,4 +60,9 @@ impl<'a> Index<'a> {
 
         Ok(())
     }
+
+    #[inline]
+    pub fn active(&self) -> &[String] {
+        self.active.as_slice()
+    }
 }
