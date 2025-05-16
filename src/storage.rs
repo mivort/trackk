@@ -106,15 +106,16 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 }
 
 /// Fetch bucket data if it exists, create empty bucket data otherwise.
-fn fetch_bucket(path: &String) -> Result<Bucket> {
-    let data = File::open(path);
+fn fetch_bucket(path: impl AsRef<Path>) -> Result<Bucket> {
+    let data = File::open(&path);
     let data = match data {
         Ok(d) => d,
         Err(_e) => return Ok(Bucket::new()),
     };
 
     let reader = BufReader::new(data);
-    serde_json::from_reader(reader).with_context(|| format!("Unable to read bucket: {path}"))
+    serde_json::from_reader(reader)
+        .with_context(|| format!("Unable to read bucket: {}", path.as_ref().to_string_lossy()))
 }
 
 /// Serialize bucket data and store in provided path.
@@ -147,11 +148,9 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
         if let Some(id) = &filter.id {
-            for issue in bucket.entries {
-                if issue.id.starts_with(id) {
-                    output.push((issue, path.clone()));
-                    return Ok(output);
-                }
+            if let Some(issue) = bucket.take_by_id(id) {
+                output.push((issue, path.clone()));
+                return Ok(output);
             }
             continue;
         }
@@ -166,13 +165,23 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
 
 /// Iterate over entries from the active index.
 fn filter_active_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
-    let _cache = HashMap::<String, Bucket>::new();
+    let mut cache = HashMap::<String, Rc<Bucket>>::new();
 
     let index = Index::load(config)?;
     for e in index.active() {
-        let _pointer = unwrap_some_or!(e.rsplit_once("/"), {
+        let (bucket_path, id) = unwrap_some_or!(e.rsplit_once("/"), {
             bail!("Active index entry has missing path");
         });
+
+        let bucket = unwrap_some_or!(cache.get(id), {
+            &(|| -> Result<_> {
+                let bucket = Rc::new(fetch_bucket(bucket_path)?);
+                cache.insert(bucket_path.to_owned(), bucket.clone());
+                Ok(bucket)
+            })()?
+        });
+
+        let _issue = bucket.find_by_id(id);
 
         // TODO: get last part of the path and use as ID
     }

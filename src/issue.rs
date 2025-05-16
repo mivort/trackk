@@ -2,7 +2,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::args::EntryArgs;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Clone)]
 pub struct Issue {
     /// Entry unique ID used for merging.
     pub id: String,
@@ -39,7 +39,7 @@ pub struct Issue {
     pub complete: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Bucket {
     /// Storage bucket schema version.
     pub version: i64,
@@ -71,5 +71,27 @@ impl Issue {
         if let Some(repeat) = &args.repeat {
             self.repeat = repeat.clone();
         }
+    }
+}
+
+impl Bucket {
+    /// Fetch the reference to a bucket entry.
+    pub fn find_by_id(&self, id: &str) -> Option<&Issue> {
+        for issue in &self.entries {
+            if issue.id.starts_with(id) {
+                return Some(&issue);
+            }
+        }
+        None
+    }
+
+    /// Consume bucket to move a single entry.
+    pub fn take_by_id(self, id: &str) -> Option<Issue> {
+        for issue in self.entries {
+            if issue.id.starts_with(id) {
+                return Some(issue);
+            }
+        }
+        None
     }
 }
