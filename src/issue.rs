@@ -22,7 +22,7 @@ pub struct Issue {
 
     /// Repeat string which is applied to task copy upon completion.
     #[serde(default)]
-    pub repeat: String,
+    pub repeat: Option<String>,
 
     /// Creation date/time.
     #[serde(default)]
@@ -74,7 +74,11 @@ impl Issue {
             self.apply_status(status);
         }
         if let Some(repeat) = &args.repeat {
-            self.repeat = repeat.clone();
+            self.repeat = if repeat.is_empty() {
+                None
+            } else {
+                Some(repeat.clone())
+            };
         }
 
         self.modified = now.unix_timestamp();
