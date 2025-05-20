@@ -166,6 +166,7 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
 /// Iterate over entries from the active index.
 fn filter_active_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut cache = HashMap::<String, Rc<Bucket>>::new();
+    let mut result = Vec::new();
 
     let index = Index::load(config)?;
     for e in index.active() {
@@ -173,7 +174,7 @@ fn filter_active_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(I
             bail!("Active index entry has missing path");
         });
 
-        let bucket = unwrap_some_or!(cache.get(id), {
+        let bucket = unwrap_some_or!(cache.get(bucket_path), {
             &(|| -> Result<_> {
                 let bucket = Rc::new(fetch_bucket(bucket_path)?);
                 cache.insert(bucket_path.to_owned(), bucket.clone());
@@ -181,10 +182,11 @@ fn filter_active_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(I
             })()?
         });
 
-        let _issue = bucket.find_by_id(id);
-
-        // TODO: get last part of the path and use as ID
+        let issue = bucket.find_by_id(id);
+        if let Some(issue) = issue {
+            result.push((issue.clone(), Rc::from(id)));
+        }
     }
 
-    Ok(Default::default())
+    Ok(result)
 }
