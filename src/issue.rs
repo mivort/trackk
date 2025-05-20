@@ -1,4 +1,5 @@
 use serde_derive::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 use crate::args::{EntryArgs, FilterArgs};
 
@@ -12,7 +13,7 @@ pub struct Issue {
 
     /// List of issue's tags.
     #[serde(default)]
-    pub tags: Vec<String>,
+    pub tags: HashSet<String>,
 
     /// Entry status string.
     #[serde(default)]
@@ -77,6 +78,12 @@ impl Issue {
     pub fn match_filter(&self, filter: &FilterArgs) -> bool {
         if !filter.has_status.is_empty() && !filter.has_status.contains(&self.status) {
             return false;
+        }
+
+        for tag in &filter.has_tag {
+            if !self.tags.contains(tag) {
+                return false;
+            }
         }
 
         true
