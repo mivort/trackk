@@ -1,4 +1,5 @@
 use clap_derive::{Parser, Subcommand};
+use serde_derive::Deserialize;
 
 /// Trackit command line arguments.
 #[derive(Parser)]
@@ -52,7 +53,7 @@ impl Default for Command {
     }
 }
 
-#[derive(Parser, Default)]
+#[derive(Parser, Deserialize, Default)]
 pub struct FilterArgs {
     /// Entry reference (UUID or shorthand).
     pub id: Option<String>,

@@ -187,7 +187,7 @@ fn filter_active_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Is
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
             if issue.match_filter(filter) {
-                result.push((issue.clone(), Rc::from(id)));
+                result.push((issue.clone(), Rc::from(bucket_path)));
             }
         }
     }

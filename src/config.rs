@@ -1,6 +1,8 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use serde_derive::Deserialize;
+
+use crate::args::FilterArgs;
 
 #[derive(Deserialize, Default)]
 pub struct Config {
@@ -12,6 +14,9 @@ pub struct Config {
 
     /// Issue values config.
     pub values: ValuesConfig,
+
+    /// Index of available reports.
+    pub _reports: HashMap<String, ReportConfig>,
 }
 
 #[derive(Deserialize, Default)]
@@ -58,4 +63,20 @@ impl Config {
             self.values.active_status.insert("wip".into());
         }
     }
+}
+
+/// Report configuration which contains array of report sections.
+#[derive(Deserialize, Default)]
+pub struct ReportConfig {
+    _sections: Vec<SectionConfig>,
+}
+
+/// Report section defined by filter and template.
+#[derive(Deserialize, Default)]
+pub struct SectionConfig {
+    /// Name of tera template file used for section output.
+    _template: String,
+
+    /// Section filter parameters.
+    _filter: FilterArgs,
 }
