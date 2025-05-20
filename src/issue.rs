@@ -1,5 +1,6 @@
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashSet;
+use time::UtcDateTime;
 
 use crate::args::{EntryArgs, FilterArgs};
 
@@ -37,7 +38,7 @@ pub struct Issue {
 
     /// Last status change timestamp.
     #[serde(default)]
-    pub complete: Option<i64>,
+    pub status_modified: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -61,17 +62,31 @@ impl Bucket {
 }
 
 impl Issue {
-    /// Take values from provided arguments and apply to the issue.
+    /// Take values from provided arguments and apply to the issue. Also,
+    /// update the modified timestamp.
     pub fn apply_args(&mut self, args: &EntryArgs) {
+        let now = UtcDateTime::now();
+
         if let Some(title) = &args.title {
             self.title = title.clone();
         }
         if let Some(status) = &args.status {
-            self.status = status.clone();
+            self.apply_status(status);
         }
         if let Some(repeat) = &args.repeat {
             self.repeat = repeat.clone();
         }
+
+        self.modified = now.unix_timestamp();
+    }
+
+    /// Update entry status (and timestamp in case of change).
+    pub fn apply_status(&mut self, status: &str) {
+        if self.status == status {
+            return;
+        }
+        self.status = status.to_owned();
+        self.status_modified = Some(UtcDateTime::now().unix_timestamp());
     }
 
     /// Compare issue properties to provided filter.
