@@ -156,7 +156,9 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
         }
 
         for issue in bucket.entries {
-            output.push((issue, path.clone()));
+            if issue.match_filter(filter) {
+                output.push((issue, path.clone()));
+            }
         }
     }
 
@@ -164,7 +166,7 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
 }
 
 /// Iterate over entries from the active index.
-fn filter_active_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_active_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut cache = HashMap::<String, Rc<Bucket>>::new();
     let mut result = Vec::new();
 
@@ -184,7 +186,9 @@ fn filter_active_entries(_filter: &FilterArgs, config: &Config) -> Result<Vec<(I
 
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
-            result.push((issue.clone(), Rc::from(id)));
+            if issue.match_filter(filter) {
+                result.push((issue.clone(), Rc::from(id)));
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 use serde_derive::{Deserialize, Serialize};
 
-use crate::args::EntryArgs;
+use crate::args::{EntryArgs, FilterArgs};
 
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct Issue {
@@ -72,6 +72,15 @@ impl Issue {
             self.repeat = repeat.clone();
         }
     }
+
+    /// Compare issue properties to provided filter.
+    pub fn match_filter(&self, filter: &FilterArgs) -> bool {
+        if !filter.has_status.is_empty() && !filter.has_status.contains(&self.status) {
+            return false;
+        }
+
+        true
+    }
 }
 
 impl Bucket {
@@ -80,21 +89,36 @@ impl Bucket {
         // TODO: bucket is sorted by id in most cases - attempt to find the issue
         // with a binary search.
 
-        for issue in &self.entries {
-            if issue.id.starts_with(id) {
-                return Some(&issue);
-            }
-        }
-        None
+        self.entries.iter().find(|&issue| issue.id.starts_with(id))
     }
 
-    /// Consume bucket to move a single entry.
+    /// Consume bucket to move out a single entry.
     pub fn take_by_id(self, id: &str) -> Option<Issue> {
-        for issue in self.entries {
-            if issue.id.starts_with(id) {
-                return Some(issue);
-            }
-        }
-        None
+        self.entries.into_iter().find(|i| i.id.starts_with(id))
     }
+}
+
+#[test]
+fn issue_matching() {
+    let issue = Issue {
+        status: "test".into(),
+        ..Default::default()
+    };
+
+    let filter = FilterArgs {
+        has_status: vec!["test".into()],
+        ..Default::default()
+    };
+
+    assert!(issue.match_filter(&filter), "matches test status");
+
+    let filter = FilterArgs {
+        has_status: vec!["test1".into()],
+        ..Default::default()
+    };
+
+    assert!(
+        !issue.match_filter(&filter),
+        "doesn't match non-existing status"
+    );
 }

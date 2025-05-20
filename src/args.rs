@@ -73,9 +73,9 @@ pub struct FilterArgs {
     #[arg(long)]
     pub due_after: Option<String>,
 
-    /// Filter by status.
+    /// Filter by one status values.
     #[arg(long)]
-    pub has_status: Option<String>,
+    pub has_status: Vec<String>,
 
     /// Filter by tag.
     #[arg(long)]
