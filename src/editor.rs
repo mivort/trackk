@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::Write;
 use std::process::Command;
 
 use crate::args::FilterArgs;
@@ -8,10 +10,14 @@ use crate::{prelude::*, storage};
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
     let entries = storage::fetch_entries(filter, config)?;
-    for (issue, path) in &entries {
-        let _format = format_markdown(&issue);
+    for (issue, _path) in &entries {
+        let mut tempfile = tempfile::NamedTempFile::with_suffix(".md")?;
+        format_markdown(&issue, tempfile.as_file_mut())?;
 
-        Command::new(&config.editor).arg(&**path).spawn()?.wait()?;
+        Command::new(&config.editor)
+            .arg(tempfile.path())
+            .spawn()?
+            .wait()?;
     }
 
     Ok(())
@@ -28,10 +34,10 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
 /// * Field 1: value
 /// * Field 2: value
 /// ```
-fn format_markdown(issue: &Issue) {
+fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
     let tags = issue.tags.iter().map(|t| &**t).collect::<Vec<_>>();
 
-    println!(
+    file.write_fmt(format_args!(
         concat!(
             "{title}\n\n----\n\n",
             "* Status: {status}\n",
@@ -42,7 +48,9 @@ fn format_markdown(issue: &Issue) {
         status = issue.status,
         due = issue.due.unwrap_or_default(),
         tags = tags.join(" "),
-    );
+    ))?;
+
+    Ok(())
 }
 
 /// Read edited entry back to the issue struct.
