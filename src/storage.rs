@@ -147,14 +147,6 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
         })?;
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
-        if let Some(id) = &filter.id {
-            if let Some(issue) = bucket.take_by_id(id) {
-                output.push((issue, path.clone()));
-                return Ok(output);
-            }
-            continue;
-        }
-
         for issue in bucket.entries {
             if issue.match_filter(filter) {
                 output.push((issue, path.clone()));
@@ -171,7 +163,7 @@ fn filter_active_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Is
     let mut result = Vec::new();
 
     let index = Index::load(config)?;
-    for e in index.active() {
+    for (idx, e) in index.active().iter().enumerate() {
         let (bucket_path, id) = unwrap_some_or!(e.rsplit_once("/"), {
             bail!("Active index entry has missing path");
         });
@@ -187,7 +179,7 @@ fn filter_active_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Is
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
             if issue.match_filter(filter) {
-                result.push((issue.clone(), Rc::from(bucket_path)));
+                result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
             }
         }
     }

@@ -9,6 +9,10 @@ pub struct Issue {
     /// Entry unique ID used for merging.
     pub id: String,
 
+    /// Numeric shorthand.
+    #[serde(skip)]
+    pub short: Option<usize>,
+
     /// Issue main title.
     pub title: String,
 
@@ -95,6 +99,12 @@ impl Issue {
 
     /// Compare issue properties to provided filter.
     pub fn match_filter(&self, filter: &FilterArgs) -> bool {
+        if let Some(id) = &filter.id {
+            if !self.id.contains(id) {
+                return false;
+            }
+        }
+
         if !filter.has_status.is_empty() && !filter.has_status.contains(&self.status) {
             return false;
         }
@@ -107,6 +117,13 @@ impl Issue {
 
         true
     }
+
+    /// Provide cloned entry with shorthand.
+    pub fn with_shorthand(&self, short: usize) -> Self {
+        let mut new = self.clone();
+        new.short = Some(short);
+        new
+    }
 }
 
 impl Bucket {
@@ -116,11 +133,6 @@ impl Bucket {
         // with a binary search.
 
         self.entries.iter().find(|&issue| issue.id.starts_with(id))
-    }
-
-    /// Consume bucket to move out a single entry.
-    pub fn take_by_id(self, id: &str) -> Option<Issue> {
-        self.entries.into_iter().find(|i| i.id.starts_with(id))
     }
 }
 
