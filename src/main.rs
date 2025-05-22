@@ -15,26 +15,37 @@ use prelude::*;
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    let mut config = Config::default(); // TODO: use argument to read config
-    config.set_data_directory(args.data);
-    config.fallback_values();
-
-    let command = args.command.unwrap_or_default();
-    match command {
-        Command::List(f) => {
-            display::show_entries(&storage::fetch_entries(&f, &config)?);
+    match &args.command {
+        Some(Command::List(f)) => {
+            display::show_entries(&storage::fetch_entries(&f, &read_config(&args))?);
         }
-        Command::Add(e) => {
-            storage::add_entry(&e, &config)?;
+        Some(Command::Add(e)) => {
+            storage::add_entry(&e, &read_config(&args))?;
         }
-        Command::Modify(e) => {
-            storage::modify_entries(&e, &config)?;
+        Some(Command::Modify(e)) => {
+            storage::modify_entries(&e, &read_config(&args))?;
         }
-        Command::CheckRepo => {
+        Some(Command::Init) => {
+            repo::init_repo(&read_config(&args))?;
+        }
+        Some(Command::Check) => {
             repo::check_repo();
+        }
+        None => {
+            display::show_entries(&storage::fetch_entries(
+                &Default::default(),
+                &read_config(&args),
+            )?);
         }
         _ => {}
     }
 
     Ok(())
+}
+
+fn read_config(args: &Args) -> Config {
+    let mut config = Config::default(); // TODO: use argument to read config
+    config.set_data_directory(args.data.clone());
+    config.fallback_values();
+    config
 }

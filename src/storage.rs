@@ -65,8 +65,12 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
 
         let data = File::open(entry.path())?;
         let reader = BufReader::new(data);
-        let mut bucket: Bucket = serde_json::from_reader(reader)
-            .with_context(|| format!("Unable to read the bucket: {}", entry.path().to_string_lossy()))?;
+        let mut bucket: Bucket = serde_json::from_reader(reader).with_context(|| {
+            format!(
+                "Unable to read the bucket: {}",
+                entry.path().to_string_lossy()
+            )
+        })?;
 
         let mut has_changes = false;
         for issue in &mut bucket.entries {

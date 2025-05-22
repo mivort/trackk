@@ -43,8 +43,11 @@ pub enum Command {
     /// Merge two JSON storage buckets.
     Merge,
 
-    /// Check data repository status.
-    CheckRepo,
+    /// Init the storage and VCS repo.
+    Init,
+
+    /// Check data repository and VCS status.
+    Check,
 }
 
 impl Default for Command {
