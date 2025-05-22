@@ -27,7 +27,10 @@ pub struct Config {
 #[derive(Deserialize, Default)]
 pub struct DefaultsConfig {
     /// Default status to assign upon creation.
-    pub status: String,
+    pub status_initial: String,
+
+    /// Status which is applied when 'done' command is called.
+    pub status_complete: String,
 
     /// Default time string to assign as 'due'.
     pub _due: String,
@@ -63,8 +66,12 @@ impl Config {
             self.editor = self.fallback_editor();
         }
 
-        if self.defaults.status.is_empty() {
-            self.defaults.status = "pending".into();
+        if self.defaults.status_initial.is_empty() {
+            self.defaults.status_initial = "pending".into();
+        }
+
+        if self.defaults.status_complete.is_empty() {
+            self.defaults.status_complete = "complete".into();
         }
 
         if self.values.active_status.is_empty() {

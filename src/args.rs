@@ -32,6 +32,9 @@ pub enum Command {
     #[command(visible_aliases(["mod", "m"]))]
     Modify(ModArgs),
 
+    #[command(visible_aliases(["complete"]))]
+    Done(FilterArgs),
+
     /// List entries using set of filters
     #[command(visible_aliases(["ls", "l"]))]
     List(FilterArgs),
@@ -59,7 +62,7 @@ impl Default for Command {
     }
 }
 
-#[derive(Parser, Deserialize, Default)]
+#[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
     /// Entry reference (UUID or shorthand).
     pub id: Option<String>,
@@ -89,7 +92,7 @@ pub struct FilterArgs {
     pub has_tag: Vec<String>,
 }
 
-#[derive(Parser)]
+#[derive(Parser, Default)]
 pub struct EntryArgs {
     /// Entry title
     #[arg(short('m'), visible_aliases(["message", "msg"]), long)]
@@ -116,7 +119,7 @@ pub struct EntryArgs {
     pub repeat: Option<String>,
 }
 
-#[derive(Parser)]
+#[derive(Parser, Default)]
 pub struct ModArgs {
     #[command(flatten)]
     pub filter: FilterArgs,

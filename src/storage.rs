@@ -31,7 +31,7 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
     let new_entry = Issue {
         id: new_uuid,
         title: entry.title.clone().unwrap_or_default(),
-        status: unwrap_some_or!(&entry.status, { &config.defaults.status }).clone(),
+        status: unwrap_some_or!(&entry.status, { &config.defaults.status_initial }).clone(),
         created: ts,
         modified: ts,
         ..Default::default()
