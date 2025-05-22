@@ -56,6 +56,8 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
     // TODO: ask if multiple entries are expected
     let mut changes = 0;
 
+    let mut index = Index::load(config)?;
+
     for entry in WalkDir::new(&config.data) {
         let entry = entry?;
 
@@ -76,6 +78,7 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
         for issue in &mut bucket.entries {
             if issue.match_filter(&args.filter) {
                 issue.apply_args(&args.entry);
+                index.update_status(&entry.path().to_string_lossy(), issue);
                 has_changes = true;
                 changes += 1;
             }
@@ -84,6 +87,10 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
         if has_changes {
             write_bucket(&bucket, entry.path())?;
         }
+    }
+
+    if changes > 0 {
+        index.write()?;
     }
 
     println!("Updated {changes} entry(es)");
