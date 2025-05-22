@@ -1,13 +1,18 @@
 use std::collections::{HashMap, HashSet};
+use std::env;
 
 use serde_derive::Deserialize;
 
 use crate::args::FilterArgs;
+use crate::prelude::*;
 
 #[derive(Deserialize, Default)]
 pub struct Config {
     /// Data directory.
     pub data: String,
+
+    /// Editor used for entry input.
+    pub editor: String,
 
     /// New issue default values.
     pub defaults: DefaultsConfig,
@@ -54,6 +59,10 @@ impl Config {
             self.data = "data".into();
         }
 
+        if self.editor.is_empty() {
+            self.editor = self.fallback_editor();
+        }
+
         if self.defaults.status.is_empty() {
             self.defaults.status = "pending".into();
         }
@@ -62,6 +71,14 @@ impl Config {
             self.values.active_status.insert("pending".into());
             self.values.active_status.insert("wip".into());
         }
+    }
+
+    /// Provide default editor value.
+    fn fallback_editor(&self) -> String {
+        unwrap_err_or!(env::var("TRACKIT_EDITOR"), editor, { return editor });
+        unwrap_err_or!(env::var("EDITOR"), editor, { return editor });
+
+        "nano".into()
     }
 }
 

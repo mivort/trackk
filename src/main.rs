@@ -17,13 +17,13 @@ fn main() -> Result<()> {
 
     match &args.command {
         Some(Command::List(f)) => {
-            display::show_entries(&storage::fetch_entries(&f, &read_config(&args))?);
+            display::show_entries(&storage::fetch_entries(f, &read_config(&args))?);
         }
         Some(Command::Add(e)) => {
-            storage::add_entry(&e, &read_config(&args))?;
+            storage::add_entry(e, &read_config(&args))?;
         }
         Some(Command::Modify(e)) => {
-            storage::modify_entries(&e, &read_config(&args))?;
+            storage::modify_entries(e, &read_config(&args))?;
         }
         Some(Command::Init) => {
             repo::init_repo(&read_config(&args))?;
