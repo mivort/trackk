@@ -54,29 +54,35 @@ pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
 /// Find entry using the filter and update its properties.
 pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
     // TODO: ask if multiple entries are expected
+    let mut changes = 0;
 
     for entry in WalkDir::new(&config.data) {
         let entry = entry?;
 
-        if entry.file_type().is_dir() {
+        if entry.depth() < 2 || entry.file_type().is_dir() {
             continue;
         }
 
         let data = File::open(entry.path())?;
         let reader = BufReader::new(data);
-        let mut bucket: Bucket = serde_json::from_reader(reader)?;
+        let mut bucket: Bucket = serde_json::from_reader(reader)
+            .with_context(|| format!("Unable to read the bucket: {}", entry.path().to_string_lossy()))?;
 
-        if let Some(id) = &args.filter.id {
-            for issue in &mut bucket.entries {
-                if issue.id.starts_with(id) {
-                    issue.apply_args(&args.entry);
-                    write_bucket(&bucket, entry.path())?;
-
-                    return Ok(());
-                }
+        let mut has_changes = false;
+        for issue in &mut bucket.entries {
+            if issue.match_filter(&args.filter) {
+                issue.apply_args(&args.entry);
+                has_changes = true;
+                changes += 1;
             }
         }
+
+        if has_changes {
+            write_bucket(&bucket, entry.path())?;
+        }
     }
+
+    println!("Updated {changes} entry(es)");
 
     Ok(())
 }
