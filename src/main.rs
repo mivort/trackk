@@ -1,6 +1,7 @@
 mod args;
 mod config;
 mod display;
+mod editor;
 mod index;
 mod issue;
 mod prelude;
@@ -18,6 +19,9 @@ fn main() -> Result<()> {
     match &args.command {
         Some(Command::List(f)) => {
             display::show_entries(&storage::fetch_entries(f, &read_config(&args))?);
+        }
+        Some(Command::Edit(f)) => {
+            editor::edit_entries(f, &read_config(&args))?;
         }
         Some(Command::Add(e)) => {
             storage::add_entry(e, &read_config(&args))?;

@@ -40,6 +40,9 @@ pub enum Command {
     #[command(visible_aliases(["inf", "i"]))]
     Info(FilterArgs),
 
+    #[command(visible_aliases(["e"]))]
+    Edit(FilterArgs),
+
     /// Merge two JSON storage buckets.
     Merge,
 
