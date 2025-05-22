@@ -1,4 +1,4 @@
-use std::process::{Command, Stdio};
+use std::process::Command;
 
 use crate::args::FilterArgs;
 use crate::config::Config;
@@ -8,14 +8,10 @@ use crate::{prelude::*, storage};
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
     let entries = storage::fetch_entries(filter, config)?;
-    for (issue, _path) in &entries {
+    for (issue, path) in &entries {
         let _format = format_markdown(&issue);
-    }
 
-    if false {
-        Command::new(&config.editor)
-            .stdin(Stdio::inherit())
-            .spawn()?;
+        Command::new(&config.editor).arg(&**path).spawn()?.wait()?;
     }
 
     Ok(())
@@ -40,7 +36,7 @@ fn format_markdown(issue: &Issue) {
             "{title}\n\n----\n\n",
             "* Status: {status}\n",
             "* Due: {due}\n",
-            "* Tags: {tags}\n",
+            "* Tags: {tags}",
         ),
         title = issue.title,
         status = issue.status,
