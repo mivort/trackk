@@ -140,7 +140,14 @@ fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
 fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut output = Vec::new();
 
-    for entry in WalkDir::new(&config.data) {
+    let walkdir = WalkDir::new(&config.data).into_iter().filter_entry(|e| {
+        !e.file_name()
+            .to_str()
+            .map(|n| n.starts_with("."))
+            .unwrap_or(false)
+    });
+
+    for entry in walkdir {
         let entry = entry?;
 
         if entry.depth() < 2 || entry.file_type().is_dir() {
