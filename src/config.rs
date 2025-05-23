@@ -20,6 +20,9 @@ pub struct Config {
     /// Issue values config.
     pub values: ValuesConfig,
 
+    /// Options related to VCS used with the storage.
+    pub _vcs: VcsConfig,
+
     /// Index of available reports.
     pub _reports: HashMap<String, ReportConfig>,
 }
@@ -46,6 +49,15 @@ pub struct ValuesConfig {
 
     /// Only allow one of the provided statuses.
     pub _permit_status: HashSet<String>,
+}
+
+#[derive(Deserialize, Default)]
+pub struct VcsConfig {
+    /// Command using during sync before the push.
+    pub _pull_command: Vec<String>,
+
+    /// Command used during sync after the pull.
+    pub _push_command: Vec<String>,
 }
 
 impl Config {
