@@ -128,7 +128,7 @@ pub struct EntryArgs {
 pub struct AddArgs {
     /// Don't use interactive input via default editor.
     #[arg(long)]
-    pub no_editor: bool,
+    pub no_edit: bool,
 
     #[command(flatten)]
     pub entry: EntryArgs,

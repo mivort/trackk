@@ -27,7 +27,7 @@ fn main() -> Result<()> {
             let config = read_config(&args.data);
             let mut issue = issue::Issue::new(&a.entry, &config);
 
-            if !a.no_editor {
+            if !a.no_edit {
                 editor::edit_entry(&mut issue, &config)?;
             }
             storage::add_entry(issue, &read_config(&args.data))?;
@@ -38,7 +38,7 @@ fn main() -> Result<()> {
             issue.status = config.defaults.status_complete.clone();
             issue.update_end_ts();
 
-            if !a.no_editor {
+            if !a.no_edit {
                 editor::edit_entry(&mut issue, &config)?;
             }
             storage::add_entry(issue, &read_config(&args.data))?;
