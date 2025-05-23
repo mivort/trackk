@@ -68,15 +68,21 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
 
     file.write_fmt(format_args!(
         concat!(
-            "{title}\n\n----\n\n",
+            "# {title}\n\n----\n\n",
             "* Status: {status}\n",
-            "* Due: {due}\n",
-            "* Tags: {tags}",
+            "* Due:    {due}\n",
+            "* Tags:   {tags}\n",
+            "\n",
+            "----\n\n",
+            "- Last modified:  {modified}\n",
+            "- Status changed: {status_modified}\n",
         ),
         title = issue.title,
         status = issue.status,
         due = issue.due.unwrap_or_default(),
         tags = tags.join(" "),
+        modified = issue.modified,
+        status_modified = issue.status_modified.unwrap_or_default(),
     ))?;
 
     Ok(())
@@ -87,7 +93,7 @@ fn parse_markdown(issue: &mut Issue, file: &mut File) -> Result<()> {
     let mut entry = String::new();
     file.read_to_string(&mut entry)?;
 
-    let re = RegexBuilder::new("(.*?)^-{4,}$(.*)")
+    let re = RegexBuilder::new("\\s*#?(.*?)^-{4,}$(.*)")
         .multi_line(true)
         .dot_matches_new_line(true)
         .build()
@@ -96,9 +102,23 @@ fn parse_markdown(issue: &mut Issue, file: &mut File) -> Result<()> {
         .captures(&entry)
         .context("Unable to find the metadata delimiter ('----')")?;
 
-    issue.title = caps[1].trim().to_owned();
+    let (_, [title, meta]) = caps.extract();
+    issue.title = title.trim().to_owned();
 
-    // TODO: parse meta
+    let meta_re = RegexBuilder::new("^*\\s+(\\w+):(.*)$")
+        .multi_line(true)
+        .build()
+        .unwrap();
+
+    for (_, [key, val]) in meta_re.captures_iter(meta).map(|c| c.extract()) {
+        let key = key.to_lowercase();
+        match key.as_str() {
+            "status" => {
+                issue.status = val.trim().to_owned();
+            }
+            _ => {}
+        }
+    }
 
     Ok(())
 }
