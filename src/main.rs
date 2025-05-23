@@ -24,7 +24,12 @@ fn main() -> Result<()> {
             editor::edit_entries(&f, &read_config(&args.data))?;
         }
         Some(Command::Add(e)) => {
-            storage::add_entry(&e, &read_config(&args.data))?;
+            let config = read_config(&args.data);
+            let issue = issue::Issue::new(&e, &config);
+
+            // TODO: call editor
+
+            storage::add_entry(issue, &read_config(&args.data))?;
         }
         Some(Command::Modify(e)) => {
             storage::modify_entries(&e, &read_config(&args.data))?;

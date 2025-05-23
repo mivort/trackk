@@ -1,4 +1,4 @@
-use crate::args::{EntryArgs, FilterArgs, ModArgs};
+use crate::args::{FilterArgs, ModArgs};
 use crate::config::Config;
 use crate::index::Index;
 use crate::issue::{Bucket, Issue};
@@ -11,31 +11,17 @@ use std::io::BufReader;
 use std::path::Path;
 use std::rc::Rc;
 use time::{Date, UtcDateTime};
-use uuid::Uuid;
 use walkdir::WalkDir;
 
 /// Access storage bucket if it exists and add new entry to it.
-pub fn add_entry(entry: &EntryArgs, config: &Config) -> Result<()> {
-    let now = UtcDateTime::now();
-    let date = now.date();
+pub fn add_entry(new_entry: Issue, config: &Config) -> Result<()> {
+    let date = UtcDateTime::now().date();
 
     let (mut bucket, path) = fetch_new_bucket(&date, config)?;
 
-    let new_uuid = Uuid::new_v4().to_string();
-
-    if bucket.entries.iter().any(|e| e.id == new_uuid) {
+    if bucket.entries.iter().any(|e| e.id == new_entry.id) {
         bail!("collision has occured: task uuid exists");
     }
-
-    let ts = now.unix_timestamp();
-    let new_entry = Issue {
-        id: new_uuid,
-        title: entry.title.clone().unwrap_or_default(),
-        status: unwrap_some_or!(&entry.status, { &config.defaults.status_initial }).clone(),
-        created: ts,
-        modified: ts,
-        ..Default::default()
-    };
 
     let mut index = Index::load(config)?;
     index.update_status(&path, &new_entry);
@@ -107,7 +93,7 @@ pub fn fetch_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue,
     filter_active_entries(filter, config)
 }
 
-/// Create the storage bucket using the current date.
+/// Create or get the storage bucket using the current date.
 fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     let year = date.year();
     let month = date.month() as i32;

@@ -1,8 +1,11 @@
 use serde_derive::{Deserialize, Serialize};
 use std::collections::HashSet;
 use time::UtcDateTime;
+use uuid::Uuid;
 
 use crate::args::{EntryArgs, FilterArgs};
+use crate::config::Config;
+use crate::prelude::*;
 
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct Issue {
@@ -66,6 +69,22 @@ impl Bucket {
 }
 
 impl Issue {
+    /// Create new entry using provided arguments.
+    pub fn new(entry: &EntryArgs, config: &Config) -> Self {
+        let new_uuid = Uuid::new_v4().to_string();
+
+        let ts = UtcDateTime::now().unix_timestamp();
+
+        Self {
+            id: new_uuid,
+            title: entry.title.clone().unwrap_or_default(),
+            status: unwrap_some_or!(&entry.status, { &config.defaults.status_initial }).clone(),
+            created: ts,
+            modified: ts,
+            ..Default::default()
+        }
+    }
+
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
     pub fn apply_args(&mut self, args: &EntryArgs) {

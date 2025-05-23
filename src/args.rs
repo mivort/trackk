@@ -121,6 +121,15 @@ pub struct EntryArgs {
 }
 
 #[derive(Parser, Default)]
+pub struct AddArgs {
+    /// Don't use interactive input via default editor.
+    pub no_editor: bool,
+
+    #[command(flatten)]
+    pub entry: EntryArgs,
+}
+
+#[derive(Parser, Default)]
 pub struct ModArgs {
     #[command(flatten)]
     pub filter: FilterArgs,
