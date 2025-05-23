@@ -15,7 +15,7 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
     let entries = storage::fetch_entries(filter, config)?;
     let mut changes = 0;
     for (mut issue, path) in entries {
-        let mut tempfile = tempfile::NamedTempFile::with_suffix(".md")?;
+        let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
         format_markdown(&issue, tempfile.as_file_mut())?;
 
         let status = Command::new(&config.editor)
@@ -72,8 +72,10 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
             "* Status: {status}\n",
             "* Due:    {due}\n",
             "* Tags:   {tags}\n",
+            "* Repeat: {repeat}\n",
             "\n",
             "----\n\n",
+            "- Created:        {created}\n",
             "- Last modified:  {modified}\n",
             "- Status changed: {status_modified}\n",
         ),
@@ -81,6 +83,8 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         status = issue.status,
         due = issue.due.map(|d| d.to_string()).unwrap_or_default(),
         tags = tags.join(" "),
+        repeat = unwrap_some_or!(&issue.repeat, { "" }),
+        created = issue.created,
         modified = issue.modified,
         status_modified = issue.status_modified.unwrap_or_default(),
     ))?;
@@ -115,6 +119,14 @@ fn parse_markdown(issue: &mut Issue, file: &mut File) -> Result<()> {
         match key.as_str() {
             "status" => {
                 issue.status = val.trim().to_owned();
+            }
+            "repeat" => {
+                let val = val.trim();
+                if val.is_empty() {
+                    issue.repeat = None;
+                } else {
+                    issue.repeat = Some(val.to_owned());
+                }
             }
             _ => {}
         }
