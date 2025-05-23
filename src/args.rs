@@ -43,11 +43,12 @@ pub enum Command {
     #[command(visible_aliases(["inf", "i"]))]
     Info(FilterArgs),
 
+    /// Edit using default editor program.
     #[command(visible_aliases(["e"]))]
     Edit(FilterArgs),
 
     /// Merge two JSON storage buckets.
-    Merge,
+    Merge(MergeArgs),
 
     /// Init the storage and VCS repo.
     Init,
@@ -126,4 +127,16 @@ pub struct ModArgs {
 
     #[command(flatten)]
     pub entry: EntryArgs,
+}
+
+#[derive(Parser)]
+pub struct MergeArgs {
+    /// Current file state in repo.
+    pub ours: String,
+
+    /// Incomfing changes.
+    pub theirs: String,
+
+    /// Merge output.
+    pub output: String,
 }
