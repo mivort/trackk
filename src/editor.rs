@@ -48,7 +48,7 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
         let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();
 
         if prev_issue.status != issue.status {
-            issue.update_status_ts();
+            issue.update_end_ts();
             index.update_status(&*path, &issue);
         }
 
@@ -84,23 +84,23 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         concat!(
             "# {title}\n\n----\n\n",
             "* Status: {status}\n",
-            "* Due:    {due}\n",
             "* Tags:   {tags}\n",
+            "* Due:    {due}\n",
+            "* End:    {end}\n",
             "* Repeat: {repeat}\n",
             "\n",
             "----\n\n",
-            "- Created:        {created}\n",
-            "- Last modified:  {modified}\n",
-            "- Status changed: {status_modified}\n",
+            "- Created:  {created}\n",
+            "- Modified: {modified}\n",
         ),
         title = issue.title,
         status = issue.status,
         due = issue.due.map(|d| d.to_string()).unwrap_or_default(),
+        end = issue.end.map(|d| d.to_string()).unwrap_or_default(),
         tags = tags.join(" "),
         repeat = unwrap_some_or!(&issue.repeat, { "" }),
         created = issue.created,
         modified = issue.modified,
-        status_modified = unwrap_some_or!(&issue.status_modified.map(|s| s.to_string()), { "n/a" }),
     ))?;
 
     Ok(())

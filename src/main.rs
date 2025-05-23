@@ -36,7 +36,7 @@ fn main() -> Result<()> {
             let config = read_config(&args.data);
             let mut issue = issue::Issue::new(&a.entry, &config);
             issue.status = config.defaults.status_complete.clone();
-            issue.update_status_ts();
+            issue.update_end_ts();
 
             if !a.no_editor {
                 editor::edit_entry(&mut issue, &config)?;

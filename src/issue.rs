@@ -45,7 +45,7 @@ pub struct Issue {
 
     /// Last status change timestamp.
     #[serde(default)]
-    pub status_modified: Option<i64>,
+    pub end: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -111,7 +111,7 @@ impl Issue {
             return;
         }
         self.status = status.to_owned();
-        self.update_status_ts();
+        self.update_end_ts();
     }
 
     /// Update timestamp to the current time.
@@ -120,8 +120,8 @@ impl Issue {
     }
 
     /// Update status timestamp to the current time.
-    pub fn update_status_ts(&mut self) {
-        self.status_modified = Some(UtcDateTime::now().unix_timestamp());
+    pub fn update_end_ts(&mut self) {
+        self.end = Some(UtcDateTime::now().unix_timestamp());
     }
 
     /// Compare issue properties to provided filter.
