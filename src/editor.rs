@@ -86,7 +86,7 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         repeat = unwrap_some_or!(&issue.repeat, { "" }),
         created = issue.created,
         modified = issue.modified,
-        status_modified = issue.status_modified.unwrap_or_default(),
+        status_modified = unwrap_some_or!(&issue.status_modified.map(|s| s.to_string()), { "n/a" }),
     ))?;
 
     Ok(())

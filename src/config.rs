@@ -76,7 +76,8 @@ impl Config {
 
         if self.values.active_status.is_empty() {
             self.values.active_status.insert("pending".into());
-            self.values.active_status.insert("wip".into());
+            self.values.active_status.insert("started".into());
+            self.values.active_status.insert("blocked".into());
         }
     }
 
