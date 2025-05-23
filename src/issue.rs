@@ -69,8 +69,6 @@ impl Issue {
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
     pub fn apply_args(&mut self, args: &EntryArgs) {
-        let now = UtcDateTime::now();
-
         if let Some(title) = &args.title {
             self.title = title.clone();
         }
@@ -85,7 +83,7 @@ impl Issue {
             };
         }
 
-        self.modified = now.unix_timestamp();
+        self.update_ts();
     }
 
     /// Update entry status (and timestamp in case of change).
@@ -94,6 +92,16 @@ impl Issue {
             return;
         }
         self.status = status.to_owned();
+        self.update_status_ts();
+    }
+
+    /// Update timestamp to the current time.
+    pub fn update_ts(&mut self) {
+        self.modified = UtcDateTime::now().unix_timestamp();
+    }
+
+    /// Update status timestamp to the current time.
+    pub fn update_status_ts(&mut self) {
         self.status_modified = Some(UtcDateTime::now().unix_timestamp());
     }
 
@@ -133,6 +141,13 @@ impl Bucket {
         // with a binary search.
 
         self.entries.iter().find(|&issue| issue.id.starts_with(id))
+    }
+
+    /// Fetch the mutable reference to a bucket entry.
+    pub fn find_by_id_mut(&mut self, id: &str) -> Option<&mut Issue> {
+        self.entries
+            .iter_mut()
+            .find(|issue| issue.id.starts_with(id))
     }
 }
 

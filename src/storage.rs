@@ -123,7 +123,7 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 }
 
 /// Fetch bucket data if it exists, create empty bucket data otherwise.
-fn fetch_bucket(path: impl AsRef<Path>) -> Result<Bucket> {
+pub fn fetch_bucket(path: impl AsRef<Path>) -> Result<Bucket> {
     let data = File::open(&path);
     let data = match data {
         Ok(d) => d,
@@ -136,7 +136,7 @@ fn fetch_bucket(path: impl AsRef<Path>) -> Result<Bucket> {
 }
 
 /// Serialize bucket data and store in provided path.
-fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
+pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
     fs::write(path, output)?;
 
