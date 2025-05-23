@@ -32,6 +32,17 @@ fn main() -> Result<()> {
             }
             storage::add_entry(issue, &read_config(&args.data))?;
         }
+        Some(Command::Log(a)) => {
+            let config = read_config(&args.data);
+            let mut issue = issue::Issue::new(&a.entry, &config);
+            issue.status = config.defaults.status_complete.clone();
+            issue.update_status_ts();
+
+            if !a.no_editor {
+                editor::edit_entry(&mut issue, &config)?;
+            }
+            storage::add_entry(issue, &read_config(&args.data))?;
+        }
         Some(Command::Modify(e)) => {
             storage::modify_entries(&e, &read_config(&args.data))?;
         }

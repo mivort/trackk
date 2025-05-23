@@ -20,11 +20,15 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// Create new entry
+    /// Create new entry.
     #[command(visible_aliases(["a"]))]
     Add(AddArgs),
 
-    /// Remove specified entry
+    /// Create new entry and mark it as complete.
+    #[command(visible_aliases(["l"]))]
+    Log(AddArgs),
+
+    /// Remove specified entry.
     #[command(visible_aliases(["rem", "rm", "r", "delete", "del", "d"]))]
     Remove(FilterArgs),
 
@@ -36,7 +40,7 @@ pub enum Command {
     Done(FilterArgs),
 
     /// List entries using set of filters
-    #[command(visible_aliases(["ls", "l"]))]
+    #[command(visible_aliases(["ls"]))]
     List(FilterArgs),
 
     /// Show info about specified entry
