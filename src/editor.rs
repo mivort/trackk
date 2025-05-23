@@ -7,12 +7,15 @@ use regex::RegexBuilder;
 
 use crate::args::FilterArgs;
 use crate::config::Config;
+use crate::index::Index;
 use crate::issue::Issue;
 use crate::{prelude::*, storage};
 
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
+    let mut index = Index::load(config)?;
     let entries = storage::fetch_entries(filter, config)?;
+
     let mut changes = 0;
     for (mut issue, path) in entries {
         let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
@@ -37,6 +40,7 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
 
         if prev_issue.status != issue.status {
             issue.update_status_ts();
+            index.update_status(&*path, &issue);
         }
 
         *prev_issue = issue;
@@ -46,6 +50,7 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
     }
 
     if changes > 0 {
+        index.write()?;
         println!("Edited {changes} entry(es)");
     }
 

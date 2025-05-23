@@ -46,11 +46,12 @@ impl<'a> Index<'a> {
                 return;
             }
             self.active.push(entry);
-        } else {
-            let position = self.active.iter().position(|e| e == status);
-            if let Some(position) = position {
-                self.active.remove(position);
-            }
+            return;
+        }
+
+        let position = self.active.iter().position(|e| e == &entry);
+        if let Some(position) = position {
+            self.active.remove(position);
         }
     }
 
