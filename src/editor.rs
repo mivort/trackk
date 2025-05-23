@@ -87,14 +87,14 @@ fn parse_markdown(issue: &mut Issue, file: &mut File) -> Result<()> {
     let mut entry = String::new();
     file.read_to_string(&mut entry)?;
 
-    let re = RegexBuilder::new("(.*?)-{4,}(.*)")
+    let re = RegexBuilder::new("(.*?)^-{4,}$(.*)")
         .multi_line(true)
         .dot_matches_new_line(true)
         .build()
         .unwrap();
     let caps = re
         .captures(&entry)
-        .context("Unable to find the delimiter")?;
+        .context("Unable to find the metadata delimiter ('----')")?;
 
     issue.title = caps[1].trim().to_owned();
 
