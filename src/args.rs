@@ -22,7 +22,7 @@ pub struct Args {
 pub enum Command {
     /// Create new entry
     #[command(visible_aliases(["a"]))]
-    Add(EntryArgs),
+    Add(AddArgs),
 
     /// Remove specified entry
     #[command(visible_aliases(["rem", "rm", "r", "delete", "del", "d"]))]
@@ -123,6 +123,7 @@ pub struct EntryArgs {
 #[derive(Parser, Default)]
 pub struct AddArgs {
     /// Don't use interactive input via default editor.
+    #[arg(long)]
     pub no_editor: bool,
 
     #[command(flatten)]

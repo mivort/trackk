@@ -23,11 +23,13 @@ fn main() -> Result<()> {
         Some(Command::Edit(f)) => {
             editor::edit_entries(&f, &read_config(&args.data))?;
         }
-        Some(Command::Add(e)) => {
+        Some(Command::Add(a)) => {
             let config = read_config(&args.data);
-            let mut issue = issue::Issue::new(&e, &config);
+            let mut issue = issue::Issue::new(&a.entry, &config);
 
-            editor::edit_entry(&mut issue, &config)?;
+            if !a.no_editor {
+                editor::edit_entry(&mut issue, &config)?;
+            }
             storage::add_entry(issue, &read_config(&args.data))?;
         }
         Some(Command::Modify(e)) => {
