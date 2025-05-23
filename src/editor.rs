@@ -79,7 +79,7 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         ),
         title = issue.title,
         status = issue.status,
-        due = issue.due.unwrap_or_default(),
+        due = issue.due.map(|d| d.to_string()).unwrap_or_default(),
         tags = tags.join(" "),
         modified = issue.modified,
         status_modified = issue.status_modified.unwrap_or_default(),
