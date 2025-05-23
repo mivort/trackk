@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{Read, Write};
-use std::process::Command;
+use std::process::{Command, ExitStatus};
 
 use anyhow::Context;
 use regex::RegexBuilder;
@@ -11,6 +11,28 @@ use crate::index::Index;
 use crate::issue::Issue;
 use crate::{prelude::*, storage};
 
+/// Run editor, apply changes and return the exit status.
+pub fn edit_entry(issue: &mut Issue, config: &Config) -> Result<ExitStatus> {
+    let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
+    format_markdown(&issue, tempfile.as_file_mut())?;
+
+    let status = Command::new(&config.editor)
+        .arg(tempfile.path())
+        .spawn()?
+        .wait()?;
+
+    if !status.success() {
+        println!("Editing cancelled.");
+        return Ok(status);
+    }
+
+    let mut edited = File::open(tempfile.path())?;
+    parse_markdown(issue, &mut edited)?;
+    issue.update_ts();
+
+    Ok(status)
+}
+
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
     let mut index = Index::load(config)?;
@@ -18,22 +40,9 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
 
     let mut changes = 0;
     for (mut issue, path) in entries {
-        let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
-        format_markdown(&issue, tempfile.as_file_mut())?;
-
-        let status = Command::new(&config.editor)
-            .arg(tempfile.path())
-            .spawn()?
-            .wait()?;
-
-        if !status.success() {
-            println!("Editing cancelled.");
+        if !edit_entry(&mut issue, config)?.success() {
             break;
         }
-
-        let mut edited = File::open(tempfile.path())?;
-        parse_markdown(&mut issue, &mut edited)?;
-        issue.update_ts();
 
         let mut bucket = storage::fetch_bucket(&*path)?;
         let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();

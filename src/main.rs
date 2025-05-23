@@ -25,10 +25,9 @@ fn main() -> Result<()> {
         }
         Some(Command::Add(e)) => {
             let config = read_config(&args.data);
-            let issue = issue::Issue::new(&e, &config);
+            let mut issue = issue::Issue::new(&e, &config);
 
-            // TODO: call editor
-
+            editor::edit_entry(&mut issue, &config)?;
             storage::add_entry(issue, &read_config(&args.data))?;
         }
         Some(Command::Modify(e)) => {
