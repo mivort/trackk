@@ -23,6 +23,15 @@ impl Bucket {
         }
     }
 
+    /// Insert new entry at the sorted position.
+    pub fn insert(&mut self, issue: Issue) {
+        if let Some(pos) = self.entries.iter().position(|e| issue.id < e.id) {
+            self.entries.insert(pos, issue);
+        } else {
+            self.entries.push(issue);
+        };
+    }
+
     /// Fetch the reference to a bucket entry.
     pub fn find_by_id(&self, id: &str) -> Option<&Issue> {
         // TODO: bucket is sorted by id in most cases - attempt to find the issue

@@ -28,13 +28,7 @@ pub fn add_entry(new_entry: Issue, config: &Config) -> Result<()> {
     index.update_status(&path, &new_entry);
     index.write()?;
 
-    let insert = bucket.entries.iter().position(|e| new_entry.id < e.id);
-    if let Some(insert) = insert {
-        bucket.entries.insert(insert, new_entry);
-    } else {
-        bucket.entries.push(new_entry);
-    };
-
+    bucket.insert(new_entry);
     write_bucket(&bucket, &path)
 }
 
