@@ -46,16 +46,9 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
             continue;
         }
 
-        let data = File::open(entry.path())?;
-        let reader = BufReader::new(data);
-        let mut bucket: Bucket = serde_json::from_reader(reader).with_context(|| {
-            format!(
-                "Unable to read the bucket: {}",
-                entry.path().to_string_lossy()
-            )
-        })?;
-
+        let mut bucket = Bucket::from_path(entry.path())?;
         let mut has_changes = false;
+
         for issue in &mut bucket.entries {
             if issue.match_filter(&args.filter) {
                 issue.apply_args(&args.entry);
@@ -142,14 +135,7 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
             continue;
         }
 
-        let data = File::open(entry.path())?;
-        let reader = BufReader::new(data);
-        let bucket: Bucket = serde_json::from_reader(reader).with_context(|| {
-            format!(
-                "Unable to display the bucket: {}",
-                entry.path().to_string_lossy()
-            )
-        })?;
+        let bucket = Bucket::from_path(entry.path())?;
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
         for issue in bucket.entries {
@@ -175,7 +161,7 @@ fn filter_active_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Is
 
         let bucket = unwrap_some_or!(cache.get(bucket_path), {
             &(|| -> Result<_> {
-                let bucket = Rc::new(fetch_bucket(bucket_path)?);
+                let bucket = Rc::new(Bucket::from_path(bucket_path)?);
                 cache.insert(bucket_path.to_owned(), bucket.clone());
                 Ok(bucket)
             })()?

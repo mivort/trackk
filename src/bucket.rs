@@ -1,6 +1,12 @@
+use std::fs::File;
+use std::io::BufReader;
+use std::path::Path;
+
+use anyhow::Context;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::issue::Issue;
+use crate::prelude::*;
 
 /// Storage bucket which groups several entries in a single file.
 #[derive(Serialize, Deserialize, Clone)]
@@ -21,6 +27,19 @@ impl Bucket {
             version: Self::VERSION,
             entries: Default::default(),
         }
+    }
+
+    /// Open file from the provided path and parse as bucket.
+    pub fn from_path(path: impl AsRef<Path>) -> Result<Self> {
+        let file = File::open(&path)?;
+        let reader = BufReader::new(file);
+
+        serde_json::from_reader(reader).with_context(|| {
+            format!(
+                "Unable to parse bucket: {}",
+                path.as_ref().to_string_lossy()
+            )
+        })
     }
 
     /// Insert new entry at the sorted position.
