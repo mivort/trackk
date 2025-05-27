@@ -17,6 +17,7 @@ pub struct Issue {
     pub short: Option<usize>,
 
     /// Issue main title.
+    #[serde(default)]
     pub title: String,
 
     /// List of issue's tags.
@@ -53,7 +54,8 @@ pub struct Bucket {
     /// Storage bucket schema version.
     pub version: i64,
 
-    /// Entry IDs.
+    /// List of bucket entries.
+    #[serde(default)]
     pub entries: Vec<Issue>,
 }
 
