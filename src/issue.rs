@@ -7,6 +7,7 @@ use crate::args::{EntryArgs, FilterArgs};
 use crate::config::Config;
 use crate::prelude::*;
 
+/// Base entry storage with ID, title text and date properties.
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct Issue {
     /// Entry unique ID used for merging.
@@ -47,27 +48,6 @@ pub struct Issue {
     /// Last status change timestamp.
     #[serde(default)]
     pub end: Option<i64>,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct Bucket {
-    /// Storage bucket schema version.
-    pub version: i64,
-
-    /// List of bucket entries.
-    #[serde(default)]
-    pub entries: Vec<Issue>,
-}
-
-impl Bucket {
-    const VERSION: i64 = 1;
-
-    pub fn new() -> Self {
-        Self {
-            version: Self::VERSION,
-            entries: Default::default(),
-        }
-    }
 }
 
 impl Issue {
@@ -152,23 +132,6 @@ impl Issue {
         let mut new = self.clone();
         new.short = Some(short);
         new
-    }
-}
-
-impl Bucket {
-    /// Fetch the reference to a bucket entry.
-    pub fn find_by_id(&self, id: &str) -> Option<&Issue> {
-        // TODO: bucket is sorted by id in most cases - attempt to find the issue
-        // with a binary search.
-
-        self.entries.iter().find(|&issue| issue.id.starts_with(id))
-    }
-
-    /// Fetch the mutable reference to a bucket entry.
-    pub fn find_by_id_mut(&mut self, id: &str) -> Option<&mut Issue> {
-        self.entries
-            .iter_mut()
-            .find(|issue| issue.id.starts_with(id))
     }
 }
 

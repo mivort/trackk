@@ -1,4 +1,5 @@
 mod args;
+mod bucket;
 mod config;
 mod display;
 mod editor;

@@ -1,7 +1,8 @@
 use crate::args::{FilterArgs, ModArgs};
+use crate::bucket::Bucket;
 use crate::config::Config;
 use crate::index::Index;
-use crate::issue::{Bucket, Issue};
+use crate::issue::Issue;
 use crate::prelude::*;
 
 use anyhow::Context;
