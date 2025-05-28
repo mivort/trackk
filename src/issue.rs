@@ -141,6 +141,32 @@ impl Issue {
         new.short = Some(short);
         new
     }
+
+    /// Determine if modified entry has any differences.
+    pub fn differs(&self, other: &Self) -> bool {
+        debug_assert_eq!(self.id, other.id, "compared entry ids should match");
+
+        if self.title != other.title {
+            return true;
+        }
+        if self.due != other.due {
+            return true;
+        }
+        if self.end != other.end {
+            return true;
+        }
+        if self.tags != other.tags {
+            return true;
+        }
+        if self.status != other.status {
+            return true;
+        }
+        if self.repeat != other.repeat {
+            return true;
+        }
+
+        false
+    }
 }
 
 #[test]
