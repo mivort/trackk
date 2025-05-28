@@ -70,7 +70,7 @@ impl Default for Command {
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
     /// Entry reference (UUID or shorthand).
-    pub id: Option<String>,
+    pub id: Vec<String>,
 
     /// List both active and inactive entries.
     #[arg(long, short)]

@@ -65,7 +65,7 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
 
 /// Produce the list of entries to display or modify.
 pub fn fetch_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
-    if filter.all || filter.id.is_some() {
+    if filter.all || !filter.id.is_empty() {
         return filter_all_entries(filter, config);
     }
 

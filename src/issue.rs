@@ -118,10 +118,8 @@ impl Issue {
 
     /// Compare issue properties to provided filter.
     pub fn match_filter(&self, filter: &FilterArgs) -> bool {
-        if let Some(id) = &filter.id {
-            if !self.id.contains(id) {
-                return false;
-            }
+        if !filter.id.is_empty() && !filter.id.iter().any(|id| self.id.starts_with(id)) {
+            return false;
         }
 
         if !filter.has_status.is_empty() && !filter.has_status.contains(&self.status) {
