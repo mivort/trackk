@@ -138,6 +138,10 @@ fn parse_markdown(issue: &mut Issue, file: &mut File) -> Result<()> {
             "status" => {
                 issue.status = val.trim().to_owned();
             }
+            "tags" => {
+                let tags = val.split_whitespace().filter(|s| !s.is_empty());
+                issue.tags = tags.map(|s| s.to_string()).collect();
+            }
             "repeat" => {
                 let val = val.trim();
                 if val.is_empty() {
