@@ -6,6 +6,7 @@ use anyhow::Context;
 use regex::RegexBuilder;
 
 use crate::args::FilterArgs;
+use crate::bucket::Bucket;
 use crate::config::Config;
 use crate::index::Index;
 use crate::issue::Issue;
@@ -14,7 +15,7 @@ use crate::{prelude::*, storage};
 /// Run editor, apply changes and return the exit status.
 pub fn edit_entry(issue: &mut Issue, config: &Config) -> Result<ExitStatus> {
     let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
-    format_markdown(&issue, tempfile.as_file_mut())?;
+    format_markdown(issue, tempfile.as_file_mut())?;
 
     let status = Command::new(&config.editor)
         .arg(tempfile.path())
@@ -44,12 +45,12 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
             break;
         }
 
-        let mut bucket = storage::fetch_bucket(&*path)?;
+        let mut bucket = Bucket::from_path(&*path)?;
         let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();
 
         if prev_issue.status != issue.status {
             issue.update_end_ts();
-            index.update_status(&*path, &issue);
+            index.update_status(&path, &issue);
         }
 
         *prev_issue = issue;

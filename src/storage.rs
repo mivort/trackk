@@ -5,10 +5,8 @@ use crate::index::Index;
 use crate::issue::Issue;
 use crate::prelude::*;
 
-use anyhow::Context;
 use std::collections::HashMap;
-use std::fs::{self, File};
-use std::io::BufReader;
+use std::fs;
 use std::path::Path;
 use std::rc::Rc;
 use time::{Date, UtcDateTime};
@@ -91,22 +89,9 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     fs::create_dir_all(&directory)?;
 
     let path = format!("{directory}/{month:02}.json");
-    let bucket = fetch_bucket(&path)?;
+    let bucket = Bucket::from_path_or_default(&path)?;
 
     Ok((bucket, path))
-}
-
-/// Fetch bucket data if it exists, create empty bucket data otherwise.
-pub fn fetch_bucket(path: impl AsRef<Path>) -> Result<Bucket> {
-    let data = File::open(&path);
-    let data = match data {
-        Ok(d) => d,
-        Err(_e) => return Ok(Bucket::new()),
-    };
-
-    let reader = BufReader::new(data);
-    serde_json::from_reader(reader)
-        .with_context(|| format!("Unable to read bucket: {}", path.as_ref().to_string_lossy()))
 }
 
 /// Serialize bucket data and store in provided path.

@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, ErrorKind};
 use std::path::Path;
 
 use anyhow::Context;
@@ -32,14 +32,22 @@ impl Bucket {
     /// Open file from the provided path and parse as bucket.
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self> {
         let file = File::open(&path)?;
-        let reader = BufReader::new(file);
+        Self::from_file(&file, path)
+    }
 
-        serde_json::from_reader(reader).with_context(|| {
-            format!(
-                "Unable to parse bucket: {}",
-                path.as_ref().to_string_lossy()
-            )
-        })
+    /// Open file from the provided path and parse as bucket. If file doesn't
+    /// exist return the empty bucket.
+    pub fn from_path_or_default(path: impl AsRef<Path>) -> Result<Self> {
+        let file = File::open(&path);
+        let file = unwrap_ok_or!(file, e, {
+            match e.kind() {
+                ErrorKind::NotFound => return Ok(Bucket::new()),
+                _ => {
+                    bail!("Unable to read bucket: {}", path.as_ref().to_string_lossy())
+                }
+            }
+        });
+        Self::from_file(&file, path)
     }
 
     /// Insert new entry at the sorted position.
@@ -64,5 +72,19 @@ impl Bucket {
         self.entries
             .iter_mut()
             .find(|issue| issue.id.starts_with(id))
+    }
+}
+
+impl Bucket {
+    /// Read bucket file and deserialize the data.
+    fn from_file(file: &File, path: impl AsRef<Path>) -> Result<Self> {
+        let reader = BufReader::new(file);
+
+        serde_json::from_reader(reader).with_context(|| {
+            format!(
+                "Unable to parse bucket: {}",
+                path.as_ref().to_string_lossy()
+            )
+        })
     }
 }

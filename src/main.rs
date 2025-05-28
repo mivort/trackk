@@ -55,7 +55,6 @@ fn main() -> Result<()> {
                     status: Some(config.defaults.status_complete.clone()),
                     ..Default::default()
                 },
-                ..Default::default()
             };
             storage::modify_entries(&args, &config)?;
         }
