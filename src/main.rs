@@ -21,13 +21,19 @@ fn main() -> Result<()> {
         Some(Command::List(mut f)) => {
             let config = read_config(&args.data);
             let index = index::Index::load(&config)?;
-            f.resolve_shorthands(&index);
+            if !f.resolve_shorthands(&index) {
+                println!("No results.");
+                return Ok(());
+            }
             display::show_entries(&storage::fetch_entries(&f, &config, &index)?);
         }
         Some(Command::Edit(mut f)) => {
             let config = read_config(&args.data);
             let index = index::Index::load(&config)?;
-            f.resolve_shorthands(&index);
+            if !f.resolve_shorthands(&index) {
+                println!("No entries to edit.");
+                return Ok(());
+            }
             editor::edit_entries(&f, &config)?;
         }
         Some(Command::Add(a)) => {
@@ -50,9 +56,13 @@ fn main() -> Result<()> {
             }
             storage::add_entry(issue, &read_config(&args.data))?;
         }
-        Some(Command::Modify(e)) => {
+        Some(Command::Modify(mut e)) => {
             let config = read_config(&args.data);
             let mut index = index::Index::load(&config)?;
+            if !e.filter.resolve_shorthands(&index) {
+                println!("No entries to modify.");
+                return Ok(());
+            }
             storage::modify_entries(&e, &config, &mut index)?;
         }
         Some(Command::Done(filter)) => {

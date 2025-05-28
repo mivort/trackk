@@ -176,7 +176,13 @@ impl FilterArgs {
     ///
     /// If entry ID is porvided as shortcut, but it goes outside of index range,
     /// it gets removed from the vec.
-    pub fn resolve_shorthands(&mut self, index: &Index) {
+    ///
+    /// Return `false` if all shorthands were outside of index range.
+    pub fn resolve_shorthands(&mut self, index: &Index) -> bool {
+        if self.id.is_empty() {
+            return true;
+        }
+
         let mut unresolved = false;
 
         self.id.retain_mut(|id| {
@@ -184,6 +190,10 @@ impl FilterArgs {
                 unresolved = true;
                 return true;
             });
+            if shorthand > 999999 {
+                unresolved = true;
+                return true;
+            }
             let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
                 return false;
             });
@@ -195,8 +205,14 @@ impl FilterArgs {
             true
         });
 
+        if self.id.is_empty() {
+            return false;
+        }
+
         if unresolved {
             self.all = true;
         }
+
+        true
     }
 }
