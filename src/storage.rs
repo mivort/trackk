@@ -32,33 +32,26 @@ pub fn add_entry(new_entry: Issue, config: &Config) -> Result<()> {
 
 /// Find entry using the filter and update its properties.
 pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
-    // TODO: ask if multiple entries are expected
     let mut changes = 0;
 
     let mut index = Index::load(config)?;
+    let entries = fetch_entries(&args.filter, config)?;
 
-    for entry in WalkDir::new(&config.data) {
-        let entry = entry?;
+    // TODO: ask if multiple entries are expected
+    // TODO: use cache to reduce amount of re-parsing/writes?
 
-        if entry.depth() < 2 || entry.file_type().is_dir() {
-            continue;
+    for (issue, path) in &entries {
+        let mut bucket = Bucket::from_path(&**path)?;
+        let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
+        bucket_issue.apply_args(&args.entry);
+
+        if bucket_issue.status != issue.status {
+            bucket_issue.update_end_ts();
+            index.update_status(&path, &issue);
         }
 
-        let mut bucket = Bucket::from_path(entry.path())?;
-        let mut has_changes = false;
-
-        for issue in &mut bucket.entries {
-            if issue.match_filter(&args.filter) {
-                issue.apply_args(&args.entry);
-                index.update_status(&entry.path().to_string_lossy(), issue);
-                has_changes = true;
-                changes += 1;
-            }
-        }
-
-        if has_changes {
-            write_bucket(&bucket, entry.path())?;
-        }
+        write_bucket(&bucket, &**path)?;
+        changes += 1;
     }
 
     if changes > 0 {
