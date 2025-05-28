@@ -1,6 +1,9 @@
 use clap_derive::{Parser, Subcommand};
 use serde_derive::Deserialize;
 
+use crate::index::Index;
+use crate::prelude::*;
+
 /// Trackit command line arguments.
 #[derive(Parser)]
 #[command(author, version, about = None, long_about = None)]
@@ -165,4 +168,35 @@ pub struct MergeArgs {
 
     /// Merge output.
     pub output: String,
+}
+
+impl FilterArgs {
+    /// Iterate over IDs list provided with filter and resolve shortcuts using
+    /// 'active' index.
+    ///
+    /// If entry ID is porvided as shortcut, but it goes outside of index range,
+    /// it gets removed from the vec.
+    pub fn resolve_shorthands(&mut self, index: &Index) {
+        let mut unresolved = false;
+
+        self.id.retain_mut(|id| {
+            let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
+                unresolved = true;
+                return true;
+            });
+            let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
+                return false;
+            });
+            let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
+                return false;
+            });
+            *id = resolved.to_string();
+
+            true
+        });
+
+        if unresolved {
+            self.all = true;
+        }
+    }
 }

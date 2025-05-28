@@ -18,11 +18,17 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     match args.command {
-        Some(Command::List(f)) => {
-            display::show_entries(&storage::fetch_entries(&f, &read_config(&args.data))?);
+        Some(Command::List(mut f)) => {
+            let config = read_config(&args.data);
+            let index = index::Index::load(&config)?;
+            f.resolve_shorthands(&index);
+            display::show_entries(&storage::fetch_entries(&f, &config, &index)?);
         }
-        Some(Command::Edit(f)) => {
-            editor::edit_entries(&f, &read_config(&args.data))?;
+        Some(Command::Edit(mut f)) => {
+            let config = read_config(&args.data);
+            let index = index::Index::load(&config)?;
+            f.resolve_shorthands(&index);
+            editor::edit_entries(&f, &config)?;
         }
         Some(Command::Add(a)) => {
             let config = read_config(&args.data);
@@ -45,7 +51,9 @@ fn main() -> Result<()> {
             storage::add_entry(issue, &read_config(&args.data))?;
         }
         Some(Command::Modify(e)) => {
-            storage::modify_entries(&e, &read_config(&args.data))?;
+            let config = read_config(&args.data);
+            let mut index = index::Index::load(&config)?;
+            storage::modify_entries(&e, &config, &mut index)?;
         }
         Some(Command::Done(filter)) => {
             let config = read_config(&args.data);
@@ -56,7 +64,8 @@ fn main() -> Result<()> {
                     ..Default::default()
                 },
             };
-            storage::modify_entries(&args, &config)?;
+            let mut index = index::Index::load(&config)?;
+            storage::modify_entries(&args, &config, &mut index)?;
         }
         Some(Command::Init) => {
             repo::init_repo(&read_config(&args.data))?;
@@ -65,9 +74,12 @@ fn main() -> Result<()> {
             repo::check_repo();
         }
         None => {
+            let config = read_config(&args.data);
+            let index = index::Index::load(&config)?;
             display::show_entries(&storage::fetch_entries(
                 &Default::default(),
-                &read_config(&args.data),
+                &config,
+                &index,
             )?);
         }
         _ => {}

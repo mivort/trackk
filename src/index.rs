@@ -56,7 +56,7 @@ impl<'a> Index<'a> {
     }
 
     /// Write index back to storage.
-    pub fn write(self) -> Result<()> {
+    pub fn write(&self) -> Result<()> {
         fs::write(&self.index_path, serde_json::to_string(&self.active)?)?;
 
         Ok(())

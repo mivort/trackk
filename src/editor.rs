@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::process::{Command, ExitStatus};
 
-use anyhow::Context;
 use regex::RegexBuilder;
 
 use crate::args::FilterArgs;
@@ -37,7 +36,7 @@ pub fn edit_entry(issue: &mut Issue, config: &Config) -> Result<ExitStatus> {
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
     let mut index = Index::load(config)?;
-    let entries = storage::fetch_entries(filter, config)?;
+    let entries = storage::fetch_entries(filter, config, &index)?;
 
     let mut changes = 0;
     for (mut issue, path) in entries {

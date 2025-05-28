@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::{BufReader, ErrorKind};
 use std::path::Path;
 
-use anyhow::Context;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::issue::Issue;
