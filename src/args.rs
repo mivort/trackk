@@ -88,6 +88,14 @@ pub struct FilterArgs {
     #[arg(long)]
     pub due_after: Option<String>,
 
+    /// Filter by max end date.
+    #[arg(long)]
+    pub end_before: Option<String>,
+
+    /// Filter by min end date.
+    #[arg(long)]
+    pub end_after: Option<String>,
+
     /// Filter by one status values.
     #[arg(long)]
     pub has_status: Vec<String>,
@@ -103,9 +111,13 @@ pub struct EntryArgs {
     #[arg(short('m'), visible_aliases(["message", "msg"]), long)]
     pub title: Option<String>,
 
-    /// Entry due reference
+    /// Entry due date string.
     #[arg(short, long)]
     pub due: Option<String>,
+
+    /// Entry end date string.
+    #[arg(long)]
+    pub end: Option<String>,
 
     /// Entry status
     #[arg(short, long)]

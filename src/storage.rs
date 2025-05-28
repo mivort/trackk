@@ -43,11 +43,11 @@ pub fn modify_entries(args: &ModArgs, config: &Config) -> Result<()> {
     for (issue, path) in &entries {
         let mut bucket = Bucket::from_path(&**path)?;
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
-        bucket_issue.apply_args(&args.entry);
+        bucket_issue.apply_args(&args.entry, config);
 
         if bucket_issue.status != issue.status {
             bucket_issue.update_end_ts();
-            index.update_status(&path, &issue);
+            index.update_status(path, issue);
         }
 
         write_bucket(&bucket, &**path)?;

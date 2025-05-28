@@ -69,12 +69,18 @@ impl Issue {
 
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
-    pub fn apply_args(&mut self, args: &EntryArgs) {
+    pub fn apply_args(&mut self, args: &EntryArgs, config: &Config) {
         if let Some(title) = &args.title {
             self.title = title.clone();
         }
         if let Some(status) = &args.status {
-            self.apply_status(status);
+            self.apply_status(status, args.end.is_none(), config);
+        }
+        if let Some(_due) = &args.due {
+            // TODO: parse and apply due date
+        }
+        if let Some(_end) = &args.end {
+            // TODO: parse and apply end date
         }
         if let Some(repeat) = &args.repeat {
             self.repeat = if repeat.is_empty() {
@@ -87,13 +93,17 @@ impl Issue {
         self.update_ts();
     }
 
-    /// Update entry status (and timestamp in case of change).
-    pub fn apply_status(&mut self, status: &str) {
+    /// Update entry status (and end timestamp in case if 'set_end' is true and
+    /// status is not in active list).
+    pub fn apply_status(&mut self, status: &str, set_end: bool, config: &Config) {
         if self.status == status {
             return;
         }
         self.status = status.to_owned();
-        self.update_end_ts();
+
+        if set_end && !config.values.active_status.contains(&self.status) {
+            self.update_end_ts();
+        }
     }
 
     /// Update timestamp to the current time.

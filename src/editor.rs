@@ -49,7 +49,7 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
         let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();
 
         if prev_issue.status != issue.status {
-            issue.update_end_ts();
+            issue.apply_status(&prev_issue.status, issue.end.is_none(), config);
             index.update_status(&path, &issue);
         }
 
