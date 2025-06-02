@@ -3,6 +3,7 @@ mod bucket;
 mod config;
 mod display;
 mod editor;
+mod filter;
 mod index;
 mod issue;
 mod prelude;
@@ -16,7 +17,9 @@ use prelude::*;
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    let mut filter = args.filter;
+    let mut filter = args.filter_args;
+
+    let (_filter, _) = filter::parse_filter_args(&args.filter)?;
 
     match args.command {
         Some(Command::List) => {

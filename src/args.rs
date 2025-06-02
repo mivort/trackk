@@ -9,8 +9,9 @@ use crate::prelude::*;
 #[command(author, version, about = None, long_about = None)]
 #[command(args_override_self = true, subcommand_precedence_over_arg = true)]
 pub struct Args {
-    /// Filter arguments.
-    pub f: Vec<String>,
+    /// List of filter rules.
+    /// Supported rules: tag:, created:, modified:, due:, end:.
+    pub filter: Vec<String>,
 
     #[command(subcommand)]
     pub command: Option<Command>,
@@ -24,7 +25,7 @@ pub struct Args {
     pub data: Option<String>,
 
     #[command(flatten)]
-    pub filter: FilterArgs,
+    pub filter_args: FilterArgs,
 }
 
 #[derive(Subcommand)]
