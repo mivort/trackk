@@ -16,25 +16,26 @@ use prelude::*;
 
 fn main() -> Result<()> {
     let args = Args::parse();
+    let mut filter = args.filter;
 
     match args.command {
-        Some(Command::List(mut f)) => {
+        Some(Command::List) => {
             let config = read_config(&args.data);
             let index = index::Index::load(&config)?;
-            if !f.resolve_shorthands(&index) {
+            if !filter.resolve_shorthands(&index) {
                 println!("No results.");
                 return Ok(());
             }
-            display::show_entries(&storage::fetch_entries(&f, &config, &index)?);
+            display::show_entries(&storage::fetch_entries(&filter, &config, &index)?);
         }
-        Some(Command::Edit(mut f)) => {
+        Some(Command::Edit) => {
             let config = read_config(&args.data);
             let index = index::Index::load(&config)?;
-            if !f.resolve_shorthands(&index) {
+            if !filter.resolve_shorthands(&index) {
                 println!("No entries to edit.");
                 return Ok(());
             }
-            editor::edit_entries(&f, &config)?;
+            editor::edit_entries(&filter, &config)?;
         }
         Some(Command::Add(a)) => {
             let config = read_config(&args.data);
@@ -56,26 +57,25 @@ fn main() -> Result<()> {
             }
             storage::add_entry(issue, &read_config(&args.data))?;
         }
-        Some(Command::Modify(mut e)) => {
+        Some(Command::Modify(e)) => {
             let config = read_config(&args.data);
             let mut index = index::Index::load(&config)?;
-            if !e.filter.resolve_shorthands(&index) {
+            if !filter.resolve_shorthands(&index) {
                 println!("No entries to modify.");
                 return Ok(());
             }
-            storage::modify_entries(&e, &config, &mut index)?;
+            storage::modify_entries(&e, &filter, &config, &mut index)?;
         }
-        Some(Command::Done(filter)) => {
+        Some(Command::Done) => {
             let config = read_config(&args.data);
             let args = args::ModArgs {
-                filter,
                 entry: args::EntryArgs {
                     status: Some(config.defaults.status_complete.clone()),
                     ..Default::default()
                 },
             };
             let mut index = index::Index::load(&config)?;
-            storage::modify_entries(&args, &config, &mut index)?;
+            storage::modify_entries(&args, &filter, &config, &mut index)?;
         }
         Some(Command::Init) => {
             repo::init_repo(&read_config(&args.data))?;
@@ -83,6 +83,7 @@ fn main() -> Result<()> {
         Some(Command::Check) => {
             repo::check_repo();
         }
+        Some(Command::External(_args)) => {}
         None => {
             let config = read_config(&args.data);
             let index = index::Index::load(&config)?;

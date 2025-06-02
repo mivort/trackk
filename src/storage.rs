@@ -31,10 +31,15 @@ pub fn add_entry(new_entry: Issue, config: &Config) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entries(args: &ModArgs, config: &Config, index: &mut Index) -> Result<()> {
+pub fn modify_entries(
+    args: &ModArgs,
+    filter: &FilterArgs,
+    config: &Config,
+    index: &mut Index,
+) -> Result<()> {
     let mut changes = 0;
 
-    let entries = fetch_entries(&args.filter, config, index)?;
+    let entries = fetch_entries(&filter, config, index)?;
 
     // TODO: ask if multiple entries are expected
     // TODO: use cache to reduce amount of re-parsing/writes?

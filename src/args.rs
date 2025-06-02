@@ -19,6 +19,9 @@ pub struct Args {
     /// Path to data storage.
     #[arg(long)]
     pub data: Option<String>,
+
+    #[command(flatten)]
+    pub filter: FilterArgs,
 }
 
 #[derive(Subcommand)]
@@ -33,26 +36,26 @@ pub enum Command {
 
     /// Remove specified entry.
     #[command(visible_aliases(["rem", "rm", "r", "delete", "del", "d"]))]
-    Remove(FilterArgs),
+    Remove,
 
     /// Modify specified entry
     #[command(visible_aliases(["mod", "m"]))]
     Modify(ModArgs),
 
     #[command(visible_aliases(["complete"]))]
-    Done(FilterArgs),
+    Done,
 
     /// List entries using set of filters
     #[command(visible_aliases(["ls"]))]
-    List(FilterArgs),
+    List,
 
     /// Show info about specified entry
     #[command(visible_aliases(["inf", "i"]))]
-    Info(FilterArgs),
+    Info,
 
     /// Edit using default editor program.
     #[command(visible_aliases(["e"]))]
-    Edit(FilterArgs),
+    Edit,
 
     /// Merge two JSON storage buckets.
     Merge(MergeArgs),
@@ -62,17 +65,22 @@ pub enum Command {
 
     /// Check data repository and VCS status.
     Check,
+
+    /// Allow to call custom reports/aliases.
+    #[command(external_subcommand)]
+    External(Vec<String>),
 }
 
 impl Default for Command {
     fn default() -> Self {
-        Self::List(FilterArgs::default())
+        Self::List
     }
 }
 
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
     /// Entry reference (UUID or shorthand).
+    #[arg(skip)]
     pub id: Vec<String>,
 
     /// List both active and inactive entries.
@@ -151,9 +159,6 @@ pub struct AddArgs {
 
 #[derive(Parser, Default)]
 pub struct ModArgs {
-    #[command(flatten)]
-    pub filter: FilterArgs,
-
     #[command(flatten)]
     pub entry: EntryArgs,
 }
