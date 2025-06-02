@@ -83,7 +83,6 @@ fn main() -> Result<()> {
         Some(Command::Check) => {
             repo::check_repo();
         }
-        Some(Command::External(_args)) => {}
         None => {
             let config = read_config(&args.data);
             let index = index::Index::load(&config)?;

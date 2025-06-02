@@ -7,8 +7,11 @@ use crate::prelude::*;
 /// Trackit command line arguments.
 #[derive(Parser)]
 #[command(author, version, about = None, long_about = None)]
-#[command(args_override_self = true)]
+#[command(args_override_self = true, subcommand_precedence_over_arg = true)]
 pub struct Args {
+    /// Filter arguments.
+    pub f: Vec<String>,
+
     #[command(subcommand)]
     pub command: Option<Command>,
 
@@ -65,10 +68,6 @@ pub enum Command {
 
     /// Check data repository and VCS status.
     Check,
-
-    /// Allow to call custom reports/aliases.
-    #[command(external_subcommand)]
-    External(Vec<String>),
 }
 
 impl Default for Command {
