@@ -74,7 +74,8 @@ impl Issue {
             self.title = title.clone();
         }
         if let Some(status) = &args.status {
-            self.apply_status(status, args.end.is_none(), config);
+            self.status = status.clone();
+            self.update_status(args.end.is_none(), config);
         }
         if let Some(_due) = &args.due {
             // TODO: parse and apply due date
@@ -95,12 +96,7 @@ impl Issue {
 
     /// Update entry status (and end timestamp in case if 'set_end' is true and
     /// status is not in active list).
-    pub fn apply_status(&mut self, status: &str, set_end: bool, config: &Config) {
-        if self.status == status {
-            return;
-        }
-        self.status = status.to_owned();
-
+    pub fn update_status(&mut self, set_end: bool, config: &Config) {
         if set_end && !config.values.active_status.contains(&self.status) {
             self.update_end_ts();
         }

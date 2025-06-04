@@ -49,7 +49,7 @@ pub fn edit_entries(app: &App) -> Result<()> {
         }
 
         if prev_issue.status != issue.status {
-            issue.apply_status(&prev_issue.status, issue.end.is_none(), &app.config);
+            issue.update_status(issue.end.is_none(), &app.config);
             index.update_status(&app.config, &path, &issue);
         }
 
