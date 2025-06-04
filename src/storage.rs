@@ -1,7 +1,6 @@
 use crate::args::{FilterArgs, ModArgs};
 use crate::bucket::Bucket;
 use crate::config::Config;
-use crate::index::Index;
 use crate::issue::Issue;
 use crate::{App, prelude::*};
 
@@ -35,7 +34,7 @@ pub fn modify_entries(args: &ModArgs, filter: &FilterArgs, app: &App) -> Result<
     let mut changes = 0;
 
     let mut index = app.index_owned()?;
-    let entries = fetch_entries(filter, &app.config, &index)?;
+    let entries = fetch_entries(filter, app)?;
 
     // TODO: ask if multiple entries are expected
     // TODO: use cache to reduce amount of re-parsing/writes?
@@ -64,16 +63,12 @@ pub fn modify_entries(args: &ModArgs, filter: &FilterArgs, app: &App) -> Result<
 }
 
 /// Produce the list of entries to display or modify.
-pub fn fetch_entries(
-    filter: &FilterArgs,
-    config: &Config,
-    index: &Index,
-) -> Result<Vec<(Issue, Rc<str>)>> {
+pub fn fetch_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     if filter.all {
-        return filter_all_entries(filter, config);
+        return filter_all_entries(filter, app);
     }
 
-    filter_active_entries(filter, index)
+    filter_active_entries(filter, app)
 }
 
 /// Create or get the storage bucket using the current date.
@@ -100,10 +95,11 @@ pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_all_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut output = Vec::new();
 
-    let walkdir = WalkDir::new(&config.data).into_iter().filter_entry(|e| {
+    let data = &app.config.data;
+    let walkdir = WalkDir::new(data).into_iter().filter_entry(|e| {
         !e.file_name()
             .to_str()
             .map(|n| n.starts_with("."))
@@ -131,9 +127,10 @@ fn filter_all_entries(filter: &FilterArgs, config: &Config) -> Result<Vec<(Issue
 }
 
 /// Iterate over entries from the active index.
-fn filter_active_entries(filter: &FilterArgs, index: &Index) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_active_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut cache = HashMap::<String, Rc<Bucket>>::new();
     let mut result = Vec::new();
+    let index = app.index()?;
 
     for (idx, e) in index.active().iter().enumerate() {
         let (bucket_path, id) = unwrap_some_or!(e.rsplit_once("/"), {

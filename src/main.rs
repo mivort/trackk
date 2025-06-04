@@ -46,7 +46,7 @@ impl App {
         Ok(self.index.get().unwrap())
     }
 
-    /// If index is loaded, clone lazy-initialized value. Otherwise, procude a independent clone.
+    /// If index is loaded, clone lazy-initialized value. Otherwise, produce an independent clone.
     pub fn index_owned(&self) -> Result<index::Index> {
         if let Some(index) = self.index.get() {
             return Ok(index.clone());
@@ -77,7 +77,7 @@ fn main() -> Result<()> {
                 println!("No results.");
                 return Ok(());
             }
-            display::show_entries(&storage::fetch_entries(&filter, &app.config, index)?);
+            display::show_entries(&storage::fetch_entries(&filter, &app)?);
         }
         Some(Command::Edit) => {
             let index = app.index()?;
@@ -129,12 +129,7 @@ fn main() -> Result<()> {
             repo::check_repo();
         }
         None => {
-            let index = app.index()?;
-            display::show_entries(&storage::fetch_entries(
-                &Default::default(),
-                &app.config,
-                index,
-            )?);
+            display::show_entries(&storage::fetch_entries(&Default::default(), &app)?);
         }
         _ => {}
     }
