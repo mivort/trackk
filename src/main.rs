@@ -57,28 +57,26 @@ fn main() -> Result<()> {
         _cache: Default::default(),
     };
 
-    app.filter = filter::parse_filter_args(&args, &mut app)?;
+    app.filter = filter::parse_filter_args(&args, &app)?;
 
     let mut filter = args.filter_args;
 
     match args.command {
         Some(Command::List) => {
-            let config = read_config(&args.data);
-            let index = index::Index::load(&config)?;
-            if !filter.resolve_shorthands(&index) {
+            let index = app.index()?;
+            if !filter.resolve_shorthands(index) {
                 println!("No results.");
                 return Ok(());
             }
-            display::show_entries(&storage::fetch_entries(&filter, &config, &index)?);
+            display::show_entries(&storage::fetch_entries(&filter, &app.config, index)?);
         }
         Some(Command::Edit) => {
-            let config = read_config(&args.data);
-            let index = index::Index::load(&config)?;
-            if !filter.resolve_shorthands(&index) {
+            let index = app.index()?;
+            if !filter.resolve_shorthands(index) {
                 println!("No entries to edit.");
                 return Ok(());
             }
-            editor::edit_entries(&filter, &config)?;
+            editor::edit_entries(&filter, &app.config)?;
         }
         Some(Command::Add(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app);
@@ -86,52 +84,48 @@ fn main() -> Result<()> {
             if !a.no_edit {
                 editor::edit_entry(&mut issue, &app.config)?;
             }
-            storage::add_entry(issue, &read_config(&args.data))?;
+            storage::add_entry(issue, &app.config)?;
         }
         Some(Command::Log(a)) => {
-            let config = read_config(&args.data);
             let mut issue = issue::Issue::new(&a.entry, &app);
-            issue.status = config.defaults.status_complete.clone();
+            issue.status = app.config.defaults.status_complete.clone();
             issue.update_end_ts();
 
             if !a.no_edit {
-                editor::edit_entry(&mut issue, &config)?;
+                editor::edit_entry(&mut issue, &app.config)?;
             }
-            storage::add_entry(issue, &read_config(&args.data))?;
+            storage::add_entry(issue, &app.config)?;
         }
         Some(Command::Modify(e)) => {
-            let config = read_config(&args.data);
-            let mut index = index::Index::load(&config)?;
+            let mut index = index::Index::load(&app.config)?;
             if !filter.resolve_shorthands(&index) {
                 println!("No entries to modify.");
                 return Ok(());
             }
-            storage::modify_entries(&e, &filter, &config, &mut index)?;
+            storage::modify_entries(&e, &filter, &app.config, &mut index)?;
         }
         Some(Command::Done) => {
-            let config = read_config(&args.data);
             let args = args::ModArgs {
                 entry: args::EntryArgs {
-                    status: Some(config.defaults.status_complete.clone()),
+                    status: Some(app.config.defaults.status_complete.clone()),
                     ..Default::default()
                 },
             };
-            let mut index = index::Index::load(&config)?;
-            storage::modify_entries(&args, &filter, &config, &mut index)?;
+            let mut index = index::Index::load(&app.config)?;
+            storage::modify_entries(&args, &filter, &app.config, &mut index)?;
         }
         Some(Command::Init) => {
-            repo::init_repo(&read_config(&args.data))?;
+            repo::init_repo(&app.config)?;
         }
         Some(Command::Check) => {
             repo::check_repo();
         }
         None => {
-            let config = read_config(&args.data);
-            let index = index::Index::load(&config)?;
+            let index = app.index()?;
             display::show_entries(&storage::fetch_entries(
                 &Default::default(),
-                &config,
-                &index,
+                &app.config,
+                index,
             )?);
         }
         _ => {}
