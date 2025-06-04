@@ -112,7 +112,15 @@ fn main() -> Result<()> {
             repo::check_repo();
         }
         None => {
-            display::show_entries(&storage::fetch_entries(&args.filter_args, &app)?);
+            let entries = storage::fetch_entries(&args.filter_args, &app)?;
+
+            if !app.filter.ids.is_empty() {
+                for entry in &entries {
+                    display::show_entry(entry);
+                }
+            } else {
+                display::show_entries(&entries);
+            }
         }
         _ => {}
     }

@@ -8,7 +8,7 @@ use crate::{App, prelude::*};
 #[derive(Default)]
 pub struct Filter {
     /// List of IDs to include in the result.
-    ids: HashSet<String>,
+    pub ids: HashSet<String>,
 
     /// List of IDs to exclude from results.
     exclude_ids: HashSet<String>,
