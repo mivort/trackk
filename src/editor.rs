@@ -4,7 +4,6 @@ use std::process::{Command, ExitStatus};
 
 use regex::RegexBuilder;
 
-use crate::args::FilterArgs;
 use crate::bucket::Bucket;
 use crate::issue::Issue;
 use crate::{App, prelude::*, storage};
@@ -32,9 +31,9 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
 }
 
 /// Iterate over matching entries and run editor for each.
-pub fn edit_entries(filter: &FilterArgs, app: &App) -> Result<()> {
+pub fn edit_entries(app: &App) -> Result<()> {
     let mut index = app.index_owned()?;
-    let entries = storage::fetch_entries(filter, app)?;
+    let entries = storage::filter_all_entries(app)?;
 
     let mut changes = 0;
     for (mut issue, path) in entries {

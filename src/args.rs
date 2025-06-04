@@ -1,9 +1,6 @@
 use clap_derive::{Parser, Subcommand};
 use serde_derive::Deserialize;
 
-use crate::index::Index;
-use crate::prelude::*;
-
 /// Trackit command line arguments.
 #[derive(Parser)]
 #[command(author, version, about = None, long_about = None)]
@@ -84,57 +81,9 @@ pub struct FilterArgs {
     pub exclude: Vec<String>,
 
     // TODO: deprecate separate filter flags in favor of rules
-    /// Entry reference (UUID or shorthand).
-    #[arg(skip)]
-    pub id: Vec<String>,
-
     /// List both active and inactive entries.
     #[arg(skip)]
     pub all: bool,
-
-    /// Filter by entry title content.
-    #[arg(long, short)]
-    pub message: Option<String>,
-
-    /// Filter by due date.
-    #[arg(long, short)]
-    pub due: Option<String>,
-
-    /// Filter by max due date.
-    #[arg(long)]
-    pub due_before: Option<String>,
-
-    /// Filter by min due date.
-    #[arg(long)]
-    pub due_after: Option<String>,
-
-    /// Filter by end date.
-    #[arg(long, short)]
-    pub end: Option<String>,
-
-    /// Filter by max end date.
-    #[arg(long)]
-    pub end_before: Option<String>,
-
-    /// Filter by min end date.
-    #[arg(long)]
-    pub end_after: Option<String>,
-
-    /// Filter by one status values.
-    #[arg(long, short)]
-    pub status: Vec<String>,
-
-    /// Filter out issue status.
-    #[arg(long)]
-    pub nostatus: Vec<String>,
-
-    /// Filter by tag.
-    #[arg(long, short)]
-    pub tag: Vec<String>,
-
-    /// Filter out tag.
-    #[arg(long, short)]
-    pub notag: Vec<String>,
 }
 
 #[derive(Parser, Default)]
@@ -194,51 +143,4 @@ pub struct MergeArgs {
 
     /// Merge output.
     pub output: String,
-}
-
-impl FilterArgs {
-    /// Iterate over IDs list provided with filter and resolve shortcuts using
-    /// 'active' index.
-    ///
-    /// If entry ID is porvided as shortcut, but it goes outside of index range,
-    /// it gets removed from the vec.
-    ///
-    /// Return `false` if all shorthands were outside of index range.
-    pub fn resolve_shorthands(&mut self, index: &Index) -> bool {
-        if self.id.is_empty() {
-            return true;
-        }
-
-        let mut unresolved = false;
-
-        self.id.retain_mut(|id| {
-            let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
-                unresolved = true;
-                return true;
-            });
-            if shorthand > 999999 {
-                unresolved = true;
-                return true;
-            }
-            let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
-                return false;
-            });
-            let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
-                return false;
-            });
-            *id = resolved.to_string();
-
-            true
-        });
-
-        if self.id.is_empty() {
-            return false;
-        }
-
-        if unresolved {
-            self.all = true;
-        }
-
-        true
-    }
 }

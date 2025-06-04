@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use time::UtcDateTime;
 use uuid::Uuid;
 
-use crate::args::{EntryArgs, FilterArgs};
+use crate::args::EntryArgs;
 use crate::config::Config;
 use crate::{App, prelude::*};
 
@@ -114,25 +114,6 @@ impl Issue {
     /// Update status timestamp to the current time.
     pub fn update_end_ts(&mut self) {
         self.end = Some(UtcDateTime::now().unix_timestamp());
-    }
-
-    /// Compare issue properties to provided filter.
-    pub fn match_filter(&self, filter: &FilterArgs) -> bool {
-        if !filter.id.is_empty() && !filter.id.iter().any(|id| self.id.starts_with(id)) {
-            return false;
-        }
-
-        if !filter.status.is_empty() && !filter.status.contains(&self.status) {
-            return false;
-        }
-
-        for tag in &filter.tag {
-            if !self.tags.contains(tag) {
-                return false;
-            }
-        }
-
-        true
     }
 
     /// Provide cloned entry with shorthand.

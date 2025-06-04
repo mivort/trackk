@@ -68,24 +68,12 @@ fn main() -> Result<()> {
 
     app.filter = filter::parse_filter_args(&args, &app)?;
 
-    let mut filter = args.filter_args;
-
     match args.command {
         Some(Command::List) => {
-            let index = app.index()?;
-            if !filter.resolve_shorthands(index) {
-                println!("No results.");
-                return Ok(());
-            }
-            display::show_entries(&storage::fetch_entries(&filter, &app)?);
+            display::show_entries(&storage::fetch_entries(&args.filter_args, &app)?);
         }
         Some(Command::Edit) => {
-            let index = app.index()?;
-            if !filter.resolve_shorthands(index) {
-                println!("No entries to edit.");
-                return Ok(());
-            }
-            editor::edit_entries(&filter, &app)?;
+            editor::edit_entries(&app)?;
         }
         Some(Command::Add(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app);
@@ -106,12 +94,7 @@ fn main() -> Result<()> {
             storage::add_entry(issue, &app)?;
         }
         Some(Command::Modify(e)) => {
-            let index = app.index()?;
-            if !filter.resolve_shorthands(&index) {
-                println!("No entries to modify.");
-                return Ok(());
-            }
-            storage::modify_entries(&e, &filter, &app)?;
+            storage::modify_entries(&e, &app)?;
         }
         Some(Command::Done) => {
             let args = args::ModArgs {
@@ -120,7 +103,7 @@ fn main() -> Result<()> {
                     ..Default::default()
                 },
             };
-            storage::modify_entries(&args, &filter, &app)?;
+            storage::modify_entries(&args, &app)?;
         }
         Some(Command::Init) => {
             repo::init_repo(&app.config)?;

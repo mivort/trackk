@@ -30,11 +30,11 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entries(args: &ModArgs, filter: &FilterArgs, app: &App) -> Result<()> {
+pub fn modify_entries(args: &ModArgs, app: &App) -> Result<()> {
     let mut changes = 0;
 
     let mut index = app.index_owned()?;
-    let entries = fetch_entries(filter, app)?;
+    let entries = filter_all_entries(app)?;
 
     // TODO: ask if multiple entries are expected
     // TODO: use cache to reduce amount of re-parsing/writes?
@@ -95,7 +95,7 @@ pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+pub fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut output = Vec::new();
 
     let data = &app.config.data;
@@ -127,7 +127,7 @@ fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
 }
 
 /// Iterate over entries from the active index.
-fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+pub fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut cache = HashMap::<String, Rc<Bucket>>::new();
     let mut result = Vec::new();
     let index = app.index()?;
