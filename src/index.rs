@@ -60,4 +60,12 @@ impl Index {
     pub fn active(&self) -> &[String] {
         self.active.as_slice()
     }
+
+    /// Find shorthand for the provided ID.
+    pub fn find_id(&self, id: &str) -> Option<usize> {
+        self.active
+            .iter()
+            .position(|a| a.ends_with(id))
+            .map(|v| v + 1)
+    }
 }

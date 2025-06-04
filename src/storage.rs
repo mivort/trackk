@@ -106,6 +106,8 @@ pub fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
             .unwrap_or(false)
     });
 
+    let index = app.index()?;
+
     for entry in walkdir {
         let entry = entry?;
 
@@ -116,10 +118,15 @@ pub fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
         let bucket = Bucket::from_path(entry.path())?;
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
-        for issue in bucket.entries {
-            if app.filter.match_issue(&issue) {
-                output.push((issue, path.clone()));
+        for mut issue in bucket.entries {
+            if !app.filter.match_issue(&issue) {
+                continue;
             }
+
+            if app.config.values.active_status.contains(&issue.status) {
+                issue.short = index.find_id(&issue.id);
+            }
+            output.push((issue, path.clone()));
         }
     }
 
