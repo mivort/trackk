@@ -7,10 +7,10 @@ use crate::{App, prelude::*};
 #[derive(Default)]
 pub struct Filter {
     /// List of IDs to include in the result.
-    _ids: HashSet<String>,
+    ids: HashSet<String>,
 
     /// List of IDs to exclude from results.
-    _exclude_ids: HashSet<String>,
+    exclude_ids: HashSet<String>,
 
     /// Positive filtering rules.
     positive: Vec<Vec<FilterRule>>,
@@ -32,14 +32,16 @@ pub enum FilterRule {
 
 impl Filter {
     /// Parse single argument, return 'true' on success.
-    fn parse_positive_arg(&mut self, arg: &str, _app: &App) -> Result<()> {
+    fn parse_positive_arg(&mut self, arg: &str, app: &App) -> Result<()> {
         let mut entry = Vec::new();
         for part in arg.split(',') {
-            // TODO: match id
             if let Some(rule) = FilterRule::from_str(part) {
                 entry.push(rule);
             } else {
-                bail!("Unable to parse narrowing rule: {}", part);
+                let id = resolve_shorthand(part, app)?;
+                if !id.is_empty() {
+                    self.ids.insert(id);
+                }
             }
         }
         self.positive.push(entry);
@@ -48,12 +50,15 @@ impl Filter {
     }
 
     /// Parse single exclude filter argument.
-    fn parse_negative_arg(&mut self, arg: &str, _app: &App) -> Result<()> {
+    fn parse_negative_arg(&mut self, arg: &str, app: &App) -> Result<()> {
         for part in arg.split(',') {
             if let Some(rule) = FilterRule::from_str(part) {
                 self.exclude.push(rule);
             } else {
-                bail!("Unable to parse exclude rule: {}", part);
+                let id = resolve_shorthand(part, app)?;
+                if !id.is_empty() {
+                    self.exclude_ids.insert(id);
+                }
             }
         }
 
@@ -105,4 +110,24 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
     }
 
     Ok(filter)
+}
+
+/// Check if value is numeric, and try to match it to the index. If input is detected
+/// to be a shorthand, but doesn't match any index entry, return empty string.
+pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
+    let shorthand = unwrap_ok_or!(value.parse::<usize>(), _e, { return Ok(value.to_owned()) });
+
+    if shorthand > 999999 {
+        return Ok(value.to_owned());
+    }
+
+    let index = app.index()?;
+    let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
+        return Ok(String::new());
+    });
+    let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
+        return Ok(String::new());
+    });
+
+    Ok(resolved.to_owned())
 }
