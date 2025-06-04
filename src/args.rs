@@ -108,12 +108,12 @@ pub struct FilterArgs {
     pub end_after: Option<String>,
 
     /// Filter by one status values.
-    #[arg(long)]
-    pub has_status: Vec<String>,
+    #[arg(long, short)]
+    pub status: Vec<String>,
 
     /// Filter by tag.
-    #[arg(long)]
-    pub has_tag: Vec<String>,
+    #[arg(long, short)]
+    pub tag: Vec<String>,
 }
 
 #[derive(Parser, Default)]

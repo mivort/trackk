@@ -122,11 +122,11 @@ impl Issue {
             return false;
         }
 
-        if !filter.has_status.is_empty() && !filter.has_status.contains(&self.status) {
+        if !filter.status.is_empty() && !filter.status.contains(&self.status) {
             return false;
         }
 
-        for tag in &filter.has_tag {
+        for tag in &filter.tag {
             if !self.tags.contains(tag) {
                 return false;
             }
