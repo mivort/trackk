@@ -3,15 +3,24 @@ use crate::prelude::*;
 /// List of filter rules.
 #[derive(Default)]
 pub struct Filter {
-    _rules: Vec<FilterRule>,
+    /// List of IDs to include in the result.
+    _ids: Vec<String>,
+
+    /// Positive filtering rules.
+    _postivie: Vec<Vec<FilterRule>>,
+
+    /// Negative filtering rules.
+    _negative: Vec<FilterRule>,
 }
 
-/// Single filter narrowing rule.
+/// Single filtering rule.
 pub enum FilterRule {
     _Tag(String),
-    _NoTag(String),
     _DueBefore(i64),
     _DueAfter(i64),
+    _EndBefore(i64),
+    _EndAfter(i64),
+    _Repeat,
 }
 
 impl Filter {

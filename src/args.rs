@@ -79,6 +79,11 @@ impl Default for Command {
 
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
+    /// Exclude entries which match the provided rule.
+    #[arg(long, short = 'x')]
+    pub exclude: Vec<String>,
+
+    // TODO: deprecate separate filter flags in favor of rules
     /// Entry reference (UUID or shorthand).
     #[arg(skip)]
     pub id: Vec<String>,
