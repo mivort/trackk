@@ -7,7 +7,9 @@ use serde_derive::Deserialize;
 #[command(args_override_self = true, subcommand_precedence_over_arg = true)]
 pub struct Args {
     /// List of filter rules.
-    /// Supported rules: tag:, created:, modified:, due:, end:.
+    /// Supported rules:
+    /// @[tag], status:, created:, modified:, due:, end:.
+    /// Multiple conditions can be provided separated by comma (,) to use 'OR' matching.
     pub filter: Vec<String>,
 
     #[command(subcommand)]
@@ -43,6 +45,7 @@ pub enum Command {
     #[command(visible_aliases(["mod", "m"]))]
     Modify(ModArgs),
 
+    /// Mark specified tasks as done.
     #[command(visible_aliases(["complete"]))]
     Done,
 
