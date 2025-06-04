@@ -17,9 +17,10 @@ use prelude::*;
 
 fn main() -> Result<()> {
     let args = Args::parse();
-    let mut filter = args.filter_args;
 
-    let (_filter, _) = filter::parse_filter_args(&args.filter)?;
+    let (_filter, _) = filter::parse_filter_args(&args.filter, &args.filter_args.exclude)?;
+
+    let mut filter = args.filter_args;
 
     match args.command {
         Some(Command::List) => {
