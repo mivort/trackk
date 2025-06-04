@@ -23,7 +23,7 @@ pub fn add_entry(new_entry: Issue, config: &Config) -> Result<()> {
     }
 
     let mut index = Index::load(config)?;
-    index.update_status(&path, &new_entry);
+    index.update_status(config, &path, &new_entry);
     index.write()?;
 
     bucket.insert(new_entry);
@@ -51,7 +51,7 @@ pub fn modify_entries(
 
         if bucket_issue.status != issue.status {
             bucket_issue.update_end_ts();
-            index.update_status(path, issue);
+            index.update_status(config, path, issue);
         }
 
         write_bucket(&bucket, &**path)?;

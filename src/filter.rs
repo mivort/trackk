@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
-use crate::prelude::*;
+use crate::args::Args;
+use crate::{App, prelude::*};
 
 /// List of filter rules.
 #[derive(Default)]
@@ -31,7 +32,7 @@ pub enum FilterRule {
 
 impl Filter {
     /// Parse single argument, return 'true' on success.
-    fn parse_positive_arg(&mut self, arg: &str) -> Result<()> {
+    fn parse_positive_arg(&mut self, arg: &str, _app: &mut App) -> Result<()> {
         let mut entry = Vec::new();
         for part in arg.split(',') {
             // TODO: match id
@@ -47,7 +48,7 @@ impl Filter {
     }
 
     /// Parse single exclude filter argument.
-    fn parse_negative_arg(&mut self, arg: &str) -> Result<()> {
+    fn parse_negative_arg(&mut self, arg: &str, _app: &mut App) -> Result<()> {
         for part in arg.split(',') {
             if let Some(rule) = FilterRule::from_str(part) {
                 self.exclude.push(rule);
@@ -89,20 +90,19 @@ impl FilterRule {
 }
 
 /// Parse filter argument and return list of IDs (if there's any) and the filter.
-pub fn parse_filter_args(
-    positive: &[String],
-    negative: &[String],
-) -> Result<(Filter, Vec<String>)> {
+pub fn parse_filter_args(args: &Args, app: &mut App) -> Result<Filter> {
+    let (positive, negative) = (&args.filter, &args.filter_args.exclude);
+
     let mut filter = Filter::default();
     for arg in positive {
         // TODO: match aliases
 
-        filter.parse_positive_arg(arg)?;
+        filter.parse_positive_arg(arg, app)?;
     }
 
     for arg in negative {
-        filter.parse_negative_arg(arg)?;
+        filter.parse_negative_arg(arg, app)?;
     }
 
-    Ok((filter, Default::default()))
+    Ok(filter)
 }

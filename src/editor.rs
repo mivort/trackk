@@ -53,7 +53,7 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
 
         if prev_issue.status != issue.status {
             issue.apply_status(&prev_issue.status, issue.end.is_none(), config);
-            index.update_status(&path, &issue);
+            index.update_status(config, &path, &issue);
         }
 
         *prev_issue = issue;

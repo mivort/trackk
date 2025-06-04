@@ -10,15 +10,54 @@ mod prelude;
 mod repo;
 mod storage;
 
+use std::cell::OnceCell;
+use std::collections::HashMap;
+
 use args::{Args, Command};
 use clap::Parser;
 use config::Config;
 use prelude::*;
 
+pub struct App {
+    /// Application config.
+    config: config::Config,
+
+    /// Active entry index.
+    index: OnceCell<index::Index>,
+
+    /// Current global entry filter.
+    filter: filter::Filter,
+
+    /// Parsed entries cache.
+    _cache: HashMap<String, issue::Issue>,
+}
+
+impl App {
+    /// Load or access the active entry index.
+    pub fn index(&self) -> Result<&index::Index> {
+        // TODO: replace with 'get_or_try_init' once it gets stable
+        if let Some(index) = self.index.get() {
+            return Ok(index);
+        }
+
+        let index = index::Index::load(&self.config)?;
+
+        self.index.set(index).unwrap();
+        Ok(self.index.get().unwrap())
+    }
+}
+
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    let (_filter, _) = filter::parse_filter_args(&args.filter, &args.filter_args.exclude)?;
+    let mut app = App {
+        config: read_config(&args.data),
+        index: Default::default(),
+        filter: Default::default(),
+        _cache: Default::default(),
+    };
+
+    app.filter = filter::parse_filter_args(&args, &mut app)?;
 
     let mut filter = args.filter_args;
 
@@ -42,17 +81,16 @@ fn main() -> Result<()> {
             editor::edit_entries(&filter, &config)?;
         }
         Some(Command::Add(a)) => {
-            let config = read_config(&args.data);
-            let mut issue = issue::Issue::new(&a.entry, &config);
+            let mut issue = issue::Issue::new(&a.entry, &app);
 
             if !a.no_edit {
-                editor::edit_entry(&mut issue, &config)?;
+                editor::edit_entry(&mut issue, &app.config)?;
             }
             storage::add_entry(issue, &read_config(&args.data))?;
         }
         Some(Command::Log(a)) => {
             let config = read_config(&args.data);
-            let mut issue = issue::Issue::new(&a.entry, &config);
+            let mut issue = issue::Issue::new(&a.entry, &app);
             issue.status = config.defaults.status_complete.clone();
             issue.update_end_ts();
 

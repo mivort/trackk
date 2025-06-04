@@ -5,19 +5,17 @@ use crate::config::Config;
 use crate::issue::Issue;
 use crate::prelude::*;
 
-pub struct Index<'a> {
+#[derive(Debug)]
+pub struct Index {
     /// List of currently active entries.
     active: Vec<String>,
 
     /// Path to index.
     index_path: String,
-
-    /// Reference to current configuration.
-    config: &'a Config,
 }
 
-impl<'a> Index<'a> {
-    pub fn load(config: &'a Config) -> Result<Self> {
+impl Index {
+    pub fn load(config: &Config) -> Result<Self> {
         let index_path = format!("{}/active.json", config.data);
         let active: Vec<String> = match File::open(&index_path) {
             Ok(data) => {
@@ -27,21 +25,17 @@ impl<'a> Index<'a> {
             Err(_) => Default::default(),
         };
 
-        Ok(Self {
-            active,
-            index_path,
-            config,
-        })
+        Ok(Self { active, index_path })
     }
 
     /// Append entry to active/shorthand storage.
-    pub fn update_status(&mut self, path: &str, issue: &Issue) {
+    pub fn update_status(&mut self, config: &Config, path: &str, issue: &Issue) {
         let id = &issue.id;
         let status = &issue.status;
 
         let entry = format!("{path}/{id}");
 
-        if self.config.values.active_status.contains(status) {
+        if config.values.active_status.contains(status) {
             if self.active.contains(&entry) {
                 return;
             }
