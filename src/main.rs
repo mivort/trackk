@@ -112,7 +112,7 @@ fn main() -> Result<()> {
             repo::check_repo();
         }
         None => {
-            display::show_entries(&storage::fetch_entries(&Default::default(), &app)?);
+            display::show_entries(&storage::fetch_entries(&args.filter_args, &app)?);
         }
         _ => {}
     }

@@ -24,6 +24,7 @@ pub struct Filter {
 #[allow(unused)]
 pub enum FilterRule {
     Tag(String),
+    Status(String),
     DueBefore(i64),
     DueAfter(i64),
     EndBefore(i64),
@@ -105,15 +106,16 @@ impl FilterRule {
 
         let mut split = rule.splitn(2, ':');
         let (key, value) = (split.next(), split.next());
-        if let (Some(key), Some(_value)) = (key, value) {
+        if let (Some(key), Some(value)) = (key, value) {
             match key {
                 "due" | "d" => return None,
                 "end" | "e" => return None,
-                "due.before" | "d.before" => return Some(FilterRule::DueBefore(0)),
-                "due.after" | "d.after" => return Some(FilterRule::DueAfter(0)),
-                "end.before" | "e.before" => return Some(FilterRule::EndBefore(0)),
-                "end.after" | "e.after" => return Some(FilterRule::EndAfter(0)),
-                "repeat" | "r" => return Some(FilterRule::Repeat),
+                "due.before" | "d.before" => return Some(Self::DueBefore(0)),
+                "due.after" | "d.after" => return Some(Self::DueAfter(0)),
+                "end.before" | "e.before" => return Some(Self::EndBefore(0)),
+                "end.after" | "e.after" => return Some(Self::EndAfter(0)),
+                "status" | "s" => return Some(Self::Status(value.to_owned())),
+                "repeat" | "r" => return Some(Self::Repeat),
                 _ => {}
             }
         }
@@ -125,6 +127,7 @@ impl FilterRule {
     fn match_issue(&self, issue: &Issue) -> bool {
         match self {
             Self::Tag(tag) => issue.tags.contains(tag),
+            Self::Status(status) => issue.status == *status,
             _ => false,
         }
     }

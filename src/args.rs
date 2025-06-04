@@ -82,7 +82,7 @@ pub struct FilterArgs {
 
     // TODO: deprecate separate filter flags in favor of rules
     /// List both active and inactive entries.
-    #[arg(skip)]
+    #[arg(long, short)]
     pub all: bool,
 }
 
