@@ -33,7 +33,7 @@ pub struct App {
 }
 
 impl App {
-    /// Load or access the active entry index.
+    /// Load load and access the active entry index.
     pub fn index(&self) -> Result<&index::Index> {
         // TODO: replace with 'get_or_try_init' once it gets stable
         if let Some(index) = self.index.get() {
@@ -44,6 +44,15 @@ impl App {
 
         self.index.set(index).unwrap();
         Ok(self.index.get().unwrap())
+    }
+
+    /// If index is loaded, clone lazy-initialized value. Otherwise, procude a independent clone.
+    pub fn index_owned(&self) -> Result<index::Index> {
+        if let Some(index) = self.index.get() {
+            return Ok(index.clone());
+        }
+
+        index::Index::load(&self.config)
     }
 }
 
@@ -76,7 +85,7 @@ fn main() -> Result<()> {
                 println!("No entries to edit.");
                 return Ok(());
             }
-            editor::edit_entries(&filter, &app.config)?;
+            editor::edit_entries(&filter, &app)?;
         }
         Some(Command::Add(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app);
@@ -84,7 +93,7 @@ fn main() -> Result<()> {
             if !a.no_edit {
                 editor::edit_entry(&mut issue, &app.config)?;
             }
-            storage::add_entry(issue, &app.config)?;
+            storage::add_entry(issue, &app)?;
         }
         Some(Command::Log(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app);
@@ -94,10 +103,10 @@ fn main() -> Result<()> {
             if !a.no_edit {
                 editor::edit_entry(&mut issue, &app.config)?;
             }
-            storage::add_entry(issue, &app.config)?;
+            storage::add_entry(issue, &app)?;
         }
         Some(Command::Modify(e)) => {
-            let mut index = index::Index::load(&app.config)?;
+            let mut index = app.index_owned()?;
             if !filter.resolve_shorthands(&index) {
                 println!("No entries to modify.");
                 return Ok(());
@@ -111,7 +120,7 @@ fn main() -> Result<()> {
                     ..Default::default()
                 },
             };
-            let mut index = index::Index::load(&app.config)?;
+            let mut index = app.index_owned()?;
             storage::modify_entries(&args, &filter, &app.config, &mut index)?;
         }
         Some(Command::Init) => {

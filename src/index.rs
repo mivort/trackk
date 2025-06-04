@@ -5,7 +5,7 @@ use crate::config::Config;
 use crate::issue::Issue;
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Index {
     /// List of currently active entries.
     active: Vec<String>,

@@ -9,7 +9,7 @@ use crate::bucket::Bucket;
 use crate::config::Config;
 use crate::index::Index;
 use crate::issue::Issue;
-use crate::{prelude::*, storage};
+use crate::{App, prelude::*, storage};
 
 /// Run editor, apply changes and return the exit status.
 pub fn edit_entry(issue: &mut Issue, config: &Config) -> Result<ExitStatus> {
@@ -34,13 +34,13 @@ pub fn edit_entry(issue: &mut Issue, config: &Config) -> Result<ExitStatus> {
 }
 
 /// Iterate over matching entries and run editor for each.
-pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
-    let mut index = Index::load(config)?;
-    let entries = storage::fetch_entries(filter, config, &index)?;
+pub fn edit_entries(filter: &FilterArgs, app: &App) -> Result<()> {
+    let mut index = Index::load(&app.config)?;
+    let entries = storage::fetch_entries(filter, &app.config, &index)?;
 
     let mut changes = 0;
     for (mut issue, path) in entries {
-        if !edit_entry(&mut issue, config)?.success() {
+        if !edit_entry(&mut issue, &app.config)?.success() {
             break;
         }
 
@@ -52,8 +52,8 @@ pub fn edit_entries(filter: &FilterArgs, config: &Config) -> Result<()> {
         }
 
         if prev_issue.status != issue.status {
-            issue.apply_status(&prev_issue.status, issue.end.is_none(), config);
-            index.update_status(config, &path, &issue);
+            issue.apply_status(&prev_issue.status, issue.end.is_none(), &app.config);
+            index.update_status(&app.config, &path, &issue);
         }
 
         *prev_issue = issue;

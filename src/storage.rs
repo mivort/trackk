@@ -3,7 +3,7 @@ use crate::bucket::Bucket;
 use crate::config::Config;
 use crate::index::Index;
 use crate::issue::Issue;
-use crate::prelude::*;
+use crate::{App, prelude::*};
 
 use std::collections::HashMap;
 use std::fs;
@@ -13,17 +13,17 @@ use time::{Date, UtcDateTime};
 use walkdir::WalkDir;
 
 /// Access storage bucket if it exists and add new entry to it.
-pub fn add_entry(new_entry: Issue, config: &Config) -> Result<()> {
+pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
     let date = UtcDateTime::now().date();
 
-    let (mut bucket, path) = fetch_new_bucket(&date, config)?;
+    let (mut bucket, path) = fetch_new_bucket(&date, &app.config)?;
 
     if bucket.entries.iter().any(|e| e.id == new_entry.id) {
         bail!("collision has occured: task uuid exists");
     }
 
-    let mut index = Index::load(config)?;
-    index.update_status(config, &path, &new_entry);
+    let mut index = Index::load(&app.config)?;
+    index.update_status(&app.config, &path, &new_entry);
     index.write()?;
 
     bucket.insert(new_entry);
