@@ -65,10 +65,10 @@ pub fn modify_entries(args: &ModArgs, filter: &FilterArgs, app: &App) -> Result<
 /// Produce the list of entries to display or modify.
 pub fn fetch_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     if filter.all {
-        return filter_all_entries(filter, app);
+        return filter_all_entries(app);
     }
 
-    filter_active_entries(filter, app)
+    filter_active_entries(app)
 }
 
 /// Create or get the storage bucket using the current date.
@@ -95,7 +95,7 @@ pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_all_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut output = Vec::new();
 
     let data = &app.config.data;
@@ -117,7 +117,7 @@ fn filter_all_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<s
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
         for issue in bucket.entries {
-            if issue.match_filter(filter) {
+            if app.filter.match_issue(&issue) {
                 output.push((issue, path.clone()));
             }
         }
@@ -127,7 +127,7 @@ fn filter_all_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<s
 }
 
 /// Iterate over entries from the active index.
-fn filter_active_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut cache = HashMap::<String, Rc<Bucket>>::new();
     let mut result = Vec::new();
     let index = app.index()?;
@@ -147,7 +147,7 @@ fn filter_active_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, R
 
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
-            if issue.match_filter(filter) {
+            if app.filter.match_issue(&issue) {
                 result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
             }
         }

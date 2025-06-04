@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 
 use crate::args::Args;
+use crate::issue::Issue;
 use crate::{App, prelude::*};
 
 /// List of filter rules.
@@ -31,6 +32,33 @@ pub enum FilterRule {
 }
 
 impl Filter {
+    /// Compare issue properties to the filter.
+    pub fn match_issue(&self, issue: &Issue) -> bool {
+        if !self.ids.is_empty() && !self.ids.contains(&issue.id) {
+            return false;
+        }
+
+        if !self.exclude_ids.is_empty() && self.exclude_ids.contains(&issue.id) {
+            return false;
+        }
+
+        for group in &self.positive {
+            for rule in group {
+                if !rule.match_issue(issue) {
+                    return false;
+                }
+            }
+        }
+
+        for rule in &self.exclude {
+            if rule.match_issue(issue) {
+                return false;
+            }
+        }
+
+        true
+    }
+
     /// Parse single argument, return 'true' on success.
     fn parse_positive_arg(&mut self, arg: &str, app: &App) -> Result<()> {
         let mut entry = Vec::new();
@@ -91,6 +119,14 @@ impl FilterRule {
         }
 
         None
+    }
+
+    /// Check current enum value and match the issue.
+    fn match_issue(&self, issue: &Issue) -> bool {
+        match self {
+            Self::Tag(tag) => issue.tags.contains(tag),
+            _ => false,
+        }
     }
 }
 
