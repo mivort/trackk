@@ -39,7 +39,7 @@ pub fn modify_entries(
 ) -> Result<()> {
     let mut changes = 0;
 
-    let entries = fetch_entries(&filter, config, index)?;
+    let entries = fetch_entries(filter, config, index)?;
 
     // TODO: ask if multiple entries are expected
     // TODO: use cache to reduce amount of re-parsing/writes?

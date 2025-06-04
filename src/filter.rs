@@ -19,14 +19,14 @@ pub struct Filter {
 }
 
 /// Single filtering rule.
+#[allow(unused)]
 pub enum FilterRule {
-    #[allow(unused)]
     Tag(String),
-    _DueBefore(i64),
-    _DueAfter(i64),
-    _EndBefore(i64),
-    _EndAfter(i64),
-    _Repeat,
+    DueBefore(i64),
+    DueAfter(i64),
+    EndBefore(i64),
+    EndAfter(i64),
+    Repeat,
 }
 
 impl Filter {
@@ -38,7 +38,7 @@ impl Filter {
             if let Some(rule) = FilterRule::from_str(part) {
                 entry.push(rule);
             } else {
-                bail!("Unable to parse narrowing rule: {}", arg);
+                bail!("Unable to parse narrowing rule: {}", part);
             }
         }
         self.positive.push(entry);
@@ -52,7 +52,7 @@ impl Filter {
             if let Some(rule) = FilterRule::from_str(part) {
                 self.exclude.push(rule);
             } else {
-                bail!("Unable to parse exclude rule: {}", arg);
+                bail!("Unable to parse exclude rule: {}", part);
             }
         }
 
@@ -67,6 +67,21 @@ impl FilterRule {
 
         if rule.starts_with('@') {
             return Some(FilterRule::Tag(rule[1..rule.len()].to_owned()));
+        }
+
+        let mut split = rule.splitn(2, ':');
+        let (key, value) = (split.next(), split.next());
+        if let (Some(key), Some(_value)) = (key, value) {
+            match key {
+                "due" | "d" => return None,
+                "end" | "e" => return None,
+                "due.before" | "d.before" => return Some(FilterRule::DueBefore(0)),
+                "due.after" | "d.after" => return Some(FilterRule::DueAfter(0)),
+                "end.before" | "e.before" => return Some(FilterRule::EndBefore(0)),
+                "end.after" | "e.after" => return Some(FilterRule::EndAfter(0)),
+                "repeat" | "r" => return Some(FilterRule::Repeat),
+                _ => {}
+            }
         }
 
         None
