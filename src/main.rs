@@ -91,7 +91,7 @@ fn main() -> Result<()> {
             let mut issue = issue::Issue::new(&a.entry, &app);
 
             if !a.no_edit {
-                editor::edit_entry(&mut issue, &app.config)?;
+                editor::edit_entry(&mut issue, &app)?;
             }
             storage::add_entry(issue, &app)?;
         }
@@ -101,17 +101,17 @@ fn main() -> Result<()> {
             issue.update_end_ts();
 
             if !a.no_edit {
-                editor::edit_entry(&mut issue, &app.config)?;
+                editor::edit_entry(&mut issue, &app)?;
             }
             storage::add_entry(issue, &app)?;
         }
         Some(Command::Modify(e)) => {
-            let mut index = app.index_owned()?;
+            let index = app.index()?;
             if !filter.resolve_shorthands(&index) {
                 println!("No entries to modify.");
                 return Ok(());
             }
-            storage::modify_entries(&e, &filter, &app.config, &mut index)?;
+            storage::modify_entries(&e, &filter, &app)?;
         }
         Some(Command::Done) => {
             let args = args::ModArgs {
@@ -120,8 +120,7 @@ fn main() -> Result<()> {
                     ..Default::default()
                 },
             };
-            let mut index = app.index_owned()?;
-            storage::modify_entries(&args, &filter, &app.config, &mut index)?;
+            storage::modify_entries(&args, &filter, &app)?;
         }
         Some(Command::Init) => {
             repo::init_repo(&app.config)?;

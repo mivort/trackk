@@ -22,7 +22,7 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
         bail!("collision has occured: task uuid exists");
     }
 
-    let mut index = Index::load(&app.config)?;
+    let mut index = app.index_owned()?;
     index.update_status(&app.config, &path, &new_entry);
     index.write()?;
 
@@ -31,15 +31,11 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entries(
-    args: &ModArgs,
-    filter: &FilterArgs,
-    config: &Config,
-    index: &mut Index,
-) -> Result<()> {
+pub fn modify_entries(args: &ModArgs, filter: &FilterArgs, app: &App) -> Result<()> {
     let mut changes = 0;
 
-    let entries = fetch_entries(filter, config, index)?;
+    let mut index = app.index_owned()?;
+    let entries = fetch_entries(filter, &app.config, &index)?;
 
     // TODO: ask if multiple entries are expected
     // TODO: use cache to reduce amount of re-parsing/writes?
@@ -47,11 +43,11 @@ pub fn modify_entries(
     for (issue, path) in &entries {
         let mut bucket = Bucket::from_path(&**path)?;
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
-        bucket_issue.apply_args(&args.entry, config);
+        bucket_issue.apply_args(&args.entry, &app.config);
 
         if bucket_issue.status != issue.status {
             bucket_issue.update_end_ts();
-            index.update_status(config, path, issue);
+            index.update_status(&app.config, path, issue);
         }
 
         write_bucket(&bucket, &**path)?;

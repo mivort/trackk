@@ -6,17 +6,15 @@ use regex::RegexBuilder;
 
 use crate::args::FilterArgs;
 use crate::bucket::Bucket;
-use crate::config::Config;
-use crate::index::Index;
 use crate::issue::Issue;
 use crate::{App, prelude::*, storage};
 
 /// Run editor, apply changes and return the exit status.
-pub fn edit_entry(issue: &mut Issue, config: &Config) -> Result<ExitStatus> {
+pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
     let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
     format_markdown(issue, tempfile.as_file_mut())?;
 
-    let status = Command::new(&config.editor)
+    let status = Command::new(&app.config.editor)
         .arg(tempfile.path())
         .spawn()?
         .wait()?;
@@ -35,12 +33,12 @@ pub fn edit_entry(issue: &mut Issue, config: &Config) -> Result<ExitStatus> {
 
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(filter: &FilterArgs, app: &App) -> Result<()> {
-    let mut index = Index::load(&app.config)?;
+    let mut index = app.index_owned()?;
     let entries = storage::fetch_entries(filter, &app.config, &index)?;
 
     let mut changes = 0;
     for (mut issue, path) in entries {
-        if !edit_entry(&mut issue, &app.config)?.success() {
+        if !edit_entry(&mut issue, &app)?.success() {
             break;
         }
 
