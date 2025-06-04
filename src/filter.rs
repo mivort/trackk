@@ -170,3 +170,34 @@ pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
 
     Ok(resolved.to_owned())
 }
+
+#[test]
+fn match_issue() {
+    let mut tags = HashSet::<String>::default();
+    tags.extend(["a", "b", "c"].map(Into::into).into_iter());
+
+    let issue = Issue {
+        tags,
+        ..Default::default()
+    };
+
+    let filter = Filter {
+        positive: vec![vec![FilterRule::Tag("a".into())]],
+        ..Default::default()
+    };
+    assert_eq!(
+        filter.match_issue(&issue),
+        true,
+        "when filter has right tag, match the issue"
+    );
+
+    let filter = Filter {
+        positive: vec![vec![FilterRule::Tag("d".into())]],
+        ..Default::default()
+    };
+    assert_eq!(
+        filter.match_issue(&issue),
+        false,
+        "when filter doesn't have the right tag, don't match the issue"
+    );
+}

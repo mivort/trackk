@@ -149,28 +149,3 @@ impl Issue {
         false
     }
 }
-
-#[test]
-fn issue_matching() {
-    let issue = Issue {
-        status: "test".into(),
-        ..Default::default()
-    };
-
-    let filter = FilterArgs {
-        has_status: vec!["test".into()],
-        ..Default::default()
-    };
-
-    assert!(issue.match_filter(&filter), "matches test status");
-
-    let filter = FilterArgs {
-        has_status: vec!["test1".into()],
-        ..Default::default()
-    };
-
-    assert!(
-        !issue.match_filter(&filter),
-        "doesn't match non-existing status"
-    );
-}
