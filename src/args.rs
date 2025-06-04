@@ -84,12 +84,16 @@ pub struct FilterArgs {
     pub id: Vec<String>,
 
     /// List both active and inactive entries.
-    #[arg(long, short)]
+    #[arg(skip)]
     pub all: bool,
 
     /// Filter by entry title content.
-    #[arg(long)]
-    pub contains: Option<String>,
+    #[arg(long, short)]
+    pub message: Option<String>,
+
+    /// Filter by due date.
+    #[arg(long, short)]
+    pub due: Option<String>,
 
     /// Filter by max due date.
     #[arg(long)]
@@ -98,6 +102,10 @@ pub struct FilterArgs {
     /// Filter by min due date.
     #[arg(long)]
     pub due_after: Option<String>,
+
+    /// Filter by end date.
+    #[arg(long, short)]
+    pub end: Option<String>,
 
     /// Filter by max end date.
     #[arg(long)]
@@ -111,9 +119,17 @@ pub struct FilterArgs {
     #[arg(long, short)]
     pub status: Vec<String>,
 
+    /// Filter out issue status.
+    #[arg(long)]
+    pub nostatus: Vec<String>,
+
     /// Filter by tag.
     #[arg(long, short)]
     pub tag: Vec<String>,
+
+    /// Filter out tag.
+    #[arg(long, short)]
+    pub notag: Vec<String>,
 }
 
 #[derive(Parser, Default)]
