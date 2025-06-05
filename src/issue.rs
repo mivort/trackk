@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::args::EntryArgs;
 use crate::config::Config;
+use crate::dateexp::parse_date;
 use crate::{App, prelude::*};
 
 /// Base entry storage with ID, title text and date properties.
@@ -52,24 +53,24 @@ pub struct Issue {
 
 impl Issue {
     /// Create new entry using provided arguments.
-    pub fn new(entry: &EntryArgs, app: &App) -> Self {
+    pub fn new(entry: &EntryArgs, app: &App) -> Result<Self> {
         let new_uuid = Uuid::new_v4().to_string();
 
         let ts = UtcDateTime::now().unix_timestamp();
 
-        Self {
+        let mut new = Self {
             id: new_uuid,
-            title: entry.title.clone().unwrap_or_default(),
-            status: unwrap_some_or!(&entry.status, { &app.config.defaults.status_initial }).clone(),
             created: ts,
-            modified: ts,
             ..Default::default()
-        }
+        };
+
+        new.apply_args(entry, &app.config)?;
+        Ok(new)
     }
 
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
-    pub fn apply_args(&mut self, args: &EntryArgs, config: &Config) {
+    pub fn apply_args(&mut self, args: &EntryArgs, config: &Config) -> Result<()> {
         if let Some(title) = &args.title {
             self.title = title.clone();
         }
@@ -77,11 +78,11 @@ impl Issue {
             self.status = status.clone();
             self.update_status(args.end.is_none(), config);
         }
-        if let Some(_due) = &args.due {
-            // TODO: parse and apply due date
+        if let Some(due) = &args.due {
+            self.due = Some(parse_date(&due)?);
         }
-        if let Some(_end) = &args.end {
-            // TODO: parse and apply end date
+        if let Some(end) = &args.end {
+            self.end = Some(parse_date(&end)?);
         }
         if let Some(repeat) = &args.repeat {
             self.repeat = if repeat.is_empty() {
@@ -92,6 +93,7 @@ impl Issue {
         }
 
         self.update_ts();
+        Ok(())
     }
 
     /// Update entry status (and end timestamp in case if 'set_end' is true and

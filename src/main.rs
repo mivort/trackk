@@ -78,7 +78,7 @@ fn main() -> Result<()> {
             editor::edit_entries(&app)?;
         }
         Some(Command::Add(a)) => {
-            let mut issue = issue::Issue::new(&a.entry, &app);
+            let mut issue = issue::Issue::new(&a.entry, &app)?;
 
             if !a.no_edit {
                 editor::edit_entry(&mut issue, &app)?;
@@ -86,7 +86,7 @@ fn main() -> Result<()> {
             storage::add_entry(issue, &app)?;
         }
         Some(Command::Log(a)) => {
-            let mut issue = issue::Issue::new(&a.entry, &app);
+            let mut issue = issue::Issue::new(&a.entry, &app)?;
             issue.status = app.config.defaults.status_complete.clone();
             issue.update_end_ts();
 
