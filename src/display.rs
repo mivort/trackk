@@ -11,8 +11,8 @@ pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
         let title = issue.title.lines().next().unwrap_or_default();
         let status = &issue.status[0..1];
         println!(
-            " {short}. [{status}] {id}: {tags}{tags_space}{title}",
-            id = issue.id,
+            " {short}. [{status}] {id}: {title}{tags_space}{tags}",
+            id = &issue.id.as_str()[0..8],
             short = issue.short.unwrap_or(0),
             tags_space = if tags.is_empty() { "" } else { " " }
         );

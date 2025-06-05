@@ -83,14 +83,15 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
 
     file.write_fmt(format_args!(
         concat!(
-            "# {title}\n\n----\n\n",
+            "# {title}\n\n",
+            "--------------------------------------------------------------------------------\n",
             "* Status: {status}\n",
             "* Tags:   {tags}\n",
             "* Due:    {due}\n",
             "* End:    {end}\n",
             "* Repeat: {repeat}\n",
-            "\n",
-            "----\n\n",
+            "--------------------------------------------------------------------------------\n",
+            "- ID:       {id}\n",
             "- Created:  {created}\n",
             "- Modified: {modified}\n",
         ),
@@ -102,6 +103,7 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         repeat = unwrap_some_or!(&issue.repeat, { "" }),
         created = issue.created,
         modified = issue.modified,
+        id = issue.id,
     ))?;
 
     Ok(())

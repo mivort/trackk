@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::args::Args;
 use crate::issue::Issue;
 use crate::{App, prelude::*};
@@ -8,10 +6,10 @@ use crate::{App, prelude::*};
 #[derive(Default)]
 pub struct Filter {
     /// List of IDs to include in the result.
-    pub ids: HashSet<String>,
+    pub ids: Vec<String>,
 
     /// List of IDs to exclude from results.
-    exclude_ids: HashSet<String>,
+    exclude_ids: Vec<String>,
 
     /// Positive filtering rules.
     positive: Vec<Vec<FilterRule>>,
@@ -35,11 +33,13 @@ pub enum FilterRule {
 impl Filter {
     /// Compare issue properties to the filter.
     pub fn match_issue(&self, issue: &Issue) -> bool {
-        if !self.ids.is_empty() && !self.ids.contains(&issue.id) {
+        if !self.ids.is_empty() && !self.ids.iter().any(|id| issue.id.starts_with(id)) {
             return false;
         }
 
-        if !self.exclude_ids.is_empty() && self.exclude_ids.contains(&issue.id) {
+        if !self.exclude_ids.is_empty()
+            && self.exclude_ids.iter().any(|id| issue.id.starts_with(id))
+        {
             return false;
         }
 
@@ -69,7 +69,7 @@ impl Filter {
             } else {
                 let id = resolve_shorthand(part, app)?;
                 if !id.is_empty() {
-                    self.ids.insert(id);
+                    self.ids.push(id);
                 }
             }
         }
@@ -86,7 +86,7 @@ impl Filter {
             } else {
                 let id = resolve_shorthand(part, app)?;
                 if !id.is_empty() {
-                    self.exclude_ids.insert(id);
+                    self.exclude_ids.push(id);
                 }
             }
         }
