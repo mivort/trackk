@@ -10,8 +10,9 @@ mod prelude;
 mod repo;
 mod storage;
 
-use std::cell::OnceCell;
+use std::cell::{OnceCell, RefCell};
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use args::{Args, Command};
 use clap::Parser;
@@ -29,7 +30,7 @@ pub struct App {
     filter: filter::Filter,
 
     /// Parsed entries cache.
-    _cache: HashMap<String, issue::Issue>,
+    cache: RefCell<HashMap<String, Rc<bucket::Bucket>>>,
 }
 
 impl App {
@@ -63,7 +64,7 @@ fn main() -> Result<()> {
         config: read_config(&args.data),
         index: Default::default(),
         filter: Default::default(),
-        _cache: Default::default(),
+        cache: Default::default(),
     };
 
     app.filter = filter::parse_filter_args(&args, &app)?;

@@ -1,6 +1,8 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, ErrorKind};
 use std::path::Path;
+use std::rc::Rc;
 
 use serde_derive::{Deserialize, Serialize};
 
@@ -32,6 +34,19 @@ impl Bucket {
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self> {
         let file = File::open(&path)?;
         Self::from_file(&file, path)
+    }
+
+    /// Check cache and read from file system if not yet cached.
+    pub fn from_cache(path: &str, cache: &mut HashMap<String, Rc<Self>>) -> Result<Rc<Self>> {
+        let bucket = unwrap_some_or!(cache.get(path), {
+            &(|| -> Result<_> {
+                let bucket = Rc::new(Bucket::from_path(path)?);
+                cache.insert(path.to_owned(), bucket.clone());
+                Ok(bucket)
+            })()?
+        });
+
+        Ok(bucket.clone())
     }
 
     /// Open file from the provided path and parse as bucket. If file doesn't

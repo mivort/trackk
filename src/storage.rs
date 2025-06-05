@@ -4,7 +4,6 @@ use crate::config::Config;
 use crate::issue::Issue;
 use crate::{App, prelude::*};
 
-use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::rc::Rc;
@@ -135,7 +134,8 @@ pub fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
 
 /// Iterate over entries from the active index.
 pub fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
-    let mut cache = HashMap::<String, Rc<Bucket>>::new();
+    let cache = &mut *app.cache.borrow_mut();
+
     let mut result = Vec::new();
     let index = app.index()?;
 
@@ -144,14 +144,7 @@ pub fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
             bail!("Active index entry has missing path");
         });
 
-        let bucket = unwrap_some_or!(cache.get(bucket_path), {
-            &(|| -> Result<_> {
-                let bucket = Rc::new(Bucket::from_path(bucket_path)?);
-                cache.insert(bucket_path.to_owned(), bucket.clone());
-                Ok(bucket)
-            })()?
-        });
-
+        let bucket = Bucket::from_cache(bucket_path, cache)?;
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
             if app.filter.match_issue(&issue) {
