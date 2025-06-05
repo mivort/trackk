@@ -1,3 +1,5 @@
+use regex::Regex;
+
 use crate::args::Args;
 use crate::issue::Issue;
 use crate::{App, prelude::*};
@@ -27,6 +29,8 @@ pub enum FilterRule {
     DueAfter(i64),
     EndBefore(i64),
     EndAfter(i64),
+    Title(String),
+    TitleRegex(Regex),
     Repeat,
 }
 
@@ -64,7 +68,7 @@ impl Filter {
     fn parse_positive_arg(&mut self, arg: &str, app: &App) -> Result<()> {
         let mut entry = Vec::new();
         for part in arg.split(',') {
-            if let Some(rule) = FilterRule::from_str(part) {
+            if let Some(rule) = FilterRule::from_str(part)? {
                 entry.push(rule);
             } else {
                 let id = resolve_shorthand(part, app)?;
@@ -81,7 +85,7 @@ impl Filter {
     /// Parse single exclude filter argument.
     fn parse_negative_arg(&mut self, arg: &str, app: &App) -> Result<()> {
         for part in arg.split(',') {
-            if let Some(rule) = FilterRule::from_str(part) {
+            if let Some(rule) = FilterRule::from_str(part)? {
                 self.exclude.push(rule);
             } else {
                 let id = resolve_shorthand(part, app)?;
@@ -97,30 +101,36 @@ impl Filter {
 
 impl FilterRule {
     /// Parse rule string and produce rule enum value.
-    fn from_str(rule: &str) -> Option<Self> {
+    fn from_str(rule: &str) -> Result<Option<Self>> {
         let rule = rule.trim();
 
         if rule.starts_with('@') {
-            return Some(FilterRule::Tag(rule[1..rule.len()].to_owned()));
+            return Ok(Some(FilterRule::Tag(rule[1..rule.len()].to_owned())));
         }
 
         let mut split = rule.splitn(2, ':');
         let (key, value) = (split.next(), split.next());
         if let (Some(key), Some(value)) = (key, value) {
             match key {
-                "due" | "d" => return None,
-                "end" | "e" => return None,
-                "due.before" | "d.before" => return Some(Self::DueBefore(0)),
-                "due.after" | "d.after" => return Some(Self::DueAfter(0)),
-                "end.before" | "e.before" => return Some(Self::EndBefore(0)),
-                "end.after" | "e.after" => return Some(Self::EndAfter(0)),
-                "status" | "s" => return Some(Self::Status(value.to_owned())),
-                "repeat" | "r" => return Some(Self::Repeat),
+                "due" | "d" => return Ok(None),
+                "end" | "e" => return Ok(None),
+                "due.before" | "d.before" => return Ok(Some(Self::DueBefore(0))),
+                "due.after" | "d.after" => return Ok(Some(Self::DueAfter(0))),
+                "end.before" | "e.before" => return Ok(Some(Self::EndBefore(0))),
+                "end.after" | "e.after" => return Ok(Some(Self::EndAfter(0))),
+                "title" | "t" => return Ok(Some(Self::Title(value.to_owned()))),
+                "title.regex" | "title.re" | "t.regex" | "t.re" => {
+                    return Ok(Some(Self::TitleRegex(
+                        Regex::new(value).context("Unable to parse the filter regex")?,
+                    )));
+                }
+                "status" | "s" => return Ok(Some(Self::Status(value.to_owned()))),
+                "repeat" | "r" => return Ok(Some(Self::Repeat)),
                 _ => {}
             }
         }
 
-        None
+        Ok(None)
     }
 
     /// Check current enum value and match the issue.
@@ -128,6 +138,8 @@ impl FilterRule {
         match self {
             Self::Tag(tag) => issue.tags.contains(tag),
             Self::Status(status) => issue.status == *status,
+            Self::Title(title) => issue.title.contains(title),
+            Self::TitleRegex(regex) => regex.is_match(&issue.title),
             _ => false,
         }
     }
