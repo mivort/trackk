@@ -1,4 +1,4 @@
-use nom::bytes::complete::tag;
+use nom::character::complete::char;
 use nom::character::complete::digit1;
 use nom::combinator::{map_res, opt, recognize};
 use nom::{IResult, Parser};
@@ -20,5 +20,5 @@ fn parse_number(input: &str) -> IResult<&str, f64> {
 
 /// Recognize float point number pattern.
 fn recognize_float(input: &str) -> IResult<&str, &str> {
-    recognize((digit1, opt((tag("."), digit1)))).parse(input)
+    recognize((digit1, opt((char('.'), digit1)))).parse(input)
 }
