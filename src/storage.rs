@@ -147,7 +147,7 @@ pub fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
         let bucket = Bucket::from_cache(bucket_path, cache)?;
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
-            if app.filter.match_issue(&issue) {
+            if app.filter.match_issue(issue) {
                 result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
             }
         }

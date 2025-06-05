@@ -37,7 +37,7 @@ pub fn edit_entries(app: &App) -> Result<()> {
 
     let mut changes = 0;
     for (mut issue, path) in entries {
-        if !edit_entry(&mut issue, &app)?.success() {
+        if !edit_entry(&mut issue, app)?.success() {
             break;
         }
 
