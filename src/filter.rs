@@ -1,6 +1,7 @@
 use regex::Regex;
 
 use crate::args::Args;
+use crate::dateexp::parse_date;
 use crate::issue::Issue;
 use crate::{App, prelude::*};
 
@@ -114,10 +115,12 @@ impl FilterRule {
             match key {
                 "due" | "d" => return Ok(None),
                 "end" | "e" => return Ok(None),
-                "due.before" | "d.before" => return Ok(Some(Self::DueBefore(0))),
-                "due.after" | "d.after" => return Ok(Some(Self::DueAfter(0))),
-                "end.before" | "e.before" => return Ok(Some(Self::EndBefore(0))),
-                "end.after" | "e.after" => return Ok(Some(Self::EndAfter(0))),
+                "due.before" | "d.before" => {
+                    return Ok(Some(Self::DueBefore(parse_date(value)?)));
+                }
+                "due.after" | "d.after" => return Ok(Some(Self::DueAfter(parse_date(value)?))),
+                "end.before" | "e.before" => return Ok(Some(Self::EndBefore(parse_date(value)?))),
+                "end.after" | "e.after" => return Ok(Some(Self::EndAfter(parse_date(value)?))),
                 "title" | "t" => return Ok(Some(Self::Title(value.to_owned()))),
                 "title.regex" | "title.re" | "t.regex" | "t.re" => {
                     return Ok(Some(Self::TitleRegex(

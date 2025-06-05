@@ -1,6 +1,7 @@
 mod args;
 mod bucket;
 mod config;
+mod dateexp;
 mod display;
 mod editor;
 mod filter;
