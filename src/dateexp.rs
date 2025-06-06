@@ -8,15 +8,40 @@ use nom::{IResult, Parser};
 use crate::prelude::*;
 
 /// Parse date expression and produce the timestamp.
+/// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
 pub fn parse_date(input: &str) -> Result<i64> {
+    use Token::*;
+
     let mut output = Vec::<Token>::new();
-    let _op_stack = Vec::<Token>::new();
+    let mut op_stack = Vec::<Token>::new();
 
     for tok in iterator(input, alt((parse_number, parse_op))) {
         match tok {
-            Token::Duration(_) | Token::_Date(_) => output.push(tok),
-            _ => {}
+            Duration(_) | _Date(_) => output.push(tok),
+            Add | Sub | Mul | Div => {
+                while let Some(top) = op_stack.pop_if(|top| {
+                    if let LParen = top {
+                        return false;
+                    }
+                    let (top_prec, _) = top.prec_and_assoc();
+                    let (prec, left_assoc) = top.prec_and_assoc();
+
+                    (top_prec > prec) || (top_prec == prec && left_assoc)
+                }) {
+                    output.push(top)
+                }
+                op_stack.push(tok);
+            }
+            LParen => op_stack.push(tok),
+            RParen => {
+                if !tilt(&mut op_stack, &mut output) {
+                    bail!("Mismatched closing bracket");
+                }
+            }
         }
+    }
+    if tilt(&mut op_stack, &mut output) {
+        bail!("Mismatched opening bracket");
     }
 
     let out = output.iter().cloned().reduce(|v, s| {
@@ -32,6 +57,18 @@ pub fn parse_date(input: &str) -> Result<i64> {
         return Ok(out as i64);
     }
     bail!("Not a number");
+}
+
+/// Move elements from op stack to output until left parenthesis is found.
+/// Return true if there's some leftover.
+fn tilt(stack: &mut Vec<Token>, output: &mut Vec<Token>) -> bool {
+    while let Some(top) = stack.pop() {
+        if let Token::LParen = top {
+            return true;
+        }
+        output.push(top);
+    }
+    false
 }
 
 /// Convert float point string into token.
@@ -54,6 +91,8 @@ fn parse_op(input: &str) -> IResult<&str, Token> {
         '-' => Ok(Token::Sub),
         '*' => Ok(Token::Mul),
         '/' => Ok(Token::Div),
+        '(' => Ok(Token::LParen),
+        ')' => Ok(Token::RParen),
         _ => bail!("Unknown character: {}", c),
     })
     .parse(input)
@@ -82,7 +121,7 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
 }
 
 /// Parsed token types.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 enum Token {
     Duration(f64),
     _Date(i64),
@@ -90,4 +129,19 @@ enum Token {
     Sub,
     Mul,
     Div,
+    LParen,
+    RParen,
+}
+
+impl Token {
+    /// Check token precedence and if it's left associative.
+    fn prec_and_assoc(&self) -> (u8, bool) {
+        match self {
+            Token::Add => (1, true),
+            Token::Sub => (1, true),
+            Token::Mul => (2, true),
+            Token::Div => (2, true),
+            _ => panic!("Token {:?} is not operator", self),
+        }
+    }
 }

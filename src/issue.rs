@@ -79,10 +79,10 @@ impl Issue {
             self.update_status(args.end.is_none(), config);
         }
         if let Some(due) = &args.due {
-            self.due = Some(parse_date(due)?);
+            self.due = Some(parse_date(due).context("Unable to parse the due date")?);
         }
         if let Some(end) = &args.end {
-            self.end = Some(parse_date(end)?);
+            self.end = Some(parse_date(end).context("Unable to parse the end date")?);
         }
         if let Some(repeat) = &args.repeat {
             self.repeat = if repeat.is_empty() {
