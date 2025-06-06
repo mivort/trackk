@@ -1,7 +1,6 @@
-use std::num::ParseFloatError;
-
-use nom::character::complete::char;
+use nom::branch::alt;
 use nom::character::complete::{alpha0, digit1};
+use nom::character::complete::{anychar, char};
 use nom::combinator::iterator;
 use nom::combinator::{map_res, opt, recognize};
 use nom::{IResult, Parser};
@@ -13,7 +12,7 @@ pub fn parse_date(input: &str) -> Result<i64> {
     let mut output = Vec::<Token>::new();
     let _op_stack = Vec::<Token>::new();
 
-    for tok in iterator(input, parse_number) {
+    for tok in iterator(input, alt((parse_number, parse_op))) {
         match tok {
             Token::Duration(_) | Token::_Date(_) => output.push(tok),
             _ => {}
@@ -35,10 +34,27 @@ pub fn parse_date(input: &str) -> Result<i64> {
     bail!("Not a number");
 }
 
-/// Convert float point string into f64.
+/// Convert float point string into token.
 fn parse_number(input: &str) -> IResult<&str, Token> {
     map_res((recognize_float, alpha0), |(s, suffix): (&str, &str)| {
-        Ok::<_, ParseFloatError>(match_suffix(s.parse::<f64>()?, suffix))
+        match_suffix(s.parse::<f64>()?, suffix)
+    })
+    .parse(input)
+}
+
+/// Convert one of the supported date formats into token.
+fn _parse_date(_input: &str) -> IResult<&str, Token> {
+    todo!()
+}
+
+/// Check for one of possible operations.
+fn parse_op(input: &str) -> IResult<&str, Token> {
+    map_res(anychar, |c| match c {
+        '+' => Ok(Token::Add),
+        '-' => Ok(Token::Sub),
+        '*' => Ok(Token::Mul),
+        '/' => Ok(Token::Div),
+        _ => bail!("Unknown character: {}", c),
     })
     .parse(input)
 }
@@ -49,17 +65,19 @@ fn recognize_float(input: &str) -> IResult<&str, &str> {
 }
 
 /// Convert number suffix to the seconds.
-fn match_suffix(literal: f64, suffix: &str) -> Token {
+fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
+    use Token::*;
+
     match suffix {
-        "" => Token::Duration(literal * 1.),
-        "s" => Token::Duration(literal * 1.),
-        "m" => Token::Duration(literal * 60.),
-        "h" => Token::Duration(literal * 3600.),
-        "d" | "D" => Token::Duration(literal * 86400.),
-        "w" | "W" => Token::Duration(literal * 604800.),
-        "M" => Token::Duration(literal * 2592000.),
-        "y" | "Y" => Token::Duration(literal * 946080000.),
-        _ => panic!("Unknown number suffix: {}", suffix),
+        "" => Ok(Duration(literal * 1.)),
+        "s" => Ok(Duration(literal * 1.)),
+        "m" => Ok(Duration(literal * 60.)),
+        "h" => Ok(Duration(literal * 3600.)),
+        "d" | "D" => Ok(Duration(literal * 86400.)),
+        "w" | "W" => Ok(Duration(literal * 604800.)),
+        "M" => Ok(Duration(literal * 2592000.)),
+        "y" | "Y" => Ok(Duration(literal * 946080000.)),
+        _ => bail!("Unknown number suffix: {}", suffix),
     }
 }
 
@@ -68,8 +86,8 @@ fn match_suffix(literal: f64, suffix: &str) -> Token {
 enum Token {
     Duration(f64),
     _Date(i64),
-    _Add,
-    _Sub,
-    _Mul,
-    _Div,
+    Add,
+    Sub,
+    Mul,
+    Div,
 }
