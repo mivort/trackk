@@ -17,7 +17,7 @@ pub fn parse_date(input: &str) -> Result<i64> {
 
     for tok in iterator(input, alt((parse_number, parse_op))) {
         match tok {
-            Duration(_) | _Date(_) => output.push(tok),
+            Duration(_) | Date(_) => output.push(tok),
             Add | Sub | Mul | Div => {
                 while let Some(top) = op_stack.pop_if(|top| {
                     if let LParen = top {
@@ -116,6 +116,7 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
         "w" | "W" => Ok(Duration(literal * 604800.)),
         "M" => Ok(Duration(literal * 2592000.)),
         "y" | "Y" => Ok(Duration(literal * 946080000.)),
+        "st" | "nd" | "rd" | "th" => Ok(Date(())),
         _ => bail!("Unknown number suffix: {}", suffix),
     }
 }
@@ -124,7 +125,7 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
 #[derive(Clone, Copy, Debug)]
 enum Token {
     Duration(f64),
-    _Date(i64),
+    Date(()),
     Add,
     Sub,
     Mul,
