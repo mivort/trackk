@@ -30,6 +30,9 @@ pub struct App {
     /// Current global entry filter.
     filter: filter::Filter,
 
+    /// UTC timestamp during the init.
+    ts: i64,
+
     /// Parsed entries cache.
     cache: RefCell<HashMap<String, Rc<bucket::Bucket>>>,
 }
@@ -56,6 +59,14 @@ impl App {
 
         index::Index::load(&self.config)
     }
+
+    /// Convert start timestamp to time with offset.
+    pub fn local_time(&self) -> Result<time::OffsetDateTime> {
+        use time::*;
+
+        let utc = UtcDateTime::from_unix_timestamp(self.ts)?;
+        Ok(utc.to_offset(UtcOffset::current_local_offset()?))
+    }
 }
 
 fn main() -> Result<()> {
@@ -66,6 +77,7 @@ fn main() -> Result<()> {
         index: Default::default(),
         filter: Default::default(),
         cache: Default::default(),
+        ts: time::UtcDateTime::now().unix_timestamp(),
     };
 
     app.filter = filter::parse_filter_args(&args, &app)?;

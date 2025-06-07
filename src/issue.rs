@@ -56,11 +56,9 @@ impl Issue {
     pub fn new(entry: &EntryArgs, app: &App) -> Result<Self> {
         let new_uuid = Uuid::new_v4().to_string();
 
-        let ts = UtcDateTime::now().unix_timestamp();
-
         let mut new = Self {
             id: new_uuid,
-            created: ts,
+            created: app.ts,
             ..Default::default()
         };
 
