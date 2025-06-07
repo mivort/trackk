@@ -15,7 +15,7 @@ pub fn parse_date(input: &str) -> Result<i64> {
     let mut output = Vec::<Token>::new();
     let mut op_stack = Vec::<Token>::new();
 
-    for tok in iterator(input, alt((parse_number, parse_op))) {
+    for tok in iterator(input, alt((parse_rfc3339, parse_number, parse_op))) {
         match tok {
             Duration(_) | Date(_) => output.push(tok),
             Add | Sub | Mul | Div => {
@@ -67,20 +67,25 @@ fn parse_number(input: &str) -> IResult<&str, Token> {
     .parse(input)
 }
 
-/// Convert one of the supported date formats into token.
-fn _parse_date(_input: &str) -> IResult<&str, Token> {
-    todo!()
+/// Convert RFC3339 date into token.
+fn parse_rfc3339(input: &str) -> IResult<&str, Token> {
+    map_res(recognize_rfc3339, |_date| -> Result<Token> {
+        Ok(Token::Date(0))
+    })
+    .parse(input)
 }
 
 /// Check for one of possible operations.
 fn parse_op(input: &str) -> IResult<&str, Token> {
+    use Token::*;
+
     map_res(anychar, |c| match c {
-        '+' => Ok(Token::Add),
-        '-' => Ok(Token::Sub),
-        '*' => Ok(Token::Mul),
-        '/' => Ok(Token::Div),
-        '(' => Ok(Token::LParen),
-        ')' => Ok(Token::RParen),
+        '+' => Ok(Add),
+        '-' => Ok(Sub),
+        '*' => Ok(Mul),
+        '/' => Ok(Div),
+        '(' => Ok(LParen),
+        ')' => Ok(RParen),
         _ => bail!("Unknown character: {}", c),
     })
     .parse(input)
@@ -89,6 +94,13 @@ fn parse_op(input: &str) -> IResult<&str, Token> {
 /// Recognize float point number pattern.
 fn recognize_float(input: &str) -> IResult<&str, &str> {
     recognize((digit1, opt((char('.'), digit1)))).parse(input)
+}
+
+/// Recognize RFC3339.
+fn recognize_rfc3339(input: &str) -> IResult<&str, &str> {
+    let with_year = (digit1, char('-'), digit1, char('-'), digit1);
+    let no_year = (digit1, char('-'), digit1);
+    alt((recognize(with_year), recognize(no_year))).parse(input)
 }
 
 /// Convert number suffix to the seconds.
@@ -128,11 +140,13 @@ enum Token {
 impl Token {
     /// Check token precedence and if it's left associative.
     fn prec_and_assoc(&self) -> (u8, bool) {
+        use Token::*;
+
         match self {
-            Token::Add => (1, true),
-            Token::Sub => (1, true),
-            Token::Mul => (2, true),
-            Token::Div => (2, true),
+            Add => (1, true),
+            Sub => (1, true),
+            Mul => (2, true),
+            Div => (2, true),
             _ => panic!("Token {:?} is not operator", self),
         }
     }
