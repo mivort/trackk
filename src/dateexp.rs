@@ -144,19 +144,13 @@ impl Token {
             Self::Duration(lhs) => match rhs {
                 Self::Date(rhs) => Ok(Self::Date(lhs + rhs)),
                 Self::Duration(rhs) => Ok(Self::Duration(lhs + rhs)),
-                _ => {
-                    bail!("Unsupported arguments")
-                }
+                _ => bail!("Unsupported arguments"),
             },
             Self::Date(lhs) => match rhs {
                 Self::Duration(rhs) => Ok(Self::Date(lhs + rhs)),
-                _ => {
-                    bail!("Unsupported arguments")
-                }
+                _ => bail!("Unsupported arguments"),
             },
-            _ => {
-                panic!("Non-literal arguments")
-            }
+            _ => panic!("Non-literal arguments"),
         }
     }
 
@@ -166,19 +160,37 @@ impl Token {
             Self::Duration(lhs) => match rhs {
                 Self::Date(rhs) => Ok(Self::Date(lhs - rhs)),
                 Self::Duration(rhs) => Ok(Self::Duration(lhs - rhs)),
-                _ => {
-                    bail!("Unsupported arguments")
-                }
+                _ => bail!("Unsupported arguments"),
             },
             Self::Date(lhs) => match rhs {
                 Self::Duration(rhs) => Ok(Self::Date(lhs - rhs)),
-                _ => {
-                    bail!("Unsupported arguments")
-                }
+                _ => bail!("Unsupported arguments"),
             },
-            _ => {
-                panic!("Non-literal arguments")
-            }
+            _ => panic!("Non-literal arguments"),
+        }
+    }
+
+    /// Produce a multiplication of two duration values.
+    fn mul(self, rhs: Self) -> Result<Self> {
+        match self {
+            Self::Duration(lhs) => match rhs {
+                Self::Duration(rhs) => Ok(Self::Date(lhs * rhs)), // TODO: handle non-integers
+                _ => bail!("Unsupported arguments"),
+            },
+            Self::Date(_) => bail!("Unsupported arguments"),
+            _ => panic!("Non-literal arguments"),
+        }
+    }
+
+    /// Produce a multiplication of two duration values.
+    fn div(self, rhs: Self) -> Result<Self> {
+        match self {
+            Self::Duration(lhs) => match rhs {
+                Self::Duration(rhs) => Ok(Self::Date(lhs / rhs)), // TODO: handle non-integers
+                _ => bail!("Unsupported arguments"),
+            },
+            Self::Date(_) => bail!("Unsupported arguments"),
+            _ => panic!("Non-literal arguments"),
         }
     }
 
@@ -213,16 +225,20 @@ fn eval(queue: &Vec<Token>) -> Result<i64> {
             Add => match (arg_stack.pop(), arg_stack.pop()) {
                 (Some(rhs), Some(lhs)) => arg_stack.push(lhs.sum(rhs)?),
                 (Some(rhs), None) => arg_stack.push(rhs),
-                _ => {
-                    bail!("'+' operator haven't got enough arguments")
-                }
+                _ => bail!("'+' operator haven't got enough arguments"),
             },
             Sub => match (arg_stack.pop(), arg_stack.pop()) {
                 (Some(rhs), Some(lhs)) => arg_stack.push(lhs.sub(rhs)?),
                 (Some(rhs), None) => arg_stack.push(rhs.neg()?),
-                _ => {
-                    bail!("'-' operator haven't got enough arguments")
-                }
+                _ => bail!("'-' operator haven't got enough arguments"),
+            },
+            Mul => match (arg_stack.pop(), arg_stack.pop()) {
+                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.mul(rhs)?),
+                _ => bail!("'*' operator haven't got enough arguments"),
+            },
+            Div => match (arg_stack.pop(), arg_stack.pop()) {
+                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.div(rhs)?),
+                _ => bail!("'/' operator haven't got enough arguments"),
             },
             _ => {}
         }
