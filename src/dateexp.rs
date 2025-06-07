@@ -96,13 +96,13 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
     use Token::*;
 
     match suffix {
-        "" | "s" => Ok(Duration((literal * 1.) as i64)),
-        "m" => Ok(Duration((literal * 60.) as i64)),
-        "h" => Ok(Duration((literal * 3600.) as i64)),
-        "d" | "D" => Ok(Duration((literal * 86400.) as i64)),
-        "w" | "W" => Ok(Duration((literal * 604800.) as i64)),
-        "M" => Ok(Duration((literal * 2592000.) as i64)),
-        "y" | "Y" => Ok(Duration((literal * 946080000.) as i64)),
+        "" | "s" => Ok(Duration(literal * 1.)),
+        "m" => Ok(Duration(literal * 60.)),
+        "h" => Ok(Duration(literal * 3600.)),
+        "d" | "D" => Ok(Duration(literal * 86400.)),
+        "w" | "W" => Ok(Duration(literal * 604800.)),
+        "M" => Ok(Duration(literal * 2592000.)),
+        "y" | "Y" => Ok(Duration(literal * 946080000.)),
         "st" | "nd" | "rd" | "th" => Ok(Date(0)),
         _ => bail!("Unknown number suffix: {}", suffix),
     }
@@ -112,7 +112,7 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
 #[derive(Clone, Copy, Debug)]
 enum Token {
     #[allow(unused)]
-    Duration(i64),
+    Duration(f64),
     #[allow(unused)]
     Date(i64),
 
@@ -142,12 +142,12 @@ impl Token {
     fn sum(self, rhs: Self) -> Result<Self> {
         match self {
             Self::Duration(lhs) => match rhs {
-                Self::Date(rhs) => Ok(Self::Date(lhs + rhs)),
+                Self::Date(rhs) => Ok(Self::Date(lhs as i64 + rhs)),
                 Self::Duration(rhs) => Ok(Self::Duration(lhs + rhs)),
                 _ => bail!("Unsupported arguments"),
             },
             Self::Date(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Date(lhs + rhs)),
+                Self::Duration(rhs) => Ok(Self::Date(lhs + rhs as i64)),
                 _ => bail!("Unsupported arguments"),
             },
             _ => panic!("Non-literal arguments"),
@@ -158,12 +158,12 @@ impl Token {
     fn sub(self, rhs: Self) -> Result<Self> {
         match self {
             Self::Duration(lhs) => match rhs {
-                Self::Date(rhs) => Ok(Self::Date(lhs - rhs)),
                 Self::Duration(rhs) => Ok(Self::Duration(lhs - rhs)),
+                Self::Date(_) => bail!("Date can't be negative"),
                 _ => bail!("Unsupported arguments"),
             },
             Self::Date(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Date(lhs - rhs)),
+                Self::Duration(rhs) => Ok(Self::Date(lhs - rhs as i64)),
                 _ => bail!("Unsupported arguments"),
             },
             _ => panic!("Non-literal arguments"),
@@ -174,7 +174,7 @@ impl Token {
     fn mul(self, rhs: Self) -> Result<Self> {
         match self {
             Self::Duration(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Date(lhs * rhs)), // TODO: handle non-integers
+                Self::Duration(rhs) => Ok(Self::Duration(lhs * rhs)),
                 _ => bail!("Unsupported arguments"),
             },
             Self::Date(_) => bail!("Unsupported arguments"),
@@ -186,7 +186,7 @@ impl Token {
     fn div(self, rhs: Self) -> Result<Self> {
         match self {
             Self::Duration(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Date(lhs / rhs)), // TODO: handle non-integers
+                Self::Duration(rhs) => Ok(Self::Duration(lhs / rhs)),
                 _ => bail!("Unsupported arguments"),
             },
             Self::Date(_) => bail!("Unsupported arguments"),
@@ -206,7 +206,7 @@ impl Token {
     /// Convert date or duration to i64 timestamp.
     fn as_i64(&self) -> i64 {
         match self {
-            Self::Duration(offset) => *offset, // TODO: add current date
+            Self::Duration(offset) => *offset as i64,
             Self::Date(date) => *date,
             _ => panic!("Non-literal token"),
         }
