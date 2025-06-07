@@ -44,19 +44,7 @@ pub fn parse_date(input: &str) -> Result<i64> {
         bail!("Mismatched opening bracket");
     }
 
-    let out = output.iter().cloned().reduce(|v, s| {
-        if let Token::Duration(v) = v {
-            if let Token::Duration(s) = s {
-                return Token::Duration(v + s);
-            }
-        }
-        Token::Duration(0.)
-    });
-
-    if let Token::Duration(out) = out.unwrap_or(Token::Duration(0.)) {
-        return Ok(out as i64);
-    }
-    bail!("Not a number");
+    eval(&output)
 }
 
 /// Move elements from op stack to output until left parenthesis is found.
@@ -108,15 +96,14 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
     use Token::*;
 
     match suffix {
-        "" => Ok(Duration(literal * 1.)),
-        "s" => Ok(Duration(literal * 1.)),
-        "m" => Ok(Duration(literal * 60.)),
-        "h" => Ok(Duration(literal * 3600.)),
-        "d" | "D" => Ok(Duration(literal * 86400.)),
-        "w" | "W" => Ok(Duration(literal * 604800.)),
-        "M" => Ok(Duration(literal * 2592000.)),
-        "y" | "Y" => Ok(Duration(literal * 946080000.)),
-        "st" | "nd" | "rd" | "th" => Ok(Date(())),
+        "" | "s" => Ok(Duration((literal * 1.) as i64)),
+        "m" => Ok(Duration((literal * 60.) as i64)),
+        "h" => Ok(Duration((literal * 3600.) as i64)),
+        "d" | "D" => Ok(Duration((literal * 86400.) as i64)),
+        "w" | "W" => Ok(Duration((literal * 604800.) as i64)),
+        "M" => Ok(Duration((literal * 2592000.) as i64)),
+        "y" | "Y" => Ok(Duration((literal * 946080000.) as i64)),
+        "st" | "nd" | "rd" | "th" => Ok(Date(0)),
         _ => bail!("Unknown number suffix: {}", suffix),
     }
 }
@@ -124,12 +111,16 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
 /// Parsed token types.
 #[derive(Clone, Copy, Debug)]
 enum Token {
-    Duration(f64),
-    Date(()),
+    #[allow(unused)]
+    Duration(i64),
+    #[allow(unused)]
+    Date(i64),
+
     Add,
     Sub,
     Mul,
     Div,
+
     LParen,
     RParen,
 }
@@ -145,4 +136,20 @@ impl Token {
             _ => panic!("Token {:?} is not operator", self),
         }
     }
+}
+
+/// Iterate over stack and calculate the result.
+fn eval(queue: &Vec<Token>) -> Result<i64> {
+    use Token::*;
+
+    let mut arg_stack = Vec::<Token>::new();
+
+    for tok in queue {
+        match tok {
+            Duration(_) | Date(_) => arg_stack.push(*tok),
+            _ => {}
+        }
+    }
+
+    Ok(0)
 }
