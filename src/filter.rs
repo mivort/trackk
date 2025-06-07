@@ -188,6 +188,8 @@ pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
 
 #[test]
 fn match_issue() {
+    use std::collections::HashSet;
+
     let mut tags = HashSet::<String>::default();
     tags.extend(["a", "b", "c"].map(Into::into).into_iter());
 
