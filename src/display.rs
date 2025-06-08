@@ -9,7 +9,7 @@ pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
         let tags = tags.collect::<Vec<_>>().join(" ");
 
         let title = issue.title.lines().next().unwrap_or_default();
-        let status = &issue.status[0..1];
+        let status = &issue.status.chars().next().unwrap_or('?');
         println!(
             "{short:3}. [{status}] {id}: {title}{tags_space}{tags}",
             id = &issue.id.as_str()[0..8],
