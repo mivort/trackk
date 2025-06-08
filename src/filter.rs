@@ -69,7 +69,7 @@ impl Filter {
     fn parse_positive_arg(&mut self, arg: &str, app: &App) -> Result<()> {
         let mut entry = Vec::new();
         for part in arg.split(',') {
-            if let Some(rule) = FilterRule::from_str(part)? {
+            if let Some(rule) = FilterRule::from_str(part, app)? {
                 entry.push(rule);
             } else {
                 let id = resolve_shorthand(part, app)?;
@@ -86,7 +86,7 @@ impl Filter {
     /// Parse single exclude filter argument.
     fn parse_negative_arg(&mut self, arg: &str, app: &App) -> Result<()> {
         for part in arg.split(',') {
-            if let Some(rule) = FilterRule::from_str(part)? {
+            if let Some(rule) = FilterRule::from_str(part, app)? {
                 self.exclude.push(rule);
             } else {
                 let id = resolve_shorthand(part, app)?;
@@ -102,7 +102,7 @@ impl Filter {
 
 impl FilterRule {
     /// Parse rule string and produce rule enum value.
-    fn from_str(rule: &str) -> Result<Option<Self>> {
+    fn from_str(rule: &str, app: &App) -> Result<Option<Self>> {
         let rule = rule.trim();
 
         if rule.starts_with('@') {
@@ -116,11 +116,17 @@ impl FilterRule {
                 "due" | "d" => return Ok(None),
                 "end" | "e" => return Ok(None),
                 "due.before" | "d.before" => {
-                    return Ok(Some(Self::DueBefore(parse_date(value)?)));
+                    return Ok(Some(Self::DueBefore(parse_date(value, app)?)));
                 }
-                "due.after" | "d.after" => return Ok(Some(Self::DueAfter(parse_date(value)?))),
-                "end.before" | "e.before" => return Ok(Some(Self::EndBefore(parse_date(value)?))),
-                "end.after" | "e.after" => return Ok(Some(Self::EndAfter(parse_date(value)?))),
+                "due.after" | "d.after" => {
+                    return Ok(Some(Self::DueAfter(parse_date(value, app)?)));
+                }
+                "end.before" | "e.before" => {
+                    return Ok(Some(Self::EndBefore(parse_date(value, app)?)));
+                }
+                "end.after" | "e.after" => {
+                    return Ok(Some(Self::EndAfter(parse_date(value, app)?)));
+                }
                 "title" | "t" => return Ok(Some(Self::Title(value.to_owned()))),
                 "title.regex" | "title.re" | "t.regex" | "t.re" => {
                     return Ok(Some(Self::TitleRegex(

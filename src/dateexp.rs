@@ -5,15 +5,19 @@ use nom::combinator::iterator;
 use nom::combinator::{map_res, opt, recognize};
 use nom::{IResult, Parser};
 
-use crate::prelude::*;
+use logos::Logos;
+
+use crate::{App, prelude::*};
 
 /// Parse date expression and produce the timestamp.
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
-pub fn parse_date(input: &str) -> Result<i64> {
+pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     use Token::*;
 
     let mut output = Vec::<Token>::new();
     let mut op_stack = Vec::<Token>::new();
+
+    let _lexer = Token::lexer_with_extras(input, app.ts);
 
     for tok in iterator(input, alt((parse_rfc3339, parse_number, parse_op))) {
         match tok {
@@ -121,19 +125,31 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
 }
 
 /// Parsed token types.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Logos)]
+#[logos(skip r"[ \t\n\f]+", extras = i64)]
 enum Token {
     #[allow(unused)]
     Duration(f64),
+
     #[allow(unused)]
     Date(i64),
 
+    #[token("+")]
     Add,
+
+    #[token("-")]
     Sub,
+
+    #[token("*")]
     Mul,
+
+    #[token("/")]
     Div,
 
+    #[token("(")]
     LParen,
+
+    #[token(")")]
     RParen,
 }
 
@@ -265,5 +281,6 @@ fn eval(queue: &Vec<Token>) -> Result<i64> {
 
 #[test]
 fn full_exp_parsing() {
-    assert_eq!(matches!(parse_date("1h+2h"), Ok(10800)), true);
+    let app = App::default();
+    assert_eq!(matches!(parse_date("1h+2h", &app), Ok(10800)), true);
 }

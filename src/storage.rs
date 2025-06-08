@@ -41,7 +41,7 @@ pub fn modify_entries(args: &ModArgs, app: &App) -> Result<()> {
     for (issue, path) in &entries {
         let mut bucket = Bucket::from_path(&**path)?;
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
-        bucket_issue.apply_args(&args.entry, &app.config)?;
+        bucket_issue.apply_args(&args.entry, app)?;
 
         if bucket_issue.status != issue.status {
             bucket_issue.update_end_ts();

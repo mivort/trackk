@@ -62,25 +62,25 @@ impl Issue {
             ..Default::default()
         };
 
-        new.apply_args(entry, &app.config)?;
+        new.apply_args(entry, &app)?;
         Ok(new)
     }
 
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
-    pub fn apply_args(&mut self, args: &EntryArgs, config: &Config) -> Result<()> {
+    pub fn apply_args(&mut self, args: &EntryArgs, app: &App) -> Result<()> {
         if let Some(title) = &args.title {
             self.title = title.clone();
         }
         if let Some(status) = &args.status {
             self.status = status.clone();
-            self.update_status(args.end.is_none(), config);
+            self.update_status(args.end.is_none(), &app.config);
         }
         if let Some(due) = &args.due {
-            self.due = Some(parse_date(due).context("Unable to parse the due date")?);
+            self.due = Some(parse_date(due, app).context("Unable to parse the due date")?);
         }
         if let Some(end) = &args.end {
-            self.end = Some(parse_date(end).context("Unable to parse the end date")?);
+            self.end = Some(parse_date(end, app).context("Unable to parse the end date")?);
         }
         if let Some(repeat) = &args.repeat {
             self.repeat = if repeat.is_empty() {
