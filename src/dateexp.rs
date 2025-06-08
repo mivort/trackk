@@ -1,4 +1,7 @@
 use logos::{Lexer, Logos};
+use time::UtcOffset;
+use time::macros::format_description;
+use time::{Date, PrimitiveDateTime};
 
 use crate::{App, prelude::*};
 
@@ -85,13 +88,34 @@ fn parse_short_date(_: &Lexer<Token>) -> Option<i64> {
 }
 
 /// Parse date in `[year]-[month]-[day]` format.
-fn parse_full_date(_: &Lexer<Token>) -> Option<i64> {
-    None
+fn parse_full_date(lex: &Lexer<Token>) -> Option<i64> {
+    let format = format_description!("[year]-[month]-[day]");
+    let res = unwrap_ok_or!(Date::parse(lex.slice(), &format), _, {
+        return None;
+    });
+    let offset = unwrap_ok_or!(UtcOffset::current_local_offset(), _, { return None });
+    let time = res.with_hms(0, 0, 0).unwrap();
+    Some(time.assume_offset(offset).unix_timestamp())
 }
 
 /// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
-fn parse_date_time(_: &Lexer<Token>) -> Option<i64> {
-    None
+fn parse_date_time(lex: &Lexer<Token>) -> Option<i64> {
+    let format = format_description!("[year]-[month]-[day]T[hour]:[minute]");
+    let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
+        return None;
+    });
+    let offset = unwrap_ok_or!(UtcOffset::current_local_offset(), _, { return None });
+    Some(res.assume_offset(offset).unix_timestamp())
+}
+
+/// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
+fn parse_date_time_sec(lex: &Lexer<Token>) -> Option<i64> {
+    let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
+    let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
+        return None;
+    });
+    let offset = unwrap_ok_or!(UtcOffset::current_local_offset(), _, { return None });
+    Some(res.assume_offset(offset).unix_timestamp())
 }
 
 /// Parsed token types.
@@ -111,7 +135,8 @@ enum Token {
     #[regex(r"\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
     #[regex(r"\d{2}-\d{2}", parse_short_date)]
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
-    #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time)]
+    #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
+    #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time_sec)]
     Date(i64),
 
     #[token("+")]
