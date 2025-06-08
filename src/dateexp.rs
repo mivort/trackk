@@ -1,10 +1,3 @@
-use nom::branch::alt;
-use nom::character::complete::{alpha0, digit1};
-use nom::character::complete::{anychar, char};
-use nom::combinator::iterator;
-use nom::combinator::{map_res, opt, recognize};
-use nom::{IResult, Parser};
-
 use logos::{Lexer, Logos};
 
 use crate::{App, prelude::*};
@@ -49,34 +42,6 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
         bail!("Mismatched opening bracket");
     }
 
-    if false {
-        for tok in iterator(input, alt((parse_rfc3339, parse_number, parse_op))) {
-            match tok {
-                Duration(_) | Date(_) => output.push(tok),
-                Add | Sub | Mul | Div => {
-                    while let Some(top) = op_stack.pop_if(|top| {
-                        if let LParen = top {
-                            return false;
-                        }
-                        let (top_prec, _) = top.prec_and_assoc();
-                        let (prec, left_assoc) = top.prec_and_assoc();
-
-                        (top_prec > prec) || (top_prec == prec && left_assoc)
-                    }) {
-                        output.push(top)
-                    }
-                    op_stack.push(tok);
-                }
-                LParen => op_stack.push(tok),
-                RParen => {
-                    if !tilt(&mut op_stack, &mut output) {
-                        bail!("Mismatched closing bracket");
-                    }
-                }
-            }
-        }
-    }
-
     eval(&output)
 }
 
@@ -90,67 +55,6 @@ fn tilt(stack: &mut Vec<Token>, output: &mut Vec<Token>) -> bool {
         output.push(top);
     }
     false
-}
-
-/// Convert float point string into token.
-fn parse_number(input: &str) -> IResult<&str, Token> {
-    map_res((recognize_float, alpha0), |(s, suffix): (&str, &str)| {
-        match_suffix(s.parse::<f64>()?, suffix)
-    })
-    .parse(input)
-}
-
-/// Convert RFC3339 date into token.
-fn parse_rfc3339(input: &str) -> IResult<&str, Token> {
-    map_res(recognize_rfc3339, |_date| -> Result<Token> {
-        Ok(Token::Date(0))
-    })
-    .parse(input)
-}
-
-/// Check for one of possible operations.
-fn parse_op(input: &str) -> IResult<&str, Token> {
-    use Token::*;
-
-    map_res(anychar, |c| match c {
-        '+' => Ok(Add),
-        '-' => Ok(Sub),
-        '*' => Ok(Mul),
-        '/' => Ok(Div),
-        '(' => Ok(LParen),
-        ')' => Ok(RParen),
-        _ => bail!("Unknown character: {}", c),
-    })
-    .parse(input)
-}
-
-/// Recognize float point number pattern.
-fn recognize_float(input: &str) -> IResult<&str, &str> {
-    recognize((digit1, opt((char('.'), digit1)))).parse(input)
-}
-
-/// Recognize RFC3339.
-fn recognize_rfc3339(input: &str) -> IResult<&str, &str> {
-    let with_year = (digit1, char('-'), digit1, char('-'), digit1);
-    let no_year = (digit1, char('-'), digit1);
-    alt((recognize(with_year), recognize(no_year))).parse(input)
-}
-
-/// Convert number suffix to the seconds.
-fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
-    use Token::*;
-
-    match suffix {
-        "" | "s" => Ok(Duration(literal * 1.)),
-        "m" => Ok(Duration(literal * 60.)),
-        "h" => Ok(Duration(literal * 3600.)),
-        "d" | "D" => Ok(Duration(literal * 86400.)),
-        "w" | "W" => Ok(Duration(literal * 604800.)),
-        "M" => Ok(Duration(literal * 2592000.)),
-        "y" | "Y" => Ok(Duration(literal * 946080000.)),
-        "st" | "nd" | "rd" | "th" => Ok(Date(0)),
-        _ => bail!("Unknown number suffix: {}", suffix),
-    }
 }
 
 /// Parse no-suffix duration.
@@ -194,14 +98,14 @@ fn parse_date_time(_: &Lexer<Token>) -> Option<i64> {
 #[derive(Clone, Copy, Debug, Logos)]
 #[logos(skip r"[ \t\n\f]+", extras = i64)]
 enum Token {
-    #[regex(r"\d+", parse_no_suffix_span)]
-    #[regex(r"\d+s", |l| parse_suffix_span(l, 1, 1.))]
-    #[regex(r"\d+m", |l| parse_suffix_span(l, 1, 60.))]
-    #[regex(r"\d+h", |l| parse_suffix_span(l, 1, 3600.))]
-    #[regex(r"\d+[Dd]", |l| parse_suffix_span(l, 1, 86400.))]
-    #[regex(r"\d+[Ww]", |l| parse_suffix_span(l, 1, 604800.))]
-    #[regex(r"\d+M", |l| parse_suffix_span(l, 1, 2592000.))]
-    #[regex(r"\d+[Yy]", |l| parse_suffix_span(l, 1, 946080000.))]
+    #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
+    #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
+    #[regex(r"\d+(\.\d+)?m", |l| parse_suffix_span(l, 1, 60.))]
+    #[regex(r"\d+(\.\d+)?h", |l| parse_suffix_span(l, 1, 3600.))]
+    #[regex(r"\d+(\.\d+)?[Dd]", |l| parse_suffix_span(l, 1, 86400.))]
+    #[regex(r"\d+(\.\d+)?[Ww]", |l| parse_suffix_span(l, 1, 604800.))]
+    #[regex(r"\d+(\.\d+)?M", |l| parse_suffix_span(l, 1, 2592000.))]
+    #[regex(r"\d+(\.\d+)?[Yy]", |l| parse_suffix_span(l, 1, 946080000.))]
     Duration(f64),
 
     #[regex(r"\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
@@ -358,5 +262,5 @@ fn eval(queue: &Vec<Token>) -> Result<i64> {
 #[test]
 fn full_exp_parsing() {
     let app = App::default();
-    assert_eq!(matches!(parse_date("1h+2h", &app), Ok(10800)), true);
+    assert_eq!(matches!(parse_date("1.5h+2h", &app), Ok(12600)), true);
 }
