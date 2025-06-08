@@ -3,6 +3,8 @@ use std::io::{Read, Write};
 use std::process::{Command, ExitStatus};
 
 use regex::RegexBuilder;
+use time::macros::format_description;
+use time::{UtcDateTime, UtcOffset};
 
 use crate::bucket::Bucket;
 use crate::issue::Issue;
@@ -81,6 +83,17 @@ pub fn edit_entries(app: &App) -> Result<()> {
 fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
     let tags = issue.tags.iter().map(|t| &**t).collect::<Vec<_>>();
 
+    let offset = UtcOffset::current_local_offset()?;
+
+    let due = match issue.due {
+        Some(due) => format_date(due, offset)?,
+        None => String::new(),
+    };
+    let end = match issue.end {
+        Some(end) => format_date(end, offset)?,
+        None => String::new(),
+    };
+
     file.write_fmt(format_args!(
         concat!(
             "# {title}\n\n",
@@ -97,8 +110,8 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         ),
         title = issue.title,
         status = issue.status,
-        due = issue.due.map(|d| d.to_string()).unwrap_or_default(),
-        end = issue.end.map(|d| d.to_string()).unwrap_or_default(),
+        due = due,
+        end = end,
         tags = tags.join(" "),
         repeat = unwrap_some_or!(&issue.repeat, { "" }),
         created = issue.created,
@@ -107,6 +120,13 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
     ))?;
 
     Ok(())
+}
+
+/// Apply ISO8601 format to UNIX timestamps.
+fn format_date(date: i64, offset: UtcOffset) -> Result<String> {
+    let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
+    let time = UtcDateTime::from_unix_timestamp(date)?.to_offset(offset);
+    Ok(time.format(&format)?)
 }
 
 /// Read edited entry back to the issue struct.
