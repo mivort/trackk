@@ -20,6 +20,7 @@ use clap::Parser;
 use config::Config;
 use prelude::*;
 
+#[derive(Default)]
 pub struct App {
     /// Application config.
     config: config::Config,
@@ -74,10 +75,8 @@ fn main() -> Result<()> {
 
     let mut app = App {
         config: read_config(&args.data),
-        index: Default::default(),
-        filter: Default::default(),
-        cache: Default::default(),
         ts: time::UtcDateTime::now().unix_timestamp(),
+        ..Default::default()
     };
 
     app.filter = filter::parse_filter_args(&args, &app)?;
