@@ -5,7 +5,7 @@ use nom::combinator::iterator;
 use nom::combinator::{map_res, opt, recognize};
 use nom::{IResult, Parser};
 
-use logos::Logos;
+use logos::{Lexer, Logos};
 
 use crate::{App, prelude::*};
 
@@ -17,9 +17,10 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     let mut output = Vec::<Token>::new();
     let mut op_stack = Vec::<Token>::new();
 
-    let _lexer = Token::lexer_with_extras(input, app.ts);
+    let lexer = Token::lexer_with_extras(input, app.ts);
+    for tok in lexer {
+        let tok = unwrap_ok_or!(tok, _, { bail!("Unknown token") });
 
-    for tok in iterator(input, alt((parse_rfc3339, parse_number, parse_op))) {
         match tok {
             Duration(_) | Date(_) => output.push(tok),
             Add | Sub | Mul | Div => {
@@ -46,6 +47,34 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     }
     if tilt(&mut op_stack, &mut output) {
         bail!("Mismatched opening bracket");
+    }
+
+    if false {
+        for tok in iterator(input, alt((parse_rfc3339, parse_number, parse_op))) {
+            match tok {
+                Duration(_) | Date(_) => output.push(tok),
+                Add | Sub | Mul | Div => {
+                    while let Some(top) = op_stack.pop_if(|top| {
+                        if let LParen = top {
+                            return false;
+                        }
+                        let (top_prec, _) = top.prec_and_assoc();
+                        let (prec, left_assoc) = top.prec_and_assoc();
+
+                        (top_prec > prec) || (top_prec == prec && left_assoc)
+                    }) {
+                        output.push(top)
+                    }
+                    op_stack.push(tok);
+                }
+                LParen => op_stack.push(tok),
+                RParen => {
+                    if !tilt(&mut op_stack, &mut output) {
+                        bail!("Mismatched closing bracket");
+                    }
+                }
+            }
+        }
     }
 
     eval(&output)
@@ -124,14 +153,61 @@ fn match_suffix(literal: f64, suffix: &str) -> Result<Token> {
     }
 }
 
+/// Parse no-suffix duration.
+#[inline]
+fn parse_no_suffix_span(lex: &Lexer<Token>) -> Option<f64> {
+    lex.slice().parse().ok()
+}
+
+/// Exclude suffix and parse with multiplier.
+#[inline]
+fn parse_suffix_span(lex: &Lexer<Token>, width: usize, mlt: f64) -> Option<f64> {
+    let slice = lex.slice();
+    slice[..slice.len() - width]
+        .parse()
+        .ok()
+        .map(|v: f64| v * mlt)
+}
+
+/// Parse the closest month day.
+fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Option<i64> {
+    let slice = lex.slice();
+    slice[..slice.len() - 2].parse::<i64>().ok().map(|v| v)
+}
+
+/// Parse date in `[month]-[day]` format.
+fn parse_short_date(_: &Lexer<Token>) -> Option<i64> {
+    None
+}
+
+/// Parse date in `[year]-[month]-[day]` format.
+fn parse_full_date(_: &Lexer<Token>) -> Option<i64> {
+    None
+}
+
+/// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
+fn parse_date_time(_: &Lexer<Token>) -> Option<i64> {
+    None
+}
+
 /// Parsed token types.
 #[derive(Clone, Copy, Debug, Logos)]
 #[logos(skip r"[ \t\n\f]+", extras = i64)]
 enum Token {
-    #[allow(unused)]
+    #[regex(r"\d+", parse_no_suffix_span)]
+    #[regex(r"\d+s", |l| parse_suffix_span(l, 1, 1.))]
+    #[regex(r"\d+m", |l| parse_suffix_span(l, 1, 60.))]
+    #[regex(r"\d+h", |l| parse_suffix_span(l, 1, 3600.))]
+    #[regex(r"\d+[Dd]", |l| parse_suffix_span(l, 1, 86400.))]
+    #[regex(r"\d+[Ww]", |l| parse_suffix_span(l, 1, 604800.))]
+    #[regex(r"\d+M", |l| parse_suffix_span(l, 1, 2592000.))]
+    #[regex(r"\d+[Yy]", |l| parse_suffix_span(l, 1, 946080000.))]
     Duration(f64),
 
-    #[allow(unused)]
+    #[regex(r"\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
+    #[regex(r"\d{2}-\d{2}", parse_short_date)]
+    #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
+    #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time)]
     Date(i64),
 
     #[token("+")]
