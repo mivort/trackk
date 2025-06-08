@@ -126,17 +126,24 @@ enum Token {
     #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
     #[regex(r"\d+(\.\d+)?m", |l| parse_suffix_span(l, 1, 60.))]
     #[regex(r"\d+(\.\d+)?h", |l| parse_suffix_span(l, 1, 3600.))]
-    #[regex(r"\d+(\.\d+)?[Dd]", |l| parse_suffix_span(l, 1, 86400.))]
+    #[regex(r"\d+(\.\d+)?Dd]", |l| parse_suffix_span(l, 1, 86400.))]
     #[regex(r"\d+(\.\d+)?[Ww]", |l| parse_suffix_span(l, 1, 604800.))]
     #[regex(r"\d+(\.\d+)?M", |l| parse_suffix_span(l, 1, 2592000.))]
     #[regex(r"\d+(\.\d+)?[Yy]", |l| parse_suffix_span(l, 1, 946080000.))]
     Duration(f64),
 
-    #[regex(r"\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
+    #[regex(r"/\d+(st|nd|rd|th)/i", parse_st_nd_rd_th)]
     #[regex(r"\d{2}-\d{2}", parse_short_date)]
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time_sec)]
+    #[regex(r"/mon(day)?/i", |_| 0)]
+    #[regex(r"/tue(sday)?/i", |_| 0)]
+    #[regex(r"/wed(nesday)?/i", |_| 0)]
+    #[regex(r"/thu(rsday)?/i", |_| 0)]
+    #[regex(r"/fri(day)?/i", |_| 0)]
+    #[regex(r"/sat(urday)?/i", |_| 0)]
+    #[regex(r"/sun(day)?/i", |_| 0)]
     Date(i64),
 
     #[token("+")]
