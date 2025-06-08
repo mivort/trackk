@@ -126,7 +126,7 @@ enum Token {
     #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
     #[regex(r"\d+(\.\d+)?m", |l| parse_suffix_span(l, 1, 60.))]
     #[regex(r"\d+(\.\d+)?h", |l| parse_suffix_span(l, 1, 3600.))]
-    #[regex(r"\d+(\.\d+)?Dd]", |l| parse_suffix_span(l, 1, 86400.))]
+    #[regex(r"\d+(\.\d+)?[Dd]", |l| parse_suffix_span(l, 1, 86400.))]
     #[regex(r"\d+(\.\d+)?[Ww]", |l| parse_suffix_span(l, 1, 604800.))]
     #[regex(r"\d+(\.\d+)?M", |l| parse_suffix_span(l, 1, 2592000.))]
     #[regex(r"\d+(\.\d+)?[Yy]", |l| parse_suffix_span(l, 1, 946080000.))]
