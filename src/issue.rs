@@ -59,6 +59,7 @@ impl Issue {
         let mut new = Self {
             id: new_uuid,
             created: app.ts,
+            status: app.config.defaults.status_initial.clone(),
             ..Default::default()
         };
 
