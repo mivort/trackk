@@ -1,4 +1,5 @@
 use logos::{Lexer, Logos};
+use thiserror::Error;
 use time::UtcOffset;
 use time::macros::format_description;
 use time::{Date, PrimitiveDateTime};
@@ -15,7 +16,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
 
     let lexer = Token::lexer_with_extras(input, app.ts);
     for tok in lexer {
-        let tok = unwrap_ok_or!(tok, _, { bail!("Unknown token") });
+        let tok = tok?;
 
         match tok {
             Duration(_) | Date(_) => output.push(tok),
@@ -83,8 +84,10 @@ fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Option<i64> {
 }
 
 /// Parse date in `[month]-[day]` format.
-fn parse_short_date(_: &Lexer<Token>) -> Option<i64> {
-    None
+fn parse_short_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    Err(LexerError::TokenError {
+        token: lex.slice().to_owned(),
+    })
 }
 
 /// Parse date in `[year]-[month]-[day]` format.
@@ -120,7 +123,7 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Option<i64> {
 
 /// Parsed token types.
 #[derive(Clone, Copy, Debug, Logos)]
-#[logos(skip r"[ \t\n\f]+", extras = i64)]
+#[logos(skip r"[ \t\n\f]+", extras = i64, error = LexerError)]
 enum Token {
     #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
     #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
@@ -289,6 +292,17 @@ fn eval(queue: &Vec<Token>) -> Result<i64> {
     let last = arg_stack.last();
     last.context("Expression didn't produced any result")
         .map(|t| t.as_i64())
+}
+
+/// Custom lexing error type.
+#[derive(Clone, Default, Debug, PartialEq, Error)]
+enum LexerError {
+    #[default]
+    #[error("Unknown lexer error")]
+    UnknownError,
+
+    #[error("Unable to parse token: {token}")]
+    TokenError { token: String },
 }
 
 #[test]
