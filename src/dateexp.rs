@@ -2,9 +2,8 @@ use std::num::ParseIntError;
 
 use logos::{Lexer, Logos};
 use thiserror::Error;
-use time::UtcOffset;
 use time::macros::format_description;
-use time::{Date, PrimitiveDateTime};
+use time::{Date, OffsetDateTime, PrimitiveDateTime};
 
 use crate::{App, prelude::*};
 
@@ -16,7 +15,8 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     let mut output = Vec::<Token>::new();
     let mut op_stack = Vec::<Token>::new();
 
-    let lexer = Token::lexer_with_extras(input, app.ts);
+    let local = app.local_time()?;
+    let lexer = Token::lexer_with_extras(input, local);
     for tok in lexer {
         let tok = tok?;
 
@@ -105,9 +105,8 @@ fn parse_full_date(lex: &Lexer<Token>) -> Option<i64> {
     let res = unwrap_ok_or!(Date::parse(lex.slice(), &format), _, {
         return None;
     });
-    let offset = unwrap_ok_or!(UtcOffset::current_local_offset(), _, { return None });
     let time = res.with_hms(0, 0, 0).unwrap();
-    Some(time.assume_offset(offset).unix_timestamp())
+    Some(time.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
 /// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
@@ -116,8 +115,7 @@ fn parse_date_time(lex: &Lexer<Token>) -> Option<i64> {
     let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
         return None;
     });
-    let offset = unwrap_ok_or!(UtcOffset::current_local_offset(), _, { return None });
-    Some(res.assume_offset(offset).unix_timestamp())
+    Some(res.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
 /// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
@@ -126,13 +124,12 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Option<i64> {
     let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
         return None;
     });
-    let offset = unwrap_ok_or!(UtcOffset::current_local_offset(), _, { return None });
-    Some(res.assume_offset(offset).unix_timestamp())
+    Some(res.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
 /// Parsed token types.
 #[derive(Clone, Copy, Debug, Logos)]
-#[logos(skip r"[ \t\n\f]+", extras = i64, error = LexerError)]
+#[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
 enum Token {
     #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
     #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
