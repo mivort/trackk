@@ -2,6 +2,7 @@ use std::num::ParseIntError;
 
 use logos::{Lexer, Logos};
 use thiserror::Error;
+use time::ext::NumericalDuration;
 use time::macros::format_description;
 use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time};
 
@@ -99,7 +100,7 @@ fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     } else {
         prev.replace_day(num)?
     }
-    .replace_time(Time::from_hms(0, 0, 0)?);
+    .replace_time(Time::MIDNIGHT);
 
     Ok(date.unix_timestamp())
 }
@@ -120,7 +121,7 @@ fn parse_full_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let res = unwrap_ok_or!(Date::parse(lex.slice(), &format), _, {
         return Err(LexerError::token_error(lex.slice()));
     });
-    let time = res.with_hms(0, 0, 0).unwrap();
+    let time = res.with_time(Time::MIDNIGHT);
     Ok(time.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
@@ -140,6 +141,15 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
         return Err(LexerError::token_error(lex.slice()));
     });
     Ok(res.assume_offset(lex.extras.offset()).unix_timestamp())
+}
+
+/// Parse relative date alias.
+fn relative_sod(lex: &Lexer<Token>, offset: i64) -> i64 {
+    lex.extras
+        .checked_add(offset.days())
+        .unwrap()
+        .replace_time(Time::MIDNIGHT)
+        .unix_timestamp()
 }
 
 /// Parsed token types.
@@ -162,11 +172,10 @@ enum Token {
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time_sec)]
-    #[regex(r"(?i)now", |_| 0)]
-    #[regex(r"(?i)sod", |_| 0)]
-    #[regex(r"(?i)today", |_| 0)]
-    #[regex(r"(?i)tomorrow", |_| 0)]
-    #[regex(r"(?i)yesterday", |_| 0)]
+    #[regex(r"(?i)now", |lex| lex.extras.unix_timestamp())]
+    #[regex(r"(?i)(sod|today)", |lex| lex.extras.replace_time(Time::MIDNIGHT).unix_timestamp())]
+    #[regex(r"(?i)tomorrow", |lex| relative_sod(lex, 1))]
+    #[regex(r"(?i)yesterday", |lex| relative_sod(lex, -1))]
     #[regex(r"(?i)mon(day)?", |_| 0)]
     #[regex(r"(?i)tue(sday)?", |_| 0)]
     #[regex(r"(?i)wed(nesday)?", |_| 0)]
