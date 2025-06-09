@@ -63,7 +63,7 @@ impl Issue {
             ..Default::default()
         };
 
-        new.apply_args(entry, &app)?;
+        new.apply_args(entry, app)?;
         Ok(new)
     }
 

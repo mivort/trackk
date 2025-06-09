@@ -3,7 +3,7 @@ use std::num::ParseIntError;
 use logos::{Lexer, Logos};
 use thiserror::Error;
 use time::macros::format_description;
-use time::{Date, OffsetDateTime, PrimitiveDateTime};
+use time::{Date, Month, OffsetDateTime, PrimitiveDateTime};
 
 use crate::{App, prelude::*};
 
@@ -82,11 +82,25 @@ fn parse_suffix_span(lex: &Lexer<Token>, width: usize, mlt: f64) -> Option<f64> 
 /// Parse the closest month day.
 fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let slice = lex.slice();
-    let num = slice[..slice.len() - 2].parse::<i64>()?;
+    let num = slice[..slice.len() - 2].parse::<u8>()?;
 
-    // TODO: convert to relative
+    let prev = lex.extras;
+    let date = if prev.day() >= num {
+        let year = if prev.month() == Month::December {
+            prev.year() + 1
+        } else {
+            prev.year()
+        };
+        prev.replace_date(Date::from_calendar_date(
+            year,
+            lex.extras.month().next(),
+            num,
+        )?)
+    } else {
+        prev.replace_day(num)?
+    };
 
-    Ok(num)
+    Ok(date.unix_timestamp())
 }
 
 /// Parse date in `[month]-[day]` format (non-ISO 8601).
@@ -109,22 +123,22 @@ fn parse_full_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     Ok(time.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
-/// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
-fn parse_date_time(lex: &Lexer<Token>) -> Option<i64> {
+/// Parse date and time in `[year]-[month]-[day]T[hour]:[minute] format.
+fn parse_date_time(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let format = format_description!("[year]-[month]-[day]T[hour]:[minute]");
     let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
-        return None;
+        return Err(LexerError::token_error(lex.slice()));
     });
-    Some(res.assume_offset(lex.extras.offset()).unix_timestamp())
+    Ok(res.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
 /// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
-fn parse_date_time_sec(lex: &Lexer<Token>) -> Option<i64> {
+fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
     let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
-        return None;
+        return Err(LexerError::token_error(lex.slice()));
     });
-    Some(res.assume_offset(lex.extras.offset()).unix_timestamp())
+    Ok(res.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
 /// Parsed token types.
@@ -141,7 +155,7 @@ enum Token {
     #[regex(r"\d+(\.\d+)?[Yy]", |l| parse_suffix_span(l, 1, 946080000.))]
     Duration(f64),
 
-    #[regex(r"/\d+(st|nd|rd|th)/i", parse_st_nd_rd_th)]
+    #[regex(r"\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
     #[regex(r"\d{2}-\d{2}", parse_short_date)]
     #[regex(r"\d{4,}-\d{3}", parse_ordinal)]
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
@@ -312,7 +326,10 @@ enum LexerError {
     TokenError { token: String },
 
     #[error(transparent)]
-    ParseError(#[from] ParseIntError),
+    ParseInt(#[from] ParseIntError),
+
+    #[error(transparent)]
+    ComponentRange(#[from] time::error::ComponentRange),
 }
 
 impl LexerError {
