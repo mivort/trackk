@@ -1,3 +1,5 @@
+use std::num::ParseIntError;
+
 use logos::{Lexer, Logos};
 use thiserror::Error;
 use time::UtcOffset;
@@ -78,9 +80,13 @@ fn parse_suffix_span(lex: &Lexer<Token>, width: usize, mlt: f64) -> Option<f64> 
 }
 
 /// Parse the closest month day.
-fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Option<i64> {
+fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let slice = lex.slice();
-    slice[..slice.len() - 2].parse::<i64>().ok().map(|v| v)
+    let num = slice[..slice.len() - 2].parse::<i64>()?;
+
+    // TODO: convert to relative
+
+    Ok(num)
 }
 
 /// Parse date in `[month]-[day]` format (non-ISO 8601).
@@ -307,6 +313,9 @@ enum LexerError {
 
     #[error("Unable to parse token: {token}")]
     TokenError { token: String },
+
+    #[error(transparent)]
+    ParseError(#[from] ParseIntError),
 }
 
 impl LexerError {
