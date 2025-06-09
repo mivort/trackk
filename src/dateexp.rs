@@ -100,13 +100,13 @@ fn parse_ordinal(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 }
 
 /// Parse date in `[year]-[month]-[day]` format.
-fn parse_full_date(lex: &Lexer<Token>) -> Option<i64> {
+fn parse_full_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let format = format_description!("[year]-[month]-[day]");
     let res = unwrap_ok_or!(Date::parse(lex.slice(), &format), _, {
-        return None;
+        return Err(LexerError::token_error(lex.slice()));
     });
     let time = res.with_hms(0, 0, 0).unwrap();
-    Some(time.assume_offset(lex.extras.offset()).unix_timestamp())
+    Ok(time.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
 /// Parse date and time in `[year]-[month]-[day]T[hour]:[minute]:[second] format.
