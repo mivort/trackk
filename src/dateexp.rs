@@ -83,11 +83,14 @@ fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Option<i64> {
     slice[..slice.len() - 2].parse::<i64>().ok().map(|v| v)
 }
 
-/// Parse date in `[month]-[day]` format.
+/// Parse date in `[month]-[day]` format (non-ISO 8601).
 fn parse_short_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
-    Err(LexerError::TokenError {
-        token: lex.slice().to_owned(),
-    })
+    Err(LexerError::token_error(lex.slice()))
+}
+
+/// Parse ordinal date format (`[year]-[day]`).
+fn parse_ordinal(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    Err(LexerError::token_error(lex.slice()))
 }
 
 /// Parse date in `[year]-[month]-[day]` format.
@@ -137,6 +140,7 @@ enum Token {
 
     #[regex(r"/\d+(st|nd|rd|th)/i", parse_st_nd_rd_th)]
     #[regex(r"\d{2}-\d{2}", parse_short_date)]
+    #[regex(r"\d{4,}-\d{3}", parse_ordinal)]
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time_sec)]
@@ -303,6 +307,14 @@ enum LexerError {
 
     #[error("Unable to parse token: {token}")]
     TokenError { token: String },
+}
+
+impl LexerError {
+    fn token_error(token: &str) -> Self {
+        Self::TokenError {
+            token: token.to_owned(),
+        }
+    }
 }
 
 #[test]
