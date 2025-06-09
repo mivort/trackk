@@ -3,7 +3,7 @@ use std::num::ParseIntError;
 use logos::{Lexer, Logos};
 use thiserror::Error;
 use time::macros::format_description;
-use time::{Date, Month, OffsetDateTime, PrimitiveDateTime};
+use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time};
 
 use crate::{App, prelude::*};
 
@@ -98,7 +98,8 @@ fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Result<i64, LexerError> {
         )?)
     } else {
         prev.replace_day(num)?
-    };
+    }
+    .replace_time(Time::from_hms(0, 0, 0)?);
 
     Ok(date.unix_timestamp())
 }
