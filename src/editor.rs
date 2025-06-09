@@ -21,7 +21,10 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
         .wait()?;
 
     if !status.success() {
-        println!("Editing cancelled.");
+        println!(
+            "Editor exited with code {}. Editing cancelled.",
+            status.code().unwrap_or(-1)
+        );
         return Ok(status);
     }
 

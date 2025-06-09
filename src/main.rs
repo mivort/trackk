@@ -92,7 +92,10 @@ fn main() -> Result<()> {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
 
             if !a.no_edit {
-                editor::edit_entry(&mut issue, &app)?;
+                let status = editor::edit_entry(&mut issue, &app)?;
+                if !status.success() {
+                    return Ok(());
+                }
             }
             storage::add_entry(issue, &app)?;
         }
