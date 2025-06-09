@@ -152,6 +152,19 @@ fn relative_sod(lex: &Lexer<Token>, offset: i64) -> i64 {
         .unix_timestamp()
 }
 
+fn relative_month(lex: &Lexer<Token>, month: Month) -> i64 {
+    let ts = lex.extras;
+    let year = if ts.month() as u8 >= month as u8 {
+        ts.year() + 1
+    } else {
+        ts.year()
+    };
+    let date = Date::from_calendar_date(year, month, 1).unwrap();
+    ts.replace_date(date)
+        .replace_time(Time::MIDNIGHT)
+        .unix_timestamp()
+}
+
 /// Parsed token types.
 #[derive(Clone, Copy, Debug, Logos)]
 #[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
@@ -183,18 +196,18 @@ enum Token {
     #[regex(r"(?i)fri(day)?", |_| 0)]
     #[regex(r"(?i)sat(urday)?", |_| 0)]
     #[regex(r"(?i)sun(day)?", |_| 0)]
-    #[regex(r"(?i)jan(uary)?", |_| 0)]
-    #[regex(r"(?i)feb(ruary)?", |_| 0)]
-    #[regex(r"(?i)mar(ch)?", |_| 0)]
-    #[regex(r"(?i)apr(il)?", |_| 0)]
-    #[regex(r"(?i)may", |_| 0)]
-    #[regex(r"(?i)june?", |_| 0)]
-    #[regex(r"(?i)july?", |_| 0)]
-    #[regex(r"(?i)aug(ust)?", |_| 0)]
-    #[regex(r"(?i)sep(tember)?", |_| 0)]
-    #[regex(r"(?i)oct(ober)?", |_| 0)]
-    #[regex(r"(?i)nov(ember)?", |_| 0)]
-    #[regex(r"(?i)dec(ember)?", |_| 0)]
+    #[regex(r"(?i)jan(uary)?", |lex| relative_month(lex, Month::January))]
+    #[regex(r"(?i)feb(ruary)?", |lex| relative_month(lex, Month::February))]
+    #[regex(r"(?i)mar(ch)?", |lex| relative_month(lex, Month::March))]
+    #[regex(r"(?i)apr(il)?", |lex| relative_month(lex, Month::April))]
+    #[regex(r"(?i)may", |lex| relative_month(lex, Month::May))]
+    #[regex(r"(?i)june?", |lex| relative_month(lex, Month::June))]
+    #[regex(r"(?i)july?", |lex| relative_month(lex, Month::July))]
+    #[regex(r"(?i)aug(ust)?", |lex| relative_month(lex, Month::August))]
+    #[regex(r"(?i)sep(tember)?", |lex| relative_month(lex, Month::September))]
+    #[regex(r"(?i)oct(ober)?", |lex| relative_month(lex, Month::October))]
+    #[regex(r"(?i)nov(ember)?", |lex| relative_month(lex, Month::November))]
+    #[regex(r"(?i)dec(ember)?", |lex| relative_month(lex, Month::December))]
     Date(i64),
 
     #[token("+")]
