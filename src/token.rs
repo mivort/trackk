@@ -57,6 +57,11 @@ pub enum Token {
     #[regex(r"(?i)dec(ember)?", |lex| relative_month(lex, Month::December))]
     Date(i64),
 
+    #[token("true", |_| true)]
+    #[token("false", |_| true)]
+    #[allow(unused)]
+    Bool(bool),
+
     #[token("+")]
     Add,
 
@@ -78,6 +83,9 @@ pub enum Token {
     #[token(")")]
     RParen,
 
+    #[regex(r"[a-z]+:", parse_matcher)]
+    Matcher,
+
     #[regex(r"[A-z]+[A-z0-9_]*", unknown_token)]
     Unknown,
 }
@@ -93,6 +101,7 @@ impl Token {
             Mul => (2, true),
             Div => (2, true),
             At => (3, true),
+            Matcher => (4, false),
             _ => panic!("Token {:?} is not operator", self),
         }
     }
@@ -380,6 +389,11 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
     ts.saturating_add(offset.days())
         .replace_time(Time::MIDNIGHT)
         .unix_timestamp()
+}
+
+/// Convert matcher token to specific matcher operator.
+fn parse_matcher(_lex: &Lexer<Token>) -> Result<(), LexerError> {
+    todo!("matchers are not yet implemented")
 }
 
 /// Produce error in case of unrecognized token.

@@ -15,6 +15,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     match res {
         Token::Date(date) => Ok(date),
         Token::Duration(rel) => Ok(app.ts + rel as i64),
+        Token::Bool(val) => bail!("Date expression returned boolean ({val})"),
         _ => panic!(),
     }
 }
@@ -34,12 +35,15 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
         let tok = tok?;
 
         match tok {
-            Duration(_) | Date(_) => {
+            Duration(_) | Date(_) | Bool(_) => {
                 if !mode.expects_arg() {
                     bail!("Unexpected date argument");
                 }
                 output.push(tok);
                 mode = Mode::Op;
+            }
+            Matcher => {
+                todo!() // handle unary operators
             }
             Add | Sub | Mul | Div | At => {
                 if !mode.expects_op() {
@@ -123,7 +127,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
 
     for tok in queue {
         match tok {
-            Duration(_) | Date(_) => stack.push(*tok),
+            Duration(_) | Date(_) | Bool(_) => stack.push(*tok),
             Add => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
                 (Some(rhs), None) => stack.push(rhs),
@@ -146,6 +150,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
                 (Some(rhs), Some(lhs)) => stack.push(lhs.at(rhs, ts)?),
                 _ => bail!("'@' operator haven't got enough arguments"),
             },
+            Matcher => todo!(),
             LParen | RParen | Unknown => {
                 panic!()
             }
