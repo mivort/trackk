@@ -71,7 +71,8 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
         bail!("Dangling operator at the end of expression");
     }
 
-    eval(&output, local)
+    let mut arg_stack = Vec::<Token>::new();
+    eval(&output, local, &mut arg_stack)
 }
 
 /// Token parser expected token state.
@@ -441,36 +442,32 @@ impl Token {
 }
 
 /// Iterate over stack and calculate the result.
-fn eval(queue: &Vec<Token>, ts: OffsetDateTime) -> Result<i64> {
+fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Result<i64> {
     use Token::*;
-
-    println!("{queue:?}");
-
-    let mut arg_stack = Vec::<Token>::new();
 
     for tok in queue {
         match tok {
-            Duration(_) | Date(_) => arg_stack.push(*tok),
-            Add => match (arg_stack.pop(), arg_stack.pop()) {
-                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.sum(rhs)?),
-                (Some(rhs), None) => arg_stack.push(rhs),
+            Duration(_) | Date(_) => stack.push(*tok),
+            Add => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
+                (Some(rhs), None) => stack.push(rhs),
                 _ => bail!("'+' operator haven't got enough arguments"),
             },
-            Sub => match (arg_stack.pop(), arg_stack.pop()) {
-                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.sub(rhs)?),
-                (Some(rhs), None) => arg_stack.push(rhs.neg()?),
+            Sub => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.sub(rhs)?),
+                (Some(rhs), None) => stack.push(rhs.neg()?),
                 _ => bail!("'-' operator haven't got enough arguments"),
             },
-            Mul => match (arg_stack.pop(), arg_stack.pop()) {
-                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.mul(rhs)?),
+            Mul => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.mul(rhs)?),
                 _ => bail!("'*' operator haven't got enough arguments"),
             },
-            Div => match (arg_stack.pop(), arg_stack.pop()) {
-                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.div(rhs)?),
+            Div => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.div(rhs)?),
                 _ => bail!("'/' operator haven't got enough arguments"),
             },
-            At => match (arg_stack.pop(), arg_stack.pop()) {
-                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.at(rhs, ts)?),
+            At => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.at(rhs, ts)?),
                 _ => bail!("'@' operator haven't got enough arguments"),
             },
             LParen | RParen | Unknown => {
@@ -479,7 +476,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime) -> Result<i64> {
         }
     }
 
-    let last = arg_stack.last();
+    let last = stack.last();
     last.context("Expression didn't produced any result")
         .map(|t| t.as_i64())
 }
