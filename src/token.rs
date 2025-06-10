@@ -262,12 +262,7 @@ fn parse_24h(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
         return Err(LexerError::token_error(lex.slice()));
     });
-    let date = if lex.extras.time() >= time {
-        lex.extras.saturating_add(1.days()).replace_time(time)
-    } else {
-        lex.extras.replace_time(time)
-    };
-    Ok(date.unix_timestamp())
+    Ok(relative_time(time, lex.extras))
 }
 
 /// Parse time in 24H format with seconds.
@@ -276,22 +271,39 @@ fn parse_24h_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
         return Err(LexerError::token_error(lex.slice()));
     });
-    let date = if lex.extras.time() >= time {
-        lex.extras.saturating_add(1.days()).replace_time(time)
-    } else {
-        lex.extras.replace_time(time)
-    };
-    Ok(date.unix_timestamp())
+    Ok(relative_time(time, lex.extras))
 }
 
 /// Parse time in 12H format.
-fn parse_12h(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
-    todo!()
+fn parse_12h(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    let format =
+        format_description!("[hour repr:12 padding:none]:[minute][period case_sensitive:false]");
+    let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
+        return Err(LexerError::token_error(lex.slice()));
+    });
+    Ok(relative_time(time, lex.extras))
 }
 
 /// Parse time in 12H format with seconds.
-fn parse_12h_sec(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
-    todo!()
+fn parse_12h_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    let format = format_description!(
+        "[hour repr:12 padding:none]:[minute]:[second][period case_sensitive:false]"
+    );
+    let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
+        return Err(LexerError::token_error(lex.slice()));
+    });
+    Ok(relative_time(time, lex.extras))
+}
+
+/// Produce relative date with specified time. If time has already passed for today,
+/// switch to the next day.
+fn relative_time(time: Time, date: OffsetDateTime) -> i64 {
+    if date.time() >= time {
+        date.saturating_add(1.days()).replace_time(time)
+    } else {
+        date.replace_time(time)
+    }
+    .unix_timestamp()
 }
 
 /// Parse date in `[month]-[day]` format (non-ISO 8601).
