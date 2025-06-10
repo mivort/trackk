@@ -295,13 +295,18 @@ fn parse_12h_sec(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
 }
 
 /// Parse date in `[month]-[day]` format (non-ISO 8601).
-fn parse_short_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
-    Err(LexerError::token_error(lex.slice()))
+fn parse_short_date(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    todo!()
 }
 
-/// Parse ordinal date format (`[year]-[day]`).
+/// Parse ordinal date format (`[year]-[ordinal]`).
 fn parse_ordinal(lex: &Lexer<Token>) -> Result<i64, LexerError> {
-    Err(LexerError::token_error(lex.slice()))
+    let format = format_description!("[year]-[ordinal]");
+    let res = unwrap_ok_or!(Date::parse(lex.slice(), &format), _, {
+        return Err(LexerError::token_error(lex.slice()));
+    });
+    let time = res.with_time(Time::MIDNIGHT);
+    Ok(time.assume_offset(lex.extras.offset()).unix_timestamp())
 }
 
 /// Parse date in `[year]-[month]-[day]` format.
