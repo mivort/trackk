@@ -23,7 +23,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
 
         match tok {
             Duration(_) | Date(_) => output.push(tok),
-            Add | Sub | Mul | Div => {
+            Add | Sub | Mul | Div | At => {
                 while let Some(top) = op_stack.pop_if(|top| {
                     if let LParen = top {
                         return false;
@@ -49,7 +49,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
         bail!("Mismatched opening bracket");
     }
 
-    eval(&output)
+    eval(&output, local)
 }
 
 /// Move elements from op stack to output until left parenthesis is found.
@@ -103,6 +103,44 @@ fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     .replace_time(Time::MIDNIGHT);
 
     Ok(date.unix_timestamp())
+}
+
+/// Parse time in 24H format.
+fn parse_24h(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    let format = format_description!("[hour padding:none]:[minute]");
+    let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
+        return Err(LexerError::token_error(lex.slice()));
+    });
+    let date = if lex.extras.time() >= time {
+        lex.extras.saturating_add(1.days()).replace_time(time)
+    } else {
+        lex.extras.replace_time(time)
+    };
+    Ok(date.unix_timestamp())
+}
+
+/// Parse time in 24H format with seconds.
+fn parse_24h_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    let format = format_description!("[hour padding:none]:[minute]:[second]");
+    let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
+        return Err(LexerError::token_error(lex.slice()));
+    });
+    let date = if lex.extras.time() >= time {
+        lex.extras.saturating_add(1.days()).replace_time(time)
+    } else {
+        lex.extras.replace_time(time)
+    };
+    Ok(date.unix_timestamp())
+}
+
+/// Parse time in 12H format.
+fn parse_12h(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    todo!()
+}
+
+/// Parse time in 12H format with seconds.
+fn parse_12h_sec(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    todo!()
 }
 
 /// Parse date in `[month]-[day]` format (non-ISO 8601).
@@ -191,6 +229,10 @@ enum Token {
     Duration(f64),
 
     #[regex(r"(?i)\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
+    #[regex(r"\d{1,2}:\d{2}", parse_24h)]
+    #[regex(r"\d{1,2}:\d{2}:\d{2}", parse_24h_sec)]
+    #[regex(r"\d{1,2}:\d{2}[AaPp][Mm]", parse_12h)]
+    #[regex(r"\d{1,2}:\d{2}:\d{2}[AaPp][Mm]", parse_12h_sec)]
     #[regex(r"\d{2}-\d{2}", parse_short_date)]
     #[regex(r"\d{4,}-\d{3}", parse_ordinal)]
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
@@ -233,6 +275,9 @@ enum Token {
     #[token("/")]
     Div,
 
+    #[token("@")]
+    At,
+
     #[token("(")]
     LParen,
 
@@ -250,6 +295,7 @@ impl Token {
             Sub => (1, true),
             Mul => (2, true),
             Div => (2, true),
+            At => (3, true),
             _ => panic!("Token {:?} is not operator", self),
         }
     }
@@ -320,6 +366,22 @@ impl Token {
         }
     }
 
+    /// Apply time to the date.
+    fn at(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
+        match self {
+            Self::Date(lhs) => match rhs {
+                Self::Date(rhs) => {
+                    let ltime = (lhs + ts.offset().whole_seconds() as i64) % 86400;
+                    let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
+                    println!("{ltime} {rtime}");
+                    Ok(Self::Date(lhs - ltime + rtime))
+                }
+                _ => bail!("'@' can only be applied to absolute dates"),
+            },
+            _ => bail!("'@' can only be applied to absolute dates"),
+        }
+    }
+
     /// Convert date or duration to i64 timestamp.
     fn as_i64(&self) -> i64 {
         match self {
@@ -331,7 +393,7 @@ impl Token {
 }
 
 /// Iterate over stack and calculate the result.
-fn eval(queue: &Vec<Token>) -> Result<i64> {
+fn eval(queue: &Vec<Token>, ts: OffsetDateTime) -> Result<i64> {
     use Token::*;
 
     let mut arg_stack = Vec::<Token>::new();
@@ -357,7 +419,13 @@ fn eval(queue: &Vec<Token>) -> Result<i64> {
                 (Some(rhs), Some(lhs)) => arg_stack.push(lhs.div(rhs)?),
                 _ => bail!("'/' operator haven't got enough arguments"),
             },
-            _ => {}
+            At => match (arg_stack.pop(), arg_stack.pop()) {
+                (Some(rhs), Some(lhs)) => arg_stack.push(lhs.at(rhs, ts)?),
+                _ => bail!("'@' operator haven't got enough arguments"),
+            },
+            LParen | RParen => {
+                panic!()
+            }
         }
     }
 
