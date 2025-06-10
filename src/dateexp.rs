@@ -72,7 +72,13 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     }
 
     let mut arg_stack = Vec::<Token>::new();
-    eval(&output, local, &mut arg_stack)
+    let res = eval(&output, local, &mut arg_stack)?;
+
+    match res {
+        Token::Date(date) => Ok(date),
+        Token::Duration(rel) => Ok(app.ts + rel as i64),
+        _ => panic!(),
+    }
 }
 
 /// Token parser expected token state.
@@ -430,19 +436,10 @@ impl Token {
             _ => bail!("'@' can only be applied to absolute dates"),
         }
     }
-
-    /// Convert date or duration to i64 timestamp.
-    fn as_i64(&self) -> i64 {
-        match self {
-            Self::Duration(offset) => *offset as i64,
-            Self::Date(date) => *date,
-            _ => panic!("Non-literal token"),
-        }
-    }
 }
 
 /// Iterate over stack and calculate the result.
-fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Result<i64> {
+fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Result<Token> {
     use Token::*;
 
     for tok in queue {
@@ -478,7 +475,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
 
     let last = stack.last();
     last.context("Expression didn't produced any result")
-        .map(|t| t.as_i64())
+        .copied()
 }
 
 /// Custom lexing error type.
