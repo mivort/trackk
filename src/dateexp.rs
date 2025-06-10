@@ -60,6 +60,9 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 mode = Mode::Arg;
             }
             LParen => {
+                if !mode.expects_arg() {
+                    bail!("Unexpected opening bracket");
+                }
                 op_stack.push(tok);
                 mode = Mode::Any;
             }
@@ -173,6 +176,7 @@ fn unexpected_tokens() {
     let app = App::default();
     assert_eq!(parse_date("1d+", &app).is_err(), true);
     assert_eq!(parse_date("1d2d", &app).is_err(), true);
+    assert_eq!(parse_date("1d(2d)", &app).is_err(), true);
     assert_eq!(parse_date("(", &app).is_err(), true);
     assert_eq!(parse_date(")", &app).is_err(), true);
 }
