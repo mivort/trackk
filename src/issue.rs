@@ -30,6 +30,10 @@ pub struct Issue {
     #[serde(default)]
     pub status: String,
 
+    /// Parent issue ID.
+    #[serde(default)]
+    pub parent: Option<String>,
+
     /// Repeat string which is applied to task copy upon completion.
     #[serde(default)]
     pub repeat: Option<String>,
