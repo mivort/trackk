@@ -76,43 +76,48 @@ pub enum Token {
 
     #[token("@")]
     #[token("at")]
-    #[token(":at:")]
+    #[token(".at:")]
     At,
 
-    #[token("=")]
+    #[token(":")]
     PartialEq,
 
+    #[token("=")]
     #[token("==")]
+    #[token(".eq:")]
     Eq,
 
     #[token("!=")]
-    #[token(":ne:")]
+    #[token(".ne:")]
+    #[token(".not:")]
     NotEq,
 
     #[token("<")]
-    #[token(":lt:")]
+    #[token(".lt:")]
+    #[token(".before:")]
     Less,
 
     #[token("<=")]
-    #[token(":le:")]
+    #[token(".le:")]
     LessEq,
 
     #[token(">")]
-    #[token(":gt:")]
+    #[token(".gt:")]
+    #[token(".after:")]
     Greater,
 
     #[token(">=")]
-    #[token(":ge:")]
+    #[token(".ge:")]
     GreaterEq,
 
     #[token("&&")]
     #[token("and")]
-    #[token(":and:")]
+    #[token(".and.")]
     And,
 
     #[token("||")]
     #[token("or")]
-    #[token(":or:")]
+    #[token(".or.")]
     Or,
 
     #[token("!")]
