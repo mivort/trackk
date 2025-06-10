@@ -18,12 +18,24 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
 
     let local = app.local_time()?;
     let lexer = Token::lexer_with_extras(input, local);
+
+    let mut mode = Mode::Any;
+
     for tok in lexer {
         let tok = tok?;
 
         match tok {
-            Duration(_) | Date(_) => output.push(tok),
+            Duration(_) | Date(_) => {
+                if !mode.expects_arg() {
+                    bail!("Unexpected date argument");
+                }
+                output.push(tok);
+                mode = Mode::Op;
+            }
             Add | Sub | Mul | Div | At => {
+                if !mode.expects_op() {
+                    bail!("Unexpected operator");
+                }
                 while let Some(top) = op_stack.pop_if(|top| {
                     if let LParen = top {
                         return false;
@@ -36,12 +48,17 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
                     output.push(top)
                 }
                 op_stack.push(tok);
+                mode = Mode::Arg;
             }
-            LParen => op_stack.push(tok),
+            LParen => {
+                op_stack.push(tok);
+                mode = Mode::Any;
+            }
             RParen => {
                 if !tilt(&mut op_stack, &mut output) {
                     bail!("Mismatched closing bracket");
                 }
+                mode = Mode::Op;
             }
             Unknown => panic!(),
         }
@@ -50,7 +67,30 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
         bail!("Mismatched opening bracket");
     }
 
+    if !mode.expects_op() {
+        bail!("Dangling operator at the end of expression");
+    }
+
     eval(&output, local)
+}
+
+/// Token parser expected token state.
+enum Mode {
+    Any,
+    Arg,
+    Op,
+}
+
+impl Mode {
+    #[inline]
+    fn expects_op(&self) -> bool {
+        matches!(self, Self::Any | Self::Op)
+    }
+
+    #[inline]
+    fn expects_arg(&self) -> bool {
+        matches!(self, Self::Any | Self::Arg)
+    }
 }
 
 /// Move elements from op stack to output until left parenthesis is found.
@@ -404,6 +444,8 @@ impl Token {
 fn eval(queue: &Vec<Token>, ts: OffsetDateTime) -> Result<i64> {
     use Token::*;
 
+    println!("{queue:?}");
+
     let mut arg_stack = Vec::<Token>::new();
 
     for tok in queue {
@@ -479,4 +521,13 @@ fn relative_dates() {
     let monday = parse_date("monday", &app).unwrap();
     let tuesday = parse_date("tuesday", &app).unwrap();
     assert_eq!(tuesday - monday, 86400);
+}
+
+#[test]
+fn unexpected_tokens() {
+    let app = App::default();
+    assert_eq!(parse_date("1d+", &app).is_err(), true);
+    assert_eq!(parse_date("1d2d", &app).is_err(), true);
+    assert_eq!(parse_date("(", &app).is_err(), true);
+    assert_eq!(parse_date(")", &app).is_err(), true);
 }
