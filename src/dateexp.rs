@@ -43,6 +43,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
                     bail!("Mismatched closing bracket");
                 }
             }
+            Unknown => panic!(),
         }
     }
     if tilt(&mut op_stack, &mut output) {
@@ -214,6 +215,11 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
         .unix_timestamp()
 }
 
+/// Produce error in case of unrecognized token.
+fn unknown_token(lex: &Lexer<Token>) -> Result<(), LexerError> {
+    Err(LexerError::token_error(lex.slice()))
+}
+
 /// Parsed token types.
 #[derive(Clone, Copy, Debug, Logos)]
 #[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
@@ -283,6 +289,9 @@ enum Token {
 
     #[token(")")]
     RParen,
+
+    #[regex(r"[A-z]+[A-z0-9_]*", unknown_token)]
+    Unknown,
 }
 
 impl Token {
@@ -373,7 +382,6 @@ impl Token {
                 Self::Date(rhs) => {
                     let ltime = (lhs + ts.offset().whole_seconds() as i64) % 86400;
                     let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
-                    println!("{ltime} {rtime}");
                     Ok(Self::Date(lhs - ltime + rtime))
                 }
                 _ => bail!("'@' can only be applied to absolute dates"),
@@ -423,7 +431,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime) -> Result<i64> {
                 (Some(rhs), Some(lhs)) => arg_stack.push(lhs.at(rhs, ts)?),
                 _ => bail!("'@' operator haven't got enough arguments"),
             },
-            LParen | RParen => {
+            LParen | RParen | Unknown => {
                 panic!()
             }
         }
