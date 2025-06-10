@@ -58,7 +58,7 @@ pub enum Token {
     Date(i64),
 
     #[token("true", |_| true)]
-    #[token("false", |_| true)]
+    #[token("false", |_| false)]
     #[allow(unused)]
     Bool(bool),
 
@@ -75,18 +75,57 @@ pub enum Token {
     Div,
 
     #[token("@")]
+    #[token("at")]
+    #[token(":at:")]
     At,
 
+    #[token("=")]
+    PartialEq,
+
+    #[token("==")]
+    Eq,
+
+    #[token("!=")]
+    #[token(":ne:")]
+    NotEq,
+
+    #[token("<")]
+    #[token(":lt:")]
+    Less,
+
+    #[token("<=")]
+    #[token(":le:")]
+    LessEq,
+
+    #[token(">")]
+    #[token(":gt:")]
+    Greater,
+
+    #[token(">=")]
+    #[token(":ge:")]
+    GreaterEq,
+
+    #[token("&&")]
+    #[token(":and:")]
+    And,
+
+    #[token("||")]
+    #[token(":or:")]
+    Or,
+
+    #[token("!")]
+    #[token("not:")]
+    Not,
+
     #[token("(")]
+    #[token("[")]
     LParen,
 
     #[token(")")]
+    #[token("]")]
     RParen,
 
-    #[regex(r"[a-z]+:", parse_matcher)]
-    Matcher,
-
-    #[regex(r"[A-z]+[A-z0-9_]*", unknown_token)]
+    #[regex(r"[A-Za-z]\w*", unknown_token)]
     Unknown,
 }
 
@@ -101,7 +140,6 @@ impl Token {
             Mul => (2, true),
             Div => (2, true),
             At => (3, true),
-            Matcher => (4, false),
             _ => panic!("Token {:?} is not operator", self),
         }
     }
@@ -389,11 +427,6 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
     ts.saturating_add(offset.days())
         .replace_time(Time::MIDNIGHT)
         .unix_timestamp()
-}
-
-/// Convert matcher token to specific matcher operator.
-fn parse_matcher(_lex: &Lexer<Token>) -> Result<(), LexerError> {
-    todo!("matchers are not yet implemented")
 }
 
 /// Produce error in case of unrecognized token.

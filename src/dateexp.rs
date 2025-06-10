@@ -42,10 +42,8 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 output.push(tok);
                 mode = Mode::Op;
             }
-            Matcher => {
-                todo!() // handle unary operators
-            }
-            Add | Sub | Mul | Div | At => {
+            Add | Sub | Mul | Div | At | Eq | PartialEq | Less | LessEq | Greater | GreaterEq
+            | NotEq | And | Or => {
                 if !mode.expects_op() {
                     bail!("Unexpected operator");
                 }
@@ -63,6 +61,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 op_stack.push(tok);
                 mode = Mode::Arg;
             }
+            Not => todo!(),
             LParen => {
                 if !mode.expects_arg() {
                     bail!("Unexpected opening bracket");
@@ -150,7 +149,9 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
                 (Some(rhs), Some(lhs)) => stack.push(lhs.at(rhs, ts)?),
                 _ => bail!("'@' operator haven't got enough arguments"),
             },
-            Matcher => todo!(),
+            Eq | PartialEq | Less | LessEq | Greater | GreaterEq | NotEq | And | Or | Not => {
+                todo!()
+            }
             LParen | RParen | Unknown => {
                 panic!()
             }
