@@ -10,6 +10,7 @@ mod issue;
 mod prelude;
 mod repo;
 mod storage;
+mod token;
 
 use std::cell::{OnceCell, RefCell};
 use std::collections::HashMap;
