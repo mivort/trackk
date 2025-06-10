@@ -62,6 +62,9 @@ pub enum Token {
     #[allow(unused)]
     Bool(bool),
 
+    #[regex(r"//(\\/|[^/])*/", |lex| { println!("{}", lex.slice()); Some(()) })]
+    Regex,
+
     #[token("+")]
     Add,
 
@@ -134,7 +137,7 @@ pub enum Token {
     RParen,
 
     #[regex(r"[A-Za-z]\w*", unknown_token)]
-    Unknown,
+    Symbol,
 }
 
 impl Token {

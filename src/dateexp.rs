@@ -16,6 +16,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
         Token::Date(date) => Ok(date),
         Token::Duration(rel) => Ok(app.ts + rel as i64),
         Token::Bool(val) => bail!("Date expression returned boolean ({val})"),
+        Token::Regex => bail!("Date expression returned regular expression"),
         _ => panic!(),
     }
 }
@@ -35,7 +36,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
         let tok = tok?;
 
         match tok {
-            Duration(_) | Date(_) | Bool(_) => {
+            Duration(_) | Date(_) | Bool(_) | Regex => {
                 if !mode.expects_arg() {
                     bail!("Unexpected date argument");
                 }
@@ -75,7 +76,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 }
                 mode = Mode::Op;
             }
-            Unknown => panic!(),
+            Symbol => panic!(),
         }
     }
     if tilt(&mut op_stack, &mut output) {
@@ -126,7 +127,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
 
     for tok in queue {
         match tok {
-            Duration(_) | Date(_) | Bool(_) => stack.push(*tok),
+            Duration(_) | Date(_) | Bool(_) | Regex => stack.push(*tok),
             Add => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
                 (Some(rhs), None) => stack.push(rhs),
@@ -152,7 +153,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
             Eq | PartialEq | Less | LessEq | Greater | GreaterEq | NotEq | And | Or | Not => {
                 todo!()
             }
-            LParen | RParen | Unknown => {
+            LParen | RParen | Symbol => {
                 panic!()
             }
         }
