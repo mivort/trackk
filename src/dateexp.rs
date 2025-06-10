@@ -11,13 +11,27 @@ use crate::{App, prelude::*};
 /// Parse date expression and produce the timestamp.
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
 pub fn parse_date(input: &str, app: &App) -> Result<i64> {
+    let local = app.local_time()?;
+    let exp = parse_exp(input, local)?;
+
+    let mut arg_stack = Vec::<Token>::new();
+    let res = eval(&exp, local, &mut arg_stack)?;
+
+    match res {
+        Token::Date(date) => Ok(date),
+        Token::Duration(rel) => Ok(app.ts + rel as i64),
+        _ => panic!(),
+    }
+}
+
+/// Produce parsed ASP tree ready for evaluation from the input.
+fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
     use Token::*;
 
     let mut output = Vec::<Token>::new();
     let mut op_stack = Vec::<Token>::new();
 
-    let local = app.local_time()?;
-    let lexer = Token::lexer_with_extras(input, local);
+    let lexer = Token::lexer_with_extras(input, ts);
 
     let mut mode = Mode::Any;
 
@@ -71,14 +85,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
         bail!("Dangling operator at the end of expression");
     }
 
-    let mut arg_stack = Vec::<Token>::new();
-    let res = eval(&output, local, &mut arg_stack)?;
-
-    match res {
-        Token::Date(date) => Ok(date),
-        Token::Duration(rel) => Ok(app.ts + rel as i64),
-        _ => panic!(),
-    }
+    Ok(output)
 }
 
 /// Token parser expected token state.
