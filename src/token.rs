@@ -106,14 +106,17 @@ pub enum Token {
     GreaterEq,
 
     #[token("&&")]
+    #[token("and")]
     #[token(":and:")]
     And,
 
     #[token("||")]
+    #[token("or")]
     #[token(":or:")]
     Or,
 
     #[token("!")]
+    #[token("not")]
     #[token("not:")]
     Not,
 
