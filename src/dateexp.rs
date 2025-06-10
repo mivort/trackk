@@ -4,7 +4,7 @@ use logos::{Lexer, Logos};
 use thiserror::Error;
 use time::ext::NumericalDuration;
 use time::macros::format_description;
-use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time};
+use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, Weekday};
 
 use crate::{App, prelude::*};
 
@@ -146,12 +146,12 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 /// Parse relative date alias.
 fn relative_sod(lex: &Lexer<Token>, offset: i64) -> i64 {
     lex.extras
-        .checked_add(offset.days())
-        .unwrap()
+        .saturating_add(offset.days())
         .replace_time(Time::MIDNIGHT)
         .unix_timestamp()
 }
 
+/// Parse nearest month to the selected date.
 fn relative_month(lex: &Lexer<Token>, month: Month) -> i64 {
     let ts = lex.extras;
     let year = if ts.month() as u8 >= month as u8 {
@@ -161,6 +161,17 @@ fn relative_month(lex: &Lexer<Token>, month: Month) -> i64 {
     };
     let date = Date::from_calendar_date(year, month, 1).unwrap();
     ts.replace_date(date)
+        .replace_time(Time::MIDNIGHT)
+        .unix_timestamp()
+}
+
+/// Convert weekday to the nearest date.
+fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
+    let ts = lex.extras;
+    let diff = ts.weekday().number_days_from_monday() as i64 - day.number_days_from_monday() as i64;
+
+    let offset = if diff >= 0 { 7 - diff } else { -diff };
+    ts.saturating_add(offset.days())
         .replace_time(Time::MIDNIGHT)
         .unix_timestamp()
 }
@@ -189,13 +200,13 @@ enum Token {
     #[regex(r"(?i)(sod|today)", |lex| lex.extras.replace_time(Time::MIDNIGHT).unix_timestamp())]
     #[regex(r"(?i)tomorrow", |lex| relative_sod(lex, 1))]
     #[regex(r"(?i)yesterday", |lex| relative_sod(lex, -1))]
-    #[regex(r"(?i)mon(day)?", |_| 0)]
-    #[regex(r"(?i)tue(sday)?", |_| 0)]
-    #[regex(r"(?i)wed(nesday)?", |_| 0)]
-    #[regex(r"(?i)thu(rsday)?", |_| 0)]
-    #[regex(r"(?i)fri(day)?", |_| 0)]
-    #[regex(r"(?i)sat(urday)?", |_| 0)]
-    #[regex(r"(?i)sun(day)?", |_| 0)]
+    #[regex(r"(?i)mon(day)?", |lex| relative_weekday(lex, Weekday::Monday))]
+    #[regex(r"(?i)tue(sday)?", |lex| relative_weekday(lex, Weekday::Tuesday))]
+    #[regex(r"(?i)wed(nesday)?", |lex| relative_weekday(lex, Weekday::Wednesday))]
+    #[regex(r"(?i)thu(rsday)?", |lex| relative_weekday(lex, Weekday::Thursday))]
+    #[regex(r"(?i)fri(day)?", |lex| relative_weekday(lex, Weekday::Friday))]
+    #[regex(r"(?i)sat(urday)?", |lex| relative_weekday(lex, Weekday::Saturday))]
+    #[regex(r"(?i)sun(day)?", |lex| relative_weekday(lex, Weekday::Sunday))]
     #[regex(r"(?i)jan(uary)?", |lex| relative_month(lex, Month::January))]
     #[regex(r"(?i)feb(ruary)?", |lex| relative_month(lex, Month::February))]
     #[regex(r"(?i)mar(ch)?", |lex| relative_month(lex, Month::March))]
@@ -384,4 +395,12 @@ impl LexerError {
 fn full_exp_parsing() {
     let app = App::default();
     assert_eq!(matches!(parse_date("1.5h+2h", &app), Ok(12600)), true);
+}
+
+#[test]
+fn relative_dates() {
+    let app = App::default();
+    let monday = parse_date("monday", &app).unwrap();
+    let tuesday = parse_date("tuesday", &app).unwrap();
+    assert_eq!(tuesday - monday, 86400);
 }
