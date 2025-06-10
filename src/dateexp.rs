@@ -431,9 +431,20 @@ impl Token {
                     let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
                     Ok(Self::Date(lhs - ltime + rtime))
                 }
-                _ => bail!("'@' can only be applied to absolute dates"),
+                _ => bail!("'@' can only apply time to spans and dates"),
             },
-            _ => bail!("'@' can only be applied to absolute dates"),
+            Self::Duration(lhs) => match rhs {
+                Self::Date(rhs) => {
+                    let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
+                    let with_offset = ts
+                        .saturating_add((lhs as i64).seconds())
+                        .replace_time(Time::MIDNIGHT)
+                        .saturating_add(rtime.seconds());
+                    Ok(Self::Date(with_offset.unix_timestamp()))
+                }
+                _ => bail!("'@' can only apply time to spans and dates"),
+            },
+            _ => bail!("'@' can only be applied to spans and dates"),
         }
     }
 }
