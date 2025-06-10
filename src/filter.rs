@@ -105,14 +105,12 @@ impl FilterRule {
     fn from_str(rule: &str, app: &App) -> Result<Option<Self>> {
         let rule = rule.trim();
 
-        if rule.starts_with('@') {
-            return Ok(Some(FilterRule::Tag(rule[1..rule.len()].to_owned())));
-        }
-
         let mut split = rule.splitn(2, ':');
         let (key, value) = (split.next(), split.next());
         if let (Some(key), Some(value)) = (key, value) {
             match key {
+                "" => return Ok(Some(Self::Tag(value.to_owned()))),
+                "x" | "not" => todo!("exclude tag option is nyi"),
                 "due" | "d" => return Ok(None),
                 "end" | "e" => return Ok(None),
                 "due.before" | "d.before" => {

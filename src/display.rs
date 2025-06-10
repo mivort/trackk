@@ -5,7 +5,7 @@ use crate::issue::Issue;
 /// Render the list of filtered entries.
 pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
     for (issue, _path) in entries {
-        let tags = issue.tags.iter().map(|t| format!("@{}", t));
+        let tags = issue.tags.iter().map(|t| format!(":{}", t));
         let tags = tags.collect::<Vec<_>>().join(" ");
 
         let title = issue.title.lines().next().unwrap_or_default();
