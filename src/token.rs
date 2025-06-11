@@ -1,4 +1,5 @@
 use std::num::ParseIntError;
+use std::rc::Rc;
 
 use logos::{Lexer, Logos};
 use thiserror::Error;
@@ -9,7 +10,7 @@ use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, Weekday};
 use crate::prelude::*;
 
 /// Parsed token types.
-#[derive(Clone, Copy, Debug, Logos)]
+#[derive(Clone, Debug, Logos)]
 #[logos(skip r"[ \t\n\f\.]+", extras = OffsetDateTime, error = LexerError)]
 pub enum Token {
     #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
@@ -132,9 +133,10 @@ pub enum Token {
     #[token("]")]
     RParen,
 
-    #[regex(r"[A-Za-z]\w*", unknown_token)]
-    #[regex(r#"'[^']*'"#, unknown_token)]
-    Symbol,
+    #[regex(r"[A-Za-z]\w*", symbol)]
+    #[regex(r#"'[^']*'"#, quoted_symbol)]
+    #[allow(unused)]
+    Symbol(Rc<str>),
 }
 
 impl Token {
@@ -474,7 +476,13 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
         .unix_timestamp()
 }
 
-/// Produce error in case of unrecognized token.
-fn unknown_token(lex: &Lexer<Token>) -> Result<(), LexerError> {
-    Err(LexerError::token_error(lex.slice()))
+/// Store symbol string inside the quotes.
+fn quoted_symbol(lex: &Lexer<Token>) -> Rc<str> {
+    let slice = lex.slice();
+    Rc::from(&slice[1..(slice.len() - 1)])
+}
+
+/// Store reference-counted symbol string.
+fn symbol(lex: &Lexer<Token>) -> Rc<str> {
+    Rc::from(lex.slice())
 }

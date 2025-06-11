@@ -74,7 +74,9 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 }
                 mode = Mode::Op;
             }
-            Symbol => panic!(),
+            Symbol(symbol) => {
+                todo!("Symbol processing is not supported yet: {symbol}")
+            }
         }
     }
     if tilt(&mut op_stack, &mut output) {
@@ -125,7 +127,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
 
     for tok in queue {
         match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex => stack.push(*tok),
+            Duration(_) | Date(_) | Bool(_) | Regex => stack.push(tok.clone()),
             Add => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
                 (Some(rhs), None) => stack.push(rhs),
@@ -167,7 +169,10 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
             PartialEq | Less | LessEq | Greater | GreaterEq | NotEq => {
                 todo!()
             }
-            LParen | RParen | Symbol => {
+            Symbol(symbol) => {
+                todo!("Symbol processing is not supported yet: {symbol}")
+            }
+            LParen | RParen => {
                 panic!()
             }
         }
@@ -175,7 +180,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
 
     let last = stack.last();
     last.context("Expression didn't produced any result")
-        .copied()
+        .cloned()
 }
 
 #[test]
