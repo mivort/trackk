@@ -6,13 +6,6 @@ use serde_derive::Deserialize;
 #[command(author, version, about = None, long_about = None)]
 #[command(args_override_self = true, allow_external_subcommands = true)]
 pub struct Args {
-    /// List of filter rules.
-    /// Supported rules:
-    /// @[tag], status:, created:, modified:, due:, end:.
-    /// Multiple conditions can be provided separated by comma (,) to use 'OR' matching.
-    #[arg(skip)]
-    pub filter: Vec<String>,
-
     #[command(subcommand)]
     pub command: Option<Command>,
 
@@ -87,10 +80,6 @@ impl Default for Command {
 #[derive(Parser, Deserialize, Default, Clone)]
 #[command(allow_hyphen_values = true)]
 pub struct FilterArgs {
-    /// Exclude entries which match the provided rule.
-    #[arg(skip)]
-    pub exclude: Vec<String>,
-
     /// Filter entries containing the tag.
     #[arg(long, short)]
     pub tag: Vec<String>,

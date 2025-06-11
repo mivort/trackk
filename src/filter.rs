@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use regex::Regex;
 
 use crate::args::Args;
@@ -155,14 +153,14 @@ impl FilterRule {
 }
 
 /// Parse filter argument and return list of IDs (if there's any) and the filter.
-pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
-    let (positive, negative) = (&args.filter, &args.filter_args.exclude);
+pub fn parse_filter_args(_args: &Args, app: &App) -> Result<Filter> {
+    let (positive, negative) = (Vec::<String>::new(), &Vec::<String>::new());
 
     let mut filter = Filter::default();
     for arg in positive {
         // TODO: match aliases
 
-        filter.parse_positive_arg(arg, app)?;
+        filter.parse_positive_arg(&arg, app)?;
     }
 
     for arg in negative {
@@ -194,7 +192,7 @@ pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
 
 /// Store provided list of IDs as index.
 pub struct IdFilter {
-    pub index: HashSet<String>,
+    pub index: Vec<String>,
 
     /// Flag if ID filter shouldn't match anything.
     pub empty_set: bool,
@@ -202,7 +200,7 @@ pub struct IdFilter {
 
 impl IdFilter {
     /// Convert list of IDs with shorthands into a set of fully resolved IDs.
-    pub fn from_shorthands(ids: Vec<String>, app: &App) -> Result<Self> {
+    pub fn from_shorthands(mut ids: Vec<String>, app: &App) -> Result<Self> {
         if ids.is_empty() {
             return Ok(Self {
                 index: Default::default(),
@@ -210,37 +208,39 @@ impl IdFilter {
             });
         }
 
-        let mut res = HashSet::new();
         let index = app.index()?;
 
-        for id in ids {
+        ids.retain_mut(|id| {
             let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
-                res.insert(id);
-                continue;
+                return true;
             });
 
             if shorthand > 999999 {
-                res.insert(id);
-                continue;
+                return true;
             }
 
             let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
-                continue;
+                return false;
             });
             let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
-                continue;
+                return false;
             });
 
-            res.insert(resolved.to_owned());
-        }
+            *id = resolved.to_owned();
+            true
+        });
 
-        let empty_set = res.is_empty();
-        Ok(Self { index: res, empty_set })
+        let empty_set = ids.is_empty();
+
+        Ok(Self {
+            index: ids,
+            empty_set,
+        })
     }
 
     /// Check if ID filter matches the ID.
     pub fn matches(&self, value: &String) -> bool {
-        self.index.is_empty() || self.index.contains(value)
+        self.index.is_empty() || self.index.iter().any(|id| value.starts_with(id))
     }
 
     pub fn new() -> Self {
