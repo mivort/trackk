@@ -146,11 +146,14 @@ impl Token {
         use Token::*;
 
         match self {
-            Add => (1, true),
-            Sub => (1, true),
-            Mul => (2, true),
-            Div => (2, true),
-            At => (3, true),
+            Not => (8, false),
+            At => (7, true),
+            Mul | Div => (6, true),
+            Add | Sub => (5, true),
+            Less | LessEq | Greater | GreaterEq => (4, true),
+            Eq | NotEq => (3, true),
+            And => (2, true),
+            Or => (1, true),
             _ => panic!("Token {:?} is not operator", self),
         }
     }
