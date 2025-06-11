@@ -33,7 +33,7 @@ pub enum Command {
 
     /// Remove specified entry.
     #[command(visible_aliases(["rm", "delete", "del"]))]
-    Remove,
+    Remove(ModArgs),
 
     /// Modify specified entry
     #[command(visible_aliases(["mod", "m"]))]
@@ -43,9 +43,12 @@ pub enum Command {
     #[command(visible_aliases(["d"]))]
     Done(ModArgs),
 
-    /// List entries using set of filters
+    /// List active entries using set of filters
     #[command(visible_aliases(["ls"]))]
-    List,
+    List(ListArgs),
+
+    /// List all entries using set of filters
+    All,
 
     /// Show info about specified entry
     #[command(visible_aliases(["inf", "i"]))]
@@ -73,7 +76,7 @@ pub enum Command {
 
 impl Default for Command {
     fn default() -> Self {
-        Self::List
+        Self::List(ListArgs::default())
     }
 }
 
@@ -115,11 +118,6 @@ pub struct FilterArgs {
     /// Filter query to apply to the results.
     #[arg(long, short)]
     pub filter: Vec<String>,
-
-    // TODO: deprecate separate filter flags in favor of rules
-    /// List both active and inactive entries.
-    #[arg(long, short)]
-    pub all: bool,
 }
 
 /// Args to apply changes to the selected entries.
@@ -170,6 +168,13 @@ pub struct AddArgs {
 pub struct InfoArgs {
     /// List of IDs to display.
     pub ids: Vec<String>,
+}
+
+#[derive(Parser, Default)]
+pub struct ListArgs {
+    /// List all entries.
+    #[arg(long, short)]
+    pub all: bool,
 }
 
 #[derive(Parser, Default)]

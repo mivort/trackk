@@ -1,4 +1,4 @@
-use crate::args::{EntryArgs, FilterArgs};
+use crate::args::EntryArgs;
 use crate::bucket::Bucket;
 use crate::config::Config;
 use crate::filter::IdFilter;
@@ -63,16 +63,12 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
 }
 
 /// Produce the list of entries to display or modify.
-pub fn fetch_entries(
-    ids: &IdFilter,
-    filter: &FilterArgs,
-    app: &App,
-) -> Result<Vec<(Issue, Rc<str>)>> {
-    if filter.all {
-        return filter_all_entries(ids, app);
+pub fn fetch_entries(ids: &IdFilter, app: &App, all: bool) -> Result<Vec<(Issue, Rc<str>)>> {
+    if all {
+        filter_all_entries(ids, app)
+    } else {
+        filter_active_entries(ids, app)
     }
-
-    filter_active_entries(ids, app)
 }
 
 /// Create or get the storage bucket using the current date.

@@ -191,6 +191,7 @@ pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
 }
 
 /// Store provided list of IDs as index.
+#[derive(Default)]
 pub struct IdFilter {
     pub index: Vec<String>,
 
@@ -241,13 +242,6 @@ impl IdFilter {
     /// Check if ID filter matches the ID.
     pub fn matches(&self, value: &String) -> bool {
         self.index.is_empty() || self.index.iter().any(|id| value.starts_with(id))
-    }
-
-    pub fn new() -> Self {
-        Self {
-            index: Default::default(),
-            empty_set: false,
-        }
     }
 }
 

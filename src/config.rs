@@ -35,6 +35,9 @@ pub struct DefaultsConfig {
     /// Status which is applied when 'done' command is called.
     pub status_complete: String,
 
+    /// Status which is applied upon entry removal.
+    pub status_deleted: String,
+
     /// Default time string to assign as 'due'.
     pub _due: String,
 }
@@ -84,6 +87,10 @@ impl Config {
 
         if self.defaults.status_complete.is_empty() {
             self.defaults.status_complete = "complete".into();
+        }
+
+        if self.defaults.status_deleted.is_empty() {
+            self.defaults.status_deleted = "deleted".into();
         }
 
         if self.values.active_status.is_empty() {

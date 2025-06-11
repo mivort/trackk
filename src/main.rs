@@ -83,9 +83,14 @@ fn main() -> Result<()> {
     app.filter = filter::parse_filter_args(&args, &app)?;
 
     match args.command {
-        Some(Command::List) => {
-            let ids = filter::IdFilter::new();
-            display::show_entries(&storage::fetch_entries(&ids, &args.filter_args, &app)?);
+        Some(Command::List(args)) => {
+            let ids = Default::default();
+            display::show_entries(&storage::fetch_entries(&ids, &app, args.all)?);
+        }
+        Some(Command::Info(_)) => {}
+        Some(Command::All) => {
+            let ids = Default::default();
+            display::show_entries(&storage::filter_all_entries(&ids, &app)?);
         }
         Some(Command::Edit(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
@@ -123,18 +128,26 @@ fn main() -> Result<()> {
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }
+        Some(Command::Remove(mut args)) => {
+            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
+            if args.entry.status.is_none() {
+                args.entry.status = Some(app.config.defaults.status_deleted.clone());
+            }
+            storage::modify_entries(&ids, &args.entry, &app)?;
+        }
         Some(Command::Init) => {
             repo::init_repo(&app.config)?;
         }
         Some(Command::Check) => {
             repo::check_repo();
         }
+        Some(Command::Merge(_)) => {}
         Some(Command::Report(_)) => {
             println!("Custom reports are not supported yet");
         }
         None => {
-            let ids = filter::IdFilter::new();
-            let entries = storage::fetch_entries(&ids, &args.filter_args, &app)?;
+            let ids = Default::default();
+            let entries = storage::filter_active_entries(&ids, &app)?;
 
             if !app.filter.ids.is_empty() {
                 for entry in &entries {
@@ -144,7 +157,6 @@ fn main() -> Result<()> {
                 display::show_entries(&entries);
             }
         }
-        _ => {}
     }
 
     Ok(())
