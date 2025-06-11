@@ -133,6 +133,7 @@ pub enum Token {
     RParen,
 
     #[regex("title")]
+    #[regex("desc")]
     #[regex("status")]
     #[regex("tag")]
     #[regex("created")]

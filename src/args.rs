@@ -10,6 +10,7 @@ pub struct Args {
     /// Supported rules:
     /// @[tag], status:, created:, modified:, due:, end:.
     /// Multiple conditions can be provided separated by comma (,) to use 'OR' matching.
+    #[arg(skip)]
     pub filter: Vec<String>,
 
     #[command(subcommand)]
@@ -81,8 +82,36 @@ impl Default for Command {
 #[command(allow_hyphen_values = true)]
 pub struct FilterArgs {
     /// Exclude entries which match the provided rule.
-    #[arg(long, short = 'x')]
+    #[arg(skip)]
     pub exclude: Vec<String>,
+
+    /// Filter entries containing the tag.
+    #[arg(long, short = 'u')]
+    pub tag: Vec<String>,
+
+    /// Filter entries containing the tag.
+    #[arg(long, short)]
+    pub notag: Vec<String>,
+
+    /// Filter entries by due date.
+    #[arg(long, short)]
+    pub due: Vec<String>,
+
+    /// Filter entries by created date.
+    #[arg(long)]
+    pub created: Vec<String>,
+
+    /// Filter entries by title.
+    #[arg(long, short = 'm')]
+    pub title: Vec<String>,
+
+    /// Filter entries by description.
+    #[arg(long)]
+    pub desc: Vec<String>,
+
+    /// Filter query to apply to the results.
+    #[arg(long, short)]
+    pub filter: Vec<String>,
 
     // TODO: deprecate separate filter flags in favor of rules
     /// List both active and inactive entries.
