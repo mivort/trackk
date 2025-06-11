@@ -156,11 +156,15 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
                 (Some(rhs), Some(lhs)) => stack.push(lhs.or(rhs)?),
                 _ => bail!("'or' ('||') operator haven't got enough arguments"),
             },
+            Eq => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.eq(rhs)?),
+                _ => bail!("'eq' ('==') operator haven't got enough arguments"),
+            },
             Not => match stack.pop() {
                 Some(val) => stack.push(val.not()?),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
             },
-            Eq | PartialEq | Less | LessEq | Greater | GreaterEq | NotEq => {
+            PartialEq | Less | LessEq | Greater | GreaterEq | NotEq => {
                 todo!()
             }
             LParen | RParen | Symbol => {

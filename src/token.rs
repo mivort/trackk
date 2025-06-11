@@ -87,11 +87,10 @@ pub enum Token {
 
     #[token("=")]
     #[token("==")]
-    #[token("eq:")]
     Eq,
 
     #[token("!=")]
-    #[token("ne:")]
+    #[token("~=")]
     NotEq,
 
     #[token("<")]
@@ -134,6 +133,7 @@ pub enum Token {
     RParen,
 
     #[regex(r"[A-Za-z]\w*", unknown_token)]
+    #[regex(r#"'[^']*'"#, unknown_token)]
     Symbol,
 }
 
@@ -260,6 +260,16 @@ impl Token {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs || rhs)),
             _ => bail!("'or' ('||') can only be applied to boolean expressions"),
+        }
+    }
+
+    /// Check if two are exactly the same.
+    pub fn eq(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
+            (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs == rhs)),
+            (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs == rhs)),
+            _ => bail!("'eq' ('==') was used on incompatible values"),
         }
     }
 
