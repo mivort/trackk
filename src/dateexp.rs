@@ -44,11 +44,11 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 mode = Mode::Op;
             }
             Add | Sub | Mul | Div | At | Eq | PartialEq | Less | LessEq | Greater | GreaterEq
-            | NotEq | And | Or => {
-                if !mode.expects_op() {
+            | NotEq | And | Or | Not => {
+                let (prec, left_assoc) = tok.prec_and_assoc();
+                if !mode.expects_op() && left_assoc {
                     bail!("Unexpected operator");
                 }
-                let (prec, left_assoc) = tok.prec_and_assoc();
                 while let Some(top) = op_stack.pop_if(|top| {
                     if let LParen = top {
                         return false;
@@ -61,7 +61,6 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 op_stack.push(tok);
                 mode = Mode::Arg;
             }
-            Not => todo!(),
             LParen => {
                 if !mode.expects_arg() {
                     bail!("Unexpected opening bracket");
@@ -179,7 +178,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
 fn full_exp_parsing() {
     let app = App::default();
     assert_eq!(parse_date("1.5h+2h", &app).unwrap(), 12600);
-    assert_eq!(parse_date("1s+2s*3", &app).unwrap(), 7, "op precedence check");
+    assert_eq!(parse_date("1s+2s*3", &app).unwrap(), 7, "op precedence");
 }
 
 #[test]

@@ -10,7 +10,7 @@ use crate::prelude::*;
 
 /// Parsed token types.
 #[derive(Clone, Copy, Debug, Logos)]
-#[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
+#[logos(skip r"[ \t\n\f\.]+", extras = OffsetDateTime, error = LexerError)]
 pub enum Token {
     #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
     #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
@@ -79,7 +79,7 @@ pub enum Token {
 
     #[token("@")]
     #[token("at")]
-    #[token(".at:")]
+    #[token("at:")]
     At,
 
     #[token(":")]
@@ -87,40 +87,37 @@ pub enum Token {
 
     #[token("=")]
     #[token("==")]
-    #[token(".eq:")]
+    #[token("eq:")]
     Eq,
 
     #[token("!=")]
-    #[token(".ne:")]
-    #[token(".not:")]
+    #[token("ne:")]
     NotEq,
 
     #[token("<")]
-    #[token(".lt:")]
-    #[token(".before:")]
+    #[token("lt:")]
+    #[token("before:")]
     Less,
 
     #[token("<=")]
-    #[token(".le:")]
+    #[token("le:")]
     LessEq,
 
     #[token(">")]
-    #[token(".gt:")]
-    #[token(".after:")]
+    #[token("gt:")]
+    #[token("after:")]
     Greater,
 
     #[token(">=")]
-    #[token(".ge:")]
+    #[token("ge:")]
     GreaterEq,
 
     #[token("&&")]
     #[token("and")]
-    #[token(".and.")]
     And,
 
     #[token("||")]
     #[token("or")]
-    #[token(".or.")]
     Or,
 
     #[token("!")]
