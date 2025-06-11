@@ -74,9 +74,12 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 }
                 mode = Mode::Op;
             }
-            Symbol => {
+            Reference => {
+                todo!("Reference support is not implemented yet")
+            }
+            String => {
                 let symbol = &input[span];
-                todo!("Symbol processing is not supported yet: {symbol}")
+                todo!("String processing is not supported yet: {symbol}")
             }
         }
     }
@@ -170,7 +173,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
             PartialEq | Less | LessEq | Greater | GreaterEq | NotEq => {
                 todo!()
             }
-            LParen | RParen | Symbol => {
+            LParen | RParen | String | Reference => {
                 panic!()
             }
         }

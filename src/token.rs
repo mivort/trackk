@@ -132,9 +132,18 @@ pub enum Token {
     #[token("]")]
     RParen,
 
+    #[regex("title")]
+    #[regex("status")]
+    #[regex("tag")]
+    #[regex("created")]
+    #[regex("modified")]
+    #[token("due")]
+    #[regex("end")]
+    Reference,
+
     #[regex(r"[A-Za-z]\w*")]
     #[regex(r#"'[^']*'"#)]
-    Symbol,
+    String,
 }
 
 impl Token {
