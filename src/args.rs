@@ -4,7 +4,7 @@ use serde_derive::Deserialize;
 /// Trackit command line arguments.
 #[derive(Parser)]
 #[command(author, version, about = None, long_about = None)]
-#[command(args_override_self = true, subcommand_precedence_over_arg = true)]
+#[command(args_override_self = true, allow_external_subcommands = true)]
 pub struct Args {
     /// List of filter rules.
     /// Supported rules:
@@ -17,7 +17,7 @@ pub struct Args {
     pub command: Option<Command>,
 
     /// Path to an external configuration file.
-    #[arg(short, long)]
+    #[arg(long)]
     pub config: Option<String>,
 
     /// Path to data storage.
@@ -47,8 +47,8 @@ pub enum Command {
     Modify(ModArgs),
 
     /// Mark specified tasks as done.
-    #[command(visible_aliases(["complete"]))]
-    Done,
+    #[command(visible_aliases(["complete", "c"]))]
+    Done(ModArgs),
 
     /// List entries using set of filters
     #[command(visible_aliases(["ls"]))]
@@ -56,11 +56,11 @@ pub enum Command {
 
     /// Show info about specified entry
     #[command(visible_aliases(["inf", "i"]))]
-    Info,
+    Info(InfoArgs),
 
     /// Edit using default editor program.
     #[command(visible_aliases(["e"]))]
-    Edit,
+    Edit(ModArgs),
 
     /// Merge two JSON storage buckets.
     Merge(MergeArgs),
@@ -70,6 +70,12 @@ pub enum Command {
 
     /// Check data repository and VCS status.
     Check,
+
+    /// If no built-in command was matched, consider one of reports defined
+    /// in the config.
+    #[command(external_subcommand)]
+    #[allow(unused)]
+    Report(Vec<String>),
 }
 
 impl Default for Command {
@@ -86,11 +92,11 @@ pub struct FilterArgs {
     pub exclude: Vec<String>,
 
     /// Filter entries containing the tag.
-    #[arg(long, short = 'u')]
+    #[arg(long, short)]
     pub tag: Vec<String>,
 
-    /// Filter entries containing the tag.
-    #[arg(long, short)]
+    /// Filter entries excluding the tag.
+    #[arg(long, short = 'u')]
     pub notag: Vec<String>,
 
     /// Filter entries by due date.
@@ -98,7 +104,7 @@ pub struct FilterArgs {
     pub due: Vec<String>,
 
     /// Filter entries by created date.
-    #[arg(long)]
+    #[arg(long, short)]
     pub created: Vec<String>,
 
     /// Filter entries by title.
@@ -106,8 +112,12 @@ pub struct FilterArgs {
     pub title: Vec<String>,
 
     /// Filter entries by description.
-    #[arg(long)]
+    #[arg(long, short = 'M')]
     pub desc: Vec<String>,
+
+    /// Filter by description using regular expression.
+    #[arg(long, short)]
+    pub glob: Vec<String>,
 
     /// Filter query to apply to the results.
     #[arg(long, short)]
@@ -119,6 +129,7 @@ pub struct FilterArgs {
     pub all: bool,
 }
 
+/// Args to apply changes to the selected entries.
 #[derive(Parser, Default)]
 #[command(allow_hyphen_values = true)]
 pub struct EntryArgs {
@@ -131,7 +142,7 @@ pub struct EntryArgs {
     pub due: Option<String>,
 
     /// Entry end date string.
-    #[arg(long)]
+    #[arg(long, short)]
     pub end: Option<String>,
 
     /// Entry status
@@ -151,6 +162,7 @@ pub struct EntryArgs {
     pub repeat: Option<String>,
 }
 
+/// Args specific for entry creation.
 #[derive(Parser, Default)]
 pub struct AddArgs {
     /// Don't use interactive input via default editor.
@@ -162,7 +174,16 @@ pub struct AddArgs {
 }
 
 #[derive(Parser, Default)]
+pub struct InfoArgs {
+    /// List of IDs to display.
+    pub ids: Vec<String>,
+}
+
+#[derive(Parser, Default)]
 pub struct ModArgs {
+    /// List of IDs to apply changes to.
+    pub ids: Vec<String>,
+
     #[command(flatten)]
     pub entry: EntryArgs,
 }

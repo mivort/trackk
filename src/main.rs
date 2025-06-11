@@ -86,7 +86,7 @@ fn main() -> Result<()> {
         Some(Command::List) => {
             display::show_entries(&storage::fetch_entries(&args.filter_args, &app)?);
         }
-        Some(Command::Edit) => {
+        Some(Command::Edit(_)) => {
             editor::edit_entries(&app)?;
         }
         Some(Command::Add(a)) => {
@@ -113,13 +113,10 @@ fn main() -> Result<()> {
         Some(Command::Modify(e)) => {
             storage::modify_entries(&e, &app)?;
         }
-        Some(Command::Done) => {
-            let args = args::ModArgs {
-                entry: args::EntryArgs {
-                    status: Some(app.config.defaults.status_complete.clone()),
-                    ..Default::default()
-                },
-            };
+        Some(Command::Done(mut args)) => {
+            if args.entry.status.is_none() {
+                args.entry.status = Some(app.config.defaults.status_complete.clone());
+            }
             storage::modify_entries(&args, &app)?;
         }
         Some(Command::Init) => {
@@ -127,6 +124,9 @@ fn main() -> Result<()> {
         }
         Some(Command::Check) => {
             repo::check_repo();
+        }
+        Some(Command::Report(_)) => {
+            println!("Custom reports are not supported yet");
         }
         None => {
             let entries = storage::fetch_entries(&args.filter_args, &app)?;
