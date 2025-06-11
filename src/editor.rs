@@ -7,6 +7,7 @@ use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
 use crate::bucket::Bucket;
+use crate::dateexp::parse_date;
 use crate::filter::IdFilter;
 use crate::issue::Issue;
 use crate::{App, prelude::*, storage};
@@ -30,7 +31,7 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
     }
 
     let mut edited = File::open(tempfile.path())?;
-    parse_markdown(issue, &mut edited)?;
+    parse_markdown(issue, &mut edited, app)?;
     issue.update_ts();
 
     Ok(status)
@@ -137,7 +138,7 @@ fn format_date(date: i64, offset: UtcOffset) -> Result<String> {
 }
 
 /// Read edited entry back to the issue struct.
-fn parse_markdown(issue: &mut Issue, file: &mut File) -> Result<()> {
+fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
     let mut entry = String::new();
     file.read_to_string(&mut entry)?;
 
@@ -167,6 +168,12 @@ fn parse_markdown(issue: &mut Issue, file: &mut File) -> Result<()> {
             "tags" => {
                 let tags = val.split_whitespace().filter(|s| !s.is_empty());
                 issue.tags = tags.map(|s| s.to_string()).collect();
+            }
+            "due" => {
+                issue.due = Some(parse_date(val, app)?);
+            }
+            "end" => {
+                issue.end = Some(parse_date(val, app)?);
             }
             "repeat" => {
                 let val = val.trim();
