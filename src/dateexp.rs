@@ -48,13 +48,12 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 if !mode.expects_op() {
                     bail!("Unexpected operator");
                 }
+                let (prec, left_assoc) = tok.prec_and_assoc();
                 while let Some(top) = op_stack.pop_if(|top| {
                     if let LParen = top {
                         return false;
                     }
                     let (top_prec, _) = top.prec_and_assoc();
-                    let (prec, left_assoc) = top.prec_and_assoc();
-
                     (top_prec > prec) || (top_prec == prec && left_assoc)
                 }) {
                     output.push(top)
@@ -179,7 +178,8 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
 #[test]
 fn full_exp_parsing() {
     let app = App::default();
-    assert_eq!(matches!(parse_date("1.5h+2h", &app), Ok(12600)), true);
+    assert_eq!(parse_date("1.5h+2h", &app).unwrap(), 12600);
+    assert_eq!(parse_date("1s+2s*3", &app).unwrap(), 7, "op precedence check");
 }
 
 #[test]
