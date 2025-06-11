@@ -98,6 +98,9 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         None => String::new(),
     };
 
+    let created = format_date(issue.created, offset)?;
+    let modified = format_date(issue.modified, offset)?;
+
     file.write_fmt(format_args!(
         concat!(
             "# {title}\n\n",
@@ -118,8 +121,8 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         end = end,
         tags = tags.join(" "),
         repeat = unwrap_some_or!(&issue.repeat, { "" }),
-        created = issue.created,
-        modified = issue.modified,
+        created = created,
+        modified = modified,
         id = issue.id,
     ))?;
 
