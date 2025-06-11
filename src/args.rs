@@ -39,7 +39,7 @@ pub enum Command {
     Log(AddArgs),
 
     /// Remove specified entry.
-    #[command(visible_aliases(["rem", "rm", "r", "delete", "del", "d"]))]
+    #[command(visible_aliases(["rm", "delete", "del"]))]
     Remove,
 
     /// Modify specified entry
@@ -47,7 +47,7 @@ pub enum Command {
     Modify(ModArgs),
 
     /// Mark specified tasks as done.
-    #[command(visible_aliases(["complete", "c"]))]
+    #[command(visible_aliases(["d"]))]
     Done(ModArgs),
 
     /// List entries using set of filters
@@ -102,6 +102,10 @@ pub struct FilterArgs {
     /// Filter entries by due date.
     #[arg(long, short)]
     pub due: Vec<String>,
+
+    /// Filter entries by end date.
+    #[arg(long, short)]
+    pub end: Vec<String>,
 
     /// Filter entries by created date.
     #[arg(long, short)]
