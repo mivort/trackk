@@ -249,6 +249,30 @@ impl Token {
             _ => bail!("'@' can only be applied to spans and dates"),
         }
     }
+
+    /// Perform logical AND.
+    pub fn and(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs && rhs)),
+            _ => bail!("'and' ('&&') can only be applied to boolean expressions"),
+        }
+    }
+
+    /// Perform logical OR.
+    pub fn or(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs || rhs)),
+            _ => bail!("'or' ('||') can only be applied to boolean expressions"),
+        }
+    }
+
+    /// Perform logical NOT.
+    pub fn not(self) -> Result<Self> {
+        match self {
+            Self::Bool(val) => Ok(Self::Bool(!val)),
+            _ => bail!("'not' ('!') can only be applied to boolean expressions"),
+        }
+    }
 }
 
 /// Custom lexing error type.
