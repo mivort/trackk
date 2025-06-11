@@ -1,5 +1,4 @@
 use std::num::ParseIntError;
-use std::rc::Rc;
 
 use logos::{Lexer, Logos};
 use thiserror::Error;
@@ -63,7 +62,7 @@ pub enum Token {
     #[allow(unused)]
     Bool(bool),
 
-    #[regex(r"//(\\/|[^/])*/", |lex| { println!("{}", lex.slice()); Some(()) })]
+    #[regex(r"//(\\/|[^/])*/")]
     Regex,
 
     #[token("+")]
@@ -133,10 +132,9 @@ pub enum Token {
     #[token("]")]
     RParen,
 
-    #[regex(r"[A-Za-z]\w*", symbol)]
-    #[regex(r#"'[^']*'"#, quoted_symbol)]
-    #[allow(unused)]
-    Symbol(Rc<str>),
+    #[regex(r"[A-Za-z]\w*")]
+    #[regex(r#"'[^']*'"#)]
+    Symbol,
 }
 
 impl Token {
@@ -474,15 +472,4 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
     ts.saturating_add(offset.days())
         .replace_time(Time::MIDNIGHT)
         .unix_timestamp()
-}
-
-/// Store symbol string inside the quotes.
-fn quoted_symbol(lex: &Lexer<Token>) -> Rc<str> {
-    let slice = lex.slice();
-    Rc::from(&slice[1..(slice.len() - 1)])
-}
-
-/// Store reference-counted symbol string.
-fn symbol(lex: &Lexer<Token>) -> Rc<str> {
-    Rc::from(lex.slice())
 }

@@ -32,7 +32,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
 
     let mut mode = Mode::Any;
 
-    for tok in lexer {
+    for (tok, span) in lexer.spanned() {
         let tok = tok?;
 
         match tok {
@@ -74,7 +74,8 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 }
                 mode = Mode::Op;
             }
-            Symbol(symbol) => {
+            Symbol => {
+                let symbol = &input[span];
                 todo!("Symbol processing is not supported yet: {symbol}")
             }
         }
@@ -169,10 +170,7 @@ fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> Resul
             PartialEq | Less | LessEq | Greater | GreaterEq | NotEq => {
                 todo!()
             }
-            Symbol(symbol) => {
-                todo!("Symbol processing is not supported yet: {symbol}")
-            }
-            LParen | RParen => {
+            LParen | RParen | Symbol => {
                 panic!()
             }
         }
