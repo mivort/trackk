@@ -1,6 +1,7 @@
 use crate::args::{EntryArgs, FilterArgs};
 use crate::bucket::Bucket;
 use crate::config::Config;
+use crate::filter::IdFilter;
 use crate::issue::Issue;
 use crate::{App, prelude::*};
 
@@ -29,11 +30,11 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entries(args: &EntryArgs, app: &App) -> Result<()> {
+pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()> {
     let mut changes = 0;
 
     let mut index = app.index_owned()?;
-    let entries = filter_all_entries(app)?;
+    let entries = filter_all_entries(ids, app)?;
 
     // TODO: ask if multiple entries are expected
     // TODO: use cache to reduce amount of re-parsing/writes?
@@ -62,12 +63,16 @@ pub fn modify_entries(args: &EntryArgs, app: &App) -> Result<()> {
 }
 
 /// Produce the list of entries to display or modify.
-pub fn fetch_entries(filter: &FilterArgs, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+pub fn fetch_entries(
+    ids: &IdFilter,
+    filter: &FilterArgs,
+    app: &App,
+) -> Result<Vec<(Issue, Rc<str>)>> {
     if filter.all {
-        return filter_all_entries(app);
+        return filter_all_entries(ids, app);
     }
 
-    filter_active_entries(app)
+    filter_active_entries(ids, app)
 }
 
 /// Create or get the storage bucket using the current date.
@@ -94,8 +99,11 @@ pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-pub fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut output = Vec::new();
+    if ids.empty_set {
+        return Ok(output);
+    }
 
     let data = &app.config.data;
     let walkdir = WalkDir::new(data).into_iter().filter_entry(|e| {
@@ -118,6 +126,10 @@ pub fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
         for mut issue in bucket.entries {
+            if !ids.matches(&issue.id) {
+                continue;
+            }
+
             if !app.filter.match_issue(&issue) {
                 continue;
             }
@@ -133,10 +145,13 @@ pub fn filter_all_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
 }
 
 /// Iterate over entries from the active index.
-pub fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
-    let cache = &mut *app.cache.borrow_mut();
-
+pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut result = Vec::new();
+    if ids.empty_set {
+        return Ok(result);
+    }
+
+    let cache = &mut *app.cache.borrow_mut();
     let index = app.index()?;
 
     for (idx, e) in index.active().iter().enumerate() {
@@ -147,6 +162,10 @@ pub fn filter_active_entries(app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
         let bucket = Bucket::from_cache(bucket_path, cache)?;
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
+            if !ids.matches(&issue.id) {
+                continue;
+            }
+
             if app.filter.match_issue(issue) {
                 result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
             }

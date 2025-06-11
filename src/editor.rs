@@ -7,6 +7,7 @@ use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
 use crate::bucket::Bucket;
+use crate::filter::IdFilter;
 use crate::issue::Issue;
 use crate::{App, prelude::*, storage};
 
@@ -36,9 +37,9 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
 }
 
 /// Iterate over matching entries and run editor for each.
-pub fn edit_entries(app: &App) -> Result<()> {
+pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
     let mut index = app.index_owned()?;
-    let entries = storage::filter_all_entries(app)?;
+    let entries = storage::filter_all_entries(ids, app)?;
 
     let mut changes = 0;
     for (mut issue, path) in entries {

@@ -192,37 +192,63 @@ pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
     Ok(resolved.to_owned())
 }
 
-/// Convert list of IDs with shorthands into a set of fully resolved IDs.
-pub fn resolve_shorthands(ids: Vec<String>, app: &App) -> Result<Option<HashSet<String>>> {
-    if ids.is_empty() {
-        return Ok(None);
-    }
+/// Store provided list of IDs as index.
+pub struct IdFilter {
+    pub index: HashSet<String>,
 
-    let mut res = HashSet::new();
-    let index = app.index()?;
+    /// Flag if ID filter shouldn't match anything.
+    pub empty_set: bool,
+}
 
-    for id in ids {
-        let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
-            res.insert(id);
-            continue;
-        });
-
-        if shorthand > 999999 {
-            res.insert(id);
-            continue;
+impl IdFilter {
+    /// Convert list of IDs with shorthands into a set of fully resolved IDs.
+    pub fn from_shorthands(ids: Vec<String>, app: &App) -> Result<Self> {
+        if ids.is_empty() {
+            return Ok(Self {
+                index: Default::default(),
+                empty_set: false,
+            });
         }
 
-        let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
-            continue;
-        });
-        let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
-            continue;
-        });
+        let mut res = HashSet::new();
+        let index = app.index()?;
 
-        res.insert(resolved.to_owned());
+        for id in ids {
+            let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
+                res.insert(id);
+                continue;
+            });
+
+            if shorthand > 999999 {
+                res.insert(id);
+                continue;
+            }
+
+            let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
+                continue;
+            });
+            let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
+                continue;
+            });
+
+            res.insert(resolved.to_owned());
+        }
+
+        let empty_set = res.is_empty();
+        Ok(Self { index: res, empty_set })
     }
 
-    Ok(Some(res))
+    /// Check if ID filter matches the ID.
+    pub fn matches(&self, value: &String) -> bool {
+        self.index.is_empty() || self.index.contains(value)
+    }
+
+    pub fn new() -> Self {
+        Self {
+            index: Default::default(),
+            empty_set: false,
+        }
+    }
 }
 
 #[test]

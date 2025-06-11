@@ -84,11 +84,12 @@ fn main() -> Result<()> {
 
     match args.command {
         Some(Command::List) => {
-            display::show_entries(&storage::fetch_entries(&args.filter_args, &app)?);
+            let ids = filter::IdFilter::new();
+            display::show_entries(&storage::fetch_entries(&ids, &args.filter_args, &app)?);
         }
         Some(Command::Edit(args)) => {
-            let _ids = filter::resolve_shorthands(args.ids, &app)?;
-            editor::edit_entries(&app)?;
+            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
+            editor::edit_entries(&ids, &app)?;
         }
         Some(Command::Add(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
@@ -112,15 +113,15 @@ fn main() -> Result<()> {
             storage::add_entry(issue, &app)?;
         }
         Some(Command::Modify(e)) => {
-            let _ids = filter::resolve_shorthands(e.ids, &app)?;
-            storage::modify_entries(&e.entry, &app)?;
+            let ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
+            storage::modify_entries(&ids, &e.entry, &app)?;
         }
         Some(Command::Done(mut args)) => {
-            let _ids = filter::resolve_shorthands(args.ids, &app)?;
+            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
             if args.entry.status.is_none() {
                 args.entry.status = Some(app.config.defaults.status_complete.clone());
             }
-            storage::modify_entries(&args.entry, &app)?;
+            storage::modify_entries(&ids, &args.entry, &app)?;
         }
         Some(Command::Init) => {
             repo::init_repo(&app.config)?;
@@ -132,7 +133,8 @@ fn main() -> Result<()> {
             println!("Custom reports are not supported yet");
         }
         None => {
-            let entries = storage::fetch_entries(&args.filter_args, &app)?;
+            let ids = filter::IdFilter::new();
+            let entries = storage::fetch_entries(&ids, &args.filter_args, &app)?;
 
             if !app.filter.ids.is_empty() {
                 for entry in &entries {
