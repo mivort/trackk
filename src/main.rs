@@ -142,8 +142,11 @@ fn main() -> Result<()> {
             repo::check_repo();
         }
         Some(Command::Merge(_)) => {}
-        Some(Command::Report(_)) => {
-            println!("Custom reports are not supported yet");
+        Some(Command::Report(report)) => {
+            println!(
+                "Custom report config '{}' not found",
+                report.first().unwrap()
+            );
         }
         None => {
             let ids = Default::default();
