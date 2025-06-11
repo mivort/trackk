@@ -81,7 +81,6 @@ impl Default for Command {
 }
 
 #[derive(Parser, Deserialize, Default, Clone)]
-#[command(allow_hyphen_values = true)]
 pub struct FilterArgs {
     /// Filter entries containing the tag.
     #[arg(long, short)]
@@ -122,7 +121,6 @@ pub struct FilterArgs {
 
 /// Args to apply changes to the selected entries.
 #[derive(Parser, Default)]
-#[command(allow_hyphen_values = true)]
 pub struct EntryArgs {
     /// Entry title
     #[arg(short('m'), visible_aliases(["message", "msg"]), long)]
