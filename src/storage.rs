@@ -1,4 +1,4 @@
-use crate::args::{FilterArgs, ModArgs};
+use crate::args::{EntryArgs, FilterArgs};
 use crate::bucket::Bucket;
 use crate::config::Config;
 use crate::issue::Issue;
@@ -29,7 +29,7 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entries(args: &ModArgs, app: &App) -> Result<()> {
+pub fn modify_entries(args: &EntryArgs, app: &App) -> Result<()> {
     let mut changes = 0;
 
     let mut index = app.index_owned()?;
@@ -41,7 +41,7 @@ pub fn modify_entries(args: &ModArgs, app: &App) -> Result<()> {
     for (issue, path) in &entries {
         let mut bucket = Bucket::from_path(&**path)?;
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
-        bucket_issue.apply_args(&args.entry, app)?;
+        bucket_issue.apply_args(args, app)?;
 
         if bucket_issue.status != issue.status {
             bucket_issue.update_end_ts();

@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use regex::Regex;
 
 use crate::args::Args;
@@ -188,6 +190,39 @@ pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
     });
 
     Ok(resolved.to_owned())
+}
+
+/// Convert list of IDs with shorthands into a set of fully resolved IDs.
+pub fn resolve_shorthands(ids: Vec<String>, app: &App) -> Result<Option<HashSet<String>>> {
+    if ids.is_empty() {
+        return Ok(None);
+    }
+
+    let mut res = HashSet::new();
+    let index = app.index()?;
+
+    for id in ids {
+        let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
+            res.insert(id);
+            continue;
+        });
+
+        if shorthand > 999999 {
+            res.insert(id);
+            continue;
+        }
+
+        let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
+            continue;
+        });
+        let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
+            continue;
+        });
+
+        res.insert(resolved.to_owned());
+    }
+
+    Ok(Some(res))
 }
 
 #[test]

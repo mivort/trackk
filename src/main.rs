@@ -86,7 +86,8 @@ fn main() -> Result<()> {
         Some(Command::List) => {
             display::show_entries(&storage::fetch_entries(&args.filter_args, &app)?);
         }
-        Some(Command::Edit(_)) => {
+        Some(Command::Edit(args)) => {
+            let _ids = filter::resolve_shorthands(args.ids, &app)?;
             editor::edit_entries(&app)?;
         }
         Some(Command::Add(a)) => {
@@ -111,13 +112,15 @@ fn main() -> Result<()> {
             storage::add_entry(issue, &app)?;
         }
         Some(Command::Modify(e)) => {
-            storage::modify_entries(&e, &app)?;
+            let _ids = filter::resolve_shorthands(e.ids, &app)?;
+            storage::modify_entries(&e.entry, &app)?;
         }
         Some(Command::Done(mut args)) => {
+            let _ids = filter::resolve_shorthands(args.ids, &app)?;
             if args.entry.status.is_none() {
                 args.entry.status = Some(app.config.defaults.status_complete.clone());
             }
-            storage::modify_entries(&args, &app)?;
+            storage::modify_entries(&args.entry, &app)?;
         }
         Some(Command::Init) => {
             repo::init_repo(&app.config)?;
