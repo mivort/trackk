@@ -79,7 +79,7 @@ impl Issue {
         }
         if let Some(status) = &args.status {
             self.status = status.clone();
-            self.update_status(args.end.is_none(), &app.config);
+            self.update_end(&app.config);
         }
         if let Some(due) = &args.due {
             self.due = Some(parse_date(due, app).context("Unable to parse the due date")?);
@@ -99,22 +99,19 @@ impl Issue {
         Ok(())
     }
 
-    /// Update entry status (and end timestamp in case if 'set_end' is true and
-    /// status is not in active list).
-    pub fn update_status(&mut self, set_end: bool, config: &Config) {
-        if set_end && !config.values.active_status.contains(&self.status) {
-            self.update_end_ts();
+    /// Update entry end timestamp if it's empty and status is not in active list.
+    /// If status is updated to one of the active states, clear the timestamp.
+    pub fn update_end(&mut self, config: &Config) {
+        if self.end.is_none() && !config.values.active_status.contains(&self.status) {
+            self.end = Some(UtcDateTime::now().unix_timestamp());
+        } else {
+            self.end = None;
         }
     }
 
     /// Update timestamp to the current time.
     pub fn update_ts(&mut self) {
         self.modified = UtcDateTime::now().unix_timestamp();
-    }
-
-    /// Update status timestamp to the current time.
-    pub fn update_end_ts(&mut self) {
-        self.end = Some(UtcDateTime::now().unix_timestamp());
     }
 
     /// Provide cloned entry with shorthand.

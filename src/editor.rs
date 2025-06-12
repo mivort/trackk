@@ -56,13 +56,13 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
         }
 
         if prev_issue.status != issue.status {
-            issue.update_status(issue.end.is_none(), &app.config);
+            issue.update_end(&app.config);
             index.update_status(&app.config, &path, &issue);
         }
 
         *prev_issue = issue;
 
-        storage::write_bucket(&bucket, &*path)?;
+        storage::write_bucket(&bucket, &*path, app)?;
         changes += 1;
     }
 

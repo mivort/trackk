@@ -59,7 +59,7 @@ impl App {
             return Ok(index.clone());
         }
 
-        index::Index::load(&self.config)
+        index::Index::load(&self.config).context("Unable to open active index")
     }
 
     /// Convert start timestamp to time with offset.
@@ -110,7 +110,7 @@ fn main() -> Result<()> {
         Some(Command::Log(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
             issue.status = app.config.defaults.status_complete.clone();
-            issue.update_end_ts();
+            issue.update_end(&app.config);
 
             if !a.no_edit {
                 editor::edit_entry(&mut issue, &app)?;

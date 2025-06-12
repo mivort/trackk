@@ -26,7 +26,7 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
     index.write()?;
 
     bucket.insert(new_entry);
-    write_bucket(&bucket, &path)
+    write_bucket(&bucket, &path, app)
 }
 
 /// Find entry using the filter and update its properties.
@@ -44,12 +44,12 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
         bucket_issue.apply_args(args, app)?;
 
-        if bucket_issue.status != issue.status {
-            bucket_issue.update_end_ts();
-            index.update_status(&app.config, path, issue);
+        if issue.status != bucket_issue.status {
+            bucket_issue.update_end(&app.config);
+            index.update_status(&app.config, path, bucket_issue);
         }
 
-        write_bucket(&bucket, &**path)?;
+        write_bucket(&bucket, &**path, app)?;
         changes += 1;
     }
 
@@ -88,8 +88,11 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 }
 
 /// Serialize bucket data and store in provided path.
-pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>) -> Result<()> {
+pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
+    let path = Path::new(&app.config.data_dir)
+        .join(&app.config.issues_dir)
+        .join(&path);
     fs::write(path, output)?;
 
     Ok(())
@@ -102,26 +105,21 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
         return Ok(output);
     }
 
-    let data = format!("{}/{}", &app.config.data_dir, &app.config.issues_dir);
-    let walkdir = WalkDir::new(data).into_iter().filter_entry(|e| {
-        !e.file_name()
-            .to_str()
-            .map(|n| n.starts_with("."))
-            .unwrap_or(false)
-    });
+    let path = Path::new(&app.config.data_dir).join(&app.config.issues_dir);
 
     let index = app.index()?;
     let mut op_stack = Vec::new();
 
-    for entry in walkdir {
+    for entry in WalkDir::new(&path) {
         let entry = entry?;
 
-        if entry.depth() < 2 || entry.file_type().is_dir() {
+        if entry.file_type().is_dir() {
             continue;
         }
 
-        let bucket = Bucket::from_path(entry.path(), app)?;
-        let path = Rc::<str>::from(entry.path().to_string_lossy());
+        let relpath = entry.path().strip_prefix(&path)?;
+        let bucket = Bucket::from_path(relpath, app)?;
+        let path = Rc::<str>::from(relpath.to_string_lossy());
 
         for mut issue in bucket.entries {
             if !ids.matches(&issue.id) {
