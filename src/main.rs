@@ -87,7 +87,14 @@ fn main() -> Result<()> {
             let ids = Default::default();
             display::show_entries(&storage::fetch_entries(&ids, &app, args.all)?);
         }
-        Some(Command::Info(_)) => {}
+        Some(Command::Info(args)) => {
+            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
+            let entries = storage::filter_active_entries(&ids, &app)?;
+
+            for entry in &entries {
+                display::show_entry(entry);
+            }
+        }
         Some(Command::All) => {
             let ids = Default::default();
             display::show_entries(&storage::filter_all_entries(&ids, &app)?);
