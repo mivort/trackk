@@ -110,6 +110,7 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
     });
 
     let index = app.index()?;
+    let mut op_stack = Vec::new();
 
     for entry in walkdir {
         let entry = entry?;
@@ -126,7 +127,8 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
                 continue;
             }
 
-            if !app.filter.match_issue(&issue, app)? {
+            op_stack.clear();
+            if !app.filter.match_issue(&issue, app, &mut op_stack)? {
                 continue;
             }
 
@@ -149,6 +151,7 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
 
     let cache = &mut *app.cache.borrow_mut();
     let index = app.index()?;
+    let mut op_stack = Vec::new();
 
     for (idx, e) in index.active().iter().enumerate() {
         let (bucket_path, id) = unwrap_some_or!(e.rsplit_once("/"), {
@@ -162,7 +165,8 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
                 continue;
             }
 
-            if app.filter.match_issue(issue, app)? {
+            op_stack.clear();
+            if app.filter.match_issue(issue, app, &mut op_stack)? {
                 result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
             }
         }

@@ -41,9 +41,9 @@ pub enum FilterRule {
 
 impl Filter {
     /// Compare issue properties to the filter.
-    pub fn match_issue(&self, issue: &Issue, app: &App) -> Result<bool> {
+    pub fn match_issue(&self, issue: &Issue, app: &App, stack: &mut Vec<Token>) -> Result<bool> {
         if !self.expression.is_empty() {
-            let _res = eval(&self.expression, app.local_time()?, &mut Vec::new())?;
+            let _res = eval(&self.expression, app.local_time()?, stack)?;
         }
 
         // TODO: remove old checks
@@ -283,7 +283,7 @@ fn match_issue() {
         ..Default::default()
     };
     assert_eq!(
-        filter.match_issue(&issue, &app).unwrap(),
+        filter.match_issue(&issue, &app, &mut Vec::new()).unwrap(),
         true,
         "when filter has right tag, match the issue"
     );
@@ -293,7 +293,7 @@ fn match_issue() {
         ..Default::default()
     };
     assert_eq!(
-        filter.match_issue(&issue, &app).unwrap(),
+        filter.match_issue(&issue, &app, &mut Vec::new()).unwrap(),
         false,
         "when filter doesn't have the right tag, don't match the issue"
     );
