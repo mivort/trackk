@@ -1,8 +1,9 @@
 use regex::Regex;
 
 use crate::args::Args;
-use crate::dateexp::parse_date;
+use crate::dateexp::{parse_date, parse_filter};
 use crate::issue::Issue;
+use crate::token::Token;
 use crate::{App, prelude::*};
 
 /// List of filter rules.
@@ -19,6 +20,9 @@ pub struct Filter {
 
     /// Negative filtering rules.
     exclude: Vec<FilterRule>,
+
+    /// Match expression to eval on entries.
+    expression: Vec<Token>,
 }
 
 /// Single filtering rule.
@@ -63,6 +67,11 @@ impl Filter {
         }
 
         true
+    }
+
+    /// Evaluate the match expression on the issue.
+    pub fn _match_expr(&self, _stack: &mut Vec<Token>) -> Result<bool> {
+        Ok(false)
     }
 
     /// Parse single argument, return 'true' on success.
@@ -152,11 +161,20 @@ impl FilterRule {
     }
 }
 
-/// Parse filter argument and return list of IDs (if there's any) and the filter.
-pub fn parse_filter_args(_args: &Args, app: &App) -> Result<Filter> {
+/// Parse filter expressions and combine these with 'and' operator.
+pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
+    let mut filter = Filter::default();
+
+    for expr in &args.filter_args.filter {
+        if parse_filter(&expr, app, &mut filter.expression)? > 0 {
+            filter.expression.push(Token::And);
+        }
+    }
+
+    // TODO: remove old filters handling
+
     let (positive, negative) = (Vec::<String>::new(), &Vec::<String>::new());
 
-    let mut filter = Filter::default();
     for arg in positive {
         // TODO: match aliases
 

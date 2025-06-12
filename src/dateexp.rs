@@ -7,7 +7,9 @@ use crate::{App, prelude::*, token::Token};
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
 pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     let local = app.local_time()?;
-    let exp = parse_exp(input, local)?;
+
+    let mut exp = Vec::<Token>::new();
+    parse_exp(input, local, &mut exp)?;
 
     let mut arg_stack = Vec::<Token>::new();
     let res = eval(&exp, local, &mut arg_stack)?;
@@ -21,13 +23,21 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
     }
 }
 
+/// Parse and append to filter expression, return number of token added.
+pub fn parse_filter(input: &str, app: &App, filter: &mut Vec<Token>) -> Result<usize> {
+    let pre = filter.len();
+
+    let local = app.local_time()?;
+    parse_exp(input, local, filter)?;
+
+    Ok(filter.len() - pre)
+}
+
 /// Produce parsed ASP tree ready for evaluation from the input.
-fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
+fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result<()> {
     use Token::*;
 
-    let mut output = Vec::<Token>::new();
     let mut op_stack = Vec::<Token>::new();
-
     let lexer = Token::lexer_with_extras(input, ts);
 
     let mut mode = Mode::Any;
@@ -69,7 +79,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
                 mode = Mode::Any;
             }
             RParen => {
-                if !tilt(&mut op_stack, &mut output) {
+                if !tilt(&mut op_stack, output) {
                     bail!("Mismatched closing bracket");
                 }
                 mode = Mode::Op;
@@ -83,7 +93,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
             }
         }
     }
-    if tilt(&mut op_stack, &mut output) {
+    if tilt(&mut op_stack, output) {
         bail!("Mismatched opening bracket");
     }
 
@@ -91,7 +101,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime) -> Result<Vec<Token>> {
         bail!("Dangling operator at the end of expression");
     }
 
-    Ok(output)
+    Ok(())
 }
 
 /// Token parser expected token state.
