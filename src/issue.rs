@@ -87,6 +87,12 @@ impl Issue {
         if let Some(end) = &args.end {
             self.end = Some(parse_date(end, app).context("Unable to parse the end date")?);
         }
+        for tag in &args.tag {
+            self.tags.insert(tag.clone());
+        }
+        for untag in &args.untag {
+            self.tags.remove(untag);
+        }
         if let Some(repeat) = &args.repeat {
             self.repeat = if repeat.is_empty() {
                 None
