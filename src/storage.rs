@@ -126,7 +126,7 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
                 continue;
             }
 
-            if !app.filter.match_issue(&issue) {
+            if !app.filter.match_issue(&issue, app)? {
                 continue;
             }
 
@@ -162,7 +162,7 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
                 continue;
             }
 
-            if app.filter.match_issue(issue) {
+            if app.filter.match_issue(issue, app)? {
                 result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
             }
         }

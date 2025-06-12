@@ -1,7 +1,7 @@
 use regex::Regex;
 
 use crate::args::Args;
-use crate::dateexp::{parse_date, parse_filter};
+use crate::dateexp::{eval, parse_date, parse_filter};
 use crate::issue::Issue;
 use crate::token::Token;
 use crate::{App, prelude::*};
@@ -41,37 +41,38 @@ pub enum FilterRule {
 
 impl Filter {
     /// Compare issue properties to the filter.
-    pub fn match_issue(&self, issue: &Issue) -> bool {
+    pub fn match_issue(&self, issue: &Issue, app: &App) -> Result<bool> {
+        if !self.expression.is_empty() {
+            let _res = eval(&self.expression, app.local_time()?, &mut Vec::new())?;
+        }
+
+        // TODO: remove old checks
+
         if !self.ids.is_empty() && !self.ids.iter().any(|id| issue.id.starts_with(id)) {
-            return false;
+            return Ok(false);
         }
 
         if !self.exclude_ids.is_empty()
             && self.exclude_ids.iter().any(|id| issue.id.starts_with(id))
         {
-            return false;
+            return Ok(false);
         }
 
         for group in &self.positive {
             for rule in group {
                 if !rule.match_issue(issue) {
-                    return false;
+                    return Ok(false);
                 }
             }
         }
 
         for rule in &self.exclude {
             if rule.match_issue(issue) {
-                return false;
+                return Ok(false);
             }
         }
 
-        true
-    }
-
-    /// Evaluate the match expression on the issue.
-    pub fn _match_expr(&self, _stack: &mut Vec<Token>) -> Result<bool> {
-        Ok(false)
+        Ok(true)
     }
 
     /// Parse single argument, return 'true' on success.
@@ -166,11 +167,12 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
     let mut filter = Filter::default();
 
     for expr in &args.filter_args.filter {
-        if parse_filter(&expr, app, &mut filter.expression)? > 0 {
+        if parse_filter(expr, app, &mut filter.expression)? > 0 {
             filter.expression.push(Token::And);
         }
     }
 
+    // TODO: add changes to filter from each argument type
     // TODO: remove old filters handling
 
     let (positive, negative) = (Vec::<String>::new(), &Vec::<String>::new());
@@ -258,7 +260,7 @@ impl IdFilter {
     }
 
     /// Check if ID filter matches the ID.
-    pub fn matches(&self, value: &String) -> bool {
+    pub fn matches(&self, value: &str) -> bool {
         self.index.is_empty() || self.index.iter().any(|id| value.starts_with(id))
     }
 }
@@ -267,6 +269,7 @@ impl IdFilter {
 fn match_issue() {
     use std::collections::HashSet;
 
+    let app = Default::default();
     let mut tags = HashSet::<String>::default();
     tags.extend(["a", "b", "c"].map(Into::into).into_iter());
 
@@ -280,7 +283,7 @@ fn match_issue() {
         ..Default::default()
     };
     assert_eq!(
-        filter.match_issue(&issue),
+        filter.match_issue(&issue, &app).unwrap(),
         true,
         "when filter has right tag, match the issue"
     );
@@ -290,7 +293,7 @@ fn match_issue() {
         ..Default::default()
     };
     assert_eq!(
-        filter.match_issue(&issue),
+        filter.match_issue(&issue, &app).unwrap(),
         false,
         "when filter doesn't have the right tag, don't match the issue"
     );
