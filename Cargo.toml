@@ -19,3 +19,6 @@ time = { version = "0.3.41", features = ["macros", "local-offset", "parsing", "f
 unwrap_or = "1.0.1"
 uuid = { version = "1.16.0", features = ["v4", "serde"] }
 walkdir = "2.5.0"
+
+[dev-dependencies]
+assert_cmd = "2.0.17"

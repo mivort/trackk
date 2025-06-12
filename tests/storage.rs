@@ -1,8 +1,12 @@
 use std::env;
 
+use assert_cmd::Command;
+
 #[test]
 fn init_storage() {
-    let _dir = env!("CARGO_TARGET_TMPDIR");
+    let dir = env!("CARGO_TARGET_TMPDIR");
 
-    // TODO: invoke the binary and check tmpdir content
+    let mut cmd = Command::cargo_bin("trackit").unwrap();
+    let cmd = cmd.args(&["--data", dir]);
+    cmd.assert().success();
 }
