@@ -48,7 +48,7 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
             break;
         }
 
-        let mut bucket = Bucket::from_path(&*path)?;
+        let mut bucket = Bucket::from_path(&*path, app)?;
         let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();
 
         if !prev_issue.differs(&issue) {

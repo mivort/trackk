@@ -1,5 +1,6 @@
-use std::fs::{self, File};
-use std::io::BufReader;
+use std::fs::File;
+use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::path::{Path, PathBuf};
 
 use crate::config::Config;
 use crate::issue::Issue;
@@ -11,16 +12,20 @@ pub struct Index {
     active: Vec<String>,
 
     /// Path to index.
-    index_path: String,
+    index_path: PathBuf,
 }
 
 impl Index {
     pub fn load(config: &Config) -> Result<Self> {
-        let index_path = format!("{}/active.json", config.data);
+        let index_path = Path::new(&config.data_dir).join("active");
         let active: Vec<String> = match File::open(&index_path) {
             Ok(data) => {
                 let reader = BufReader::new(data);
-                serde_json::from_reader(reader)?
+                let mut active = Vec::<String>::new();
+                for line in reader.lines() {
+                    active.push(line?);
+                }
+                active
             }
             Err(_) => Default::default(),
         };
@@ -51,7 +56,12 @@ impl Index {
 
     /// Write index back to storage.
     pub fn write(&self) -> Result<()> {
-        fs::write(&self.index_path, serde_json::to_string(&self.active)?)?;
+        let file = File::create(&self.index_path)?;
+        let mut writer = BufWriter::new(file);
+
+        for s in self.active() {
+            write!(writer, "{}\n", s)?;
+        }
 
         Ok(())
     }

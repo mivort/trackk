@@ -40,7 +40,7 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
     // TODO: use cache to reduce amount of re-parsing/writes?
 
     for (issue, path) in &entries {
-        let mut bucket = Bucket::from_path(&**path)?;
+        let mut bucket = Bucket::from_path(&**path, app)?;
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
         bucket_issue.apply_args(args, app)?;
 
@@ -75,8 +75,9 @@ pub fn fetch_entries(ids: &IdFilter, app: &App, all: bool) -> Result<Vec<(Issue,
 fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     let year = date.year();
     let month = date.month() as i32;
-    let data = &config.data;
-    let directory = format!("{data}/{year}");
+    let data = &config.data_dir;
+    let issues = &config.issues_dir;
+    let directory = format!("{data}/{issues}/{year}");
 
     fs::create_dir_all(&directory)?;
 
@@ -101,7 +102,7 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
         return Ok(output);
     }
 
-    let data = &app.config.data;
+    let data = format!("{}/{}", &app.config.data_dir, &app.config.issues_dir);
     let walkdir = WalkDir::new(data).into_iter().filter_entry(|e| {
         !e.file_name()
             .to_str()
@@ -119,7 +120,7 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
             continue;
         }
 
-        let bucket = Bucket::from_path(entry.path())?;
+        let bucket = Bucket::from_path(entry.path(), app)?;
         let path = Rc::<str>::from(entry.path().to_string_lossy());
 
         for mut issue in bucket.entries {
@@ -155,10 +156,11 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
 
     for (idx, e) in index.active().iter().enumerate() {
         let (bucket_path, id) = unwrap_some_or!(e.rsplit_once("/"), {
-            bail!("Active index entry has missing path");
+            bail!("Active index entry has broken reference: {e}");
         });
 
-        let bucket = Bucket::from_cache(bucket_path, cache)?;
+        let bucket = Bucket::from_cache(bucket_path, cache, app)
+            .with_context(|| format!("Unable to open bucket referenced in index: {bucket_path}"))?;
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
             if !ids.matches(&issue.id) {

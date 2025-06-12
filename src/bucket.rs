@@ -7,7 +7,7 @@ use std::rc::Rc;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::issue::Issue;
-use crate::prelude::*;
+use crate::{App, prelude::*};
 
 /// Storage bucket which groups several entries in a single file.
 #[derive(Serialize, Deserialize, Clone)]
@@ -31,16 +31,23 @@ impl Bucket {
     }
 
     /// Open file from the provided path and parse as bucket.
-    pub fn from_path(path: impl AsRef<Path>) -> Result<Self> {
+    pub fn from_path(path: impl AsRef<Path>, app: &App) -> Result<Self> {
+        let path = Path::new(&app.config.data_dir)
+            .join(&app.config.issues_dir)
+            .join(path);
         let file = File::open(&path)?;
         Self::from_file(&file, path)
     }
 
     /// Check cache and read from file system if not yet cached.
-    pub fn from_cache(path: &str, cache: &mut HashMap<String, Rc<Self>>) -> Result<Rc<Self>> {
+    pub fn from_cache(
+        path: &str,
+        cache: &mut HashMap<String, Rc<Self>>,
+        app: &App,
+    ) -> Result<Rc<Self>> {
         let bucket = unwrap_some_or!(cache.get(path), {
             &(|| -> Result<_> {
-                let bucket = Rc::new(Bucket::from_path(path)?);
+                let bucket = Rc::new(Bucket::from_path(path, app)?);
                 cache.insert(path.to_owned(), bucket.clone());
                 Ok(bucket)
             })()?
