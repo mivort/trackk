@@ -170,10 +170,20 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
                 issue.tags = tags.map(|s| s.to_string()).collect();
             }
             "due" => {
-                issue.due = Some(parse_date(val, app)?);
+                let val = val.trim();
+                issue.due = if val.is_empty() {
+                    None
+                } else {
+                    Some(parse_date(val, app)?)
+                };
             }
             "end" => {
-                issue.end = Some(parse_date(val, app)?);
+                let val = val.trim();
+                issue.end = if val.is_empty() {
+                    None
+                } else {
+                    Some(parse_date(val, app)?)
+                };
             }
             "repeat" => {
                 let val = val.trim();
