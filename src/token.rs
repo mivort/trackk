@@ -86,7 +86,7 @@ pub enum Token {
     At,
 
     #[token(":")]
-    PartialEq,
+    FuzzyEq,
 
     #[token("=")]
     #[token("==")]

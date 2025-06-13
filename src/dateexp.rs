@@ -53,7 +53,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
                 output.push(tok);
                 mode = Mode::Op;
             }
-            Add(_) | Sub(_) | Mul | Div | At | Eq | PartialEq | Less | LessEq | Greater
+            Add(_) | Sub(_) | Mul | Div | At | Eq | FuzzyEq | Less | LessEq | Greater
             | GreaterEq | NotEq | And | Or | Not => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
                 let (tok, left_assoc) = if !mode.expects_op() {
@@ -192,7 +192,7 @@ pub fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> R
                 Some(val) => stack.push(val.not()?),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
             },
-            PartialEq | Less | LessEq | Greater | GreaterEq | NotEq => {
+            FuzzyEq | Less | LessEq | Greater | GreaterEq | NotEq => {
                 todo!()
             }
             LParen | RParen | String(_) | Reference => {
