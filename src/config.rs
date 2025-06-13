@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::env;
 
@@ -14,7 +15,7 @@ pub struct Config {
     pub issues_path: Box<str>,
 
     /// Editor used for entry input.
-    pub editor: Box<str>,
+    editor: Box<str>,
 
     /// User-defined fields.
     pub fields: HashMap<String, FieldType>,
@@ -35,16 +36,16 @@ pub struct Config {
 #[derive(Deserialize, Default)]
 pub struct DefaultsConfig {
     /// Default status to assign upon creation.
-    pub status_initial: Box<str>,
+    status_initial: Box<str>,
 
     /// Status which is applied when 'done' command is called.
-    pub status_complete: Box<str>,
+    status_complete: Box<str>,
 
     /// Status which is applied upon entry removal.
-    pub status_deleted: Box<str>,
+    status_deleted: Box<str>,
 
     /// Default time string to assign as 'due'.
-    pub due: Box<str>,
+    due: Box<str>,
 }
 
 #[derive(Deserialize, Default)]
@@ -83,22 +84,6 @@ impl Config {
             self.issues_path = "issues".into();
         }
 
-        if self.editor.is_empty() {
-            self.editor = self.fallback_editor().into();
-        }
-
-        if self.defaults.status_initial.is_empty() {
-            self.defaults.status_initial = "pending".into();
-        }
-
-        if self.defaults.status_complete.is_empty() {
-            self.defaults.status_complete = "complete".into();
-        }
-
-        if self.defaults.status_deleted.is_empty() {
-            self.defaults.status_deleted = "deleted".into();
-        }
-
         if self.values.active_status.is_empty() {
             self.values.active_status = hash_set(&["pending", "started", "blocked"]);
         }
@@ -110,11 +95,46 @@ impl Config {
     }
 
     /// Provide default editor value.
-    fn fallback_editor(&self) -> String {
-        unwrap_err_or!(env::var("TRACKIT_EDITOR"), editor, { return editor });
-        unwrap_err_or!(env::var("EDITOR"), editor, { return editor });
+    pub fn fallback_editor(&self) -> Cow<str> {
+        if !self.editor.is_empty() {
+            return Cow::Borrowed(&*self.editor);
+        }
+
+        unwrap_err_or!(env::var("TRACKIT_EDITOR"), editor, { return editor.into() });
+        unwrap_err_or!(env::var("EDITOR"), editor, { return editor.into() });
 
         "nano".into()
+    }
+}
+
+impl DefaultsConfig {
+    /// Status which is assigned by default when entry is created.
+    pub fn status_initial(&self) -> &str {
+        if self.status_initial.is_empty() {
+            return "pending";
+        }
+        &self.status_initial
+    }
+
+    /// Status which is assigned when entry is marked as done.
+    pub fn status_complete(&self) -> &str {
+        if self.status_complete.is_empty() {
+            return "complete";
+        }
+        &self.status_complete
+    }
+
+    /// Status which is assigned when entry is deleted.
+    pub fn status_deleted(&self) -> &str {
+        if self.status_deleted.is_empty() {
+            return "deleted";
+        }
+        &self.status_deleted
+    }
+
+    /// Default due date expression.
+    pub fn due(&self) -> &str {
+        &self.due
     }
 }
 
@@ -166,7 +186,7 @@ pub enum SyncDriver {
 #[inline]
 fn hash_set(items: &[&str]) -> HashSet<String> {
     items
-        .into_iter()
+        .iter()
         .map(|v| v.to_string())
         .collect::<HashSet<String>>()
 }

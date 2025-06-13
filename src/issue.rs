@@ -67,7 +67,7 @@ impl Issue {
         let mut new = Self {
             id: new_uuid,
             created: app.ts,
-            status: app.config.defaults.status_initial.to_string(),
+            status: app.config.defaults.status_initial().to_string(),
             ..Default::default()
         };
 
