@@ -195,12 +195,7 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
             }
         }
 
-        let _bucket = Bucket::from_full_path(entry.path()).with_context(|| {
-            format!(
-                "Unable to open the bucket for reading: {}",
-                entry.path().to_string_lossy()
-            )
-        })?;
+        let _bucket = Bucket::from_full_path(entry.path())?;
     }
     Ok(())
 }

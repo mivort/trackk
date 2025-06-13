@@ -40,8 +40,13 @@ impl Bucket {
 
     /// Open file from the provided full path and parse as bucket.
     pub fn from_full_path(path: impl AsRef<Path>) -> Result<Self> {
-        let file = File::open(&path)?;
-        Self::from_file(&file, path)
+        let file = File::open(&path).with_context(|| {
+            format!(
+                "Unable to open the bucket: {}",
+                path.as_ref().to_string_lossy()
+            )
+        })?;
+        Self::from_file(&file, &path)
     }
 
     /// Check cache and read from file system if not yet cached.
