@@ -168,57 +168,51 @@ impl Token {
     /// Produce a sum of durations or durations and dates, error for
     /// incompatible arguments.
     pub fn sum(self, rhs: Self) -> Result<Self> {
-        match self {
-            Self::Duration(lhs) => match rhs {
-                Self::Date(rhs) => Ok(Self::Date(lhs as i64 + rhs)),
-                Self::Duration(rhs) => Ok(Self::Duration(lhs + rhs)),
-                _ => bail!("Unsupported arguments"),
-            },
-            Self::Date(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Date(lhs + rhs as i64)),
-                _ => bail!("Unsupported arguments"),
-            },
-            _ => panic!("Non-literal arguments"),
+        use Token::*;
+
+        match (self, rhs) {
+            (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs + rhs)),
+            (Date(lhs), Duration(rhs)) => Ok(Date(lhs + rhs as i64)),
+            (Duration(lhs), Date(rhs)) => Ok(Date(lhs as i64 + rhs)),
+            _ => bail!("Unsupported '+' operator arguments"),
         }
     }
 
     /// Produce a substraction of durations and dates.
     pub fn sub(self, rhs: Self) -> Result<Self> {
-        match self {
-            Self::Duration(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Duration(lhs - rhs)),
-                Self::Date(_) => bail!("Date can't be negative"),
-                _ => bail!("Unsupported arguments"),
-            },
-            Self::Date(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Date(lhs - rhs as i64)),
-                _ => bail!("Unsupported arguments"),
-            },
-            _ => panic!("Non-literal arguments"),
+        use Token::*;
+
+        match (self, rhs) {
+            (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs - rhs)),
+            (Date(lhs), Duration(rhs)) => Ok(Date(lhs - rhs as i64)),
+            (Date(lhs), Date(rhs)) => Ok(Duration((lhs - rhs) as f64)),
+            (Duration(_), Date(_)) => bail!("Unable substract date from span"),
+            _ => bail!("Unsupported '-' operator arguments"),
         }
     }
 
     /// Produce a multiplication of two duration values.
     pub fn mul(self, rhs: Self) -> Result<Self> {
-        match self {
-            Self::Duration(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Duration(lhs * rhs)),
-                _ => bail!("Unsupported arguments"),
-            },
-            Self::Date(_) => bail!("Unsupported arguments"),
-            _ => panic!("Non-literal arguments"),
+        use Token::*;
+
+        match (self, rhs) {
+            (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs * rhs)),
+            _ => bail!("Unsupported '*' operator arguments"),
         }
     }
 
     /// Produce a multiplication of two duration values.
     pub fn div(self, rhs: Self) -> Result<Self> {
-        match self {
-            Self::Duration(lhs) => match rhs {
-                Self::Duration(rhs) => Ok(Self::Duration(lhs / rhs)),
-                _ => bail!("Unsupported arguments"),
-            },
-            Self::Date(_) => bail!("Unsupported arguments"),
-            _ => panic!("Non-literal arguments"),
+        use Token::*;
+
+        match (self, rhs) {
+            (Duration(lhs), Duration(rhs)) => {
+                if rhs.abs() == 0.0 {
+                    bail!("Division '/' by zero");
+                }
+                Ok(Duration(lhs / rhs))
+            }
+            _ => bail!("Unsupported '/' operator arguments"),
         }
     }
 
