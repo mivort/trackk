@@ -18,7 +18,7 @@ pub fn parse_date(input: &str, app: &App) -> Result<i64> {
         Token::Date(date) => Ok(date),
         Token::Duration(rel) => Ok(app.ts + rel as i64),
         Token::Bool(val) => bail!("Date expression returned boolean ({val})"),
-        Token::Regex => bail!("Date expression returned regular expression"),
+        Token::Regex(_) => bail!("Date expression returned regular expression"),
         _ => panic!(),
     }
 }
@@ -46,7 +46,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
         let tok = tok?;
 
         match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex => {
+            Duration(_) | Date(_) | Bool(_) | Regex(_) => {
                 if !mode.expects_arg() {
                     bail!("Unexpected date argument");
                 }
@@ -94,7 +94,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
             Reference => {
                 todo!("Reference support is not implemented yet")
             }
-            String => {
+            String(_) => {
                 let symbol = &input[span];
                 todo!("String processing is not supported yet: {symbol}")
             }
@@ -147,7 +147,7 @@ pub fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> R
 
     for tok in queue {
         match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex => stack.push(tok.clone()),
+            Duration(_) | Date(_) | Bool(_) | Regex(_) => stack.push(tok.clone()),
             Add(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
                 _ => bail!("'+' operator haven't got enough arguments"),
@@ -195,7 +195,7 @@ pub fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> R
             PartialEq | Less | LessEq | Greater | GreaterEq | NotEq => {
                 todo!()
             }
-            LParen | RParen | String | Reference => {
+            LParen | RParen | String(_) | Reference => {
                 panic!()
             }
         }

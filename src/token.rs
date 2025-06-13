@@ -63,7 +63,8 @@ pub enum Token {
     Bool(bool),
 
     #[token("//", parse_regex)]
-    Regex,
+    #[allow(unused)]
+    Regex(Box<regex::Regex>),
 
     /// Addition operator with unary mode flag.
     #[token("+", |_| false)]
@@ -145,9 +146,9 @@ pub enum Token {
     #[regex("end")]
     Reference,
 
-    #[regex(r"[A-Za-z]\w*")]
-    #[regex(r#"'[^']*'"#)]
-    String,
+    #[regex(r"[A-Za-z]\w*", |_| ())]
+    #[regex(r#"'[^']*'"#, |_| ())]
+    String(()),
 }
 
 impl Token {
@@ -457,16 +458,18 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 }
 
 /// Find the the boundaries of regex.
-fn parse_regex(lex: &mut Lexer<Token>) -> Result<(), LexerError> {
+fn parse_regex(lex: &mut Lexer<Token>) -> Result<Box<regex::Regex>, LexerError> {
     let remainder = lex.remainder();
     let end = unwrap_some_or!(remainder.find(lex.slice()), {
         return Err(LexerError::token_error("regex teminator ('//') not found"));
     });
 
-    // TODO: parse slice
+    let regex = Box::new(unwrap_ok_or!(regex::Regex::new(&remainder[..end]), _, {
+        return Err(LexerError::token_error(&remainder[..end]));
+    }));
 
     lex.bump(end + lex.slice().len());
-    Ok(())
+    Ok(regex)
 }
 
 /// Parse relative date alias.
