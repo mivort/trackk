@@ -62,7 +62,7 @@ pub enum Token {
     #[allow(unused)]
     Bool(bool),
 
-    #[regex(r"//(\\/|[^/])*/")]
+    #[token("//", parse_regex)]
     Regex,
 
     /// Addition operator with unary mode flag.
@@ -115,6 +115,7 @@ pub enum Token {
 
     #[token("&&")]
     #[token("and")]
+    #[token(",")]
     And,
 
     #[token("||")]
@@ -216,6 +217,7 @@ impl Token {
     }
 
     /// Produce a multiplication of two duration values.
+    /// On booleans, produce 'or'.
     pub fn div(self, rhs: Self) -> Result<Self> {
         use Token::*;
 
@@ -226,6 +228,7 @@ impl Token {
                 }
                 Ok(Duration(lhs / rhs))
             }
+            (Bool(lhs), Bool(rhs)) => Ok(Bool(lhs || rhs)),
             _ => bail!("Unsupported '/' operator arguments"),
         }
     }
@@ -451,6 +454,19 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
         return Err(LexerError::token_error(lex.slice()));
     });
     Ok(res.assume_offset(lex.extras.offset()).unix_timestamp())
+}
+
+/// Find the the boundaries of regex.
+fn parse_regex(lex: &mut Lexer<Token>) -> Result<(), LexerError> {
+    let remainder = lex.remainder();
+    let end = unwrap_some_or!(remainder.find(lex.slice()), {
+        return Err(LexerError::token_error("regex teminator ('//') not found"));
+    });
+
+    // TODO: parse slice
+
+    lex.bump(end + 2);
+    Ok(())
 }
 
 /// Parse relative date alias.
