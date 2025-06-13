@@ -42,8 +42,13 @@ pub enum FilterRule {
 impl Filter {
     /// Compare issue properties to the filter.
     pub fn match_issue(&self, issue: &Issue, app: &App, stack: &mut Vec<Token>) -> Result<bool> {
-        if !self.expression.is_empty() {
-            let _res = eval(&self.expression, app.local_time()?, stack)?;
+        if self.expression.is_empty() {
+            return Ok(true);
+        }
+
+        let res = eval(&self.expression, app.local_time()?, stack)?;
+        if let Token::Bool(res) = res {
+            return Ok(res);
         }
 
         // TODO: remove old checks
