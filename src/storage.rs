@@ -117,8 +117,8 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
             continue;
         }
 
+        let bucket = Bucket::from_full_path(entry.path())?;
         let relpath = entry.path().strip_prefix(&path)?;
-        let bucket = Bucket::from_path(relpath, app)?;
         let path = Rc::<str>::from(relpath.to_string_lossy());
 
         for mut issue in bucket.entries {
@@ -179,7 +179,8 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
 /// not set and mtime is lower or equal to index, skip the entry.
 pub fn refresh_index(app: &App, force: bool) -> Result<()> {
     let path = Path::new(&app.config.data_dir).join(&app.config.issues_dir);
-    let index = app.index_mut()?;
+    let mut index = app.index_mut()?;
+    let mut changes = false;
 
     for entry in WalkDir::new(&path) {
         let entry = entry?;
@@ -195,7 +196,18 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
             }
         }
 
-        let _bucket = Bucket::from_full_path(entry.path())?;
+        let bucket = Bucket::from_full_path(entry.path())?;
+        let relpath = entry.path().strip_prefix(&path)?;
+
+        for issue in &bucket.entries {
+            index.update_status(&app.config, &relpath.to_string_lossy(), issue);
+        }
+        changes = true;
     }
+
+    if changes {
+        index.write()?;
+    }
+
     Ok(())
 }
