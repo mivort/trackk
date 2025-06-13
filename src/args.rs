@@ -64,8 +64,8 @@ pub enum Command {
     /// Init the storage and VCS repo.
     Init,
 
-    /// Refresh the index on manual data update.
-    Refresh,
+    /// Refresh the active entries index (in case if storage was edited manually).
+    Refresh(RefreshArgs),
 
     /// Check data repository and VCS status.
     Check,
@@ -169,6 +169,13 @@ pub struct AddArgs {
 pub struct InfoArgs {
     /// List of IDs to display.
     pub ids: Vec<String>,
+}
+
+#[derive(Parser, Default)]
+pub struct RefreshArgs {
+    /// Ignore modify time and re-parse all storage files.
+    #[arg(short, long)]
+    pub force: bool,
 }
 
 #[derive(Parser, Default)]
