@@ -31,10 +31,12 @@ pub struct Issue {
     pub status: String,
 
     /// Parent issue ID.
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub parent: Option<String>,
 
     /// Repeat string which is applied to task copy upon completion.
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub repeat: Option<String>,
 
@@ -47,10 +49,12 @@ pub struct Issue {
     pub modified: i64,
 
     /// Due date/time.
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub due: Option<i64>,
 
     /// Last status change timestamp.
+    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub end: Option<i64>,
 }
