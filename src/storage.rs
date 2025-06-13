@@ -33,8 +33,8 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
 pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()> {
     let mut changes = 0;
 
-    let mut index = app.index_mut()?;
     let entries = filter_all_entries(ids, app)?;
+    let mut index = app.index_mut()?;
 
     // TODO: ask if multiple entries are expected
     // TODO: use cache to reduce amount of re-parsing/writes?

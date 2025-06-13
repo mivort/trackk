@@ -39,8 +39,8 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
 
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
-    let mut index = app.index_mut()?;
     let entries = storage::filter_all_entries(ids, app)?;
+    let mut index = app.index_mut()?;
 
     let mut changes = 0;
     for (mut issue, path) in entries {
