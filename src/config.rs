@@ -26,10 +26,10 @@ pub struct Config {
     pub values: ValuesConfig,
 
     /// Options related to VCS used with the storage.
-    pub _vcs: VcsConfig,
+    pub sync: SyncConfig,
 
     /// Index of available reports.
-    pub _reports: HashMap<String, ReportConfig>,
+    pub reports: HashMap<String, ReportConfig>,
 }
 
 #[derive(Deserialize, Default)]
@@ -44,7 +44,7 @@ pub struct DefaultsConfig {
     pub status_deleted: Box<str>,
 
     /// Default time string to assign as 'due'.
-    pub _due: Box<str>,
+    pub due: Box<str>,
 }
 
 #[derive(Deserialize, Default)]
@@ -53,19 +53,16 @@ pub struct ValuesConfig {
     pub active_status: HashSet<String>,
 
     /// Only allow to assign tags from this list. Allow any tag if empty.
-    pub _permit_tags: HashSet<String>,
+    pub permit_tags: HashSet<String>,
 
-    /// Only allow one of the provided statuses.
-    pub _permit_status: HashSet<String>,
+    /// Only allow one of the provided statuses. Don't check status if empty.
+    pub permit_status: HashSet<String>,
 }
 
 #[derive(Deserialize, Default)]
-pub struct VcsConfig {
-    /// Command using during sync before the push.
-    pub _pull_command: Vec<String>,
-
-    /// Command used during sync after the pull.
-    pub _push_command: Vec<String>,
+pub struct SyncConfig {
+    /// Select one of the supported sync drivers.
+    pub driver: SyncDriver,
 }
 
 impl Config {
@@ -103,9 +100,12 @@ impl Config {
         }
 
         if self.values.active_status.is_empty() {
-            self.values.active_status.insert("pending".into());
-            self.values.active_status.insert("started".into());
-            self.values.active_status.insert("blocked".into());
+            self.values.active_status = hash_set(&["pending", "started", "blocked"]);
+        }
+
+        if self.values.permit_status.is_empty() {
+            self.values.permit_status =
+                hash_set(&["pending", "started", "blocked", "complete", "deleted"]);
         }
     }
 
@@ -154,4 +154,19 @@ pub enum IndexType {
     Active,
     Recent,
     All,
+}
+
+#[derive(Deserialize, Default)]
+pub enum SyncDriver {
+    #[default]
+    Git,
+}
+
+/// Produce a hash set from slice.
+#[inline]
+fn hash_set(items: &[&str]) -> HashSet<String> {
+    items
+        .into_iter()
+        .map(|v| v.to_string())
+        .collect::<HashSet<String>>()
 }
