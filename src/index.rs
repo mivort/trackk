@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::{Path, PathBuf};
+use std::time::SystemTime;
 
 use crate::config::Config;
 use crate::issue::Issue;
@@ -11,6 +12,9 @@ pub struct Index {
     /// List of currently active entries.
     active: Vec<String>,
 
+    /// Index last modify time.
+    _mtime: SystemTime,
+
     /// Path to index.
     index_path: PathBuf,
 }
@@ -18,19 +22,20 @@ pub struct Index {
 impl Index {
     pub fn load(config: &Config) -> Result<Self> {
         let index_path = Path::new(&config.data_dir).join("active");
-        let active: Vec<String> = match File::open(&index_path) {
+        let (active, mtime) = match File::open(&index_path) {
             Ok(data) => {
+                let mtime = data.metadata()?.modified()?;
                 let reader = BufReader::new(data);
                 let mut active = Vec::<String>::new();
                 for line in reader.lines() {
                     active.push(line?);
                 }
-                active
+                (active, mtime)
             }
-            Err(_) => Default::default(),
+            Err(_) => (Default::default(), SystemTime::UNIX_EPOCH),
         };
 
-        Ok(Self { active, index_path })
+        Ok(Self { active, _mtime: mtime, index_path })
     }
 
     /// Append entry to active/shorthand storage.

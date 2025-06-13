@@ -117,6 +117,8 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
             continue;
         }
 
+        let _m = entry.metadata()?.modified()?;
+
         let relpath = entry.path().strip_prefix(&path)?;
         let bucket = Bucket::from_path(relpath, app)?;
         let path = Rc::<str>::from(relpath.to_string_lossy());
