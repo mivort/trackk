@@ -241,26 +241,20 @@ impl Token {
 
     /// Apply time to the date.
     pub fn at(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        match self {
-            Self::Date(lhs) => match rhs {
-                Self::Date(rhs) => {
-                    let ltime = (lhs + ts.offset().whole_seconds() as i64) % 86400;
-                    let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
-                    Ok(Self::Date(lhs - ltime + rtime))
-                }
-                _ => bail!("'@' can only apply time to spans and dates"),
-            },
-            Self::Duration(lhs) => match rhs {
-                Self::Date(rhs) => {
-                    let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
-                    let with_offset = ts
-                        .saturating_add((lhs as i64).seconds())
-                        .replace_time(Time::MIDNIGHT)
-                        .saturating_add(rtime.seconds());
-                    Ok(Self::Date(with_offset.unix_timestamp()))
-                }
-                _ => bail!("'@' can only apply time to spans and dates"),
-            },
+        match (self, rhs) {
+            (Self::Date(lhs), Self::Date(rhs)) => {
+                let ltime = (lhs + ts.offset().whole_seconds() as i64) % 86400;
+                let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
+                Ok(Self::Date(lhs - ltime + rtime))
+            }
+            (Self::Duration(lhs), Self::Date(rhs)) => {
+                let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
+                let with_offset = ts
+                    .saturating_add((lhs as i64).seconds())
+                    .replace_time(Time::MIDNIGHT)
+                    .saturating_add(rtime.seconds());
+                Ok(Self::Date(with_offset.unix_timestamp()))
+            }
             _ => bail!("'@' can only be applied to spans and dates"),
         }
     }
