@@ -166,8 +166,8 @@ impl FilterRule {
 pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
     let mut filter = Filter::default();
 
-    for expr in &args.filter_args.filter {
-        if parse_filter(expr, app, &mut filter.expression)? > 0 {
+    for (i, expr) in args.filter_args.filter.iter().enumerate() {
+        if parse_filter(expr, app, &mut filter.expression)? > 0 && i > 0 {
             filter.expression.push(Token::And);
         }
     }
