@@ -21,7 +21,7 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
         bail!("collision has occured: task uuid exists");
     }
 
-    let mut index = app.index_owned()?;
+    let mut index = app.index_mut()?;
     index.update_status(&app.config, &path, &new_entry);
     index.write()?;
 
@@ -33,7 +33,7 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
 pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()> {
     let mut changes = 0;
 
-    let mut index = app.index_owned()?;
+    let mut index = app.index_mut()?;
     let entries = filter_all_entries(ids, app)?;
 
     // TODO: ask if multiple entries are expected

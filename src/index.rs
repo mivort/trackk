@@ -13,29 +13,39 @@ pub struct Index {
     active: Vec<String>,
 
     /// Index last modify time.
-    _mtime: SystemTime,
+    mtime: SystemTime,
 
     /// Path to index.
-    index_path: PathBuf,
+    path: PathBuf,
+}
+
+impl Default for Index {
+    fn default() -> Self {
+        Self {
+            active: Default::default(),
+            path: Default::default(),
+            mtime: SystemTime::UNIX_EPOCH,
+        }
+    }
 }
 
 impl Index {
-    pub fn load(config: &Config) -> Result<Self> {
-        let index_path = Path::new(&config.data_dir).join("active");
-        let (active, mtime) = match File::open(&index_path) {
-            Ok(data) => {
-                let mtime = data.metadata()?.modified()?;
-                let reader = BufReader::new(data);
-                let mut active = Vec::<String>::new();
-                for line in reader.lines() {
-                    active.push(line?);
-                }
-                (active, mtime)
-            }
-            Err(_) => (Default::default(), SystemTime::UNIX_EPOCH),
-        };
+    pub fn load(&mut self, config: &Config) -> Result<()> {
+        self.path = Path::new(&config.data_dir).join("active");
 
-        Ok(Self { active, _mtime: mtime, index_path })
+        let data = File::open(&self.path)?;
+        self.mtime = data.metadata()?.modified()?;
+
+        let reader = BufReader::new(data);
+        for line in reader.lines() {
+            self.active.push(line?);
+        }
+
+        Ok(())
+    }
+
+    pub fn loaded(&self) -> bool {
+        self.mtime > SystemTime::UNIX_EPOCH
     }
 
     /// Append entry to active/shorthand storage.
@@ -61,7 +71,7 @@ impl Index {
 
     /// Write index back to storage.
     pub fn write(&self) -> Result<()> {
-        let file = File::create(&self.index_path)?;
+        let file = File::create(&self.path)?;
         let mut writer = BufWriter::new(file);
 
         for s in self.active() {

@@ -12,7 +12,7 @@ mod repo;
 mod storage;
 mod token;
 
-use std::cell::{OnceCell, RefCell};
+use std::cell::{Ref, RefCell, RefMut};
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -27,7 +27,7 @@ pub struct App {
     config: config::Config,
 
     /// Active entry index.
-    index: OnceCell<index::Index>,
+    index: RefCell<index::Index>,
 
     /// Current global entry filter.
     filter: filter::Filter,
@@ -40,26 +40,28 @@ pub struct App {
 }
 
 impl App {
-    /// Load load and access the active entry index.
-    pub fn index(&self) -> Result<&index::Index> {
-        // TODO: replace with 'get_or_try_init' once it gets stable
-        if let Some(index) = self.index.get() {
+    /// Lazy load and access the active entry index.
+    pub fn index(&self) -> Result<Ref<'_, index::Index>> {
+        let index = self.index.borrow();
+        if index.loaded() {
             return Ok(index);
         }
+        drop(index);
 
-        let index = index::Index::load(&self.config)?;
+        let mut index = self.index.borrow_mut();
+        index.load(&self.config)?;
+        drop(index);
 
-        self.index.set(index).unwrap();
-        Ok(self.index.get().unwrap())
+        Ok(self.index.borrow())
     }
 
-    /// If index is loaded, clone lazy-initialized value. Otherwise, produce an independent clone.
-    pub fn index_owned(&self) -> Result<index::Index> {
-        if let Some(index) = self.index.get() {
-            return Ok(index.clone());
+    /// Load load and get mutable reference to the index.
+    pub fn index_mut(&self) -> Result<RefMut<'_, index::Index>> {
+        let mut index = self.index.borrow_mut();
+        if !index.loaded() {
+            index.load(&self.config)?;
         }
-
-        index::Index::load(&self.config).context("Unable to open active index")
+        Ok(index)
     }
 
     /// Convert start timestamp to time with offset.
