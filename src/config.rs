@@ -3,7 +3,6 @@ use std::env;
 
 use serde_derive::Deserialize;
 
-use crate::args::FilterArgs;
 use crate::prelude::*;
 
 #[derive(Deserialize, Default)]
@@ -129,10 +128,16 @@ pub struct ReportConfig {
 #[derive(Deserialize, Default)]
 pub struct SectionConfig {
     /// Name of tera template file used for section output.
-    _template: String,
+    _template: Box<str>,
+
+    /// Index to use when report is produced.
+    _index: IndexType,
+
+    /// Sorting direction.
+    _sorting: Box<str>,
 
     /// Section filter parameters.
-    _filter: FilterArgs,
+    _filter: Box<str>,
 }
 
 /// Custom field type.
@@ -141,4 +146,12 @@ pub enum FieldType {
     String,
     Number,
     Date,
+}
+
+#[derive(Deserialize, Default)]
+pub enum IndexType {
+    #[default]
+    Active,
+    Recent,
+    All,
 }
