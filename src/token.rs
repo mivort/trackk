@@ -465,7 +465,7 @@ fn parse_regex(lex: &mut Lexer<Token>) -> Result<(), LexerError> {
 
     // TODO: parse slice
 
-    lex.bump(end + 2);
+    lex.bump(end + lex.slice().len());
     Ok(())
 }
 
