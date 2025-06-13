@@ -18,7 +18,7 @@ pub struct Config {
     pub editor: String,
 
     /// User-defined fields.
-    pub fields: HashSet<FieldType>,
+    pub fields: HashMap<String, FieldType>,
 
     /// New issue default values.
     pub defaults: DefaultsConfig,
