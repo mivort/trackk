@@ -87,7 +87,12 @@ fn main() -> Result<()> {
     match args.command {
         Some(Command::List(args)) => {
             let ids = Default::default();
-            display::show_entries(&storage::fetch_entries(&ids, &app, args.all)?);
+            let entries = storage::fetch_entries(&ids, &app, args.all)?;
+            if args.json {
+                display::show_json(&entries)?;
+                return Ok(());
+            }
+            display::show_entries(&entries);
         }
         Some(Command::Info(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;

@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use crate::issue::Issue;
+use crate::prelude::*;
 
 /// Render the list of filtered entries.
 pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
@@ -41,4 +42,18 @@ pub fn show_entry((issue, path): &(Issue, Rc<str>)) {
         path = path,
         tags = tags,
     )
+}
+
+/// Export entries as JSON.
+pub fn show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
+    print!("[");
+    for (i, (e, _)) in entries.iter().enumerate() {
+        print!("{}", serde_json::to_string_pretty(e)?);
+        if i < entries.len() - 1 {
+            print!(",");
+        }
+    }
+    println!("]");
+
+    Ok(())
 }

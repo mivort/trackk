@@ -183,6 +183,10 @@ pub struct ListArgs {
     /// List all entries.
     #[arg(long, short)]
     pub all: bool,
+
+    /// Output in JSON format.
+    #[arg(long)]
+    pub json: bool,
 }
 
 #[derive(Parser, Default)]
