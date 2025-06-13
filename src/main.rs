@@ -144,6 +144,9 @@ fn main() -> Result<()> {
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }
+        Some(Command::Refresh) => {
+            storage::refresh_index(&app, false)?;
+        }
         Some(Command::Init) => {
             repo::init_repo(&app.config)?;
         }

@@ -33,7 +33,7 @@ impl Index {
     pub fn load(&mut self, config: &Config) -> Result<()> {
         self.path = Path::new(&config.data_dir).join("active");
 
-        let data = File::open(&self.path)?;
+        let data = unwrap_ok_or!(File::open(&self.path), _, { return Ok(()) });
         self.mtime = data.metadata()?.modified()?;
 
         let reader = BufReader::new(data);
@@ -84,6 +84,11 @@ impl Index {
     #[inline]
     pub fn active(&self) -> &[String] {
         self.active.as_slice()
+    }
+
+    #[inline]
+    pub fn mtime(&self) -> SystemTime {
+        self.mtime
     }
 
     /// Find shorthand for the provided ID.

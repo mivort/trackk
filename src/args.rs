@@ -64,6 +64,9 @@ pub enum Command {
     /// Init the storage and VCS repo.
     Init,
 
+    /// Refresh the index on manual data update.
+    Refresh,
+
     /// Check data repository and VCS status.
     Check,
 

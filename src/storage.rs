@@ -117,8 +117,6 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
             continue;
         }
 
-        let _m = entry.metadata()?.modified()?;
-
         let relpath = entry.path().strip_prefix(&path)?;
         let bucket = Bucket::from_path(relpath, app)?;
         let path = Rc::<str>::from(relpath.to_string_lossy());
@@ -175,4 +173,34 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
     }
 
     Ok(result)
+}
+
+/// Iterate over files in storage directory and update the index. If 'force' is
+/// not set and mtime is lower or equal to index, skip the entry.
+pub fn refresh_index(app: &App, force: bool) -> Result<()> {
+    let path = Path::new(&app.config.data_dir).join(&app.config.issues_dir);
+    let index = app.index_mut()?;
+
+    for entry in WalkDir::new(&path) {
+        let entry = entry?;
+
+        if entry.file_type().is_dir() {
+            continue;
+        }
+
+        if !force {
+            let mtime = entry.metadata()?.modified()?;
+            if mtime <= index.mtime() {
+                continue;
+            }
+        }
+
+        let _bucket = Bucket::from_full_path(entry.path()).with_context(|| {
+            format!(
+                "Unable to open the bucket for reading: {}",
+                entry.path().to_string_lossy()
+            )
+        })?;
+    }
+    Ok(())
 }
