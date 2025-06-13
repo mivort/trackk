@@ -9,13 +9,16 @@ use crate::prelude::*;
 #[derive(Deserialize, Default)]
 pub struct Config {
     /// Data directory.
-    pub data_dir: String,
+    pub data_path: String,
 
     /// Issues sub-directory.
-    pub issues_dir: String,
+    pub issues_path: String,
 
     /// Editor used for entry input.
     pub editor: String,
+
+    /// User-defined fields.
+    pub fields: HashSet<FieldType>,
 
     /// New issue default values.
     pub defaults: DefaultsConfig,
@@ -70,18 +73,18 @@ impl Config {
     /// Override data directory.
     pub fn set_data_directory(&mut self, data: Option<String>) {
         if let Some(data) = data {
-            self.data_dir = data;
+            self.data_path = data;
         }
     }
 
     /// Fill the empty values with default ones.
     pub fn fallback_values(&mut self) {
-        if self.data_dir.is_empty() {
-            self.data_dir = "data".into(); // TODO: change to .local/share/appname
+        if self.data_path.is_empty() {
+            self.data_path = "data".into(); // TODO: change to .local/share/appname
         }
 
-        if self.issues_dir.is_empty() {
-            self.issues_dir = "issues".into();
+        if self.issues_path.is_empty() {
+            self.issues_path = "issues".into();
         }
 
         if self.editor.is_empty() {
@@ -130,4 +133,12 @@ pub struct SectionConfig {
 
     /// Section filter parameters.
     _filter: FilterArgs,
+}
+
+/// Custom field type.
+#[derive(Hash, PartialEq, Eq, Deserialize)]
+pub enum FieldType {
+    String,
+    Number,
+    Date,
 }
