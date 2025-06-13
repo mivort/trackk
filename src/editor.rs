@@ -17,7 +17,7 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
     let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
     format_markdown(issue, tempfile.as_file_mut())?;
 
-    let status = Command::new(&app.config.editor)
+    let status = Command::new(&*app.config.editor)
         .arg(tempfile.path())
         .spawn()?
         .wait()?;

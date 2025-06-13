@@ -90,8 +90,8 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 /// Serialize bucket data and store in provided path.
 pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
-    let path = Path::new(&app.config.data_path)
-        .join(&app.config.issues_path)
+    let path = Path::new(&*app.config.data_path)
+        .join(&*app.config.issues_path)
         .join(&path);
     fs::write(path, output)?;
 
@@ -105,7 +105,7 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
         return Ok(output);
     }
 
-    let path = Path::new(&app.config.data_path).join(&app.config.issues_path);
+    let path = Path::new(&*app.config.data_path).join(&*app.config.issues_path);
 
     let index = app.index()?;
     let mut op_stack = Vec::new();
@@ -178,7 +178,7 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
 /// Iterate over files in storage directory and update the index. If 'force' is
 /// not set and mtime is lower or equal to index, skip the entry.
 pub fn refresh_index(app: &App, force: bool) -> Result<()> {
-    let path = Path::new(&app.config.data_path).join(&app.config.issues_path);
+    let path = Path::new(&*app.config.data_path).join(&*app.config.issues_path);
     let mut index = app.index_mut()?;
     let mut changes = false;
 

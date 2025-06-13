@@ -123,7 +123,7 @@ fn main() -> Result<()> {
         }
         Some(Command::Log(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
-            issue.status = app.config.defaults.status_complete.clone();
+            issue.status = app.config.defaults.status_complete.to_string();
             issue.update_end(&app.config);
 
             if !a.no_edit {
@@ -138,14 +138,14 @@ fn main() -> Result<()> {
         Some(Command::Done(mut args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
             if args.entry.status.is_none() {
-                args.entry.status = Some(app.config.defaults.status_complete.clone());
+                args.entry.status = Some(app.config.defaults.status_complete.to_string());
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }
         Some(Command::Remove(mut args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
             if args.entry.status.is_none() {
-                args.entry.status = Some(app.config.defaults.status_deleted.clone());
+                args.entry.status = Some(app.config.defaults.status_deleted.to_string());
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }

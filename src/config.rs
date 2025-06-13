@@ -9,13 +9,13 @@ use crate::prelude::*;
 #[derive(Deserialize, Default)]
 pub struct Config {
     /// Data directory.
-    pub data_path: String,
+    pub data_path: Box<str>,
 
     /// Issues sub-directory.
-    pub issues_path: String,
+    pub issues_path: Box<str>,
 
     /// Editor used for entry input.
-    pub editor: String,
+    pub editor: Box<str>,
 
     /// User-defined fields.
     pub fields: HashMap<String, FieldType>,
@@ -36,16 +36,16 @@ pub struct Config {
 #[derive(Deserialize, Default)]
 pub struct DefaultsConfig {
     /// Default status to assign upon creation.
-    pub status_initial: String,
+    pub status_initial: Box<str>,
 
     /// Status which is applied when 'done' command is called.
-    pub status_complete: String,
+    pub status_complete: Box<str>,
 
     /// Status which is applied upon entry removal.
-    pub status_deleted: String,
+    pub status_deleted: Box<str>,
 
     /// Default time string to assign as 'due'.
-    pub _due: String,
+    pub _due: Box<str>,
 }
 
 #[derive(Deserialize, Default)]
@@ -73,7 +73,7 @@ impl Config {
     /// Override data directory.
     pub fn set_data_directory(&mut self, data: Option<String>) {
         if let Some(data) = data {
-            self.data_path = data;
+            self.data_path = data.into();
         }
     }
 
@@ -88,7 +88,7 @@ impl Config {
         }
 
         if self.editor.is_empty() {
-            self.editor = self.fallback_editor();
+            self.editor = self.fallback_editor().into();
         }
 
         if self.defaults.status_initial.is_empty() {
