@@ -29,8 +29,14 @@ pub struct Config {
     /// Options related to VCS used with the storage.
     pub sync: SyncConfig,
 
+    /// Default output report.
+    pub report_next: ReportConfig,
+
+    /// All entries report.
+    pub report_all: ReportConfig,
+
     /// Index of available reports.
-    pub reports: HashMap<String, ReportConfig>,
+    pub custom_reports: HashMap<String, ReportConfig>,
 }
 
 #[derive(Deserialize, Default)]
@@ -95,7 +101,7 @@ impl Config {
     }
 
     /// Provide default editor value.
-    pub fn fallback_editor(&self) -> Cow<str> {
+    pub fn editor(&self) -> Cow<str> {
         if !self.editor.is_empty() {
             return Cow::Borrowed(&*self.editor);
         }
@@ -104,6 +110,22 @@ impl Config {
         unwrap_err_or!(env::var("EDITOR"), editor, { return editor.into() });
 
         "nano".into()
+    }
+
+    /// Default report format.
+    pub fn report_next(&self) -> Cow<ReportConfig> {
+        if !self.report_next.sections.is_empty() {
+            return Cow::Borrowed(&self.report_next);
+        }
+
+        Cow::Owned(ReportConfig {
+            sections: vec![SectionConfig {
+                _index: IndexType::Active,
+                _sorting: "+urgency".into(),
+                _filter: "".into(),
+                _template: "next".into(),
+            }],
+        })
     }
 }
 
@@ -139,13 +161,13 @@ impl DefaultsConfig {
 }
 
 /// Report configuration which contains array of report sections.
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Default, Clone)]
 pub struct ReportConfig {
-    _sections: Vec<SectionConfig>,
+    sections: Vec<SectionConfig>,
 }
 
 /// Report section defined by filter and template.
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Default, Clone)]
 pub struct SectionConfig {
     /// Name of tera template file used for section output.
     _template: Box<str>,
@@ -168,7 +190,7 @@ pub enum FieldType {
     Date,
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize, Default, Clone)]
 pub enum IndexType {
     #[default]
     Active,
