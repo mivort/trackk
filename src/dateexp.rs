@@ -40,7 +40,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
     let mut op_stack = Vec::<Token>::new();
     let lexer = Token::lexer_with_extras(input, ts);
 
-    let mut mode = Mode::Any;
+    let mut mode = Mode::Arg;
 
     for (tok, span) in lexer.spanned() {
         let tok = tok?;
@@ -53,12 +53,19 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
                 output.push(tok);
                 mode = Mode::Op;
             }
-            Add | Sub | Mul | Div | At | Eq | PartialEq | Less | LessEq | Greater | GreaterEq
-            | NotEq | And | Or | Not => {
+            Add(_) | Sub(_) | Mul | Div | At | Eq | PartialEq | Less | LessEq | Greater
+            | GreaterEq | NotEq | And | Or | Not => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
-                if !mode.expects_op() && left_assoc {
-                    bail!("Unexpected operator");
-                }
+                let (tok, left_assoc) = if !mode.expects_op() {
+                    let (tok, left_assoc) = tok.to_unary();
+                    if left_assoc {
+                        bail!("Unexpected operator");
+                    }
+                    (tok, left_assoc)
+                } else {
+                    (tok, left_assoc)
+                };
+
                 while let Some(top) = op_stack.pop_if(|top| {
                     if let LParen = top {
                         return false;
@@ -76,7 +83,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
                     bail!("Unexpected opening bracket");
                 }
                 op_stack.push(tok);
-                mode = Mode::Any;
+                mode = Mode::Arg;
             }
             RParen => {
                 if !tilt(&mut op_stack, output) {
@@ -106,7 +113,6 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
 
 /// Token parser expected token state.
 enum Mode {
-    Any,
     Arg,
     Op,
 }
@@ -114,12 +120,12 @@ enum Mode {
 impl Mode {
     #[inline]
     fn expects_op(&self) -> bool {
-        matches!(self, Self::Any | Self::Op)
+        matches!(self, Self::Op)
     }
 
     #[inline]
     fn expects_arg(&self) -> bool {
-        matches!(self, Self::Any | Self::Arg)
+        matches!(self, Self::Arg)
     }
 }
 
@@ -142,15 +148,21 @@ pub fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> R
     for tok in queue {
         match tok {
             Duration(_) | Date(_) | Bool(_) | Regex => stack.push(tok.clone()),
-            Add => match (stack.pop(), stack.pop()) {
+            Add(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
-                (Some(rhs), None) => stack.push(rhs),
                 _ => bail!("'+' operator haven't got enough arguments"),
             },
-            Sub => match (stack.pop(), stack.pop()) {
+            Add(true) => match stack.pop() {
+                Some(rhs) => stack.push(rhs),
+                _ => bail!("Unary '+' operator haven't got enough arguments"),
+            },
+            Sub(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sub(rhs)?),
-                (Some(rhs), None) => stack.push(rhs.neg()?),
                 _ => bail!("'-' operator haven't got enough arguments"),
+            },
+            Sub(true) => match stack.pop() {
+                Some(rhs) => stack.push(rhs.neg()?),
+                _ => bail!("Unary '-' operator haven't got enough arguments"),
             },
             Mul => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.mul(rhs)?),

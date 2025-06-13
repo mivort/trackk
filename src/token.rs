@@ -65,11 +65,13 @@ pub enum Token {
     #[regex(r"//(\\/|[^/])*/")]
     Regex,
 
-    #[token("+")]
-    Add,
+    /// Addition operator with unary mode flag.
+    #[token("+", |_| false)]
+    Add(bool),
 
-    #[token("-")]
-    Sub,
+    /// Substraction operator with unary mode flag.
+    #[token("-", |_| false)]
+    Sub(bool),
 
     #[token("*")]
     Mul,
@@ -156,12 +158,24 @@ impl Token {
             Not => (8, false),
             At => (7, true),
             Mul | Div => (6, true),
-            Add | Sub => (5, true),
+            Add(_) | Sub(_) => (5, true),
             Less | LessEq | Greater | GreaterEq => (4, true),
             Eq | NotEq => (3, true),
             And => (2, true),
             Or => (1, true),
             _ => panic!("Token {:?} is not operator", self),
+        }
+    }
+
+    /// If operator can be used in unary form, return it with mode flag and new assoc flag.
+    pub fn to_unary(&self) -> (Self, bool) {
+        use Token::*;
+
+        match self {
+            Add(_) => (Add(true), false),
+            Sub(_) => (Sub(true), false),
+            Not => (Not, false),
+            _ => (self.clone(), true),
         }
     }
 
