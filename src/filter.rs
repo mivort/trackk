@@ -1,8 +1,10 @@
+use std::rc::Rc;
+
 use regex::Regex;
 
 use crate::args::Args;
 use crate::dateexp::{eval, parse_date, parse_filter};
-use crate::issue::Issue;
+use crate::issue::{FieldRef, Issue};
 use crate::token::Token;
 use crate::{App, prelude::*};
 
@@ -99,22 +101,6 @@ impl Filter {
 
         Ok(())
     }
-
-    /// Parse single exclude filter argument.
-    fn parse_negative_arg(&mut self, arg: &str, app: &App) -> Result<()> {
-        for part in arg.split(',') {
-            if let Some(rule) = FilterRule::from_str(part, app)? {
-                self.exclude.push(rule);
-            } else {
-                let id = resolve_shorthand(part, app)?;
-                if !id.is_empty() {
-                    self.exclude_ids.push(id);
-                }
-            }
-        }
-
-        Ok(())
-    }
 }
 
 impl FilterRule {
@@ -173,26 +159,35 @@ impl FilterRule {
 /// Parse filter expressions and combine these with 'and' operator.
 pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
     let mut filter = Filter::default();
+    let expression = &mut filter.expression;
 
-    for (i, expr) in args.filter_args.filter.iter().enumerate() {
-        if parse_filter(expr, app, &mut filter.expression)? > 0 && i > 0 {
-            filter.expression.push(Token::And);
+    for expr in &args.filter_args.filter {
+        let append = !expression.is_empty();
+        parse_filter(expr, app, expression)?;
+
+        if append {
+            expression.push(Token::And)
+        }
+    }
+
+    for title in &args.filter_args.title {
+        let append = !expression.is_empty();
+        expression.push(Token::Reference(FieldRef::Title));
+        expression.push(Token::String(Rc::from(title.as_str())));
+        expression.push(Token::FuzzyEq);
+
+        if append {
+            expression.push(Token::And);
         }
     }
 
     // TODO: add changes to filter from each argument type
     // TODO: remove old filters handling
 
-    let (positive, negative) = (Vec::<String>::new(), &Vec::<String>::new());
+    let positive = Vec::<String>::new();
 
     for arg in positive {
-        // TODO: match aliases
-
         filter.parse_positive_arg(&arg, app)?;
-    }
-
-    for arg in negative {
-        filter.parse_negative_arg(arg, app)?;
     }
 
     Ok(filter)
