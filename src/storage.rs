@@ -159,7 +159,8 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
         });
 
         let bucket = Bucket::from_cache(bucket_path, cache, app)
-            .with_context(|| format!("Unable to open bucket referenced in index: {bucket_path}"))?;
+            .with_context(|| format!("Unable to open index reference: {bucket_path}. Run 'refresh --force' to rebuild the index."))?;
+
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
             if !ids.matches(&issue.id) {
@@ -180,7 +181,12 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
 /// not set and mtime is lower or equal to index, skip the entry.
 pub fn refresh_index(app: &App, force: bool) -> Result<()> {
     let path = app.config.issues_path()?;
-    let mut index = app.index_mut()?;
+    let mut index = if force {
+        app.index_empty_mut()
+    } else {
+        app.index_mut()
+    }?;
+
     let mut changes = false;
 
     for entry in WalkDir::new(&path) {
@@ -190,11 +196,9 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
             continue;
         }
 
-        if !force {
-            let mtime = entry.metadata()?.modified()?;
-            if mtime <= index.mtime() {
-                continue;
-            }
+        let mtime = entry.metadata()?.modified()?;
+        if mtime <= index.mtime() {
+            continue;
         }
 
         let bucket = Bucket::from_full_path(entry.path())?;

@@ -31,7 +31,7 @@ impl Default for Index {
 
 impl Index {
     pub fn load(&mut self, config: &Config) -> Result<()> {
-        self.path = config.data_path()?.join("active");
+        self.load_path(config)?;
 
         let data = unwrap_ok_or!(File::open(&self.path), _, { return Ok(()) });
         self.mtime = data.metadata()?.modified()?;
@@ -45,8 +45,21 @@ impl Index {
         Ok(())
     }
 
+    #[inline]
+    pub fn clear(&mut self) {
+        self.active.clear();
+        self.mtime = SystemTime::UNIX_EPOCH;
+    }
+
     pub fn loaded(&self) -> bool {
         self.mtime > SystemTime::UNIX_EPOCH
+    }
+
+    /// Initialize active entry index path.
+    pub fn load_path(&mut self, config: &Config) -> Result<()> {
+        self.path = config.data_path()?;
+        self.path.push("active");
+        Ok(())
     }
 
     /// Append entry to active/shorthand storage.

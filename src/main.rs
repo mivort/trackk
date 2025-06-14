@@ -66,6 +66,15 @@ impl App {
         Ok(index)
     }
 
+    /// Get reference to empty index.
+    pub fn index_empty_mut(&self) -> Result<RefMut<'_, index::Index>> {
+        let mut index = self.index.borrow_mut();
+        index.load_path(&self.config)?;
+        index.clear();
+
+        Ok(index)
+    }
+
     /// Convert start timestamp to time with offset.
     pub fn local_time(&self) -> Result<time::OffsetDateTime> {
         use time::*;
