@@ -155,7 +155,8 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
 
     for (idx, e) in index.active().iter().enumerate() {
         let (bucket_path, id) = unwrap_some_or!(e.rsplit_once("/"), {
-            bail!("Active index entry has broken reference: {e}");
+            warn!("Active index entry has broken reference: {e}");
+            continue;
         });
 
         let bucket = Bucket::from_cache(bucket_path, cache, app)

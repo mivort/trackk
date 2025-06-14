@@ -84,6 +84,12 @@ fn main() -> Result<()> {
 
     app.filter = filter::parse_filter_args(&args, &app)?;
 
+    fern::Dispatch::new()
+        .format(|out, message, record| out.finish(format_args!("[{}] {}", record.level(), message)))
+        .level(log::LevelFilter::Warn)
+        .chain(std::io::stdout())
+        .apply()?;
+
     match args.command {
         Some(Command::List(args)) => {
             let ids = Default::default();
