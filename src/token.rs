@@ -6,7 +6,7 @@ use time::ext::NumericalDuration;
 use time::macros::format_description;
 use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, Weekday};
 
-use crate::issue::FieldRef;
+use crate::issue::{FieldRef, Issue};
 use crate::prelude::*;
 
 /// Parsed token types.
@@ -295,10 +295,11 @@ impl Token {
     }
 
     /// Peform loose comparison.
-    pub fn fuzzy_eq(self, rhs: Self) -> Result<Self> {
+    pub fn fuzzy_eq(self, rhs: Self, issue: &Issue) -> Result<Self> {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(rhs)),
+            (Self::Reference(lhs), token) => Ok(Self::Bool(lhs.fuzzy_eq(&token, issue)?)),
             _ => bail!("':' was used on incompatible values"),
         }
     }

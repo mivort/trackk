@@ -151,7 +151,7 @@ pub fn eval(
     for tok in queue {
         match tok {
             Duration(_) | Date(_) | Bool(_) | Regex(_) => stack.push(tok.clone()),
-            Reference(field) => stack.push(field.to_token(issue)),
+            Reference(field) => stack.push(field.as_token(issue)),
             Add(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
                 _ => bail!("'+' operator haven't got enough arguments"),
@@ -213,7 +213,7 @@ pub fn eval(
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
             FuzzyEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(rhs, issue)?),
                 _ => bail!("':' operator haven't got enough arguments"),
             },
             NotEq => {

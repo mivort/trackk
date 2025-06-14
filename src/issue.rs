@@ -183,19 +183,22 @@ pub enum FieldRef {
 
 impl FieldRef {
     /// Convert field reference to token value. Nulls (None) are converted to 'false'.
-    pub fn to_token(&self, issue: &Issue) -> Token {
+    /// If token is not cheaply copyable (e.g. string or set), keep the reference for now.
+    pub fn as_token(&self, issue: &Issue) -> Token {
         match self {
             Self::Created => Token::Date(issue.created),
             Self::Modified => Token::Date(issue.modified),
-            Self::Due => issue
-                .due
-                .map(|d| Token::Date(d))
-                .unwrap_or(Token::Bool(false)),
-            Self::End => issue
-                .due
-                .map(|d| Token::Date(d))
-                .unwrap_or(Token::Bool(false)),
+            Self::Due => issue.due.map(Token::Date).unwrap_or(Token::Bool(false)),
+            Self::End => issue.due.map(Token::Date).unwrap_or(Token::Bool(false)),
             _ => Token::Reference(*self),
+        }
+    }
+
+    /// Compare referenced value to provided token.
+    pub fn fuzzy_eq(&self, token: &Token, _issue: &Issue) -> Result<bool> {
+        match (self, token) {
+            (Self::Title, Token::String(_)) => todo!(),
+            _ => bail!("Unable to compare the value with field reference"),
         }
     }
 }
