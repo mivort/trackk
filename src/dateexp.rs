@@ -46,7 +46,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
         let tok = tok?;
 
         match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex(_) => {
+            Duration(_) | Date(_) | Bool(_) | Regex(_) | Reference(_) => {
                 if !mode.expects_arg() {
                     bail!("Unexpected date argument");
                 }
@@ -90,9 +90,6 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
                     bail!("Mismatched closing bracket");
                 }
                 mode = Mode::Op;
-            }
-            Reference => {
-                todo!("Reference support is not implemented yet")
             }
             String(_) => {
                 let symbol = &input[span];
@@ -211,7 +208,7 @@ pub fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> R
             FuzzyEq | NotEq => {
                 todo!()
             }
-            LParen | RParen | String(_) | Reference => {
+            LParen | RParen | String(_) | Reference(_) => {
                 panic!()
             }
         }

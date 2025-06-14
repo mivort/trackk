@@ -6,6 +6,7 @@ use time::ext::NumericalDuration;
 use time::macros::format_description;
 use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, Weekday};
 
+use crate::issue::FieldRef;
 use crate::prelude::*;
 
 /// Parsed token types.
@@ -136,15 +137,16 @@ pub enum Token {
     #[token("]")]
     RParen,
 
-    #[regex("title")]
-    #[regex("desc")]
-    #[regex("status")]
-    #[regex("tag")]
-    #[regex("created")]
-    #[regex("modified")]
-    #[token("due")]
-    #[regex("end")]
-    Reference,
+    #[token("title", |_| FieldRef::Title)]
+    #[token("desc", |_| FieldRef::Desc)]
+    #[token("status", |_| FieldRef::Status)]
+    #[token("tag", |_| FieldRef::Tag)]
+    #[token("created", |_| FieldRef::Created)]
+    #[token("modified", |_| FieldRef::Modified)]
+    #[token("due", |_| FieldRef::Due)]
+    #[regex("end", |_| FieldRef::End)]
+    #[allow(unused)]
+    Reference(FieldRef),
 
     #[regex(r"[A-Za-z]\w*", |_| ())]
     #[regex(r#"'[^']*'"#, |_| ())]

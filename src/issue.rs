@@ -157,3 +157,16 @@ impl Issue {
         false
     }
 }
+
+/// Build-in issue field reference.
+#[derive(Debug, Clone)]
+pub enum FieldRef {
+    Title,
+    Desc,
+    Status,
+    Tag,
+    Created,
+    Modified,
+    Due,
+    End,
+}
