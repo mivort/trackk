@@ -90,7 +90,7 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 /// Serialize bucket data and store in provided path.
 pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
-    let path = app.config .issues_path()?.join(&path);
+    let path = app.config.issues_path()?.join(&path);
     fs::write(path, output)?;
 
     Ok(())

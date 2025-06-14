@@ -164,7 +164,7 @@ fn main() -> Result<()> {
             repo::init_repo(&app.config)?;
         }
         Some(Command::Check) => {
-            repo::check_repo();
+            repo::check_repo(&app.config)?;
         }
         Some(Command::Merge(_)) => {
             // TODO: P3: implement merge driver
