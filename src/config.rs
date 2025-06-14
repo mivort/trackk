@@ -10,36 +10,47 @@ use crate::prelude::*;
 #[derive(Deserialize, Default)]
 pub struct Config {
     /// Data directory.
+    #[serde(default)]
     data_path: Box<str>,
 
     /// Data directory base path.
+    #[serde(default)]
     data_prefix: PrefixType,
 
     /// Issues sub-directory.
+    #[serde(default)]
     issues_path: Box<str>,
 
     /// Editor used for entry input.
+    #[serde(default)]
     editor: Box<str>,
 
     /// User-defined fields.
+    #[serde(default)]
     pub fields: HashMap<String, FieldType>,
 
     /// New issue default values.
+    #[serde(default)]
     pub defaults: DefaultsConfig,
 
     /// Issue values config.
+    #[serde(default)]
     pub values: ValuesConfig,
 
     /// Options related to VCS used with the storage.
+    #[serde(default)]
     pub sync: SyncConfig,
 
     /// Default output report.
+    #[serde(default)]
     pub report_next: ReportConfig,
 
     /// All entries report.
+    #[serde(default)]
     pub report_all: ReportConfig,
 
     /// Index of available reports.
+    #[serde(default)]
     pub custom_reports: HashMap<String, ReportConfig>,
 }
 
@@ -78,9 +89,9 @@ pub struct SyncConfig {
 
 impl Config {
     /// Override data directory.
-    pub fn set_data_directory(&mut self, data: Option<String>) {
+    pub fn set_data_directory(&mut self, data: &Option<Box<str>>) {
         if let Some(data) = data {
-            self.data_path = data.into();
+            self.data_path = data.clone();
         }
     }
 
@@ -232,6 +243,7 @@ pub enum IndexType {
 #[derive(Deserialize, Default)]
 pub enum SyncDriver {
     #[default]
+    #[serde(rename = "git")]
     Git,
 }
 

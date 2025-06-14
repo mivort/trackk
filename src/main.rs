@@ -14,7 +14,9 @@ mod token;
 
 use std::cell::{Ref, RefCell, RefMut};
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::rc::Rc;
+use std::{env, fs, io};
 
 use args::{Args, Command};
 use clap::Parser;
@@ -79,7 +81,7 @@ fn main() -> Result<()> {
     let args = Args::parse();
 
     let mut app = App {
-        config: read_config(&args.data),
+        config: read_config(&args)?,
         ts: time::UtcDateTime::now().unix_timestamp(),
         ..Default::default()
     };
@@ -194,9 +196,27 @@ fn main() -> Result<()> {
 }
 
 /// Read config from file and (optionally) from storage directory.
-fn read_config(data: &Option<String>) -> Config {
-    let mut config = Config::default(); // TODO: P3: use argument to read config
-    config.set_data_directory(data.clone());
+fn read_config(args: &Args) -> Result<Config> {
+    let path = if let Some(config) = &args.config {
+        config
+    } else {
+        &unwrap_ok_or!(env::var("TRACKIT_CONFIG").map(PathBuf::from), _, {
+            let mut dir = dirs::config_dir().context("Unable to find config directory")?;
+            dir.push(env!("CARGO_PKG_NAME"));
+            dir.push("config.json5");
+            dir
+        })
+    };
+
+    let mut config: Config = match fs::read_to_string(path) {
+        Ok(data) => json5::from_str(data.as_str())?,
+        Err(e) => match e.kind() {
+            io::ErrorKind::NotFound => Config::default(),
+            _ => bail!("Unable to read config: {}", path.to_string_lossy()),
+        },
+    };
+    config.set_data_directory(&args.data);
     config.fallback_values();
-    config
+
+    Ok(config)
 }

@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use clap_derive::{Parser, Subcommand};
 use serde_derive::Deserialize;
 
@@ -11,11 +13,11 @@ pub struct Args {
 
     /// Path to an external configuration file.
     #[arg(long)]
-    pub config: Option<String>,
+    pub config: Option<PathBuf>,
 
     /// Path to data storage.
     #[arg(long)]
-    pub data: Option<String>,
+    pub data: Option<Box<str>>,
 
     #[command(flatten)]
     pub filter_args: FilterArgs,
