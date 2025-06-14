@@ -297,6 +297,7 @@ impl Token {
     pub fn not(self) -> Result<Self> {
         match self {
             Self::Bool(val) => Ok(Self::Bool(!val)),
+            Self::Date(_) => Ok(Self::Bool(false)),
             _ => bail!("'not' ('!') can only be applied to boolean expressions"),
         }
     }

@@ -47,8 +47,10 @@ impl Filter {
         }
 
         let res = eval(&self.expression, app.local_time()?, stack, issue)?;
-        if let Token::Bool(res) = res {
-            return Ok(res);
+        match res {
+            Token::Bool(res) => return Ok(res),
+            Token::Date(_) | Token::Duration(_) => return Ok(true),
+            _ => {}
         }
 
         // TODO: remove old checks
