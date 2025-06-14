@@ -296,6 +296,42 @@ impl Token {
             _ => bail!("'not' ('!') can only be applied to boolean expressions"),
         }
     }
+
+    /// Perform greater comparison.
+    pub fn greater(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs > rhs)),
+            (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs > rhs)),
+            _ => bail!("'>' operator got incompatibe arguments"),
+        }
+    }
+
+    /// Perform greater comparison.
+    pub fn greater_eq(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs >= rhs)),
+            (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs >= rhs)),
+            _ => bail!("'>=' operator got incompatibe arguments"),
+        }
+    }
+
+    /// Perform greater comparison.
+    pub fn less(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs < rhs)),
+            (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs < rhs)),
+            _ => bail!("'<' operator got incompatibe arguments"),
+        }
+    }
+
+    /// Perform greater comparison.
+    pub fn less_eq(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs <= rhs)),
+            (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs <= rhs)),
+            _ => bail!("'<=' operator got incompatibe arguments"),
+        }
+    }
 }
 
 /// Custom lexing error type.

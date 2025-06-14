@@ -192,7 +192,23 @@ pub fn eval(queue: &Vec<Token>, ts: OffsetDateTime, stack: &mut Vec<Token>) -> R
                 Some(val) => stack.push(val.not()?),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
             },
-            FuzzyEq | Less | LessEq | Greater | GreaterEq | NotEq => {
+            Greater => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs)?),
+                _ => bail!("'>' operator haven't got enough arguments"),
+            },
+            GreaterEq => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.greater_eq(rhs)?),
+                _ => bail!("'>=' operator haven't got enough arguments"),
+            },
+            Less => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.less(rhs)?),
+                _ => bail!("'<' operator haven't got enough arguments"),
+            },
+            LessEq => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.less_eq(rhs)?),
+                _ => bail!("'<' operator haven't got enough arguments"),
+            },
+            FuzzyEq | NotEq => {
                 todo!()
             }
             LParen | RParen | String(_) | Reference => {
