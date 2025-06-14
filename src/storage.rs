@@ -122,6 +122,8 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
         let relpath = entry.path().strip_prefix(&path)?;
         let path = Rc::<str>::from(relpath.to_string_lossy());
 
+        trace!("Reading bucket: {}", path);
+
         for mut issue in bucket.entries {
             if !ids.matches(&issue.id) {
                 continue;

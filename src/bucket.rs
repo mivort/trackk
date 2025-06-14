@@ -58,6 +58,9 @@ impl Bucket {
         let bucket = unwrap_some_or!(cache.get(path), {
             &(|| -> Result<_> {
                 let bucket = Rc::new(Bucket::from_path(path, app)?);
+
+                trace!("Reading bucket to cache: {path}");
+
                 cache.insert(path.to_owned(), bucket.clone());
                 Ok(bucket)
             })()?

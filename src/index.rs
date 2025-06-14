@@ -41,6 +41,7 @@ impl Index {
             self.active.push(line?);
         }
 
+        trace!("Active entry index loaded");
         Ok(())
     }
 
@@ -78,6 +79,7 @@ impl Index {
             writeln!(writer, "{}", s)?;
         }
 
+        trace!("Active entry index updated");
         Ok(())
     }
 
