@@ -83,7 +83,7 @@ impl Config {
     /// Fill the empty values with default ones.
     pub fn fallback_values(&mut self) {
         if self.data_path.is_empty() {
-            self.data_path = "data".into(); // TODO: change to .local/share/appname
+            self.data_path = "data".into(); // TODO: P3: change to .local/share/appname
         }
 
         if self.issues_path.is_empty() {

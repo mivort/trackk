@@ -5,7 +5,9 @@ use crate::config::Config;
 use crate::prelude::*;
 
 /// Check repository validity: merge tool, etc.
-pub fn check_repo() {}
+pub fn check_repo() {
+    // TODO: P2: implement method to produce check report
+}
 
 /// Run git to create repo, set the main settings.
 pub fn init_repo(config: &Config) -> Result<()> {

@@ -166,8 +166,11 @@ fn main() -> Result<()> {
         Some(Command::Check) => {
             repo::check_repo();
         }
-        Some(Command::Merge(_)) => {}
+        Some(Command::Merge(_)) => {
+            // TODO: P3: implement merge driver
+        }
         Some(Command::Report(report)) => {
+            // TODO: P2: handle custom reports
             bail!(
                 "Custom report config '{}' not found",
                 report.first().unwrap()
@@ -190,8 +193,9 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+/// Read config from file and (optionally) from storage directory.
 fn read_config(data: &Option<String>) -> Config {
-    let mut config = Config::default(); // TODO: use argument to read config
+    let mut config = Config::default(); // TODO: P3: use argument to read config
     config.set_data_directory(data.clone());
     config.fallback_values();
     config

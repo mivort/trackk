@@ -95,7 +95,7 @@ impl Bucket {
 
     /// Fetch the reference to a bucket entry.
     pub fn find_by_id(&self, id: &str) -> Option<&Issue> {
-        // TODO: bucket is sorted by id in most cases - attempt to find the issue
+        // TODO: P1: bucket is sorted by id in most cases - attempt to find the issue
         // with a binary search.
 
         self.entries.iter().find(|&issue| issue.id.starts_with(id))

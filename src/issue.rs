@@ -196,6 +196,7 @@ impl FieldRef {
 
     /// Compare referenced value to provided token.
     pub fn fuzzy_eq(&self, token: &Token, issue: &Issue) -> Result<bool> {
+        // TODO: P3: support other operand types
         match (self, token) {
             (Self::Title, Token::String(rhs)) => Ok(issue.title.contains(&**rhs)),
             _ => bail!("Unable to compare the value with field reference"),

@@ -5,6 +5,8 @@ use crate::prelude::*;
 
 /// Render the list of filtered entries.
 pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
+    // TODO: P3: read report settings and use template
+
     for (issue, _path) in entries {
         let tags = issue.tags.iter().map(|t| format!(":{}", t));
         let tags = tags.collect::<Vec<_>>().join(" ");
@@ -24,6 +26,8 @@ pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
 pub fn show_entry((issue, path): &(Issue, Rc<str>)) {
     let tags = issue.tags.iter().map(|t| format!("@{}", t));
     let tags = tags.collect::<Vec<_>>().join(" ");
+
+    // TODO: P2: use template for single entry report
 
     println!(
         concat!(
