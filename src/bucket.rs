@@ -32,9 +32,7 @@ impl Bucket {
 
     /// Open file from the provided path and parse as bucket.
     pub fn from_path(path: impl AsRef<Path>, app: &App) -> Result<Self> {
-        let path = Path::new(&*app.config.data_path)
-            .join(&*app.config.issues_path)
-            .join(path);
+        let path = app.config.issues_path()?.join(path);
         Self::from_full_path(path)
     }
 

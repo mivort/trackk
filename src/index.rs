@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::time::SystemTime;
 
 use crate::config::Config;
@@ -31,7 +31,7 @@ impl Default for Index {
 
 impl Index {
     pub fn load(&mut self, config: &Config) -> Result<()> {
-        self.path = Path::new(&*config.data_path).join("active");
+        self.path = config.data_path()?.join("active");
 
         let data = unwrap_ok_or!(File::open(&self.path), _, { return Ok(()) });
         self.mtime = data.metadata()?.modified()?;

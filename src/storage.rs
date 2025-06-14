@@ -75,13 +75,12 @@ pub fn fetch_entries(ids: &IdFilter, app: &App, all: bool) -> Result<Vec<(Issue,
 fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     let year = date.year();
     let month = date.month() as i32;
-    let data = &config.data_path;
-    let issues = &config.issues_path;
-    let directory = format!("{data}/{issues}/{year}");
+    let issues = config.issues_path()?;
+    let directory = issues.join(format!("{year}"));
 
     fs::create_dir_all(&directory).context("Unable to create storage directory")?;
 
-    let full_path = format!("{directory}/{month:02}.json");
+    let full_path = directory.join(format!("{month:02}.json"));
     let path = format!("{year}/{month:02}.json");
     let bucket = Bucket::from_full_path_or_default(&full_path)?;
 
@@ -91,9 +90,7 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 /// Serialize bucket data and store in provided path.
 pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
-    let path = Path::new(&*app.config.data_path)
-        .join(&*app.config.issues_path)
-        .join(&path);
+    let path = app.config .issues_path()?.join(&path);
     fs::write(path, output)?;
 
     Ok(())
@@ -106,7 +103,7 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
         return Ok(output);
     }
 
-    let path = Path::new(&*app.config.data_path).join(&*app.config.issues_path);
+    let path = app.config.issues_path()?;
 
     let index = app.index()?;
     let mut op_stack = Vec::new();
@@ -182,7 +179,7 @@ pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc
 /// Iterate over files in storage directory and update the index. If 'force' is
 /// not set and mtime is lower or equal to index, skip the entry.
 pub fn refresh_index(app: &App, force: bool) -> Result<()> {
-    let path = Path::new(&*app.config.data_path).join(&*app.config.issues_path);
+    let path = app.config.issues_path()?;
     let mut index = app.index_mut()?;
     let mut changes = false;
 

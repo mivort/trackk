@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::env;
+use std::path::PathBuf;
 
 use serde_derive::Deserialize;
 
@@ -9,10 +10,13 @@ use crate::prelude::*;
 #[derive(Deserialize, Default)]
 pub struct Config {
     /// Data directory.
-    pub data_path: Box<str>,
+    data_path: Box<str>,
+
+    /// Data directory base path.
+    data_prefix: PrefixType,
 
     /// Issues sub-directory.
-    pub issues_path: Box<str>,
+    issues_path: Box<str>,
 
     /// Editor used for entry input.
     editor: Box<str>,
@@ -82,14 +86,6 @@ impl Config {
 
     /// Fill the empty values with default ones.
     pub fn fallback_values(&mut self) {
-        if self.data_path.is_empty() {
-            self.data_path = "data".into(); // TODO: P3: change to .local/share/appname
-        }
-
-        if self.issues_path.is_empty() {
-            self.issues_path = "issues".into();
-        }
-
         if self.values.active_status.is_empty() {
             self.values.active_status = hash_set(&["pending", "started", "blocked"]);
         }
@@ -126,6 +122,41 @@ impl Config {
                 _template: "next".into(),
             }],
         })
+    }
+
+    /// Produce data path prefix.
+    pub fn data_path_base(&self) -> Result<PathBuf> {
+        let prefix = match self.data_prefix {
+            PrefixType::DataDir => dirs::data_dir(),
+            PrefixType::HomeDir => dirs::home_dir(),
+            _ => Some(PathBuf::new()),
+        };
+
+        prefix.context("Unable to locate data prefix directory")
+    }
+
+    /// Produce full data path with default fallback.
+    pub fn data_path(&self) -> Result<PathBuf> {
+        let data_path = if self.data_path.is_empty() {
+            env!("CARGO_PKG_NAME")
+        } else {
+            &*self.data_path
+        };
+        let mut path = self.data_path_base()?;
+        path.push(data_path);
+        Ok(path)
+    }
+
+    /// Produce full path to issues storage.
+    pub fn issues_path(&self) -> Result<PathBuf> {
+        let issues_path = if self.issues_path.is_empty() {
+            "issues"
+        } else {
+            &*self.issues_path
+        };
+        let mut path = self.data_path()?;
+        path.push(issues_path);
+        Ok(path)
     }
 }
 
@@ -202,6 +233,17 @@ pub enum IndexType {
 pub enum SyncDriver {
     #[default]
     Git,
+}
+
+#[derive(Deserialize, Default)]
+pub enum PrefixType {
+    #[default]
+    DataDir,
+    DataLocalDir,
+    HomeDir,
+    ConfigDir,
+    ConfigLocalDir,
+    None,
 }
 
 /// Produce a hash set from slice.
