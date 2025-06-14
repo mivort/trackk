@@ -75,12 +75,12 @@ pub fn fetch_entries(ids: &IdFilter, app: &App, all: bool) -> Result<Vec<(Issue,
 fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     let year = date.year();
     let month = date.month() as i32;
-    let issues = config.issues_path()?;
-    let directory = issues.join(format!("{year}"));
+    let mut full_path = config.issues_path()?;
+    full_path.push(year.to_string());
 
-    fs::create_dir_all(&directory).context("Unable to create storage directory")?;
+    fs::create_dir_all(&full_path).context("Unable to create storage directory")?;
 
-    let full_path = directory.join(format!("{month:02}.json"));
+    full_path.push(format!("{month:02}.json"));
     let path = format!("{year}/{month:02}.json");
     let bucket = Bucket::from_full_path_or_default(&full_path)?;
 
