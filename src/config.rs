@@ -139,8 +139,11 @@ impl Config {
     pub fn data_path_base(&self) -> Result<PathBuf> {
         let prefix = match self.data_prefix {
             PrefixType::DataDir => dirs::data_dir(),
+            PrefixType::DataLocalDir => dirs::data_local_dir(),
+            PrefixType::ConfigDir => dirs::config_dir(),
+            PrefixType::ConfigLocalDir => dirs::config_local_dir(),
             PrefixType::HomeDir => dirs::home_dir(),
-            _ => Some(PathBuf::new()),
+            PrefixType::None => Some(PathBuf::new()),
         };
 
         prefix.context("Unable to locate data prefix directory")
@@ -250,11 +253,17 @@ pub enum SyncDriver {
 #[derive(Deserialize, Default)]
 pub enum PrefixType {
     #[default]
+    #[serde(rename = "data_dir")]
     DataDir,
+    #[serde(rename = "data_local_dir")]
     DataLocalDir,
+    #[serde(rename = "home_dir")]
     HomeDir,
+    #[serde(rename = "config_dir")]
     ConfigDir,
+    #[serde(rename = "config_local_dir")]
     ConfigLocalDir,
+    #[serde(rename = "none")]
     None,
 }
 
