@@ -68,7 +68,7 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
 
     if changes > 0 {
         index.write()?;
-        println!("Edited {changes} entry(es)");
+        info!("Edited {changes} entry(es)");
     }
 
     Ok(())

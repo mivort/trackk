@@ -74,6 +74,8 @@ impl App {
 }
 
 fn main() -> Result<()> {
+    use log::LevelFilter::*;
+
     let args = Args::parse();
 
     let mut app = App {
@@ -85,8 +87,8 @@ fn main() -> Result<()> {
     app.filter = filter::parse_filter_args(&args, &app)?;
 
     fern::Dispatch::new()
-        .format(|out, message, record| out.finish(format_args!("[{}] {}", record.level(), message)))
-        .level(log::LevelFilter::Warn)
+        .format(|out, message, record| out.finish(format_args!("{}: {}", record.level(), message)))
+        .level(if args.verbose { Trace } else { Info })
         .chain(std::io::stdout())
         .apply()?;
 
@@ -166,7 +168,7 @@ fn main() -> Result<()> {
         }
         Some(Command::Merge(_)) => {}
         Some(Command::Report(report)) => {
-            println!(
+            bail!(
                 "Custom report config '{}' not found",
                 report.first().unwrap()
             );

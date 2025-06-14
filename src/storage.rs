@@ -57,7 +57,7 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
         index.write()?;
     }
 
-    println!("Updated {changes} entry(es)");
+    info!("Updated {changes} entry(es)");
 
     Ok(())
 }

@@ -19,6 +19,10 @@ pub struct Args {
 
     #[command(flatten)]
     pub filter_args: FilterArgs,
+
+    /// Enable verbose output.
+    #[arg(long, short)]
+    pub verbose: bool,
 }
 
 #[derive(Subcommand)]
