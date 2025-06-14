@@ -285,6 +285,8 @@ impl Token {
     pub fn eq(self, rhs: Self) -> Result<Self> {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
+            (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(rhs)),
+            (Self::Bool(lhs), Self::Date(_rhs)) => Ok(Self::Bool(lhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs == rhs)),
             _ => bail!("'eq' ('==') was used on incompatible values"),
