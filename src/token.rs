@@ -161,7 +161,7 @@ impl Token {
 
         match self {
             Not => (8, false),
-            At => (7, true),
+            At | FuzzyEq => (7, true),
             Mul | Div => (6, true),
             Add(_) | Sub(_) => (5, true),
             Less | LessEq | Greater | GreaterEq => (4, true),
@@ -291,6 +291,15 @@ impl Token {
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs == rhs)),
             _ => bail!("'eq' ('==') was used on incompatible values"),
+        }
+    }
+
+    /// Peform loose comparison.
+    pub fn fuzzy_eq(self, rhs: Self) -> Result<Self> {
+        match (self, rhs) {
+            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
+            (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(rhs)),
+            _ => bail!("':' was used on incompatible values"),
         }
     }
 

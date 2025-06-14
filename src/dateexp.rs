@@ -212,7 +212,11 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => stack.push(lhs.less_eq(rhs)?),
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
-            FuzzyEq | NotEq => {
+            FuzzyEq => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(rhs)?),
+                _ => bail!("':' operator haven't got enough arguments"),
+            },
+            NotEq => {
                 todo!()
             }
             LParen | RParen | String(_) => {
