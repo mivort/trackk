@@ -8,12 +8,17 @@ and [dstask](https://github.com/naggie/dstask).
 
 ## Features
 
-* VCS-friendly storage format and multi-device syncrhonization capabilities.
-  Data is stored as JSON files and by default syncronized using Git. Custom
-  JSON merge driver prevents conflicts on syncrhonization.
+* VCS-friendly storage format and multi-device synchronization capabilities.
+  Data is stored as JSON files and by default synchronized using Git. Custom
+  JSON merge driver prevents conflicts on synchronization.
 * Dates input and filtering query syntax which allows to enter dates using
   natural syntax (`tomorrow at 14:00`), or perform context filtering on tasks
   (`tag:home and status:started`).
+* Recurrent tasks which use same date input syntax, allowing to use flexible
+  re-occurrence rules (`monday at 7:00am`) and enabling the usage as habit
+  tracker.
+* Fully-customizable output format using [Tera](https://keats.github.io/tera/)
+  (Jinja2-like) template syntax.
 
 ## Usage
 
