@@ -6,6 +6,7 @@ use uuid::Uuid;
 use crate::args::EntryArgs;
 use crate::config::Config;
 use crate::dateexp::parse_date;
+use crate::token::Token;
 use crate::{App, prelude::*};
 
 /// Base entry storage with ID, title text and date properties.
@@ -87,12 +88,12 @@ impl Issue {
         }
 
         let due = if let Some(due) = &args.due {
-            Some(parse_date(due, app, Some(self)).context("Unable to parse the due date")?)
+            Some(parse_date(due, app, self).context("Unable to parse the due date")?)
         } else {
             self.due
         };
         let end = if let Some(end) = &args.end {
-            Some(parse_date(end, app, Some(self)).context("Unable to parse the end date")?)
+            Some(parse_date(end, app, self).context("Unable to parse the end date")?)
         } else {
             self.end
         };
@@ -168,7 +169,7 @@ impl Issue {
 }
 
 /// Build-in issue field reference.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum FieldRef {
     Title,
     Desc,
@@ -178,4 +179,23 @@ pub enum FieldRef {
     Modified,
     Due,
     End,
+}
+
+impl FieldRef {
+    /// Convert field reference to token value. Nulls (None) are converted to 'false'.
+    pub fn to_token(&self, issue: &Issue) -> Token {
+        match self {
+            Self::Created => Token::Date(issue.created),
+            Self::Modified => Token::Date(issue.modified),
+            Self::Due => issue
+                .due
+                .map(|d| Token::Date(d))
+                .unwrap_or(Token::Bool(false)),
+            Self::End => issue
+                .due
+                .map(|d| Token::Date(d))
+                .unwrap_or(Token::Bool(false)),
+            _ => Token::Reference(*self),
+        }
+    }
 }

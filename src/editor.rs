@@ -178,7 +178,7 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
                 due = if val.is_empty() {
                     None
                 } else {
-                    Some(parse_date(val, app, Some(issue))?)
+                    Some(parse_date(val, app, issue)?)
                 };
             }
             "end" => {
@@ -186,7 +186,7 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
                 end = if val.is_empty() {
                     None
                 } else {
-                    Some(parse_date(val, app, Some(issue))?)
+                    Some(parse_date(val, app, issue)?)
                 };
             }
             "repeat" => {

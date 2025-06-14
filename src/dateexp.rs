@@ -6,7 +6,7 @@ use crate::{App, prelude::*, token::Token};
 
 /// Parse date expression and produce the timestamp.
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
-pub fn parse_date(input: &str, app: &App, issue: Option<&Issue>) -> Result<i64> {
+pub fn parse_date(input: &str, app: &App, issue: &Issue) -> Result<i64> {
     let local = app.local_time()?;
 
     let mut exp = Vec::<Token>::new();
@@ -144,14 +144,14 @@ pub fn eval(
     queue: &Vec<Token>,
     ts: OffsetDateTime,
     stack: &mut Vec<Token>,
-    _issue: Option<&Issue>,
+    issue: &Issue,
 ) -> Result<Token> {
     use Token::*;
 
     for tok in queue {
         match tok {
             Duration(_) | Date(_) | Bool(_) | Regex(_) => stack.push(tok.clone()),
-            Reference(_) => stack.push(tok.clone()),
+            Reference(field) => stack.push(field.to_token(issue)),
             Add(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
                 _ => bail!("'+' operator haven't got enough arguments"),
@@ -228,10 +228,10 @@ pub fn eval(
 
 #[test]
 fn full_exp_parsing() {
-    let app = App::default();
-    assert_eq!(parse_date("1.5h+2h", &app, None).unwrap(), 12600);
+    let (app, issue) = (&App::default(), &Issue::default());
+    assert_eq!(parse_date("1.5h+2h", app, issue).unwrap(), 12600);
     assert_eq!(
-        parse_date("1s+2s*3", &app, None).unwrap(),
+        parse_date("1s+2s*3", app, issue).unwrap(),
         7,
         "op precedence"
     );
@@ -239,18 +239,18 @@ fn full_exp_parsing() {
 
 #[test]
 fn relative_dates() {
-    let app = App::default();
-    let monday = parse_date("monday", &app, None).unwrap();
-    let tuesday = parse_date("tuesday", &app, None).unwrap();
+    let (app, issue) = (&App::default(), &Issue::default());
+    let monday = parse_date("monday", app, issue).unwrap();
+    let tuesday = parse_date("tuesday", app, issue).unwrap();
     assert_eq!(tuesday - monday, 86400);
 }
 
 #[test]
 fn unexpected_tokens() {
-    let app = App::default();
-    assert_eq!(parse_date("1d+", &app, None).is_err(), true);
-    assert_eq!(parse_date("1d2d", &app, None).is_err(), true);
-    assert_eq!(parse_date("1d(2d)", &app, None).is_err(), true);
-    assert_eq!(parse_date("(", &app, None).is_err(), true);
-    assert_eq!(parse_date(")", &app, None).is_err(), true);
+    let (app, issue) = (&App::default(), &Issue::default());
+    assert_eq!(parse_date("1d+", app, issue).is_err(), true);
+    assert_eq!(parse_date("1d2d", app, issue).is_err(), true);
+    assert_eq!(parse_date("1d(2d)", app, issue).is_err(), true);
+    assert_eq!(parse_date("(", app, issue).is_err(), true);
+    assert_eq!(parse_date(")", app, issue).is_err(), true);
 }

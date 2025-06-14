@@ -46,7 +46,7 @@ impl Filter {
             return Ok(true);
         }
 
-        let res = eval(&self.expression, app.local_time()?, stack, Some(issue))?;
+        let res = eval(&self.expression, app.local_time()?, stack, issue)?;
         if let Token::Bool(res) = res {
             return Ok(res);
         }
@@ -121,6 +121,7 @@ impl FilterRule {
         let rule = rule.trim();
 
         let mut split = rule.splitn(2, ':');
+        let issue = &Default::default();
         let (key, value) = (split.next(), split.next());
         if let (Some(key), Some(value)) = (key, value) {
             match key {
@@ -129,16 +130,16 @@ impl FilterRule {
                 "due" | "d" => return Ok(None),
                 "end" | "e" => return Ok(None),
                 "due.before" | "d.before" => {
-                    return Ok(Some(Self::DueBefore(parse_date(value, app, None)?)));
+                    return Ok(Some(Self::DueBefore(parse_date(value, app, issue)?)));
                 }
                 "due.after" | "d.after" => {
-                    return Ok(Some(Self::DueAfter(parse_date(value, app, None)?)));
+                    return Ok(Some(Self::DueAfter(parse_date(value, app, issue)?)));
                 }
                 "end.before" | "e.before" => {
-                    return Ok(Some(Self::EndBefore(parse_date(value, app, None)?)));
+                    return Ok(Some(Self::EndBefore(parse_date(value, app, issue)?)));
                 }
                 "end.after" | "e.after" => {
-                    return Ok(Some(Self::EndAfter(parse_date(value, app, None)?)));
+                    return Ok(Some(Self::EndAfter(parse_date(value, app, issue)?)));
                 }
                 "title" | "t" => return Ok(Some(Self::Title(value.to_owned()))),
                 "title.regex" | "title.re" | "t.regex" | "t.re" => {
