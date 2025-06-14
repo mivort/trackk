@@ -1,9 +1,7 @@
 use std::rc::Rc;
 
-use regex::Regex;
-
 use crate::args::Args;
-use crate::dateexp::{eval, parse_date, parse_filter};
+use crate::dateexp::{eval, parse_filter};
 use crate::issue::{FieldRef, Issue};
 use crate::token::Token;
 use crate::{App, prelude::*};
@@ -14,31 +12,8 @@ pub struct Filter {
     /// List of IDs to include in the result.
     pub ids: Vec<String>,
 
-    /// List of IDs to exclude from results.
-    exclude_ids: Vec<String>,
-
-    /// Positive filtering rules.
-    positive: Vec<Vec<FilterRule>>,
-
-    /// Negative filtering rules.
-    exclude: Vec<FilterRule>,
-
     /// Match expression to eval on entries.
     expression: Vec<Token>,
-}
-
-/// Single filtering rule.
-#[allow(unused)]
-pub enum FilterRule {
-    Tag(String),
-    Status(String),
-    DueBefore(i64),
-    DueAfter(i64),
-    EndBefore(i64),
-    EndAfter(i64),
-    Title(String),
-    TitleRegex(Regex),
-    Repeat,
 }
 
 impl Filter {
@@ -50,108 +25,9 @@ impl Filter {
 
         let res = eval(&self.expression, app.local_time()?, stack, issue)?;
         match res {
-            Token::Bool(res) => return Ok(res),
-            Token::Date(_) | Token::Duration(_) => return Ok(true),
-            _ => {}
-        }
-
-        // TODO: remove old checks
-
-        if !self.ids.is_empty() && !self.ids.iter().any(|id| issue.id.starts_with(id)) {
-            return Ok(false);
-        }
-
-        if !self.exclude_ids.is_empty()
-            && self.exclude_ids.iter().any(|id| issue.id.starts_with(id))
-        {
-            return Ok(false);
-        }
-
-        for group in &self.positive {
-            for rule in group {
-                if !rule.match_issue(issue) {
-                    return Ok(false);
-                }
-            }
-        }
-
-        for rule in &self.exclude {
-            if rule.match_issue(issue) {
-                return Ok(false);
-            }
-        }
-
-        Ok(true)
-    }
-
-    /// Parse single argument, return 'true' on success.
-    fn parse_positive_arg(&mut self, arg: &str, app: &App) -> Result<()> {
-        let mut entry = Vec::new();
-        for part in arg.split(',') {
-            if let Some(rule) = FilterRule::from_str(part, app)? {
-                entry.push(rule);
-            } else {
-                let id = resolve_shorthand(part, app)?;
-                if !id.is_empty() {
-                    self.ids.push(id);
-                }
-            }
-        }
-        self.positive.push(entry);
-
-        Ok(())
-    }
-}
-
-impl FilterRule {
-    /// Parse rule string and produce rule enum value.
-    fn from_str(rule: &str, app: &App) -> Result<Option<Self>> {
-        let rule = rule.trim();
-
-        let mut split = rule.splitn(2, ':');
-        let issue = &Default::default();
-        let (key, value) = (split.next(), split.next());
-        if let (Some(key), Some(value)) = (key, value) {
-            match key {
-                "" => return Ok(Some(Self::Tag(value.to_owned()))),
-                "x" | "not" => todo!("exclude tag option is nyi"),
-                "due" | "d" => return Ok(None),
-                "end" | "e" => return Ok(None),
-                "due.before" | "d.before" => {
-                    return Ok(Some(Self::DueBefore(parse_date(value, app, issue)?)));
-                }
-                "due.after" | "d.after" => {
-                    return Ok(Some(Self::DueAfter(parse_date(value, app, issue)?)));
-                }
-                "end.before" | "e.before" => {
-                    return Ok(Some(Self::EndBefore(parse_date(value, app, issue)?)));
-                }
-                "end.after" | "e.after" => {
-                    return Ok(Some(Self::EndAfter(parse_date(value, app, issue)?)));
-                }
-                "title" | "t" => return Ok(Some(Self::Title(value.to_owned()))),
-                "title.regex" | "title.re" | "t.regex" | "t.re" => {
-                    return Ok(Some(Self::TitleRegex(
-                        Regex::new(value).context("Unable to parse the filter regex")?,
-                    )));
-                }
-                "status" | "s" => return Ok(Some(Self::Status(value.to_owned()))),
-                "repeat" | "r" => return Ok(Some(Self::Repeat)),
-                _ => {}
-            }
-        }
-
-        Ok(None)
-    }
-
-    /// Check current enum value and match the issue.
-    fn match_issue(&self, issue: &Issue) -> bool {
-        match self {
-            Self::Tag(tag) => issue.tags.contains(tag),
-            Self::Status(status) => issue.status == *status,
-            Self::Title(title) => issue.title.contains(title),
-            Self::TitleRegex(regex) => regex.is_match(&issue.title),
-            _ => false,
+            Token::Bool(res) => Ok(res),
+            Token::Date(_) | Token::Duration(_) => Ok(true),
+            _ => bail!("Filter expression produced non-boolean result"),
         }
     }
 }
@@ -182,35 +58,8 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
     }
 
     // TODO: add changes to filter from each argument type
-    // TODO: remove old filters handling
-
-    let positive = Vec::<String>::new();
-
-    for arg in positive {
-        filter.parse_positive_arg(&arg, app)?;
-    }
 
     Ok(filter)
-}
-
-/// Check if value is numeric, and try to match it to the index. If input is detected
-/// to be a shorthand, but doesn't match any index entry, return empty string.
-pub fn resolve_shorthand(value: &str, app: &App) -> Result<String> {
-    let shorthand = unwrap_ok_or!(value.parse::<usize>(), _e, { return Ok(value.to_owned()) });
-
-    if shorthand > 999999 {
-        return Ok(value.to_owned());
-    }
-
-    let index = app.index()?;
-    let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
-        return Ok(String::new());
-    });
-    let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
-        return Ok(String::new());
-    });
-
-    Ok(resolved.to_owned())
 }
 
 /// Store provided list of IDs as index.
