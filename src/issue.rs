@@ -85,12 +85,18 @@ impl Issue {
             self.status = status.clone();
             self.update_end(&app.config);
         }
-        if let Some(due) = &args.due {
-            self.due = Some(parse_date(due, app).context("Unable to parse the due date")?);
-        }
-        if let Some(end) = &args.end {
-            self.end = Some(parse_date(end, app).context("Unable to parse the end date")?);
-        }
+
+        let due = if let Some(due) = &args.due {
+            Some(parse_date(due, app, Some(self)).context("Unable to parse the due date")?)
+        } else {
+            self.due
+        };
+        let end = if let Some(end) = &args.end {
+            Some(parse_date(end, app, Some(self)).context("Unable to parse the end date")?)
+        } else {
+            self.end
+        };
+
         for tag in &args.tag {
             self.tags.insert(tag.clone());
         }
@@ -104,6 +110,9 @@ impl Issue {
                 Some(repeat.clone())
             };
         }
+
+        self.due = due;
+        self.end = end;
 
         self.update_ts();
         Ok(())

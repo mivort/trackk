@@ -46,7 +46,7 @@ impl Filter {
             return Ok(true);
         }
 
-        let res = eval(&self.expression, app.local_time()?, stack)?;
+        let res = eval(&self.expression, app.local_time()?, stack, Some(issue))?;
         if let Token::Bool(res) = res {
             return Ok(res);
         }
@@ -129,16 +129,16 @@ impl FilterRule {
                 "due" | "d" => return Ok(None),
                 "end" | "e" => return Ok(None),
                 "due.before" | "d.before" => {
-                    return Ok(Some(Self::DueBefore(parse_date(value, app)?)));
+                    return Ok(Some(Self::DueBefore(parse_date(value, app, None)?)));
                 }
                 "due.after" | "d.after" => {
-                    return Ok(Some(Self::DueAfter(parse_date(value, app)?)));
+                    return Ok(Some(Self::DueAfter(parse_date(value, app, None)?)));
                 }
                 "end.before" | "e.before" => {
-                    return Ok(Some(Self::EndBefore(parse_date(value, app)?)));
+                    return Ok(Some(Self::EndBefore(parse_date(value, app, None)?)));
                 }
                 "end.after" | "e.after" => {
-                    return Ok(Some(Self::EndAfter(parse_date(value, app)?)));
+                    return Ok(Some(Self::EndAfter(parse_date(value, app, None)?)));
                 }
                 "title" | "t" => return Ok(Some(Self::Title(value.to_owned()))),
                 "title.regex" | "title.re" | "t.regex" | "t.re" => {
@@ -283,23 +283,18 @@ fn match_issue() {
         ..Default::default()
     };
 
-    let filter = Filter {
-        positive: vec![vec![FilterRule::Tag("a".into())]],
-        ..Default::default()
-    };
-    assert_eq!(
-        filter.match_issue(&issue, &app, &mut Vec::new()).unwrap(),
-        true,
-        "when filter has right tag, match the issue"
-    );
+    let match_filter = |input: &str| {
+        let mut exp = Vec::new();
+        parse_filter(input, &app, &mut exp).unwrap();
 
-    let filter = Filter {
-        positive: vec![vec![FilterRule::Tag("d".into())]],
-        ..Default::default()
+        Filter {
+            expression: exp,
+            ..Default::default()
+        }
+        .match_issue(&issue, &app, &mut Vec::new())
+        .unwrap()
     };
-    assert_eq!(
-        filter.match_issue(&issue, &app, &mut Vec::new()).unwrap(),
-        false,
-        "when filter doesn't have the right tag, don't match the issue"
-    );
+
+    assert_eq!(match_filter("true"), true);
+    assert_eq!(match_filter("false"), false);
 }

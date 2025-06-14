@@ -161,6 +161,10 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
 
     for (_, [key, val]) in meta_re.captures_iter(meta).map(|c| c.extract()) {
         let key = key.to_lowercase();
+
+        let mut due = issue.due;
+        let mut end = issue.end;
+
         match key.as_str() {
             "status" => {
                 issue.status = val.trim().to_owned();
@@ -171,18 +175,18 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
             }
             "due" => {
                 let val = val.trim();
-                issue.due = if val.is_empty() {
+                due = if val.is_empty() {
                     None
                 } else {
-                    Some(parse_date(val, app)?)
+                    Some(parse_date(val, app, Some(issue))?)
                 };
             }
             "end" => {
                 let val = val.trim();
-                issue.end = if val.is_empty() {
+                end = if val.is_empty() {
                     None
                 } else {
-                    Some(parse_date(val, app)?)
+                    Some(parse_date(val, app, Some(issue))?)
                 };
             }
             "repeat" => {
@@ -195,6 +199,9 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
             }
             _ => {}
         }
+
+        issue.due = due;
+        issue.end = end;
     }
 
     Ok(())
