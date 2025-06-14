@@ -79,10 +79,11 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     let issues = &config.issues_path;
     let directory = format!("{data}/{issues}/{year}");
 
-    fs::create_dir_all(&directory)?;
+    fs::create_dir_all(&directory).context("Unable to create storage directory")?;
 
-    let path = format!("{directory}/{month:02}.json");
-    let bucket = Bucket::from_path_or_default(&path)?;
+    let full_path = format!("{directory}/{month:02}.json");
+    let path = format!("{year}/{month:02}.json");
+    let bucket = Bucket::from_full_path_or_default(&full_path)?;
 
     Ok((bucket, path))
 }

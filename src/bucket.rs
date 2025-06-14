@@ -68,7 +68,7 @@ impl Bucket {
 
     /// Open file from the provided path and parse as bucket. If file doesn't
     /// exist return the empty bucket.
-    pub fn from_path_or_default(path: impl AsRef<Path>) -> Result<Self> {
+    pub fn from_full_path_or_default(path: impl AsRef<Path>) -> Result<Self> {
         let file = File::open(&path);
         let file = unwrap_ok_or!(file, e, {
             match e.kind() {
