@@ -125,6 +125,7 @@ pub enum Token {
     Or,
 
     #[token("!")]
+    #[token("~")]
     #[token("not")]
     #[token("not:")]
     Not,
