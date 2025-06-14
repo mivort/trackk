@@ -1,4 +1,5 @@
 use std::num::ParseIntError;
+use std::rc::Rc;
 
 use logos::{Lexer, Logos};
 use thiserror::Error;
@@ -65,7 +66,7 @@ pub enum Token {
 
     #[token("//", parse_regex)]
     #[allow(unused)]
-    Regex(Box<regex::Regex>),
+    Regex(Rc<regex::Regex>),
 
     /// Addition operator with unary mode flag.
     #[token("+", |_| false)]
@@ -146,12 +147,13 @@ pub enum Token {
     #[token("modified", |_| FieldRef::Modified)]
     #[token("due", |_| FieldRef::Due)]
     #[regex("end", |_| FieldRef::End)]
-    #[allow(unused)]
     Reference(FieldRef),
 
-    #[regex(r"[A-Za-z]\w*", |_| ())]
-    #[regex(r#"'[^']*'"#, |_| ())]
-    String(()),
+    /// String value token.
+    #[regex(r"[A-Za-z]\w*", |l| Rc::from(l.slice()))]
+    #[regex(r#"'[^']*'"#, parse_quoted_string)]
+    #[allow(unused)]
+    String(Rc<str>),
 }
 
 impl Token {
@@ -510,18 +512,23 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 }
 
 /// Find the the boundaries of regex.
-fn parse_regex(lex: &mut Lexer<Token>) -> Result<Box<regex::Regex>, LexerError> {
+fn parse_regex(lex: &mut Lexer<Token>) -> Result<Rc<regex::Regex>, LexerError> {
     let remainder = lex.remainder();
     let end = unwrap_some_or!(remainder.find(lex.slice()), {
         return Err(LexerError::token_error("regex teminator ('//') not found"));
     });
 
-    let regex = Box::new(unwrap_ok_or!(regex::Regex::new(&remainder[..end]), _, {
+    let regex = Rc::new(unwrap_ok_or!(regex::Regex::new(&remainder[..end]), _, {
         return Err(LexerError::token_error(&remainder[..end]));
     }));
 
     lex.bump(end + lex.slice().len());
     Ok(regex)
+}
+
+/// Exclude quotes and return reference-counted str.
+fn parse_quoted_string(lex: &Lexer<Token>) -> Rc<str> {
+    Rc::from(&lex.slice()[1..lex.slice().len() - 2])
 }
 
 /// Parse relative date alias.

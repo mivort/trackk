@@ -21,7 +21,7 @@ pub struct Args {
     pub filter_args: FilterArgs,
 
     /// Enable verbose output.
-    #[arg(long, short)]
+    #[arg(long, short, global = true)]
     pub verbose: bool,
 }
 

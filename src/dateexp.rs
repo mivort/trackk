@@ -43,13 +43,13 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
 
     let mut mode = Mode::Arg;
 
-    for (tok, span) in lexer.spanned() {
+    for tok in lexer {
         let tok = tok?;
 
         match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex(_) | Reference(_) => {
+            Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
                 if !mode.expects_arg() {
-                    bail!("Unexpected date argument");
+                    bail!("Unexpected argument");
                 }
                 output.push(tok);
                 mode = Mode::Op;
@@ -91,10 +91,6 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
                     bail!("Mismatched closing bracket");
                 }
                 mode = Mode::Op;
-            }
-            String(_) => {
-                let symbol = &input[span];
-                todo!("String processing is not supported yet: {symbol}")
             }
         }
     }
@@ -150,7 +146,7 @@ pub fn eval(
 
     for tok in queue {
         match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex(_) => stack.push(tok.clone()),
+            Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) => stack.push(tok.clone()),
             Reference(field) => stack.push(field.as_token(issue)),
             Add(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
@@ -219,7 +215,7 @@ pub fn eval(
             NotEq => {
                 todo!()
             }
-            LParen | RParen | String(_) => {
+            LParen | RParen => {
                 panic!()
             }
         }
