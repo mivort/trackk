@@ -10,6 +10,7 @@ mod issue;
 mod prelude;
 mod repo;
 mod storage;
+mod template;
 mod token;
 
 use std::cell::{Ref, RefCell, RefMut};
@@ -38,6 +39,9 @@ pub struct App {
 
     /// UTC timestamp during the init.
     ts: i64,
+
+    /// Tera templates reference.
+    templates: template::Templates,
 
     /// Parsed entries cache.
     cache: RefCell<HashMap<String, Rc<bucket::Bucket>>>,
