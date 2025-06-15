@@ -92,6 +92,7 @@ impl Config {
     pub fn set_data_directory(&mut self, data: &Option<Box<str>>) {
         if let Some(data) = data {
             self.data_path = data.clone();
+            self.data_prefix = PrefixType::None;
         }
     }
 

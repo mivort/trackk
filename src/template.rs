@@ -20,8 +20,8 @@ impl<'env> Templates<'env> {
         }
 
         match template {
-            "next" => j2.add_template(template, "{{ title }}")?,
-            "all" => j2.add_template(template, "{{ title }}")?,
+            "next" => j2.add_template(template, "{{ title }}\n\n")?,
+            "all" => j2.add_template(template, "{{ title }}\n\n")?,
 
             // TODO: P3: resolve external templates
             _ => panic!(),

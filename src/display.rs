@@ -25,14 +25,18 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
     app.templates.load_template(&section.template)?;
 
     let j2 = app.templates.j2.borrow();
-    let _template = j2.get_template(&section.template)?;
+    let template = j2.get_template(&section.template)?;
+    let out = std::io::stdout();
 
     for (issue, _path) in entries {
+        let title = issue.title.lines().next().unwrap_or_default();
+        let status = &issue.status.chars().next().unwrap_or('?');
+
+        template.render_to_write(&issue, &out)?;
+
         let tags = issue.tags.iter().map(|t| format!(":{}", t));
         let tags = tags.collect::<Vec<_>>().join(" ");
 
-        let title = issue.title.lines().next().unwrap_or_default();
-        let status = &issue.status.chars().next().unwrap_or('?');
         println!(
             "{short:3}. [{status}] {id}: {title}{tags_space}{tags}",
             id = &issue.id.as_str()[0..8],
