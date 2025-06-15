@@ -168,6 +168,9 @@ fn main() -> Result<()> {
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }
+        Some(Command::Config) => {
+            config::print_config(&app.config)?;
+        }
         Some(Command::Refresh(args)) => {
             storage::refresh_index(&app, args.force)?;
         }

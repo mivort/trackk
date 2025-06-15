@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use std::env;
 use std::path::PathBuf;
 
-use serde_derive::Deserialize;
+use serde_derive::{Deserialize, Serialize};
 
 use crate::prelude::*;
 
@@ -151,11 +151,7 @@ impl Config {
 
     /// Produce full data path with default fallback.
     pub fn data_path(&self) -> Result<PathBuf> {
-        let data_path = if self.data_path.is_empty() {
-            env!("CARGO_PKG_NAME")
-        } else {
-            &*self.data_path
-        };
+        let data_path = self.data_path_fallback();
         let mut path = self.data_path_base()?;
         path.push(data_path);
         Ok(path)
@@ -163,14 +159,28 @@ impl Config {
 
     /// Produce full path to issues storage.
     pub fn issues_path(&self) -> Result<PathBuf> {
-        let issues_path = if self.issues_path.is_empty() {
-            "issues"
-        } else {
-            &*self.issues_path
-        };
+        let issues_path = self.issues_path_fallback();
         let mut path = self.data_path()?;
         path.push(issues_path);
         Ok(path)
+    }
+
+    /// Data path default value.
+    fn data_path_fallback(&self) -> &str {
+        if self.data_path.is_empty() {
+            env!("CARGO_PKG_NAME")
+        } else {
+            &*self.data_path
+        }
+    }
+
+    /// Issues path default value.
+    fn issues_path_fallback(&self) -> &str {
+        if self.issues_path.is_empty() {
+            "issues"
+        } else {
+            &*self.issues_path
+        }
     }
 }
 
@@ -250,7 +260,7 @@ pub enum SyncDriver {
     Git,
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default)]
 pub enum PrefixType {
     #[default]
     #[serde(rename = "data_dir")]
@@ -267,6 +277,34 @@ pub enum PrefixType {
     None,
 }
 
+/// Print all configuration values along with documentation.
+pub fn print_config(config: &Config) -> Result<()> {
+    println!("{}", format_config(config)?);
+    Ok(())
+}
+
+/// Produce example config with current values.
+fn format_config(config: &Config) -> Result<String> {
+    Ok(format!(
+        concat!(
+            "{{\n",
+            "  // Relative or absolute path to data directory.\n",
+            "  data_path: \"{data_path}\",\n",
+            "\n",
+            "  // Prefix which is added to the data path.\n",
+            "  // Possible values: data_dir, config_dir, home_dir, none.\n",
+            "  data_path_prefix: {data_path_prefix},\n",
+            "\n",
+            "  // Sub-path to issue files in data directory.\n",
+            "  issues_path: \"{issues_path}\",\n",
+            "}}",
+        ),
+        data_path = config.data_path_fallback(),
+        data_path_prefix = json5::to_string(&config.data_prefix)?,
+        issues_path = config.issues_path_fallback(),
+    ))
+}
+
 /// Produce a hash set from slice.
 #[inline]
 fn hash_set(items: &[&str]) -> HashSet<String> {
@@ -274,4 +312,11 @@ fn hash_set(items: &[&str]) -> HashSet<String> {
         .iter()
         .map(|v| v.to_string())
         .collect::<HashSet<String>>()
+}
+
+#[test]
+fn config_doc_is_sane() {
+    let config = Config::default();
+    let format = format_config(&config).unwrap();
+    json5::from_str::<'_, Config>(format.as_str()).unwrap();
 }

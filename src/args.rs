@@ -53,6 +53,9 @@ pub enum Command {
     #[command(visible_aliases(["ls"]))]
     List(ListArgs),
 
+    /// Print current configuration values and comments about possible options.
+    Config,
+
     /// List all entries using set of filters
     All,
 
