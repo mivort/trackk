@@ -27,7 +27,7 @@ use prelude::*;
 use self::config::IndexType;
 
 #[derive(Default)]
-pub struct App {
+pub struct App<'a> {
     /// Application config.
     config: config::Config,
 
@@ -41,13 +41,13 @@ pub struct App {
     ts: i64,
 
     /// Tera templates reference.
-    templates: template::Templates,
+    templates: template::Templates<'a>,
 
     /// Parsed entries cache.
     cache: RefCell<HashMap<String, Rc<bucket::Bucket>>>,
 }
 
-impl App {
+impl<'a> App<'a> {
     /// Lazy load and access the active entry index.
     pub fn index(&self) -> Result<Ref<'_, index::Index>> {
         let index = self.index.borrow();

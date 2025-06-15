@@ -131,7 +131,7 @@ impl Config {
                 _sorting: "+urgency".into(),
                 _grouping: "".into(),
                 _filter: "".into(),
-                _template: "next".into(),
+                template: "next".into(),
             }],
         })
     }
@@ -148,7 +148,7 @@ impl Config {
                 _sorting: "+created".into(),
                 _grouping: "".into(),
                 _filter: "".into(),
-                _template: "all".into(),
+                template: "all".into(),
             }],
         })
     }
@@ -243,7 +243,7 @@ pub struct ReportConfig {
 #[derive(Deserialize, Default, Clone)]
 pub struct SectionConfig {
     /// Name of tera template file used for section output.
-    _template: Box<str>,
+    pub template: Box<str>,
 
     /// Index to use when report is produced.
     pub index: IndexType,

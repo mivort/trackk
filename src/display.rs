@@ -23,7 +23,7 @@ fn show_section(ids: &IdFilter, section: &SectionConfig, app: &App) -> Result<()
     // TODO: P3: add entry sorting
     // TODO: P3: perform lazy parsing of the template
 
-    let _ = app.templates.template()?;
+    let _ = app.templates.template(&section.template)?;
 
     for (issue, _path) in entries {
         let tags = issue.tags.iter().map(|t| format!(":{}", t));

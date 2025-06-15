@@ -3,8 +3,7 @@
 Command-line task and issue tracker which provides the synchronization and
 versioning of its DB using Git capabilities.
 
-Inspired by [Taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior)
-and [dstask](https://github.com/naggie/dstask).
+Inspired by [Taskwarrior][1] and [dstask][2].
 
 ## Features
 
@@ -17,8 +16,7 @@ and [dstask](https://github.com/naggie/dstask).
 * Recurrent tasks which use same date input syntax, allowing to use flexible
   re-occurrence rules (`monday at 7:00am`) and enabling the usage as habit
   tracker.
-* Fully-customizable output format using [Tera](https://keats.github.io/tera/)
-  (Jinja2-like) template syntax.
+* Fully-customizable output format using [Minijinja][3] template syntax.
 
 ## Usage
 
@@ -47,3 +45,8 @@ entry status.
   storage philosophy. Trackit similarly stores tasks as set of JSON files, but
   several tasks are grouped together in buckets, and custom Git merge driver
   prevents merge conflicts.
+
+---
+[1]: https://github.com/GothenburgBitFactory/taskwarrior
+[2]: https://github.com/naggie/dstask
+[3]: https://docs.rs/minijinja/2.10.2/
