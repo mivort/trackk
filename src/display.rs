@@ -6,7 +6,7 @@ use crate::issue::Issue;
 use crate::{App, prelude::*, storage};
 
 /// Render the list of filtered entries.
-pub fn show_entries(ids: &IdFilter, report: &ReportConfig, app: &App) -> Result<()> {
+pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>) -> Result<()> {
     // TODO: P3: read report settings and use template
 
     for section in &report.sections {
@@ -17,13 +17,15 @@ pub fn show_entries(ids: &IdFilter, report: &ReportConfig, app: &App) -> Result<
 }
 
 /// Apply template and render single output section.
-fn show_section(ids: &IdFilter, section: &SectionConfig, app: &App) -> Result<()> {
+fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -> Result<()> {
     let entries = storage::fetch_entries(ids, section.index, app)?;
 
     // TODO: P3: add entry sorting
-    // TODO: P3: perform lazy parsing of the template
 
-    let _ = app.templates.template(&section.template)?;
+    app.templates.load_template(&section.template)?;
+
+    let j2 = app.templates.j2.borrow();
+    let _template = j2.get_template(&section.template)?;
 
     for (issue, _path) in entries {
         let tags = issue.tags.iter().map(|t| format!(":{}", t));
