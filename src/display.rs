@@ -1,11 +1,16 @@
 use std::rc::Rc;
 
+use crate::config::SectionConfig;
 use crate::issue::Issue;
-use crate::prelude::*;
+use crate::{App, prelude::*};
 
 /// Render the list of filtered entries.
-pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
+pub fn show_entries(entries: &[(Issue, Rc<str>)], app: &App) {
     // TODO: P3: read report settings and use template
+
+    for section in &app.config.report_all.sections {
+        show_section(section, app);
+    }
 
     for (issue, _path) in entries {
         let tags = issue.tags.iter().map(|t| format!(":{}", t));
@@ -21,6 +26,9 @@ pub fn show_entries(entries: &[(Issue, Rc<str>)]) {
         );
     }
 }
+
+/// Apply template and render single output section.
+fn show_section(_config: &SectionConfig, _app: &App) {}
 
 /// Render single entry.
 pub fn show_entry((issue, path): &(Issue, Rc<str>)) {

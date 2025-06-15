@@ -218,7 +218,7 @@ impl DefaultsConfig {
 /// Report configuration which contains array of report sections.
 #[derive(Deserialize, Default, Clone)]
 pub struct ReportConfig {
-    sections: Vec<SectionConfig>,
+    pub sections: Vec<SectionConfig>,
 }
 
 /// Report section defined by filter and template.
