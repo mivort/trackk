@@ -111,7 +111,8 @@ fn main() -> Result<()> {
                 display::show_json(&entries)?;
                 return Ok(());
             }
-            display::show_entries(&entries, &app);
+            let report = &app.config.report_next;
+            display::show_entries(&entries, report, &app);
         }
         Some(Command::Info(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
@@ -123,7 +124,8 @@ fn main() -> Result<()> {
         }
         Some(Command::All) => {
             let ids = Default::default();
-            display::show_entries(&storage::filter_all_entries(&ids, &app)?, &app);
+            let report = &app.config.report_all;
+            display::show_entries(&storage::filter_all_entries(&ids, &app)?, report, &app);
         }
         Some(Command::Edit(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
@@ -199,7 +201,8 @@ fn main() -> Result<()> {
                     display::show_entry(entry);
                 }
             } else {
-                display::show_entries(&entries, &app);
+                let report = &app.config.report_next;
+                display::show_entries(&entries, report, &app);
             }
         }
     }

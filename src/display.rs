@@ -1,14 +1,16 @@
 use std::rc::Rc;
 
-use crate::config::SectionConfig;
+use crate::config::{ReportConfig, SectionConfig};
 use crate::issue::Issue;
 use crate::{App, prelude::*};
 
 /// Render the list of filtered entries.
-pub fn show_entries(entries: &[(Issue, Rc<str>)], app: &App) {
+pub fn show_entries(entries: &[(Issue, Rc<str>)], report: &ReportConfig, app: &App) {
     // TODO: P3: read report settings and use template
 
-    for section in &app.config.report_all.sections {
+    for section in &report.sections {
+        // TODO: P3: move entry fetching
+        // TODO: P3: add entry sorting
         show_section(section, app);
     }
 
