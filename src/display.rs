@@ -1,18 +1,27 @@
 use std::rc::Rc;
 
 use crate::config::{ReportConfig, SectionConfig};
+use crate::filter::IdFilter;
 use crate::issue::Issue;
-use crate::{App, prelude::*};
+use crate::{App, prelude::*, storage};
 
 /// Render the list of filtered entries.
-pub fn show_entries(entries: &[(Issue, Rc<str>)], report: &ReportConfig, app: &App) {
+pub fn show_entries(ids: &IdFilter, report: &ReportConfig, app: &App) -> Result<()> {
     // TODO: P3: read report settings and use template
 
     for section in &report.sections {
-        // TODO: P3: move entry fetching
-        // TODO: P3: add entry sorting
-        show_section(section, app);
+        show_section(ids, section, app)?;
     }
+
+    Ok(())
+}
+
+/// Apply template and render single output section.
+fn show_section(ids: &IdFilter, section: &SectionConfig, app: &App) -> Result<()> {
+    let entries = storage::fetch_entries(ids, section.index, app)?;
+
+    // TODO: P3: add entry sorting
+    // TODO: P3: perform lazy parsing of the template
 
     for (issue, _path) in entries {
         let tags = issue.tags.iter().map(|t| format!(":{}", t));
@@ -27,10 +36,9 @@ pub fn show_entries(entries: &[(Issue, Rc<str>)], report: &ReportConfig, app: &A
             tags_space = if tags.is_empty() { "" } else { " " }
         );
     }
-}
 
-/// Apply template and render single output section.
-fn show_section(_config: &SectionConfig, _app: &App) {}
+    Ok(())
+}
 
 /// Render single entry.
 pub fn show_entry((issue, path): &(Issue, Rc<str>)) {
@@ -60,6 +68,7 @@ pub fn show_entry((issue, path): &(Issue, Rc<str>)) {
 
 /// Export entries as JSON.
 pub fn show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
+    // TODO: P2: support JSON in regular reports
     print!("[");
     for (i, (e, _)) in entries.iter().enumerate() {
         print!("{}", serde_json::to_string_pretty(e)?);

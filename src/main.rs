@@ -23,6 +23,8 @@ use clap::Parser;
 use config::Config;
 use prelude::*;
 
+use self::config::IndexType;
+
 #[derive(Default)]
 pub struct App {
     /// Application config.
@@ -106,13 +108,18 @@ fn main() -> Result<()> {
     match args.command {
         Some(Command::List(args)) => {
             let ids = Default::default();
-            let entries = storage::fetch_entries(&ids, &app, args.all)?;
+            let index = if args.all {
+                IndexType::All
+            } else {
+                IndexType::Active
+            };
+            let entries = storage::fetch_entries(&ids, index, &app)?;
             if args.json {
                 display::show_json(&entries)?;
                 return Ok(());
             }
             let report = &app.config.report_next;
-            display::show_entries(&entries, report, &app);
+            display::show_entries(&ids, report, &app)?;
         }
         Some(Command::Info(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
@@ -125,7 +132,7 @@ fn main() -> Result<()> {
         Some(Command::All) => {
             let ids = Default::default();
             let report = &app.config.report_all;
-            display::show_entries(&storage::filter_all_entries(&ids, &app)?, report, &app);
+            display::show_entries(&ids, report, &app)?;
         }
         Some(Command::Edit(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
@@ -194,16 +201,8 @@ fn main() -> Result<()> {
         }
         None => {
             let ids = Default::default();
-            let entries = storage::filter_active_entries(&ids, &app)?;
-
-            if !app.filter.ids.is_empty() {
-                for entry in &entries {
-                    display::show_entry(entry);
-                }
-            } else {
-                let report = &app.config.report_next();
-                display::show_entries(&entries, report, &app);
-            }
+            let report = &app.config.report_next();
+            display::show_entries(&ids, report, &app)?;
         }
     }
 

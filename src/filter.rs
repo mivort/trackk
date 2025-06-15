@@ -9,9 +9,6 @@ use crate::{App, prelude::*};
 /// List of filter rules.
 #[derive(Default)]
 pub struct Filter {
-    /// List of IDs to include in the result.
-    pub ids: Vec<String>,
-
     /// Match expression to eval on entries.
     expression: Vec<Token>,
 }

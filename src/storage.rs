@@ -1,6 +1,6 @@
 use crate::args::EntryArgs;
 use crate::bucket::Bucket;
-use crate::config::Config;
+use crate::config::{Config, IndexType};
 use crate::filter::IdFilter;
 use crate::issue::Issue;
 use crate::{App, prelude::*};
@@ -63,11 +63,11 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
 }
 
 /// Produce the list of entries to display or modify.
-pub fn fetch_entries(ids: &IdFilter, app: &App, all: bool) -> Result<Vec<(Issue, Rc<str>)>> {
-    if all {
-        filter_all_entries(ids, app)
-    } else {
-        filter_active_entries(ids, app)
+pub fn fetch_entries(ids: &IdFilter, index: IndexType, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+    match index {
+        IndexType::All => filter_all_entries(ids, app),
+        IndexType::Active => filter_active_entries(ids, app),
+        IndexType::Recent => todo!(), // TODO: P1: introduce recent entries index
     }
 }
 

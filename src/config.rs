@@ -127,7 +127,7 @@ impl Config {
 
         Cow::Owned(ReportConfig {
             sections: vec![SectionConfig {
-                _index: IndexType::Active,
+                index: IndexType::Active,
                 _sorting: "+urgency".into(),
                 _grouping: "".into(),
                 _filter: "".into(),
@@ -144,7 +144,7 @@ impl Config {
 
         Cow::Owned(ReportConfig {
             sections: vec![SectionConfig {
-                _index: IndexType::All,
+                index: IndexType::All,
                 _sorting: "+created".into(),
                 _grouping: "".into(),
                 _filter: "".into(),
@@ -246,7 +246,7 @@ pub struct SectionConfig {
     _template: Box<str>,
 
     /// Index to use when report is produced.
-    _index: IndexType,
+    pub index: IndexType,
 
     /// Sorting direction.
     _sorting: Box<str>,
@@ -266,7 +266,7 @@ pub enum FieldType {
     Date,
 }
 
-#[derive(Deserialize, Default, Clone)]
+#[derive(Deserialize, Default, Clone, Copy)]
 pub enum IndexType {
     #[default]
     #[serde(rename = "active")]
