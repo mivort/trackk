@@ -170,7 +170,7 @@ impl Config {
         if self.data_path.is_empty() {
             env!("CARGO_PKG_NAME")
         } else {
-            &*self.data_path
+            &self.data_path
         }
     }
 
@@ -179,7 +179,7 @@ impl Config {
         if self.issues_path.is_empty() {
             "issues"
         } else {
-            &*self.issues_path
+            &self.issues_path
         }
     }
 }

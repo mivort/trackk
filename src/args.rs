@@ -71,7 +71,7 @@ pub enum Command {
     Merge(MergeArgs),
 
     /// Init the storage and VCS repo.
-    Init,
+    Init(InitArgs),
 
     /// Refresh the active entries index (in case if storage was edited manually).
     Refresh(RefreshArgs),
@@ -210,11 +210,17 @@ pub struct ModArgs {
 #[derive(Parser)]
 pub struct MergeArgs {
     /// Current file state in repo.
-    pub ours: String,
+    pub ours: Box<str>,
 
     /// Incomfing changes.
-    pub theirs: String,
+    pub theirs: Box<str>,
 
     /// Merge output.
-    pub output: String,
+    pub output: Box<str>,
+}
+
+#[derive(Parser)]
+pub struct InitArgs {
+    /// Clone repository during init.
+    pub clone: Option<Box<str>>,
 }

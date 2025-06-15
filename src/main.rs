@@ -174,7 +174,7 @@ fn main() -> Result<()> {
         Some(Command::Refresh(args)) => {
             storage::refresh_index(&app, args.force)?;
         }
-        Some(Command::Init) => {
+        Some(Command::Init(_)) => {
             repo::init_repo(&app.config)?;
         }
         Some(Command::Check) => {
