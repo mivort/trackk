@@ -201,7 +201,7 @@ fn main() -> Result<()> {
                     display::show_entry(entry);
                 }
             } else {
-                let report = &app.config.report_next;
+                let report = &app.config.report_next();
                 display::show_entries(&entries, report, &app);
             }
         }

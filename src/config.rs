@@ -129,8 +129,26 @@ impl Config {
             sections: vec![SectionConfig {
                 _index: IndexType::Active,
                 _sorting: "+urgency".into(),
+                _grouping: "".into(),
                 _filter: "".into(),
                 _template: "next".into(),
+            }],
+        })
+    }
+
+    /// Report which display all entries.
+    pub fn report_all(&self) -> Cow<ReportConfig> {
+        if !self.report_all.sections.is_empty() {
+            return Cow::Borrowed(&self.report_all);
+        }
+
+        Cow::Owned(ReportConfig {
+            sections: vec![SectionConfig {
+                _index: IndexType::All,
+                _sorting: "+created".into(),
+                _grouping: "".into(),
+                _filter: "".into(),
+                _template: "all".into(),
             }],
         })
     }
@@ -233,6 +251,9 @@ pub struct SectionConfig {
     /// Sorting direction.
     _sorting: Box<str>,
 
+    /// Grouping field.
+    _grouping: Box<str>,
+
     /// Section filter parameters.
     _filter: Box<str>,
 }
@@ -248,8 +269,11 @@ pub enum FieldType {
 #[derive(Deserialize, Default, Clone)]
 pub enum IndexType {
     #[default]
+    #[serde(rename = "active")]
     Active,
+    #[serde(rename = "recent")]
     Recent,
+    #[serde(rename = "all")]
     All,
 }
 
