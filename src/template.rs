@@ -31,6 +31,7 @@ impl<'env> Templates<'env> {
         j2.set_keep_trailing_newline(true);
 
         j2.add_filter("format", format);
+        j2.add_filter("firstline", firstline);
 
         self.init.set(true);
     }
@@ -62,4 +63,11 @@ fn format(fmt: String, value: String) -> Result<String, mj::Error> {
         Ok(r) => Ok(r),
         Err(e) => Err(mj::Error::new(mj::ErrorKind::SyntaxError, e.to_string())),
     }
+}
+
+/// Truncate string to only leave the first line.
+fn firstline(mut input: String) -> String {
+    let pos = input.lines().next().unwrap_or_default().len();
+    input.truncate(pos);
+    input
 }
