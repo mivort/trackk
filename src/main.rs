@@ -135,8 +135,8 @@ fn main() -> Result<()> {
         }
         Some(Command::All) => {
             let ids = Default::default();
-            let report = &app.config.report_all;
-            display::show_entries(&ids, report, &app)?;
+            let report = app.config.report_all();
+            display::show_entries(&ids, &report, &app)?;
         }
         Some(Command::Edit(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;

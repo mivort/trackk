@@ -1,2 +1,2 @@
-* {{ ref }}. {{ issue.title }}
-
+{{ ref | default(0, true) -}}
+. {{ issue.title | lines | first }}
