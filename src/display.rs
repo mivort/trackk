@@ -1,9 +1,20 @@
+use std::borrow::Cow;
 use std::rc::Rc;
+
+use serde_derive::Serialize;
 
 use crate::config::{ReportConfig, SectionConfig};
 use crate::filter::IdFilter;
 use crate::issue::Issue;
 use crate::{App, prelude::*, storage};
+
+#[derive(Serialize)]
+struct Context<'a> {
+    r#ref: Option<usize>,
+
+    #[serde(borrow)]
+    issue: Cow<'a, Issue>,
+}
 
 /// Render the list of filtered entries.
 pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>) -> Result<()> {
@@ -18,31 +29,28 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>)
 
 /// Apply template and render single output section.
 fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -> Result<()> {
-    let entries = storage::fetch_entries(ids, section.index, app)?;
+    let SectionConfig {
+        template, index, ..
+    } = section;
+
+    let entries = storage::fetch_entries(ids, *index, app)?;
 
     // TODO: P3: add entry sorting
 
-    app.templates.load_template(&section.template)?;
+    app.templates
+        .load_template(template)
+        .with_context(|| format!("Unable to load template: {template}"))?;
 
     let j2 = app.templates.j2.borrow();
     let template = j2.get_template(&section.template)?;
     let out = std::io::stdout();
 
     for (issue, _path) in entries {
-        let title = issue.title.lines().next().unwrap_or_default();
-        let status = &issue.status.chars().next().unwrap_or('?');
-
-        template.render_to_write(&issue, &out)?;
-
-        let tags = issue.tags.iter().map(|t| format!(":{}", t));
-        let tags = tags.collect::<Vec<_>>().join(" ");
-
-        println!(
-            "{short:3}. [{status}] {id}: {title}{tags_space}{tags}",
-            id = &issue.id.as_str()[0..8],
-            short = issue.short.unwrap_or(0),
-            tags_space = if tags.is_empty() { "" } else { " " }
-        );
+        let context = Context {
+            issue: Cow::Borrowed(&issue),
+            r#ref: issue.short,
+        };
+        template.render_to_write(context, &out)?;
     }
 
     Ok(())

@@ -20,8 +20,8 @@ impl<'env> Templates<'env> {
         }
 
         match template {
-            "next" => j2.add_template(template, "{{ title }}\n\n")?,
-            "all" => j2.add_template(template, "{{ title }}\n\n")?,
+            "next" => j2.add_template(template, include_str!("../templates/row.jinja"))?,
+            "all" => j2.add_template(template, include_str!("../templates/row.jinja"))?,
 
             // TODO: P3: resolve external templates
             _ => panic!(),
