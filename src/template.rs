@@ -1,5 +1,6 @@
 use minijinja as mj;
 use std::cell::{Cell, RefCell};
+use unicode_segmentation::UnicodeSegmentation;
 
 use crate::args::ColorMode;
 use crate::{App, prelude::*};
@@ -36,6 +37,7 @@ impl<'env> Templates<'env> {
 
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
+        j2.add_filter("ulength", ulength);
 
         let (Width(cols), Height(rows)) = terminal_size().unwrap_or((Width(0), Height(0)));
         j2.add_global("cols", cols);
@@ -43,6 +45,7 @@ impl<'env> Templates<'env> {
 
         if !matches!(app.config.color_mode, ColorMode::Never) {
             j2.add_global("green", anstyle::AnsiColor::Green.render_fg().to_string());
+            j2.add_global("blue", anstyle::AnsiColor::Blue.render_fg().to_string());
             j2.add_global("reset", anstyle::Reset.render().to_string());
         }
 
@@ -83,4 +86,9 @@ fn firstline(mut input: String) -> String {
     let pos = input.lines().next().unwrap_or_default().len();
     input.truncate(pos);
     input
+}
+
+/// Return the number of unicode segents in the string.
+fn ulength(input: String) -> usize {
+    input.graphemes(true).count()
 }
