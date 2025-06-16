@@ -1,6 +1,7 @@
+use std::fmt::Display;
 use std::path::PathBuf;
 
-use clap_derive::{Parser, Subcommand};
+use clap_derive::{Parser, Subcommand, ValueEnum};
 use serde_derive::Deserialize;
 
 /// Trackit command line arguments.
@@ -25,6 +26,10 @@ pub struct Args {
     /// Enable verbose output.
     #[arg(long, short, global = true)]
     pub verbose: bool,
+
+    /// Set color mode.
+    #[arg(long, global = true, default_value_t = ColorMode::Auto)]
+    pub color: ColorMode,
 }
 
 #[derive(Subcommand)]
@@ -223,4 +228,22 @@ pub struct MergeArgs {
 pub struct InitArgs {
     /// Clone repository during init.
     pub clone: Option<Box<str>>,
+}
+
+#[derive(ValueEnum, Default, Clone)]
+pub enum ColorMode {
+    #[default]
+    Auto,
+    Always,
+    Never,
+}
+
+impl Display for ColorMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Self::Auto => f.write_str("auto"),
+            Self::Always => f.write_str("always"),
+            Self::Never => f.write_str("never"),
+        }
+    }
 }
