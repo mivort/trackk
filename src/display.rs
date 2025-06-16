@@ -18,7 +18,7 @@ struct Context<'a> {
 
 /// Render the list of filtered entries.
 pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>) -> Result<()> {
-    app.templates.init();
+    app.templates.init(app);
 
     for section in &report.sections {
         show_section(ids, section, app)?;

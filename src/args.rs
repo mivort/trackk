@@ -32,18 +32,6 @@ pub struct Args {
     pub color: ColorMode,
 }
 
-impl Args {
-    /// Read specific environment variables to override some of the parameters.
-    pub fn env_override(&mut self) {
-        if matches!(self.color, ColorMode::Auto) {
-            let no_color = std::env::var("NO_COLOR").unwrap_or_default();
-            if no_color == "1" {
-                self.color = ColorMode::Never;
-            }
-        }
-    }
-}
-
 #[derive(Subcommand)]
 pub enum Command {
     /// Create new entry.
@@ -242,7 +230,7 @@ pub struct InitArgs {
     pub clone: Option<Box<str>>,
 }
 
-#[derive(ValueEnum, Default, Clone)]
+#[derive(ValueEnum, Default, Clone, Copy, Deserialize)]
 pub enum ColorMode {
     #[default]
     Auto,

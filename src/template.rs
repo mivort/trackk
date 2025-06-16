@@ -1,7 +1,8 @@
 use minijinja as mj;
 use std::cell::{Cell, RefCell};
 
-use crate::prelude::*;
+use crate::args::ColorMode;
+use crate::{App, prelude::*};
 
 /// Rendering template lazy loader.
 pub struct Templates<'env> {
@@ -22,7 +23,7 @@ impl<'env> Default for Templates<'env> {
 
 impl<'env> Templates<'env> {
     /// Initialize the templating environment.
-    pub fn init(&self) {
+    pub fn init(&self, app: &App) {
         use terminal_size::*;
 
         if self.init.get() {
@@ -39,8 +40,10 @@ impl<'env> Templates<'env> {
         j2.add_global("cols", cols);
         j2.add_global("rows", rows);
 
-        j2.add_global("green", anstyle::AnsiColor::Green.render_fg().to_string());
-        j2.add_global("reset", anstyle::Reset.render().to_string());
+        if !matches!(app.config.color_mode, ColorMode::Never) {
+            j2.add_global("green", anstyle::AnsiColor::Green.render_fg().to_string());
+            j2.add_global("reset", anstyle::Reset.render().to_string());
+        }
 
         self.init.set(true);
     }

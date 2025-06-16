@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use serde_derive::{Deserialize, Serialize};
 
+use crate::args::{Args, ColorMode};
 use crate::prelude::*;
 
 #[derive(Deserialize, Default)]
@@ -24,6 +25,10 @@ pub struct Config {
     /// Editor used for entry input.
     #[serde(default)]
     editor: Box<str>,
+
+    /// Color mode used during output.
+    #[serde(default)]
+    pub color_mode: ColorMode,
 
     /// User-defined fields.
     #[serde(default)]
@@ -88,11 +93,20 @@ pub struct SyncConfig {
 }
 
 impl Config {
-    /// Override data directory.
-    pub fn set_data_directory(&mut self, data: &Option<Box<str>>) {
-        if let Some(data) = data {
+    /// Override values from arguments.
+    pub fn override_from_args(&mut self, args: &Args) {
+        if let Some(data) = &args.data {
             self.data_path = data.clone();
             self.data_prefix = PrefixType::None;
+        }
+
+        if !matches!(args.color, ColorMode::Auto) {
+            self.color_mode = args.color;
+        } else {
+            let no_color = std::env::var("NO_COLOR").unwrap_or_default();
+            if no_color == "1" {
+                self.color_mode = ColorMode::Never;
+            }
         }
     }
 

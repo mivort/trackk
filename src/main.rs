@@ -93,10 +93,7 @@ impl<'env> App<'env> {
 fn main() -> Result<()> {
     use log::LevelFilter::*;
 
-    let mut args = Args::parse();
-
-    args.env_override();
-    let args = args;
+    let args = Args::parse();
 
     let mut app = App {
         config: read_config(&args)?,
@@ -236,7 +233,7 @@ fn read_config(args: &Args) -> Result<Config> {
             _ => bail!("Unable to read config: {}", path.to_string_lossy()),
         },
     };
-    config.set_data_directory(&args.data);
+    config.override_from_args(args);
     config.fallback_values();
 
     Ok(config)
