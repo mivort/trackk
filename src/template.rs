@@ -32,6 +32,7 @@ impl<'env> Templates<'env> {
 
         let mut j2 = self.j2.borrow_mut();
         j2.set_keep_trailing_newline(true);
+        j2.set_auto_escape_callback(|_| mj::AutoEscape::None);
 
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
