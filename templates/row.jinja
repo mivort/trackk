@@ -2,4 +2,4 @@
 {{ "{:3}." | format(ref | default("   ", true)) }}
 
 {#- Title column -#}
-{# #} {{ issue.title | firstline }}
+{# #} {{ issue.title | firstline }} ({{ issue.tags | length }} tag(s))

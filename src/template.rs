@@ -33,6 +33,10 @@ impl<'env> Templates<'env> {
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
 
+        let (cols, rows) = crossterm::terminal::size().unwrap_or((0, 0));
+        j2.add_global("cols", cols);
+        j2.add_global("rows", rows);
+
         self.init.set(true);
     }
 
