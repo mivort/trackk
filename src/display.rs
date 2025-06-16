@@ -50,7 +50,9 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
             issue: Cow::Borrowed(&issue),
             r#ref: issue.short,
         };
-        template.render_to_write(context, &out)?;
+        template
+            .render_to_write(context, &out)
+            .with_context(|| format!("Unable to render report template: {}", section.template))?;
     }
 
     Ok(())

@@ -1,11 +1,11 @@
-use minijinja::ErrorKind;
+use minijinja as mj;
 use std::cell::{Cell, RefCell};
 
 use crate::prelude::*;
 
 /// Rendering template lazy loader.
 pub struct Templates<'env> {
-    pub j2: RefCell<minijinja::Environment<'env>>,
+    pub j2: RefCell<mj::Environment<'env>>,
 
     /// Flag if initial lazy setup was done.
     init: Cell<bool>,
@@ -14,7 +14,7 @@ pub struct Templates<'env> {
 impl<'env> Default for Templates<'env> {
     fn default() -> Self {
         Self {
-            j2: RefCell::new(minijinja::Environment::new()),
+            j2: RefCell::new(mj::Environment::new()),
             init: Cell::new(false),
         }
     }
@@ -24,11 +24,13 @@ impl<'env> Templates<'env> {
     /// Initialize the templating environment.
     pub fn init(&self) {
         if self.init.get() {
-            return
+            return;
         }
 
         let mut j2 = self.j2.borrow_mut();
         j2.set_keep_trailing_newline(true);
+
+        j2.add_filter("format", format);
 
         self.init.set(true);
     }
@@ -38,7 +40,7 @@ impl<'env> Templates<'env> {
         let mut j2 = self.j2.borrow_mut();
         let err = unwrap_err_or!(j2.get_template(template), _, { return Ok(()) });
 
-        if !matches!(err.kind(), ErrorKind::TemplateNotFound) {
+        if !matches!(err.kind(), mj::ErrorKind::TemplateNotFound) {
             return Err(anyhow!(err));
         }
 
@@ -51,5 +53,13 @@ impl<'env> Templates<'env> {
         }
 
         Ok(())
+    }
+}
+
+/// Use format string to format the value.
+fn format(fmt: String, value: i32) -> Result<String, mj::Error> {
+    match formatx::formatx!(fmt, value) {
+        Ok(r) => Ok(r),
+        Err(e) => Err(mj::Error::new(mj::ErrorKind::SyntaxError, e.to_string())),
     }
 }

@@ -1,2 +1,2 @@
-{{ ref | default(0, true) -}}
+{{ "{:3}" | format(ref) | default(0, true) -}}
 . {{ issue.title | lines | first }}
