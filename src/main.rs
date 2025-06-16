@@ -93,7 +93,10 @@ impl<'env> App<'env> {
 fn main() -> Result<()> {
     use log::LevelFilter::*;
 
-    let args = Args::parse();
+    let mut args = Args::parse();
+
+    args.env_override();
+    let args = args;
 
     let mut app = App {
         config: read_config(&args)?,
