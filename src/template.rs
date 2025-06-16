@@ -39,6 +39,9 @@ impl<'env> Templates<'env> {
         j2.add_global("cols", cols);
         j2.add_global("rows", rows);
 
+        j2.add_global("green", anstyle::AnsiColor::Green.render_fg().to_string());
+        j2.add_global("reset", anstyle::Reset.render().to_string());
+
         self.init.set(true);
     }
 
