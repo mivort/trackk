@@ -23,6 +23,8 @@ impl<'env> Default for Templates<'env> {
 impl<'env> Templates<'env> {
     /// Initialize the templating environment.
     pub fn init(&self) {
+        use terminal_size::*;
+
         if self.init.get() {
             return;
         }
@@ -33,7 +35,7 @@ impl<'env> Templates<'env> {
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
 
-        let (cols, rows) = crossterm::terminal::size().unwrap_or((0, 0));
+        let (Width(cols), Height(rows)) = terminal_size().unwrap_or((Width(0), Height(0)));
         j2.add_global("cols", cols);
         j2.add_global("rows", rows);
 
