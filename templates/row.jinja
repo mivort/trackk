@@ -1,2 +1,5 @@
-{{ "{:3}" | format(ref) | default(0, true) -}}
+{#- Shorthand ID -#}
+{{ "{:3}" | format(ref | default("  ?", true)) }}
+
+{#- Title column -#}
 . {{ issue.title | lines | first }}

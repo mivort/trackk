@@ -57,7 +57,7 @@ impl<'env> Templates<'env> {
 }
 
 /// Use format string to format the value.
-fn format(fmt: String, value: i32) -> Result<String, mj::Error> {
+fn format(fmt: String, value: String) -> Result<String, mj::Error> {
     match formatx::formatx!(fmt, value) {
         Ok(r) => Ok(r),
         Err(e) => Err(mj::Error::new(mj::ErrorKind::SyntaxError, e.to_string())),
