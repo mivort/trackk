@@ -1,18 +1,25 @@
+{#- Max rendering width -#}
+{%- set maxw = min(cols, 96) -%}
+
+{#- Limit amount of visible tags based on terminal width -#}
+{%- set taglimit = 2 if cols > 56 else 1 -%}
+
 {#- Meta section -#}
 {%- set meta -%}
-{{ fg(13) -}}
-{% for tag in issue.tags | batch(2) | first %}<{{ tag }}> {% endfor -%}
-{% if issue.tags | length > 2 %}<+{{ issue.tags | length - 2 }}> {% endif -%}
-{{- reset -}}
-/ 0d
+  {%- if cols > 32 -%}
+    {{ fg(13) -}}
+    {% for tag in issue.tags | batch(taglimit) | first %}<{{ tag }}> {% endfor -%}
+    {% if issue.tags | length > taglimit %}<+{{ issue.tags | length - taglimit }}> {% endif -%}
+  {%- endif -%}
+  {{- reset -}}
+  / 0d
 {%- endset -%}
 {%- set metaw = meta | width -%}
 
-{#- Max width -#}
-{%- set maxw = min(cols, 96) -%}
-
 {#- Issue title -#}
-{%- set title | trunc(maxw - metaw - 8) -%}{{ fg(lightcyan) }}{{ issue.title | firstline }}{%- endset -%}
+{%- set title | trunc(maxw - metaw - 8) -%}
+  {{ fg(lightcyan) }}{{ issue.title | firstline }}
+{%- endset -%}
 {%- set titlew = title | width -%}
 
 {#- Shorthand ID -#}
