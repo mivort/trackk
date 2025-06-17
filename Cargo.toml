@@ -24,6 +24,7 @@ terminal_size = "0.4.2"
 thiserror = "2.0.12"
 time = { version = "0.3.41", features = ["macros", "local-offset", "parsing", "formatting"] }
 unicode-segmentation = "1.12.0"
+unicode-width = "0.2.1"
 unwrap_or = "1.0.1"
 uuid = { version = "1.16.0", features = ["v4", "serde"] }
 vte = "0.15.0"

@@ -1,6 +1,7 @@
 use minijinja as mj;
 use std::cell::{Cell, RefCell};
 use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::UnicodeWidthStr;
 
 use crate::args::ColorMode;
 use crate::{App, prelude::*};
@@ -37,7 +38,8 @@ impl<'env> Templates<'env> {
 
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
-        j2.add_filter("uwidth", uwidth);
+
+        j2.add_filter("uwidth", |s: &str| s.width());
         j2.add_filter("width", width);
 
         let (Width(cols), Height(rows)) = terminal_size().unwrap_or((Width(0), Height(0)));
@@ -110,11 +112,6 @@ fn firstline(mut input: String) -> String {
     let pos = input.lines().next().unwrap_or_default().len();
     input.truncate(pos);
     input
-}
-
-/// Return the number of unicode segents in the string.
-fn uwidth(input: &str) -> usize {
-    input.graphemes(true).count()
 }
 
 /// Produce the string by repeating the character N times.
@@ -205,7 +202,7 @@ fn width(input: &str) -> usize {
     for g in input.graphemes(true) {
         parser.advance(&mut performer, g.as_bytes());
         if performer.printable {
-            performer.count += 1;
+            performer.count += g.width();
             performer.printable = false;
         }
     }
@@ -214,11 +211,6 @@ fn width(input: &str) -> usize {
 }
 
 #[test]
-fn lenght_unicode() {
-    assert_eq!(width("ひびぴ"), 3);
-}
-
-#[test]
-fn length_without_escapes() {
-    assert_eq!(width("\x1B[30mabc\x1B[30m"), 3);
+fn width_no_escapes() {
+    assert_eq!(width("\x1B[30mひびぴ\x1B[30m"), 6);
 }
