@@ -44,8 +44,24 @@ impl<'env> Templates<'env> {
         j2.add_global("rows", rows);
 
         if !matches!(app.config.color_mode, ColorMode::Never) {
-            j2.add_global("green", anstyle::AnsiColor::Green.render_fg().to_string());
-            j2.add_global("blue", anstyle::AnsiColor::Blue.render_fg().to_string());
+            j2.add_global("black", anstyle::AnsiColor::Black as u8);
+            j2.add_global("red", anstyle::AnsiColor::Red as u8);
+            j2.add_global("green", anstyle::AnsiColor::Green as u8);
+            j2.add_global("yellow", anstyle::AnsiColor::Yellow as u8);
+            j2.add_global("blue", anstyle::AnsiColor::Blue as u8);
+            j2.add_global("magenta", anstyle::AnsiColor::Magenta as u8);
+            j2.add_global("cyan", anstyle::AnsiColor::Cyan as u8);
+            j2.add_global("white", anstyle::AnsiColor::White as u8);
+
+            j2.add_global("brightblack", anstyle::AnsiColor::BrightBlack as u8);
+            j2.add_global("brightred", anstyle::AnsiColor::BrightRed as u8);
+            j2.add_global("brightgreen", anstyle::AnsiColor::BrightGreen as u8);
+            j2.add_global("brightyellow", anstyle::AnsiColor::BrightYellow as u8);
+            j2.add_global("brightblue", anstyle::AnsiColor::BrightBlue as u8);
+            j2.add_global("brightmagenta", anstyle::AnsiColor::BrightMagenta as u8);
+            j2.add_global("brightcyan", anstyle::AnsiColor::BrightCyan as u8);
+            j2.add_global("brightwhite", anstyle::AnsiColor::BrightWhite as u8);
+
             j2.add_global("reset", anstyle::Reset.render().to_string());
             j2.add_function("fg", fg);
         } else {

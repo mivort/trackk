@@ -1,5 +1,5 @@
 {#- Shorthand ID -#}
-{{ fg(12) }}{{ "{:3}." | format(ref | default("   ", true)) }}
+{{ fg(brightblue) }}{{ "{:3}." | format(ref | default("   ", true)) }}
 
 {#- Title column -#}
-{# #} {{ fg(2) }}{{ issue.title | firstline }}{{ reset }} ({{ issue.tags | length }} tag(s))
+{# #} {{ fg(brightgreen) }}{{ issue.title | firstline }}{{ reset }} ({{ issue.tags | length }} tag(s))
