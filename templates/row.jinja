@@ -7,6 +7,7 @@
 
 {#- Meta section -#}
 {%- set meta -%}[{{ issue.tags | length }}]{%- endset -%}
+{%- set metaw = meta | ulength -%}
 
 {#- Title column -#}
-{# #} {{ fg(brightgreen) }}{{ title }}{{ reset }} {{ fill('.', 30 - titlew) }} {{ meta }}
+{# #} {{ fg(brightgreen) }}{{ title }}{{ reset }} {{ fill('.', min(cols, 96) - titlew - metaw - 8) }} {{ meta }}

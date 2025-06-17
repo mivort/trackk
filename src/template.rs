@@ -69,6 +69,8 @@ impl<'env> Templates<'env> {
         }
 
         j2.add_function("fill", fill);
+        j2.add_function("min", |a: i32, b: i32| a.min(b));
+        j2.add_function("max", |a: i32, b: i32| a.max(b));
 
         self.init.set(true);
     }
