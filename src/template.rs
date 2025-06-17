@@ -56,14 +56,14 @@ impl<'env> Templates<'env> {
             j2.add_global("cyan", anstyle::AnsiColor::Cyan as u8);
             j2.add_global("white", anstyle::AnsiColor::White as u8);
 
-            j2.add_global("brightblack", anstyle::AnsiColor::BrightBlack as u8);
-            j2.add_global("brightred", anstyle::AnsiColor::BrightRed as u8);
-            j2.add_global("brightgreen", anstyle::AnsiColor::BrightGreen as u8);
-            j2.add_global("brightyellow", anstyle::AnsiColor::BrightYellow as u8);
-            j2.add_global("brightblue", anstyle::AnsiColor::BrightBlue as u8);
-            j2.add_global("brightmagenta", anstyle::AnsiColor::BrightMagenta as u8);
-            j2.add_global("brightcyan", anstyle::AnsiColor::BrightCyan as u8);
-            j2.add_global("brightwhite", anstyle::AnsiColor::BrightWhite as u8);
+            j2.add_global("lightblack", anstyle::AnsiColor::BrightBlack as u8);
+            j2.add_global("lightred", anstyle::AnsiColor::BrightRed as u8);
+            j2.add_global("lightgreen", anstyle::AnsiColor::BrightGreen as u8);
+            j2.add_global("lightyellow", anstyle::AnsiColor::BrightYellow as u8);
+            j2.add_global("lightblue", anstyle::AnsiColor::BrightBlue as u8);
+            j2.add_global("lightmagenta", anstyle::AnsiColor::BrightMagenta as u8);
+            j2.add_global("lightcyan", anstyle::AnsiColor::BrightCyan as u8);
+            j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
             j2.add_global("reset", anstyle::Reset.render().to_string());
             j2.add_function("fg", fg);
@@ -119,27 +119,27 @@ fn fill(value: &str, repeat: i32) -> String {
     (0..repeat).map(|_| value).collect()
 }
 
-/// Macro which adds ANSI escape codes based on provided category.
-macro_rules! escape {
-    (a16: $code:literal) => {
-        concat!("\x1B[", stringify!($code), "m")
-    };
-    (a256: $code:literal) => {
-        concat!("\x1B[38;5;", stringify!($code), "m")
-    };
-}
-
-/// Compact notation for group of ANSI codes definitions.
-macro_rules! escape_match {
-    ($var:expr, $( $cat:ident [ $($code:literal / $res:literal )* ] )* ) => {
-        match $var {
-            $( $( $code => escape!($cat : $res), )* )*
-        }
-    };
-}
-
 /// Set foreground color using the value from 0 to 255.
 const fn fg(color: u8) -> &'static str {
+    /// Macro which adds ANSI escape codes based on provided category.
+    macro_rules! escape {
+        (a16: $code:literal) => {
+            concat!("\x1B[", stringify!($code), "m")
+        };
+        (a256: $code:literal) => {
+            concat!("\x1B[38;5;", stringify!($code), "m")
+        };
+    }
+
+    /// Compact notation for group of ANSI codes definitions.
+    macro_rules! escape_match {
+        ($var:expr, $( $cat:ident [ $($code:literal / $res:literal )* ] )* ) => {
+            match $var {
+                $( $( $code => escape!($cat : $res), )* )*
+            }
+        };
+    }
+
     escape_match!(color,
         a16[00/30 01/31 02/32 03/33 04/34 05/35 06/36 07/37]
         a16[08/90 09/91 10/92 11/93 12/94 13/95 14/96 15/97]

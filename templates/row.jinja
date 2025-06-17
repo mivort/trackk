@@ -1,14 +1,19 @@
 {#- Issue title -#}
-{%- set title -%}{{ issue.title | firstline }}{%- endset -%}
+{%- set title -%}{{ fg(lightcyan) }}{{ issue.title | firstline }}{%- endset -%}
 {%- set titlew = title | width -%}
 
 {#- Meta section -#}
-{%- set meta -%}{{ fg(10) }}[{{ issue.tags | length }}]{{ reset }}{%- endset -%}
+{%- set meta -%}
+{{ fg(13) -}}
+{% for tag in issue.tags %}<{{ tag }}> {% endfor %}
+{{- reset -}}
+/ 0d
+{%- endset -%}
 {%- set metaw = meta | width -%}
 
 {#- Shorthand ID -#}
-{{ fg(brightblue) }}{{ "{:3}. " | format(sid | default("    ", true)) }}
+{{ fg(lightblue) }}{{ "{:3}. " | format(sid | default("    ", true)) }}
 
 {#- Row output -#}
-{{ fg(brightgreen) }}{{ title -}}
+{{ title -}}
 {{ reset }} {{ fill('.', min(cols, 96) - titlew - metaw - 8) }} {{ meta }}
