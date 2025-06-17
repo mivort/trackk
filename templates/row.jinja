@@ -1,7 +1,8 @@
 {#- Meta section -#}
 {%- set meta -%}
 {{ fg(13) -}}
-{% for tag in issue.tags %}<{{ tag }}> {% endfor %}
+{% for tag in issue.tags | batch(2) | first %}<{{ tag }}> {% endfor -%}
+{% if issue.tags | length > 2 %}<+{{ issue.tags | length - 2 }}> {% endif -%}
 {{- reset -}}
 / 0d
 {%- endset -%}
