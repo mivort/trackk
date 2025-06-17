@@ -47,6 +47,9 @@ impl<'env> Templates<'env> {
             j2.add_global("green", anstyle::AnsiColor::Green.render_fg().to_string());
             j2.add_global("blue", anstyle::AnsiColor::Blue.render_fg().to_string());
             j2.add_global("reset", anstyle::Reset.render().to_string());
+            j2.add_function("fg", fg);
+        } else {
+            j2.add_function("fg", |_: u8| "");
         }
 
         self.init.set(true);
@@ -91,4 +94,9 @@ fn firstline(mut input: String) -> String {
 /// Return the number of unicode segents in the string.
 fn ulength(input: String) -> usize {
     input.graphemes(true).count()
+}
+
+/// Set foreground color using the value from 0 to 255.
+fn fg(color: u8) -> String {
+    anstyle::Ansi256Color::from(color).render_fg().to_string()
 }
