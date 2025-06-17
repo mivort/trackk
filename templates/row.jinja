@@ -1,7 +1,3 @@
-{#- Issue title -#}
-{%- set title -%}{{ fg(lightcyan) }}{{ issue.title | firstline }}{%- endset -%}
-{%- set titlew = title | width -%}
-
 {#- Meta section -#}
 {%- set meta -%}
 {{ fg(13) -}}
@@ -11,9 +7,16 @@
 {%- endset -%}
 {%- set metaw = meta | width -%}
 
+{#- Max width -#}
+{%- set maxw = min(cols, 96) -%}
+
+{#- Issue title -#}
+{%- set title | trunc(maxw - metaw - 8) -%}{{ fg(lightcyan) }}{{ issue.title | firstline }}{%- endset -%}
+{%- set titlew = title | width -%}
+
 {#- Shorthand ID -#}
 {{ fg(lightblue) }}{{ "{:3}. " | format(sid | default("    ", true)) }}
 
 {#- Row output -#}
 {{ title -}}
-{{ reset }} {{ fill('.', min(cols, 96) - titlew - metaw - 8) }} {{ meta }}
+{{ reset }} {{ fill('.', maxw - titlew - metaw - 8) }} {{ meta }}

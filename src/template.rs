@@ -41,6 +41,7 @@ impl<'env> Templates<'env> {
 
         j2.add_filter("uwidth", |s: &str| s.width());
         j2.add_filter("width", width);
+        j2.add_filter("trunc", trunc);
 
         let (Width(cols), Height(rows)) = terminal_size().unwrap_or((Width(0), Height(0)));
         j2.add_global("cols", cols);
@@ -208,6 +209,51 @@ fn width(input: &str) -> usize {
     }
 
     performer.count
+}
+
+/// Truncate string to a maximum length and add optional character at the end.
+fn trunc(mut input: String, max: i32, _end: Option<&str>) -> String {
+    // TODO: P2: implement more precise truncation
+    // TODO: P2: implement truncate chararater support
+
+    use vte::{Parser, Perform};
+
+    let mut parser = Parser::new();
+
+    struct Performer {
+        printable: bool,
+        byte: usize,
+        count: usize,
+    }
+
+    let mut performer = Performer {
+        count: 0,
+        byte: 0,
+        printable: false,
+    };
+
+    impl Perform for Performer {
+        fn print(&mut self, _c: char) {
+            self.printable = true
+        }
+    }
+
+    for g in input.graphemes(true) {
+        parser.advance(&mut performer, g.as_bytes());
+        if performer.printable {
+            performer.count += g.width();
+
+            if performer.count >= max as usize {
+                break;
+            }
+
+            performer.printable = false;
+        }
+        performer.byte += g.len();
+    }
+
+    input.truncate(performer.byte);
+    input
 }
 
 #[test]
