@@ -37,7 +37,8 @@ impl<'env> Templates<'env> {
 
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
-        j2.add_filter("ulength", ulength);
+        j2.add_filter("uwidth", uwidth);
+        j2.add_filter("width", width);
 
         let (Width(cols), Height(rows)) = terminal_size().unwrap_or((Width(0), Height(0)));
         j2.add_global("cols", cols);
@@ -112,7 +113,7 @@ fn firstline(mut input: String) -> String {
 }
 
 /// Return the number of unicode segents in the string.
-fn ulength(input: &str) -> usize {
+fn uwidth(input: &str) -> usize {
     input.graphemes(true).count()
 }
 
@@ -177,4 +178,47 @@ const fn fg(color: u8) -> &'static str {
         a256[240/240 241/241 242/242 243/243 244/244 245/245 246/246 247/247]
         a256[248/248 249/249 250/250 251/251 252/252 253/253 254/254 255/255]
     )
+}
+
+/// Iterate over Unicode segments and count length excluding escape sequences.
+fn width(input: &str) -> usize {
+    use vte::{Parser, Perform};
+
+    let mut parser = Parser::new();
+
+    struct Performer {
+        printable: bool,
+        count: usize,
+    }
+
+    let mut performer = Performer {
+        count: 0,
+        printable: false,
+    };
+
+    impl Perform for Performer {
+        fn print(&mut self, _c: char) {
+            self.printable = true
+        }
+    }
+
+    for g in input.graphemes(true) {
+        parser.advance(&mut performer, g.as_bytes());
+        if performer.printable {
+            performer.count += 1;
+            performer.printable = false;
+        }
+    }
+
+    performer.count
+}
+
+#[test]
+fn lenght_unicode() {
+    assert_eq!(width("ひびぴ"), 3);
+}
+
+#[test]
+fn length_without_escapes() {
+    assert_eq!(width("\x1B[30mabc\x1B[30m"), 3);
 }

@@ -1,10 +1,10 @@
 {#- Issue title -#}
 {%- set title -%}{{ issue.title | firstline }}{%- endset -%}
-{%- set titlew = title | ulength -%}
+{%- set titlew = title | width -%}
 
 {#- Meta section -#}
-{%- set meta -%}[{{ issue.tags | length }}]{%- endset -%}
-{%- set metaw = meta | ulength -%}
+{%- set meta -%}{{ fg(10) }}[{{ issue.tags | length }}]{{ reset }}{%- endset -%}
+{%- set metaw = meta | width -%}
 
 {#- Shorthand ID -#}
 {{ fg(brightblue) }}{{ "{:3}. " | format(sid | default("    ", true)) }}
