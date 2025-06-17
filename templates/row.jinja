@@ -1,5 +1,12 @@
 {#- Shorthand ID -#}
-{{ fg(brightblue) }}{{ "{:3}." | format(ref | default("   ", true)) }}
+{{ fg(brightblue) }}{{ "{:3}." | format(sid | default("   ", true)) }}
+
+{#- Issue title -#}
+{%- set title -%}{{ issue.title | firstline }}{%- endset -%}
+{%- set titlew = title | ulength -%}
+
+{#- Meta section -#}
+{%- set meta -%}[{{ issue.tags | length }}]{%- endset -%}
 
 {#- Title column -#}
-{# #} {{ fg(brightgreen) }}{{ issue.title | firstline }}{{ reset }} ({{ issue.tags | length }} tag(s))
+{# #} {{ fg(brightgreen) }}{{ title }}{{ reset }} {{ fill('.', 30 - titlew) }} {{ meta }}

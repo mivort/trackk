@@ -68,6 +68,8 @@ impl<'env> Templates<'env> {
             j2.add_function("fg", |_: u8| "");
         }
 
+        j2.add_function("fill", fill);
+
         self.init.set(true);
     }
 
@@ -93,7 +95,7 @@ impl<'env> Templates<'env> {
 }
 
 /// Use format string to format the value.
-fn format(fmt: String, value: String) -> Result<String, mj::Error> {
+fn format(fmt: &str, value: String) -> Result<String, mj::Error> {
     match formatx::formatx!(fmt, value) {
         Ok(r) => Ok(r),
         Err(e) => Err(mj::Error::new(mj::ErrorKind::SyntaxError, e.to_string())),
@@ -108,8 +110,13 @@ fn firstline(mut input: String) -> String {
 }
 
 /// Return the number of unicode segents in the string.
-fn ulength(input: String) -> usize {
+fn ulength(input: &str) -> usize {
     input.graphemes(true).count()
+}
+
+/// Produce the string by repeating the character N times.
+fn fill(value: &str, repeat: i32) -> String {
+    (0..repeat).map(|_| value).collect()
 }
 
 /// Macro which adds ANSI escape codes based on provided category.

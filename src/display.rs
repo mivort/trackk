@@ -9,9 +9,14 @@ use crate::issue::Issue;
 use crate::{App, prelude::*, storage};
 
 #[derive(Serialize)]
-struct Context<'a> {
-    r#ref: Option<usize>,
+struct RowContext<'a> {
+    /// Shorthand issue reference.
+    sid: Option<usize>,
 
+    /// Flag if current row is odd or even.
+    lineno: usize,
+
+    /// Reference to the issue data.
     #[serde(borrow)]
     issue: Cow<'a, Issue>,
 }
@@ -45,10 +50,11 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
     let template = j2.get_template(&section.template)?;
     let out = std::io::stdout();
 
-    for (issue, _path) in entries {
-        let context = Context {
+    for (lineno, (issue, _path)) in entries.iter().enumerate() {
+        let context = RowContext {
             issue: Cow::Borrowed(&issue),
-            r#ref: issue.short,
+            sid: issue.short,
+            lineno,
         };
         template
             .render_to_write(context, &out)
