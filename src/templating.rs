@@ -94,7 +94,7 @@ impl<'env> Templates<'env> {
     }
 
     /// Check template ID existence, if template doesn't exist yet - load and parse it.
-    pub fn load_template(&self, template: &'env str) -> Result<()> {
+    pub fn load_template(&self, template: &str) -> Result<()> {
         let mut j2 = self.j2.borrow_mut();
         let err = unwrap_err_or!(j2.get_template(template), _, { return Ok(()) });
 
@@ -103,8 +103,9 @@ impl<'env> Templates<'env> {
         }
 
         match template {
-            "next" => j2.add_template(template, include_str!("../templates/row.jinja"))?,
-            "all" => j2.add_template(template, include_str!("../templates/row.jinja"))?,
+            "next" => j2.add_template("next", include_str!("../templates/row.jinja"))?,
+            "all" => j2.add_template("all", include_str!("../templates/row.jinja"))?,
+            "issue" => j2.add_template("issue", include_str!("../templates/issue.jinja"))?,
 
             // TODO: P3: resolve external templates
             _ => panic!(),

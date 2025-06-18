@@ -13,7 +13,7 @@
   {%- endif -%}
   {{- reset -}}
   {%- if issue.due -%}
-    / {{ issue.due | reldate(1) }} {{ '' -}}
+    / {{ issue.due | reldate(1) }} {# -#}
   {%- endif -%}
 {%- endset -%}
 {%- set metaw = meta | width -%}

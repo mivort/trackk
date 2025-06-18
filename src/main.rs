@@ -136,7 +136,7 @@ fn main() -> Result<()> {
             let entries = storage::filter_active_entries(&ids, &app)?;
 
             for entry in &entries {
-                display::show_entry(entry);
+                display::show_entry(entry, &app)?;
             }
         }
         Some(Command::All) => {

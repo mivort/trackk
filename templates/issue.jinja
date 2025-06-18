@@ -1,0 +1,16 @@
+{{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
+{{ issue.title }}
+{{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
+
+{#- Meta tags -#}
+{% set created %}{{ issue.created | reldate }}{% endset %}
+{% set due %}{{ issue.due | reldate }}{% endset %}
+
+{#- Field output -#}
+{# #} UUID:    {{ issue.id }}
+{# #} Status:  {{ issue.status }}
+{# #} Created: {{ created }}
+{# #} Due:     {{ due }}
+{# #} Tags:    {{ issue.tags | length }}
+{# #} Path:    {{ path }}
+{{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}

@@ -26,6 +26,10 @@ pub struct Config {
     #[serde(default)]
     editor: Box<str>,
 
+    /// Template name for single issue view.
+    #[serde(default)]
+    issue_view: Box<str>,
+
     /// Color mode used during output.
     #[serde(default)]
     pub color_mode: ColorMode,
@@ -132,6 +136,15 @@ impl Config {
         unwrap_err_or!(env::var("EDITOR"), editor, { return editor.into() });
 
         "nano".into()
+    }
+
+    /// Single issue view template.
+    pub fn issue_view(&self) -> Cow<str> {
+        if !self.issue_view.is_empty() {
+            return Cow::Borrowed(&*self.issue_view);
+        }
+
+        "issue".into()
     }
 
     /// Default report format.

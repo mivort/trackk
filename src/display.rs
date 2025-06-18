@@ -17,8 +17,10 @@ struct RowContext<'a> {
     lineno: usize,
 
     /// Reference to the issue data.
-    #[serde(borrow)]
     issue: Cow<'a, Issue>,
+
+    /// Path to storage file which contains the entry.
+    path: Cow<'a, str>,
 }
 
 /// Render the list of filtered entries.
@@ -55,10 +57,11 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
     let template = j2.get_template(&section.template)?;
     let out = std::io::stdout();
 
-    for (lineno, (issue, _path)) in entries.iter().enumerate() {
+    for (lineno, (issue, path)) in entries.iter().enumerate() {
         let context = RowContext {
-            issue: Cow::Borrowed(issue),
             sid: issue.short,
+            issue: Cow::Borrowed(issue),
+            path: Cow::Borrowed(&path),
             lineno,
         };
         template
@@ -70,29 +73,27 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
 }
 
 /// Render single entry.
-pub fn show_entry((issue, path): &(Issue, Rc<str>)) {
-    let tags = issue.tags.iter().map(|t| format!("@{}", t));
-    let tags = tags.collect::<Vec<_>>().join(" ");
+pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Result<()> {
+    app.templates.init(app);
 
-    // TODO: P2: use template for single entry report
+    let template_id = &*app.config.issue_view();
+    app.templates.load_template(template_id)?;
 
-    println!(
-        concat!(
-            "\n",
-            "ID:     {id}\n",
-            "--------------------------------------------\n",
-            "{title}\n\n",
-            "--------------------------------------------\n",
-            "Status: {status}\n",
-            "Tags:   {tags}\n",
-            "Path:   {path}\n"
-        ),
-        id = &issue.id,
-        title = &issue.title,
-        status = &issue.status,
-        path = path,
-        tags = tags,
-    )
+    let j2 = app.templates.j2.borrow();
+    let template = j2.get_template(template_id)?;
+    let out = std::io::stdout();
+
+    let context = RowContext {
+        sid: issue.short,
+        issue: Cow::Borrowed(issue),
+        path: Cow::Borrowed(&path),
+        lineno: 0,
+    };
+    template
+        .render_to_write(context, &out)
+        .with_context(|| format!("Unable to render issue template: {}", template_id))?;
+
+    Ok(())
 }
 
 /// Export entries as JSON.
