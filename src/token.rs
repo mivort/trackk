@@ -82,6 +82,9 @@ pub enum Token {
     #[token("/")]
     Div,
 
+    #[token("%")]
+    Mod,
+
     #[token("@")]
     #[token("at")]
     #[token("at:")]
@@ -164,7 +167,7 @@ impl Token {
         match self {
             Not => (8, false),
             At | FuzzyEq => (7, true),
-            Mul | Div => (6, true),
+            Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
             Less | LessEq | Greater | GreaterEq => (4, true),
             Eq | NotEq => (3, true),
@@ -236,6 +239,16 @@ impl Token {
             }
             (Bool(lhs), Bool(rhs)) => Ok(Bool(lhs || rhs)),
             _ => bail!("Unsupported '/' operator arguments"),
+        }
+    }
+
+    /// Find the division remainder.
+    pub fn modulo(self, rhs: Self) -> Result<Self> {
+        use Token::*;
+
+        match (self, rhs) {
+            (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs % rhs)),
+            _ => bail!("Unsupported '%' operator arguments"),
         }
     }
 
