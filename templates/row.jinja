@@ -12,7 +12,9 @@
     {% if issue.tags | length > taglimit %}<+{{ issue.tags | length - taglimit }}> {% endif -%}
   {%- endif -%}
   {{- reset -}}
-  / 0d
+  {%- if issue.due -%}
+    / {{ issue.due | reldate(1) }} {{ '' -}}
+  {%- endif -%}
 {%- endset -%}
 {%- set metaw = meta | width -%}
 

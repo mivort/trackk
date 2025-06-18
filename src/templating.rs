@@ -3,7 +3,7 @@ use std::cell::{Cell, RefCell};
 use unicode_width::UnicodeWidthStr;
 
 use crate::args::ColorMode;
-use crate::templates::{colors, layout};
+use crate::templates::{colors, dates, layout};
 use crate::{App, prelude::*};
 
 /// Rendering template lazy loader.
@@ -39,7 +39,10 @@ impl<'env> Templates<'env> {
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
 
-        j2.add_filter("reldate", || ""); // TODO: P3: add relative date filter
+        let now = app.ts;
+        j2.add_filter("reldate", move |d: i64, p: Option<i32>| {
+            dates::reldate(d, now, p)
+        });
         j2.add_filter("date", || ""); // TODO: P3: add date formatter
 
         j2.add_filter("uwidth", |s: &str| s.width());
