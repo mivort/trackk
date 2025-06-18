@@ -12,6 +12,7 @@ mod repo;
 mod storage;
 mod templates {
     pub(crate) mod colors;
+    pub(crate) mod layout;
 }
 mod templating;
 mod token;

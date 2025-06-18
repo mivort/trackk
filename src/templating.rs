@@ -1,10 +1,9 @@
 use minijinja as mj;
 use std::cell::{Cell, RefCell};
-use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
 
 use crate::args::ColorMode;
-use crate::templates::colors;
+use crate::templates::{colors, layout};
 use crate::{App, prelude::*};
 
 /// Rendering template lazy loader.
@@ -40,9 +39,13 @@ impl<'env> Templates<'env> {
         j2.add_filter("format", format);
         j2.add_filter("firstline", firstline);
 
+        j2.add_filter("reldate", || ""); // TODO: P3: add relative date filter
+        j2.add_filter("date", || ""); // TODO: P3: add date formatter
+
         j2.add_filter("uwidth", |s: &str| s.width());
-        j2.add_filter("width", width);
-        j2.add_filter("trunc", trunc);
+        j2.add_filter("width", layout::width);
+        j2.add_filter("trunc", layout::trunc);
+        j2.add_function("fill", layout::fill);
 
         let (Width(cols), Height(rows)) = terminal_size().unwrap_or((Width(0), Height(0)));
         j2.add_global("cols", cols);
@@ -77,7 +80,6 @@ impl<'env> Templates<'env> {
             j2.add_function("bg", |_: u8| "");
         }
 
-        j2.add_function("fill", fill);
         j2.add_function("min", |a: i32, b: i32| a.min(b));
         j2.add_function("max", |a: i32, b: i32| a.max(b));
 
@@ -118,92 +120,4 @@ fn firstline(mut input: String) -> String {
     let pos = input.lines().next().unwrap_or_default().len();
     input.truncate(pos);
     input
-}
-
-/// Produce the string by repeating the character N times.
-fn fill(value: &str, repeat: i32) -> String {
-    (0..repeat).map(|_| value).collect()
-}
-
-/// Iterate over Unicode segments and count length excluding escape sequences.
-fn width(input: &str) -> usize {
-    use vte::{Parser, Perform};
-
-    let mut parser = Parser::new();
-
-    struct Performer {
-        printable: bool,
-        count: usize,
-    }
-
-    let mut performer = Performer {
-        count: 0,
-        printable: false,
-    };
-
-    impl Perform for Performer {
-        fn print(&mut self, _c: char) {
-            self.printable = true
-        }
-    }
-
-    for g in input.graphemes(true) {
-        parser.advance(&mut performer, g.as_bytes());
-        if performer.printable {
-            performer.count += g.width();
-            performer.printable = false;
-        }
-    }
-
-    performer.count
-}
-
-/// Truncate string to a maximum length and add optional character at the end.
-fn trunc(mut input: String, max: i32, _end: Option<&str>) -> String {
-    // TODO: P2: implement more precise truncation
-    // TODO: P2: implement truncate chararater support
-
-    use vte::{Parser, Perform};
-
-    let mut parser = Parser::new();
-
-    struct Performer {
-        printable: bool,
-        byte: usize,
-        count: usize,
-    }
-
-    let mut performer = Performer {
-        count: 0,
-        byte: 0,
-        printable: false,
-    };
-
-    impl Perform for Performer {
-        fn print(&mut self, _c: char) {
-            self.printable = true
-        }
-    }
-
-    for g in input.graphemes(true) {
-        parser.advance(&mut performer, g.as_bytes());
-        if performer.printable {
-            performer.count += g.width();
-
-            if performer.count >= max as usize {
-                break;
-            }
-
-            performer.printable = false;
-        }
-        performer.byte += g.len();
-    }
-
-    input.truncate(performer.byte);
-    input
-}
-
-#[test]
-fn width_no_escapes() {
-    assert_eq!(width("\x1B[30mひびぴ\x1B[30m"), 6);
 }
