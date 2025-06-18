@@ -70,7 +70,11 @@ impl<'env> Templates<'env> {
             j2.add_global("lightcyan", anstyle::AnsiColor::BrightCyan as u8);
             j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
-            j2.add_global("reset", anstyle::Reset.render().to_string());
+            j2.add_global("reset", colors::RESET);
+            j2.add_global("bold", colors::BOLD);
+            j2.add_global("italic", colors::ITALIC);
+            j2.add_global("underline", colors::UNDERLINE);
+
             j2.add_function("fg", colors::fg);
             j2.add_function("bg", colors::bg);
 

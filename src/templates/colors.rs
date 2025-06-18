@@ -97,3 +97,8 @@ pub const fn bg(color: u8) -> &'static str {
         a256bg[248/248 249/249 250/250 251/251 252/252 253/253 254/254 255/255]
     )
 }
+
+pub const RESET: &str = "\x1B[0m";
+pub const BOLD: &str = "\x1B[1m";
+pub const ITALIC: &str = "\x1B[3m";
+pub const UNDERLINE: &str = "\x1B[4m";
