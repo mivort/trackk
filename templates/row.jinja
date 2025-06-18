@@ -4,16 +4,24 @@
 {#- Limit amount of visible tags based on terminal width -#}
 {%- set taglimit = 2 if cols > 56 else 1 -%}
 
-{#- Meta section -#}
+{#- Issue details section -#}
 {%- set meta -%}
+  {#- Tag list -#}
   {%- if cols > 32 -%}
-    {{ fg(13) -}}
-    {% for tag in issue.tags | batch(taglimit) | first %}<{{ tag }}> {% endfor -%}
-    {% if issue.tags | length > taglimit %}<+{{ issue.tags | length - taglimit }}> {% endif -%}
+    {%- for tag in issue.tags | batch(taglimit) | first -%}
+      {{ fg(magenta) }}#{{ fg(lightmagenta) }}{{ tag }} {# -#}
+    {%- endfor -%}
+    {% if issue.tags | length > taglimit -%}
+      {{ fg(magenta) }}+{{ issue.tags | length - taglimit }} {# -#}
+    {% endif -%}
   {%- endif -%}
   {{- reset -}}
+
+  {#- Due date -#}
   {%- if issue.due -%}
     / {{ issue.due | reldate(1) }} {# -#}
+  {%- else -%}
+    / -- {# -#}
   {%- endif -%}
 {%- endset -%}
 {%- set metaw = meta | width -%}
