@@ -137,6 +137,10 @@ pub struct FilterArgs {
     /// Filter query to apply to the results.
     #[arg(long, short)]
     pub filter: Vec<String>,
+
+    /// Sort by provided sorting rule, overriding report sorting.
+    #[arg(long, short)]
+    pub sort: Option<Box<str>>,
 }
 
 /// Args to apply changes to the selected entries.

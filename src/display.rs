@@ -6,7 +6,7 @@ use serde_derive::Serialize;
 use crate::config::{ReportConfig, SectionConfig};
 use crate::filter::IdFilter;
 use crate::issue::Issue;
-use crate::{App, prelude::*, storage};
+use crate::{App, prelude::*, sort, storage};
 
 #[derive(Serialize)]
 struct RowContext<'a> {
@@ -35,12 +35,17 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>)
 /// Apply template and render single output section.
 fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -> Result<()> {
     let SectionConfig {
-        template, index, ..
+        template,
+        index,
+        sorting,
+        ..
     } = section;
 
-    let entries = storage::fetch_entries(ids, *index, app)?;
+    // TODO: P3: apply report-local filter
+    // TODO: P2: propagate sorting override from args
 
-    // TODO: P3: add entry sorting
+    let mut entries = storage::fetch_entries(ids, *index, app)?;
+    sort::sort_entries(&mut entries, &sorting)?;
 
     app.templates
         .load_template(template)

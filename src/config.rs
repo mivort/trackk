@@ -143,7 +143,7 @@ impl Config {
         Cow::Owned(ReportConfig {
             sections: vec![SectionConfig {
                 index: IndexType::Active,
-                _sorting: "+urgency".into(),
+                sorting: "+urgency".into(),
                 _grouping: "".into(),
                 _filter: "".into(),
                 template: "next".into(),
@@ -160,7 +160,7 @@ impl Config {
         Cow::Owned(ReportConfig {
             sections: vec![SectionConfig {
                 index: IndexType::All,
-                _sorting: "+created".into(),
+                sorting: "+created".into(),
                 _grouping: "".into(),
                 _filter: "".into(),
                 template: "all".into(),
@@ -264,7 +264,7 @@ pub struct SectionConfig {
     pub index: IndexType,
 
     /// Sorting direction.
-    _sorting: Box<str>,
+    pub sorting: Box<str>,
 
     /// Grouping field.
     _grouping: Box<str>,

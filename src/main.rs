@@ -9,6 +9,7 @@ mod index;
 mod issue;
 mod prelude;
 mod repo;
+mod sort;
 mod storage;
 mod templates {
     pub(crate) mod colors;
