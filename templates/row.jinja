@@ -25,7 +25,11 @@
 {%- set titlew = title | width -%}
 
 {#- Shorthand ID -#}
-{{ fg(lightblue) }}{{ "{:3}. " | format(sid | default("    ", true)) }}
+{%- if sid -%}
+{{ fg(lightblue) }}{{ "{:3}. " | format(sid) }}
+{%- else -%}
+  {{- "     " -}}
+{%- endif -%}
 
 {#- Row output -#}
 {{ title -}}
