@@ -72,6 +72,9 @@ pub enum Command {
     #[command(visible_aliases(["e"]))]
     Edit(ModArgs),
 
+    /// Import data from one of the supported formats.
+    Import(ImportArgs),
+
     /// Merge two JSON storage buckets.
     Merge(MergeArgs),
 
@@ -210,6 +213,11 @@ pub struct ModArgs {
 
     #[command(flatten)]
     pub entry: EntryArgs,
+}
+
+#[derive(Parser)]
+pub struct ImportArgs {
+    pub format: i32,
 }
 
 #[derive(Parser)]

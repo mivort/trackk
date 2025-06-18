@@ -196,6 +196,9 @@ fn main() -> Result<()> {
         Some(Command::Check) => {
             repo::check_repo(&app.config)?;
         }
+        Some(Command::Import(_)) => {
+            // TODO: P3: implement import from taskwarrior
+        }
         Some(Command::Merge(_)) => {
             // TODO: P3: implement merge driver
         }
