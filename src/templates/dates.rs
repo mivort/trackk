@@ -16,13 +16,13 @@ pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
     };
 
     if abs >= YEAR {
-        format!("{}Y", round(diff / YEAR))
+        format!("{}y", round(diff / YEAR))
     } else if abs >= MONTH {
-        format!("{}M", round(diff / MONTH))
+        format!("{}mo", round(diff / MONTH))
     } else if abs >= WEEK {
-        format!("{}W", round(diff / WEEK))
+        format!("{}w", round(diff / WEEK))
     } else if abs >= DAY {
-        format!("{}D", round(diff / DAY))
+        format!("{}d", round(diff / DAY))
     } else if abs >= HOUR {
         format!("{}h", round(diff / HOUR))
     } else if abs >= MINUTE {
