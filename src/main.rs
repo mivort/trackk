@@ -10,6 +10,9 @@ mod issue;
 mod prelude;
 mod repo;
 mod storage;
+mod templates {
+    pub(crate) mod colors;
+}
 mod templating;
 mod token;
 

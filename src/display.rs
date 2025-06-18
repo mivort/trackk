@@ -52,7 +52,7 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
 
     for (lineno, (issue, _path)) in entries.iter().enumerate() {
         let context = RowContext {
-            issue: Cow::Borrowed(&issue),
+            issue: Cow::Borrowed(issue),
             sid: issue.short,
             lineno,
         };
