@@ -200,8 +200,17 @@ fn main() -> Result<()> {
             repo::check_repo(&app.config)?;
         }
         Some(Command::Template(args)) => {
-            if let Some((_, content)) = &templating::builtin_template(&args.template) {
-                println!("{}", content);
+            use templates::colors::{RESET, fg};
+            let (color, reset) = if app.config.no_color() {
+                ("", "")
+            } else {
+                (fg(10), RESET)
+            };
+
+            if let Some((id, content)) = &templating::builtin_template(&args.template) {
+                println!("{color}{{#- TEMPLATE: {} -#}}{reset}", id);
+                print!("{}", content);
+                println!("{color}{{#- END OF TEMPLATE -#}}{reset}");
             }
         }
         Some(Command::Import(_)) => {

@@ -147,6 +147,11 @@ impl Config {
         "issue".into()
     }
 
+    /// Check if output should be colorized.
+    pub fn no_color(&self) -> bool {
+        matches!(self.color_mode, ColorMode::Never)
+    }
+
     /// Default report format.
     pub fn report_next(&self) -> Cow<ReportConfig> {
         if !self.report_next.sections.is_empty() {
