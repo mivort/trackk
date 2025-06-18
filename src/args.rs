@@ -72,6 +72,9 @@ pub enum Command {
     #[command(visible_aliases(["e"]))]
     Edit(ModArgs),
 
+    /// Show one of the built-in or config-defined report templates.
+    Template(TemplateArgs),
+
     /// Import data from one of the supported formats.
     Import(ImportArgs),
 
@@ -217,6 +220,11 @@ pub struct ModArgs {
 
     #[command(flatten)]
     pub entry: EntryArgs,
+}
+
+#[derive(Parser)]
+pub struct TemplateArgs {
+    pub template: Box<str>,
 }
 
 #[derive(Parser)]

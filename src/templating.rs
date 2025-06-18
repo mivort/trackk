@@ -102,16 +102,27 @@ impl<'env> Templates<'env> {
             return Err(anyhow!(err));
         }
 
-        match template {
-            "next" => j2.add_template("next", include_str!("../templates/row.jinja"))?,
-            "all" => j2.add_template("all", include_str!("../templates/row.jinja"))?,
-            "issue" => j2.add_template("issue", include_str!("../templates/issue.jinja"))?,
-
+        if let Some((id, content)) = builtin_template(template) {
+            j2.add_template(id, content)?;
+        } else {
             // TODO: P3: resolve external templates
-            _ => panic!(),
+            todo!()
         }
 
         Ok(())
+    }
+}
+
+/// Return one of the built-in templates.
+pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> {
+    const ROW: &str = include_str!("../templates/row.jinja");
+    const ISSUE: &str = include_str!("../templates/issue.jinja");
+
+    match template {
+        "next" => Some(("next", ROW)),
+        "all" => Some(("all", ROW)),
+        "issue" => Some(("issue", ISSUE)),
+        _ => None,
     }
 }
 

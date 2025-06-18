@@ -199,6 +199,11 @@ fn main() -> Result<()> {
         Some(Command::Check) => {
             repo::check_repo(&app.config)?;
         }
+        Some(Command::Template(args)) => {
+            if let Some((_, content)) = &templating::builtin_template(&args.template) {
+                println!("{}", content);
+            }
+        }
         Some(Command::Import(_)) => {
             // TODO: P3: implement import from taskwarrior
         }
