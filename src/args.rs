@@ -51,8 +51,15 @@ pub enum Command {
     Modify(ModArgs),
 
     /// Mark specified tasks as done.
-    #[command(visible_aliases(["d"]))]
-    Done(ModArgs),
+    #[command(visible_aliases(["c", "comp", "close"]))]
+    Complete(ModArgs),
+
+    /// Mark specified tasks as started.
+    Start(ModArgs),
+
+    /// Set task status to the initial.
+    #[command(visible_aliases(["stop", "open"]))]
+    Reset(ModArgs),
 
     /// List active entries using set of filters
     #[command(visible_aliases(["ls"]))]

@@ -164,10 +164,20 @@ fn main() -> Result<()> {
             let ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
             storage::modify_entries(&ids, &e.entry, &app)?;
         }
-        Some(Command::Done(mut args)) => {
+        Some(Command::Complete(mut args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
             if args.entry.status.is_none() {
                 args.entry.status = Some(app.config.defaults.status_complete().to_string());
+            }
+            storage::modify_entries(&ids, &args.entry, &app)?;
+        }
+        Some(Command::Start(_args)) => {
+            todo!(); // TODO: P3: implement start command
+        }
+        Some(Command::Reset(mut args)) => {
+            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
+            if args.entry.status.is_none() {
+                args.entry.status = Some(app.config.defaults.status_initial().to_string());
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }
