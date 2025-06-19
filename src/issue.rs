@@ -123,7 +123,10 @@ impl Issue {
     /// Update entry end timestamp if it's empty and status is not in active list.
     /// If status is updated to one of the active states, clear the timestamp.
     pub fn update_end(&mut self, config: &Config) {
-        if self.end.is_none() && !config.values.active_status.contains(&self.status) {
+        if self.end.is_some() {
+            return;
+        }
+        if !config.values.active_status.contains(&self.status) {
             self.end = Some(UtcDateTime::now().unix_timestamp());
         } else {
             self.end = None;
@@ -164,6 +167,8 @@ impl Issue {
         if self.repeat != other.repeat {
             return true;
         }
+
+        // TODO: P2: compare meta
 
         false
     }

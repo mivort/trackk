@@ -11,7 +11,7 @@ use crate::config::IndexType;
 use crate::dateexp::parse_date;
 use crate::filter::IdFilter;
 use crate::issue::Issue;
-use crate::{App, prelude::*, storage};
+use crate::{App, display, prelude::*, storage};
 
 /// Run editor, apply changes and return the exit status.
 pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
@@ -56,6 +56,8 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
             continue;
         }
 
+        display::show_diff(&prev_issue, &issue);
+
         if prev_issue.status != issue.status {
             issue.update_end(&app.config);
             index.update_status(&app.config, &path, &issue);
@@ -70,6 +72,8 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
     if changes > 0 {
         index.write()?;
         info!("Edited {changes} entry(es)");
+    } else {
+        info!("No changes");
     }
 
     Ok(())

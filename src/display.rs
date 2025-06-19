@@ -116,16 +116,34 @@ pub fn show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
 
 /// Print changes to the entry as the series of info messages.
 pub fn show_diff(before: &Issue, after: &Issue) {
-    let id = if let Some(sid) = before.sid { format!("#{sid}") } else { before.id[..6].to_owned() };
+    let id = &before.id[..8];
+    info!("Issue {id} updated");
 
     if before.status != after.status {
-        info!("Entry {id} status: {} -> {}", before.status, after.status);
+        info!("Status:   {} -> {}", before.status, after.status);
     }
     if before.title != after.title {
         info!(
-            "Entry {id} title: {} -> {} bytes",
+            "Title:    {} -> {} bytes",
             before.title.len(),
             after.title.len()
         );
+    }
+
+    if before.tags != after.tags {
+        info!(
+            "Tags:     {} -> {} tags",
+            before.tags.len(),
+            after.tags.len()
+        );
+    }
+
+    // TODO: P3: nicer due/end dates format
+
+    if before.due != after.due {
+        info!("Due:      {:?} -> {:?}", before.due, after.due);
+    }
+    if before.end != after.end {
+        info!("End:      {:?} -> {:?}", before.end, after.end);
     }
 }

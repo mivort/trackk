@@ -44,6 +44,10 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
         bucket_issue.apply_args(args, app)?;
 
+        if !issue.differs(bucket_issue) {
+            continue;
+        }
+
         display::show_diff(issue, bucket_issue);
 
         if issue.status != bucket_issue.status {
@@ -57,9 +61,10 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
 
     if changes > 0 {
         index.write()?;
+        info!("Updated {changes} entry(es)");
+    } else {
+        info!("No changes");
     }
-
-    info!("Updated {changes} entry(es)");
 
     Ok(())
 }
