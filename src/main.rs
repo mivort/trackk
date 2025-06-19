@@ -98,8 +98,6 @@ impl<'env> App<'env> {
 }
 
 fn main() -> Result<()> {
-    use log::LevelFilter::*;
-
     let args = Args::parse();
 
     let mut app = App {
@@ -110,32 +108,7 @@ fn main() -> Result<()> {
 
     app.filter = filter::parse_filter_args(&args, &app)?;
 
-    let no_color = app.config.no_color();
-
-    fern::Dispatch::new()
-        .format(move |out, message, record| {
-            use templates::colors::{RESET, fg};
-
-            if no_color {
-                out.finish(format_args!("{}: {}", record.level(), message))
-            } else {
-                let reset = RESET;
-                let color = match record.level() {
-                    Level::Info => fg(11),
-                    Level::Error => fg(9),
-                    Level::Trace => fg(12),
-                    _ => "",
-                };
-                out.finish(format_args!(
-                    "{color}{}:{reset} {}",
-                    record.level(),
-                    message
-                ))
-            }
-        })
-        .level(if args.verbose { Trace } else { Info })
-        .chain(std::io::stdout())
-        .apply()?;
+    setup_logging(app.config.no_color(), args.verbose)?;
 
     match args.command {
         Some(Command::List(args)) => {
@@ -282,4 +255,35 @@ fn read_config(args: &Args) -> Result<Config> {
     config.fallback_values();
 
     Ok(config)
+}
+
+/// Use Fern to setup colored logging output.
+fn setup_logging(no_color: bool, verbose: bool) -> Result<(), log::SetLoggerError> {
+    use log::LevelFilter::*;
+
+    fern::Dispatch::new()
+        .format(move |out, message, record| {
+            use templates::colors::{RESET, fg};
+
+            if no_color {
+                out.finish(format_args!("{}: {}", record.level(), message))
+            } else {
+                let reset = RESET;
+                let color = match record.level() {
+                    Level::Info => fg(11),
+                    Level::Warn => fg(10),
+                    Level::Error => fg(9),
+                    Level::Trace => fg(12),
+                    _ => "",
+                };
+                out.finish(format_args!(
+                    "{color}{}:{reset} {}",
+                    record.level(),
+                    message
+                ))
+            }
+        })
+        .level(if verbose { Trace } else { Info })
+        .chain(std::io::stdout())
+        .apply()
 }
