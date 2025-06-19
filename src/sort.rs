@@ -48,7 +48,7 @@ fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
             }
             Ok(Field) => {
                 let asc = unwrap_some_or!(ascending, {
-                    bail!("Unexpected field name in sorting rule: {rule}");
+                    bail!("Unexpected field '{}' in sorting rule: {rule}", &rule[span]);
                 });
                 res.push(SortingRule::from_str(&rule[span], asc));
                 ascending = None;
