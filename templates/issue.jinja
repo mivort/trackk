@@ -3,20 +3,48 @@
 
 {#- Meta tags -#}
 {% set created %}{{ issue.created | reldate }}{% endset %}
+{% set modified %}{{ issue.modified | reldate }}{% endset %}
+
+{#- Due date -#}
 {%- set due -%}
   {%- if issue.date -%}
     {{ issue.due | reldate }}
   {%- else -%}
-    {{ fg(lightblack) }}n/a{{ reset }}
+    {{ fg(lightblack) }}---{{ reset }}
   {%- endif -%}
+{%- endset -%}
+
+{#- End date -#}
+{%- set end -%}
+  {%- if issue.date -%}
+    {{ issue.end | reldate }}
+  {%- else -%}
+    {{ fg(lightblack) }}---{{ reset }}
+  {%- endif -%}
+{%- endset -%}
+
+{#- Tag list -#}
+{%- set tags -%}
+  {%- if issue.tags | length > 0 -%}
+    {%- for tag in issue.tags -%}
+      {{ fg(magenta) }}#{{ fg(lightmagenta) }}{{ tag }} {# -#}
+    {%- endfor -%}
+  {%- else -%}
+    {{ fg(lightblack) }}---
+  {%- endif -%}
+  {{ reset }}
 {%- endset -%}
 
 {#- Field output #}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
-{{ fg(lightblue) }} UUID:    {{ reset }}{{ issue.id }}
-{{ fg(lightblue) }} Status:  {{ reset }}{{ issue.status }}
-{{ fg(lightblue) }} Created: {{ reset }}{{ created }}
-{{ fg(lightblue) }} Due:     {{ reset }}{{ due }}
-{{ fg(lightblue) }} Tags:    {{ reset }}{{ issue.tags | length }}
-{{ fg(lightblue) }} Path:    {{ reset }}{{ path }}
+{{ fg(lightblue) }} Status:   {{ reset }}{{ issue.status }}
+{{ fg(lightblue) }} Created:  {{ reset }}{{ created }}
+{{ fg(lightblue) }} Modified: {{ reset }}{{ modified }}
+{{ fg(lightblue) }} Due:      {{ reset }}{{ due }}
+{{ fg(lightblue) }} End:      {{ reset }}{{ end }}
+{{ fg(lightblue) }} Repeat:   {{ reset }}{{ issue.repeat | default(fg(lightblack) ~ "--") }}
+{{ fg(lightblue) }} Tags:     {{ reset }}{{ tags }}
+
+{{ fg(lightblue) }} UUID:     {{ reset }}{{ issue.id }}
+{{ fg(lightblue) }} Path:     {{ reset }}{{ path }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
