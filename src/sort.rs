@@ -152,3 +152,10 @@ fn parse_sorter() {
     let rules = parse_rules(rule).unwrap();
     assert_eq!(rules, vec![CreatedAsc, UrgencyDesc, DueAsc]);
 }
+
+#[test]
+fn parse_fail() {
+    assert!(parse_rules("++created").is_err());
+    assert!(parse_rules("created").is_err());
+    assert!(parse_rules("@created").is_err());
+}
