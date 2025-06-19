@@ -1,9 +1,6 @@
-{{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
-{{ issue.title }}
-
 {#- Meta tags -#}
-{% set created %}{{ issue.created | reldate }}{% endset %}
-{% set modified %}{{ issue.modified | reldate }}{% endset %}
+{%- set created %}{{ issue.created | reldate }}{% endset -%}
+{%- set modified %}{{ issue.modified | reldate }}{% endset -%}
 
 {#- Due date -#}
 {%- set due -%}
@@ -35,7 +32,9 @@
   {{ reset }}
 {%- endset -%}
 
-{#- Field output #}
+{#- Field output -#}
+{{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
+{{ issue.title }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
 {{ fg(lightblue) }} Status:   {{ reset }}{{ issue.status }}
 {{ fg(lightblue) }} Created:  {{ reset }}{{ created }}
@@ -45,6 +44,9 @@
 {{ fg(lightblue) }} Repeat:   {{ reset }}{{ issue.repeat | default(fg(lightblack) ~ "--") }}
 {{ fg(lightblue) }} Tags:     {{ reset }}{{ tags }}
 
+{% if sid -%}
+{{ fg(lightblue) }} SID:      {{ reset }}{{ sid }}
+{% endif -%}
 {{ fg(lightblue) }} UUID:     {{ reset }}{{ issue.id }}
 {{ fg(lightblue) }} Path:     {{ reset }}{{ path }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}

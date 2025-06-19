@@ -17,7 +17,7 @@ pub struct Issue {
 
     /// Numeric shorthand.
     #[serde(skip)]
-    pub short: Option<usize>,
+    pub sid: Option<usize>,
 
     /// Issue main title.
     #[serde(default)]
@@ -133,7 +133,7 @@ impl Issue {
     /// Provide cloned entry with shorthand.
     pub fn with_shorthand(&self, short: usize) -> Self {
         let mut new = self.clone();
-        new.short = Some(short);
+        new.sid = Some(short);
         new
     }
 

@@ -138,7 +138,7 @@ fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>
             }
 
             if app.config.values.active_status.contains(&issue.status) {
-                issue.short = index.find_id(&issue.id);
+                issue.sid = index.find_id(&issue.id);
             }
             output.push((issue, path.clone()));
         }

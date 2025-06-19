@@ -11,6 +11,7 @@ use crate::{App, prelude::*, sort, storage};
 #[derive(Serialize)]
 struct RowContext<'a> {
     /// Shorthand issue reference.
+    #[serde(skip_serializing_if = "Option::is_none")]
     sid: Option<usize>,
 
     /// Flag if current row is odd or even.
@@ -59,7 +60,7 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
 
     for (lineno, (issue, path)) in entries.iter().enumerate() {
         let context = RowContext {
-            sid: issue.short,
+            sid: issue.sid,
             issue: Cow::Borrowed(issue),
             path: Cow::Borrowed(path),
             lineno,
@@ -84,7 +85,7 @@ pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
     let out = std::io::stdout();
 
     let context = RowContext {
-        sid: issue.short,
+        sid: issue.sid,
         issue: Cow::Borrowed(issue),
         path: Cow::Borrowed(path),
         lineno: 0,
