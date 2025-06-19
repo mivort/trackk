@@ -117,7 +117,7 @@ pub struct FilterArgs {
     pub tag: Vec<String>,
 
     /// Filter entries excluding the tag.
-    #[arg(long, short = 'u')]
+    #[arg(long, short)]
     pub notag: Vec<String>,
 
     /// Filter entries by due date.
@@ -178,7 +178,7 @@ pub struct EntryArgs {
 
     /// Remove tag from the record.
     #[clap(short, long)]
-    pub untag: Vec<String>,
+    pub notag: Vec<String>,
 
     /// Repeat time specifier.
     #[arg(short, long)]

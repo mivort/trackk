@@ -106,8 +106,8 @@ impl Issue {
         for tag in &args.tag {
             self.tags.insert(tag.clone());
         }
-        for untag in &args.untag {
-            self.tags.remove(untag);
+        for notag in &args.notag {
+            self.tags.remove(notag);
         }
         if let Some(repeat) = &args.repeat {
             self.repeat = if repeat.is_empty() { None } else { Some(repeat.clone()) };
@@ -200,6 +200,7 @@ impl FieldRef {
         // TODO: P3: support other operand types
         match (self, token) {
             (Self::Title, Token::String(rhs)) => Ok(issue.title.contains(&**rhs)),
+            (Self::Tag, Token::String(rhs)) => Ok(issue.tags.contains(&**rhs)),
             _ => bail!("Unable to compare the value with field reference"),
         }
     }

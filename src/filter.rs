@@ -29,11 +29,10 @@ impl Filter {
     }
 
     /// Append '&&' condition on top of the query.
-    fn merge(&mut self, lhs: Token, rhs: Token, op: Token) {
+    #[inline]
+    fn merge(&mut self, merger: impl Fn(&mut Vec<Token>)) {
         let was_empty = self.expression.is_empty();
-        self.expression.push(lhs);
-        self.expression.push(rhs);
-        self.expression.push(op);
+        merger(&mut self.expression);
 
         if !was_empty {
             self.expression.push(Token::And);
@@ -56,24 +55,37 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
     }
 
     for title in &args.filter_args.title {
-        filter.merge(
-            Token::Reference(FieldRef::Title),
-            Token::String(Rc::from(title.as_str())),
-            Token::FuzzyEq,
-        );
+        filter.merge(|e| {
+            e.push(Token::Reference(FieldRef::Title));
+            e.push(Token::String(Rc::from(title.as_str())));
+            e.push(Token::FuzzyEq);
+        });
     }
 
     for desc in &args.filter_args.desc {
-        filter.merge(
-            Token::Reference(FieldRef::Desc),
-            Token::String(Rc::from(desc.as_str())),
-            Token::FuzzyEq,
-        );
+        filter.merge(|e| {
+            e.push(Token::Reference(FieldRef::Desc));
+            e.push(Token::String(Rc::from(desc.as_str())));
+            e.push(Token::FuzzyEq);
+        });
     }
 
-    for _tag in &args.filter_args.tag {}
+    for tag in &args.filter_args.tag {
+        filter.merge(|e| {
+            e.push(Token::Reference(FieldRef::Tag));
+            e.push(Token::String(Rc::from(tag.as_str())));
+            e.push(Token::FuzzyEq);
+        });
+    }
 
-    for _notag in &args.filter_args.notag {}
+    for notag in &args.filter_args.notag {
+        filter.merge(|e| {
+            e.push(Token::Reference(FieldRef::Tag));
+            e.push(Token::String(Rc::from(notag.as_str())));
+            e.push(Token::FuzzyEq);
+            e.push(Token::Not);
+        });
+    }
 
     // TODO: P3: add changes to filter from each argument type
 
