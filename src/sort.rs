@@ -6,12 +6,10 @@ use crate::issue::Issue;
 use crate::prelude::*;
 
 /// Parse sorting expression and sort entries in the provided array.
-pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rule: &str) -> Result<()> {
-    let rules = parse_rules(rule)?;
-
+pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rules: &[SortingRule]) -> Result<()> {
     entries.sort_by(|(a, _), (b, _)| {
         let mut cmp = Ordering::Equal;
-        for r in &rules {
+        for r in rules {
             cmp = r.compare(a, b);
             if cmp != Ordering::Equal {
                 break;
@@ -24,7 +22,7 @@ pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rule: &str) -> Result<()> 
 }
 
 /// Iterate over rule directives and produce array of rules.
-fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
+pub fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
     use SortToken::*;
 
     let mut res = Vec::new();
@@ -62,7 +60,7 @@ fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
 
 /// Single sorting rule applied on comparison.
 #[derive(Debug, PartialEq, Eq)]
-enum SortingRule {
+pub enum SortingRule {
     UrgencyAsc,
     UrgencyDesc,
     TitleAsc,

@@ -44,6 +44,9 @@ pub struct App<'env> {
     /// Current global entry filter.
     filter: filter::Filter,
 
+    /// Sorting override.
+    sort: Vec<sort::SortingRule>,
+
     /// UTC timestamp during the init.
     ts: i64,
 
@@ -107,6 +110,9 @@ fn main() -> Result<()> {
     };
 
     app.filter = filter::parse_filter_args(&args, &app)?;
+    if let Some(sort) = &args.filter_args.sort {
+        app.sort = sort::parse_rules(&*sort)?;
+    }
 
     setup_logging(app.config.no_color(), args.verbose)?;
 

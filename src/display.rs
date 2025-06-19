@@ -48,7 +48,9 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
     // TODO: P2: propagate sorting override from args
 
     let mut entries = storage::fetch_entries(ids, *index, app)?;
-    sort::sort_entries(&mut entries, sorting)?;
+
+    let sort = if app.sort.is_empty() { &sort::parse_rules(sorting)? } else { &app.sort };
+    sort::sort_entries(&mut entries, sort)?;
 
     app.templates
         .load_template(template)
