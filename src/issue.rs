@@ -1,5 +1,5 @@
 use serde_derive::{Deserialize, Serialize};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use time::UtcDateTime;
 use uuid::Uuid;
 
@@ -58,6 +58,11 @@ pub struct Issue {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub end: Option<i64>,
+
+    /// Custom field values.
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    #[serde(default)]
+    pub meta: HashMap<String, FieldValue>,
 }
 
 impl Issue {
@@ -198,4 +203,13 @@ impl FieldRef {
             _ => bail!("Unable to compare the value with field reference"),
         }
     }
+}
+
+/// Custom field value. The end data representation will depend the specific field settings.
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(untagged)]
+pub enum FieldValue {
+    String(String),
+    F64(f64),
+    I64(i64),
 }
