@@ -1,11 +1,11 @@
 {#- Meta tags -#}
-{%- set created %}{{ issue.created | reldate }}{% endset -%}
-{%- set modified %}{{ issue.modified | reldate }}{% endset -%}
+{%- set created %}{{ issue.created | longreldate }}{% endset -%}
+{%- set modified %}{{ issue.modified | longreldate }}{% endset -%}
 
 {#- Due date -#}
 {%- set due -%}
   {%- if issue.date -%}
-    {{ issue.due | reldate }}
+    {{ issue.due | longreldate }}
   {%- else -%}
     {{ fg(lightblack) }}---{{ reset }}
   {%- endif -%}
@@ -14,7 +14,7 @@
 {#- End date -#}
 {%- set end -%}
   {%- if issue.date -%}
-    {{ issue.end | reldate }}
+    {{ issue.end | longreldate }}
   {%- else -%}
     {{ fg(lightblack) }}---{{ reset }}
   {%- endif -%}

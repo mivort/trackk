@@ -42,6 +42,9 @@ impl<'env> Templates<'env> {
         j2.add_filter("reldate", move |d: i64, p: Option<i32>| {
             dates::reldate(d, now, p)
         });
+        j2.add_filter("longreldate", move |d: i64, p: Option<i32>| {
+            dates::longreldate(d, now, p)
+        });
         j2.add_filter("date", || ""); // TODO: P3: add date formatter
 
         j2.add_filter("uwidth", |s: &str| s.width());

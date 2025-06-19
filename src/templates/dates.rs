@@ -31,3 +31,33 @@ pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
         format!("{}s", diff)
     }
 }
+
+pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
+    let diff = (date - now) as f64;
+    let ago = if diff < 0. { " ago" } else { "" };
+
+    let abs = diff.abs();
+
+    let round = |v: f64| {
+        let mlt = 10_f64.powi(precision.unwrap_or(0));
+        (v * mlt).round() / mlt
+    };
+
+    let s = "s"; // TODO: P2: correct plural forms
+
+    if abs >= YEAR {
+        format!("{} year{s}{ago}", round(abs / YEAR))
+    } else if abs >= MONTH {
+        format!("{} month{s}{ago}", round(abs / MONTH))
+    } else if abs >= WEEK {
+        format!("{} week{s}{ago}", round(abs / WEEK))
+    } else if abs >= DAY {
+        format!("{} day{s}{ago}", round(abs / DAY))
+    } else if abs >= HOUR {
+        format!("{} hour{s}{ago}", round(abs / HOUR))
+    } else if abs >= MINUTE {
+        format!("{} minute{s}{ago}", round(abs / MINUTE))
+    } else {
+        format!("{} second{s}{ago}", abs)
+    }
+}
