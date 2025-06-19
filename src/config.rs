@@ -142,12 +142,12 @@ impl Config {
     }
 
     /// Single issue view template.
-    pub fn issue_view(&self) -> Cow<str> {
+    pub fn issue_view(&self) -> &str {
         if !self.issue_view.is_empty() {
-            return Cow::Borrowed(&*self.issue_view);
+            return &*self.issue_view;
         }
 
-        "issue".into()
+        "issue"
     }
 
     /// Check if output should be colorized.
