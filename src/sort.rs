@@ -1,13 +1,27 @@
+use logos::Logos;
 use std::rc::Rc;
 
 use crate::issue::Issue;
 use crate::prelude::*;
 
 /// Parse sorting expression and sort entries in the provided array.
-pub fn sort_entries(_entries: &mut Vec<(Issue, Rc<str>)>, rules: &str) -> Result<()> {
+pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rules: &str) -> Result<()> {
+    use SortToken::*;
+
     let _rules = parse_rules(rules);
 
     // TODO: P3: implement entry sorting
+
+    for (tok, _span) in SortToken::lexer(rules).spanned() {
+        match tok {
+            Ok(SortAsc) => {}
+            Ok(SortDesc) => {}
+            Ok(Field) => {}
+            _ => {}
+        }
+    }
+
+    entries.sort_by(|(a, _), (b, _)| a.short.cmp(&b.short));
 
     Ok(())
 }
@@ -33,4 +47,18 @@ enum SortingRule {
     _DueDesc,
     _MetaAsc(String),
     _MetaDesc(String),
+}
+
+/// Sorting expression tokens.
+#[derive(Clone, Copy, Debug, Logos)]
+#[logos(skip r"[ \t\n\f]+")]
+enum SortToken {
+    #[token("+")]
+    SortAsc,
+
+    #[token("-")]
+    SortDesc,
+
+    #[regex(r"\w+")]
+    Field,
 }

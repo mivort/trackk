@@ -47,7 +47,7 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
     // TODO: P2: propagate sorting override from args
 
     let mut entries = storage::fetch_entries(ids, *index, app)?;
-    sort::sort_entries(&mut entries, &sorting)?;
+    sort::sort_entries(&mut entries, sorting)?;
 
     app.templates
         .load_template(template)
@@ -61,7 +61,7 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
         let context = RowContext {
             sid: issue.short,
             issue: Cow::Borrowed(issue),
-            path: Cow::Borrowed(&path),
+            path: Cow::Borrowed(path),
             lineno,
         };
         template
@@ -86,7 +86,7 @@ pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
     let context = RowContext {
         sid: issue.short,
         issue: Cow::Borrowed(issue),
-        path: Cow::Borrowed(&path),
+        path: Cow::Borrowed(path),
         lineno: 0,
     };
     template

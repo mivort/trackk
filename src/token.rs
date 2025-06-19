@@ -12,7 +12,7 @@ use crate::prelude::*;
 
 /// Parsed token types.
 #[derive(Clone, Debug, Logos)]
-#[logos(skip r"[ \t\n\f\.]+", extras = OffsetDateTime, error = LexerError)]
+#[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
 pub enum Token {
     #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
     #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
@@ -88,9 +88,11 @@ pub enum Token {
 
     #[token("@")]
     #[token("at")]
-    #[token("at:")]
     At,
 
+    // TODO: P2: add 'functions': 'min', 'max', 'clamp', 'sqrt', 'pow'
+    // TODO: P2: add 'until' operator which compares the value vs. max
+    //           and returns either value itself or 'false'
     #[token(":")]
     FuzzyEq,
 
@@ -103,26 +105,21 @@ pub enum Token {
     NotEq,
 
     #[token("<")]
-    #[token("lt:")]
-    #[token("before:")]
+    #[token("before")]
     Less,
 
     #[token("<=")]
-    #[token("le:")]
     LessEq,
 
     #[token(">")]
-    #[token("gt:")]
-    #[token("after:")]
+    #[token("after")]
     Greater,
 
     #[token(">=")]
-    #[token("ge:")]
     GreaterEq,
 
     #[token("&&")]
     #[token("and")]
-    #[token(",")]
     And,
 
     #[token("||")]
@@ -132,15 +129,12 @@ pub enum Token {
     #[token("!")]
     #[token("~")]
     #[token("not")]
-    #[token("not:")]
     Not,
 
     #[token("(")]
-    #[token("[")]
     LParen,
 
     #[token(")")]
-    #[token("]")]
     RParen,
 
     #[token("title", |_| FieldRef::Title)]
@@ -484,6 +478,7 @@ fn relative_time(time: Time, date: OffsetDateTime) -> i64 {
 
 /// Parse date in `[month]-[day]` format (non-ISO 8601).
 fn parse_short_date(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    // TODO: P2: parse short relative dates?
     todo!()
 }
 
