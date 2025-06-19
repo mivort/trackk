@@ -155,7 +155,11 @@ fn main() -> Result<()> {
         }
         Some(Command::Info(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
-            let entries = storage::filter_active_entries(&ids, &app)?;
+            let entries = if ids.unresolved {
+                storage::filter_all_entries(&ids, &app)?
+            } else {
+                storage::filter_active_entries(&ids, &app)?
+            };
 
             for entry in &entries {
                 display::show_entry(entry, &app)?;

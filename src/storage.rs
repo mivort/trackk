@@ -103,6 +103,8 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
         return Ok(output);
     }
 
+    trace!("Traversing all buckets");
+
     let path = app.config.issues_path()?;
 
     let index = app.index()?;

@@ -66,6 +66,10 @@ pub struct IdFilter {
 
     /// Flag if ID filter shouldn't match anything.
     pub empty_set: bool,
+
+    /// Flag if there was any unresolved shorthands. If query contained
+    /// only shorthands, it's safe to only check the shorthands index.
+    pub unresolved: bool,
 }
 
 impl IdFilter {
@@ -74,18 +78,22 @@ impl IdFilter {
         if ids.is_empty() {
             return Ok(Self {
                 index: Default::default(),
+                unresolved: false,
                 empty_set: false,
             });
         }
 
         let index = app.index()?;
+        let mut unresolved = false;
 
         ids.retain_mut(|id| {
             let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
+                unresolved = true;
                 return true;
             });
 
             if shorthand > 999999 {
+                unresolved = true;
                 return true;
             }
 
@@ -93,6 +101,7 @@ impl IdFilter {
                 return false;
             });
             let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
+                warn!("Index entry with missing path: {pointer}");
                 return false;
             });
 
@@ -104,6 +113,7 @@ impl IdFilter {
 
         Ok(Self {
             index: ids,
+            unresolved,
             empty_set,
         })
     }
