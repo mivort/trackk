@@ -88,6 +88,9 @@ pub struct ValuesConfig {
 
     /// Only allow one of the provided statuses. Don't check status if empty.
     pub permit_status: HashSet<String>,
+
+    /// Urgency formula to use on entries.
+    pub urgency_formula: Box<str>, // TODO: P3: implement urgency calculation
 }
 
 #[derive(Deserialize, Default)]
@@ -218,20 +221,12 @@ impl Config {
 
     /// Data path default value.
     fn data_path_fallback(&self) -> &str {
-        if self.data_path.is_empty() {
-            env!("CARGO_PKG_NAME")
-        } else {
-            &self.data_path
-        }
+        if self.data_path.is_empty() { env!("CARGO_PKG_NAME") } else { &self.data_path }
     }
 
     /// Issues path default value.
     fn issues_path_fallback(&self) -> &str {
-        if self.issues_path.is_empty() {
-            "issues"
-        } else {
-            &self.issues_path
-        }
+        if self.issues_path.is_empty() { "issues" } else { &self.issues_path }
     }
 }
 

@@ -184,11 +184,7 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
 /// not set and mtime is lower or equal to index, skip the entry.
 pub fn refresh_index(app: &App, force: bool) -> Result<()> {
     let path = app.config.issues_path()?;
-    let mut index = if force {
-        app.index_empty_mut()
-    } else {
-        app.index_mut()
-    }?;
+    let mut index = if force { app.index_empty_mut() } else { app.index_mut() }?;
 
     let mut changes = false;
 

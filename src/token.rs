@@ -408,11 +408,7 @@ fn parse_st_nd_rd_th(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 
     let prev = lex.extras;
     let date = if prev.day() >= num {
-        let year = if prev.month() == Month::December {
-            prev.year() + 1
-        } else {
-            prev.year()
-        };
+        let year = if prev.month() == Month::December { prev.year() + 1 } else { prev.year() };
         prev.replace_date(Date::from_calendar_date(
             year,
             lex.extras.month().next(),
@@ -551,11 +547,7 @@ fn relative_sod(lex: &Lexer<Token>, offset: i64) -> i64 {
 /// Parse nearest month to the selected date.
 fn relative_month(lex: &Lexer<Token>, month: Month) -> i64 {
     let ts = lex.extras;
-    let year = if ts.month() as u8 >= month as u8 {
-        ts.year() + 1
-    } else {
-        ts.year()
-    };
+    let year = if ts.month() as u8 >= month as u8 { ts.year() + 1 } else { ts.year() };
     let date = Date::from_calendar_date(year, month, 1).unwrap();
     ts.replace_date(date)
         .replace_time(Time::MIDNIGHT)

@@ -113,11 +113,7 @@ fn main() -> Result<()> {
     match args.command {
         Some(Command::List(args)) => {
             let ids = Default::default();
-            let index = if args.all {
-                IndexType::All
-            } else {
-                IndexType::Active
-            };
+            let index = if args.all { IndexType::All } else { IndexType::Active };
             let entries = storage::fetch_entries(&ids, index, &app)?;
             if args.json {
                 display::show_json(&entries)?;
@@ -196,11 +192,7 @@ fn main() -> Result<()> {
         }
         Some(Command::Template(args)) => {
             use templates::colors::{RESET, fg};
-            let (color, reset) = if app.config.no_color() {
-                ("", "")
-            } else {
-                (fg(10), RESET)
-            };
+            let (color, reset) = if app.config.no_color() { ("", "") } else { (fg(10), RESET) };
 
             if let Some((id, content)) = &templating::builtin_template(&args.template) {
                 println!("{color}{{#- TEMPLATE: {} -#}}{reset}", id);

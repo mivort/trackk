@@ -176,19 +176,11 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
             }
             "due" => {
                 let val = val.trim();
-                due = if val.is_empty() {
-                    None
-                } else {
-                    Some(parse_date(val, app, issue)?)
-                };
+                due = if val.is_empty() { None } else { Some(parse_date(val, app, issue)?) };
             }
             "end" => {
                 let val = val.trim();
-                end = if val.is_empty() {
-                    None
-                } else {
-                    Some(parse_date(val, app, issue)?)
-                };
+                end = if val.is_empty() { None } else { Some(parse_date(val, app, issue)?) };
             }
             "repeat" => {
                 let val = val.trim();

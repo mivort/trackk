@@ -105,11 +105,7 @@ impl Issue {
             self.tags.remove(untag);
         }
         if let Some(repeat) = &args.repeat {
-            self.repeat = if repeat.is_empty() {
-                None
-            } else {
-                Some(repeat.clone())
-            };
+            self.repeat = if repeat.is_empty() { None } else { Some(repeat.clone()) };
         }
 
         self.due = due;

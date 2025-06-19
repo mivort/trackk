@@ -1,57 +1,138 @@
 use logos::Logos;
+use std::cmp::Ordering;
 use std::rc::Rc;
 
 use crate::issue::Issue;
 use crate::prelude::*;
 
 /// Parse sorting expression and sort entries in the provided array.
-pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rules: &str) -> Result<()> {
-    use SortToken::*;
-
-    let _rules = parse_rules(rules);
+pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rule: &str) -> Result<()> {
+    let rules = parse_rules(rule)?;
 
     // TODO: P3: implement entry sorting
 
-    for (tok, _span) in SortToken::lexer(rules).spanned() {
-        match tok {
-            Ok(SortAsc) => {}
-            Ok(SortDesc) => {}
-            Ok(Field) => {}
-            _ => {}
+    entries.sort_by(|(a, _), (b, _)| {
+        let mut cmp = Ordering::Equal;
+        for r in &rules {
+            cmp = r.compare(a, b);
+            if cmp != Ordering::Equal {
+                break;
+            }
         }
-    }
-
-    entries.sort_by(|(a, _), (b, _)| a.short.cmp(&b.short));
+        cmp
+    });
 
     Ok(())
 }
 
 /// Iterate over rule directives and produce array of rules.
-fn parse_rules(_rules: &str) -> Vec<SortingRule> {
-    Vec::new()
+fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
+    use SortToken::*;
+
+    let mut res = Vec::new();
+    let mut ascending: Option<bool> = None;
+
+    for (tok, span) in SortToken::lexer(rule).spanned() {
+        match tok {
+            Ok(SortAsc) => {
+                if ascending.is_some() {
+                    bail!("Unexpected '+' in sorting rule: {rule}");
+                }
+                ascending = Some(true);
+            }
+            Ok(SortDesc) => {
+                if ascending.is_some() {
+                    bail!("Unexpected '-' in sorting rule: {rule}");
+                }
+                ascending = Some(false);
+            }
+            Ok(Field) => {
+                let asc = unwrap_some_or!(ascending, {
+                    bail!("Unexpected field name in sorting rule: {rule}");
+                });
+                res.push(SortingRule::from_str(&rule[span], asc));
+                ascending = None;
+            }
+            _ => {
+                bail!("Sorting rule parsing error: {rule}");
+            }
+        }
+    }
+
+    Ok(res)
 }
 
 /// Single sorting rule applied on comparison.
+#[derive(Debug, PartialEq, Eq)]
 enum SortingRule {
-    _UrgencyAsc,
-    _UrgencyDesc,
-    _TitleAsc,
-    _TitleDesc,
-    _CreatedAsc,
-    _CreatedDesc,
-    _ModifiedAsc,
-    _ModifiedDesc,
-    _EndAsc,
-    _EndDesc,
-    _DueAsc,
-    _DueDesc,
+    UrgencyAsc,
+    UrgencyDesc,
+    TitleAsc,
+    TitleDesc,
+    CreatedAsc,
+    CreatedDesc,
+    ModifiedAsc,
+    ModifiedDesc,
+    EndAsc,
+    EndDesc,
+    DueAsc,
+    DueDesc,
     _MetaAsc(String),
     _MetaDesc(String),
 }
 
+impl SortingRule {
+    /// Convert name reference to rule value.
+    fn from_str(id: &str, asc: bool) -> SortingRule {
+        use SortingRule::*;
+
+        match (id, asc) {
+            ("title", true) => TitleAsc,
+            ("title", false) => TitleDesc,
+            ("urgency", true) => UrgencyAsc,
+            ("urgency", false) => UrgencyDesc,
+            ("created", true) => CreatedAsc,
+            ("created", false) => CreatedDesc,
+            ("modified", true) => ModifiedAsc,
+            ("modified", false) => ModifiedDesc,
+            ("due", true) => DueAsc,
+            ("due", false) => DueDesc,
+            ("end", true) => EndAsc,
+            ("end", false) => EndDesc,
+
+            // TODO: P3: refer the remaing fields
+            _ => todo!(), // TODO: P2: support custom field sorting
+        }
+    }
+
+    /// Compare two fields.
+    fn compare(&self, a: &Issue, b: &Issue) -> Ordering {
+        match self {
+            Self::TitleAsc => a.title.cmp(&b.title),
+            Self::TitleDesc => b.title.cmp(&a.title),
+
+            Self::CreatedAsc => a.created.cmp(&b.created),
+            Self::CreatedDesc => b.created.cmp(&a.created),
+
+            Self::ModifiedAsc => a.modified.cmp(&b.modified),
+            Self::ModifiedDesc => b.modified.cmp(&a.modified),
+
+            Self::DueAsc => a.due.cmp(&b.due),
+            Self::DueDesc => b.due.cmp(&a.due),
+
+            Self::EndAsc => a.end.cmp(&b.end),
+            Self::EndDesc => b.end.cmp(&a.end),
+
+            Self::UrgencyAsc => a.created.cmp(&b.created), // TODO: P3: compare urgency, not created
+            Self::UrgencyDesc => b.created.cmp(&a.created),
+            _ => todo!(),
+        }
+    }
+}
+
 /// Sorting expression tokens.
 #[derive(Clone, Copy, Debug, Logos)]
-#[logos(skip r"[ \t\n\f]+")]
+#[logos(skip r"[ \t\n\f,]+")]
 enum SortToken {
     #[token("+")]
     SortAsc,
@@ -61,4 +142,13 @@ enum SortToken {
 
     #[regex(r"\w+")]
     Field,
+}
+
+#[test]
+fn parse_sorter() {
+    use SortingRule::*;
+
+    let rule = "+created -urgency +due";
+    let rules = parse_rules(rule).unwrap();
+    assert_eq!(rules, vec![CreatedAsc, UrgencyDesc, DueAsc]);
 }
