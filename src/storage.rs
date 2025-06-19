@@ -174,6 +174,8 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
             if app.filter.match_issue(issue, app, &mut op_stack)? {
                 result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
             }
+        } else {
+            warn!("Index ID is missing: {id}. Run 'refresh --force' to rebuild the index.");
         }
     }
 
