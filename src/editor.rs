@@ -7,6 +7,7 @@ use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
 use crate::bucket::Bucket;
+use crate::config::IndexType;
 use crate::dateexp::parse_date;
 use crate::filter::IdFilter;
 use crate::issue::Issue;
@@ -23,7 +24,7 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
         .wait()?;
 
     if !status.success() {
-        println!(
+        warn!(
             "Editor exited with code {}. Editing cancelled.",
             status.code().unwrap_or(-1)
         );
@@ -39,7 +40,7 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
 
 /// Iterate over matching entries and run editor for each.
 pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
-    let entries = storage::filter_all_entries(ids, app)?;
+    let entries = storage::fetch_entries(ids, IndexType::All, app)?;
     let mut index = app.index_mut()?;
 
     let mut changes = 0;

@@ -64,6 +64,14 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
 
 /// Produce the list of entries to display or modify.
 pub fn fetch_entries(ids: &IdFilter, index: IndexType, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+    if ids.empty_set {
+        return Ok(Vec::new());
+    }
+
+    if !ids.index.is_empty() && !ids.unresolved {
+        return filter_active_entries(ids, app);
+    }
+
     match index {
         IndexType::All => filter_all_entries(ids, app),
         IndexType::Active => filter_active_entries(ids, app),
@@ -97,14 +105,10 @@ pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
-    let mut output = Vec::new();
-    if ids.empty_set {
-        return Ok(output);
-    }
-
+fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     trace!("Traversing all buckets");
 
+    let mut output = Vec::new();
     let path = app.config.issues_path()?;
 
     let index = app.index()?;
@@ -144,11 +148,8 @@ pub fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<st
 }
 
 /// Iterate over entries from the active index.
-pub fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut result = Vec::new();
-    if ids.empty_set {
-        return Ok(result);
-    }
 
     let cache = &mut *app.cache.borrow_mut();
     let index = app.index()?;
