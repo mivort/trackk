@@ -9,8 +9,6 @@ use crate::prelude::*;
 pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rule: &str) -> Result<()> {
     let rules = parse_rules(rule)?;
 
-    // TODO: P3: implement entry sorting
-
     entries.sort_by(|(a, _), (b, _)| {
         let mut cmp = Ordering::Equal;
         for r in &rules {
@@ -77,7 +75,11 @@ enum SortingRule {
     EndDesc,
     DueAsc,
     DueDesc,
-    _MetaAsc(String),
+    IdAsc,
+    IdDesc,
+    TagsAsc,
+    TagsDesc,
+    _MetaAsc(String), // TODO: P2: implement meta fields sorting
     _MetaDesc(String),
 }
 
@@ -99,8 +101,11 @@ impl SortingRule {
             ("due", false) => DueDesc,
             ("end", true) => EndAsc,
             ("end", false) => EndDesc,
+            ("tags", true) => TagsAsc,
+            ("tags", false) => TagsDesc,
+            ("id", true) => IdAsc,
+            ("id", false) => IdDesc,
 
-            // TODO: P3: refer the remaing fields
             _ => todo!(), // TODO: P2: support custom field sorting
         }
     }
@@ -125,7 +130,14 @@ impl SortingRule {
 
             Self::UrgencyAsc => a.created.cmp(&b.created), // TODO: P3: compare urgency, not created
             Self::UrgencyDesc => b.created.cmp(&a.created),
-            _ => todo!(),
+
+            Self::IdAsc => a.id.cmp(&b.id),
+            Self::IdDesc => b.id.cmp(&a.id),
+
+            Self::TagsAsc => a.tags.len().cmp(&b.tags.len()),
+            Self::TagsDesc => b.tags.len().cmp(&a.tags.len()),
+
+            Self::_MetaAsc(_) | Self::_MetaDesc(_) => todo!(),
         }
     }
 }
