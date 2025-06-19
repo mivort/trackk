@@ -125,13 +125,9 @@ impl IdFilter {
                 return true;
             });
 
-            if shorthand > 999999 {
+            let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
                 unresolved = true;
                 return true;
-            }
-
-            let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
-                return false;
             });
             let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
                 warn!("Index entry with missing path: {pointer}");

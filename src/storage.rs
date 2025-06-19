@@ -3,7 +3,7 @@ use crate::bucket::Bucket;
 use crate::config::{Config, IndexType};
 use crate::filter::IdFilter;
 use crate::issue::Issue;
-use crate::{App, prelude::*};
+use crate::{App, display, prelude::*};
 
 use std::fs;
 use std::path::Path;
@@ -43,6 +43,8 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
         let mut bucket = Bucket::from_path(&**path, app)?;
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
         bucket_issue.apply_args(args, app)?;
+
+        display::show_diff(issue, bucket_issue);
 
         if issue.status != bucket_issue.status {
             bucket_issue.update_end(&app.config);

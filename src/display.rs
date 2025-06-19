@@ -113,3 +113,19 @@ pub fn show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
 
     Ok(())
 }
+
+/// Print changes to the entry as the series of info messages.
+pub fn show_diff(before: &Issue, after: &Issue) {
+    let id = if let Some(sid) = before.sid { format!("#{sid}") } else { before.id[..6].to_owned() };
+
+    if before.status != after.status {
+        info!("Entry {id} status: {} -> {}", before.status, after.status);
+    }
+    if before.title != after.title {
+        info!(
+            "Entry {id} title: {} -> {} bytes",
+            before.title.len(),
+            after.title.len()
+        );
+    }
+}
