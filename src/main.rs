@@ -28,6 +28,7 @@ use std::{env, fs, io};
 use args::{Args, Command};
 use clap::Parser;
 use config::Config;
+use log::Level;
 use prelude::*;
 
 use self::config::IndexType;
@@ -109,8 +110,29 @@ fn main() -> Result<()> {
 
     app.filter = filter::parse_filter_args(&args, &app)?;
 
+    let no_color = app.config.no_color();
+
     fern::Dispatch::new()
-        .format(|out, message, record| out.finish(format_args!("{}: {}", record.level(), message)))
+        .format(move |out, message, record| {
+            use templates::colors::{RESET, fg};
+
+            if no_color {
+                out.finish(format_args!("{}: {}", record.level(), message))
+            } else {
+                let reset = RESET;
+                let color = match record.level() {
+                    Level::Info => fg(11),
+                    Level::Error => fg(9),
+                    Level::Trace => fg(12),
+                    _ => "",
+                };
+                out.finish(format_args!(
+                    "{color}{}:{reset} {}",
+                    record.level(),
+                    message
+                ))
+            }
+        })
         .level(if args.verbose { Trace } else { Info })
         .chain(std::io::stdout())
         .apply()?;

@@ -2,7 +2,6 @@ use minijinja as mj;
 use std::cell::{Cell, RefCell};
 use unicode_width::UnicodeWidthStr;
 
-use crate::args::ColorMode;
 use crate::templates::{colors, dates, layout};
 use crate::{App, prelude::*};
 
@@ -72,7 +71,10 @@ impl<'env> Templates<'env> {
         j2.add_global("lightcyan", anstyle::AnsiColor::BrightCyan as u8);
         j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
-        if !matches!(app.config.color_mode, ColorMode::Never) {
+        if app.config.no_color() {
+            j2.add_function("fg", |_: u8| "");
+            j2.add_function("bg", |_: u8| "");
+        } else {
             j2.add_global("reset", colors::RESET);
             j2.add_global("bold", colors::BOLD);
             j2.add_global("italic", colors::ITALIC);
@@ -80,11 +82,6 @@ impl<'env> Templates<'env> {
 
             j2.add_function("fg", colors::fg);
             j2.add_function("bg", colors::bg);
-
-            // TODO: P2: add underline, bold and italic
-        } else {
-            j2.add_function("fg", |_: u8| "");
-            j2.add_function("bg", |_: u8| "");
         }
 
         j2.add_function("min", |a: i32, b: i32| a.min(b));
