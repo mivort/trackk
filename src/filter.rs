@@ -27,6 +27,18 @@ impl Filter {
             _ => bail!("Filter expression produced non-boolean result"),
         }
     }
+
+    /// Append '&&' condition on top of the query.
+    fn merge(&mut self, lhs: Token, rhs: Token, op: Token) {
+        let was_empty = self.expression.is_empty();
+        self.expression.push(lhs);
+        self.expression.push(rhs);
+        self.expression.push(op);
+
+        if !was_empty {
+            self.expression.push(Token::And);
+        }
+    }
 }
 
 /// Parse filter expressions and combine these with 'and' operator.
@@ -44,15 +56,24 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
     }
 
     for title in &args.filter_args.title {
-        let append = !expression.is_empty();
-        expression.push(Token::Reference(FieldRef::Title));
-        expression.push(Token::String(Rc::from(title.as_str())));
-        expression.push(Token::FuzzyEq);
-
-        if append {
-            expression.push(Token::And);
-        }
+        filter.merge(
+            Token::Reference(FieldRef::Title),
+            Token::String(Rc::from(title.as_str())),
+            Token::FuzzyEq,
+        );
     }
+
+    for desc in &args.filter_args.desc {
+        filter.merge(
+            Token::Reference(FieldRef::Desc),
+            Token::String(Rc::from(desc.as_str())),
+            Token::FuzzyEq,
+        );
+    }
+
+    for _tag in &args.filter_args.tag {}
+
+    for _notag in &args.filter_args.notag {}
 
     // TODO: P3: add changes to filter from each argument type
 
