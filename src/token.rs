@@ -287,7 +287,8 @@ impl Token {
     pub fn and(self, rhs: Self) -> Result<Self> {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs && rhs)),
-            _ => bail!("'and' ('&&') can only be applied to boolean expressions"),
+            (Self::Bool(lhs), rhs) => Ok(if lhs { rhs } else { Self::Bool(false) }),
+            _ => bail!("'and' ('&&') left argument should be a boolean"),
         }
     }
 
@@ -295,7 +296,8 @@ impl Token {
     pub fn or(self, rhs: Self) -> Result<Self> {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs || rhs)),
-            _ => bail!("'or' ('||') can only be applied to boolean expressions"),
+            (Self::Bool(lhs), rhs) => Ok(if lhs { Self::Bool(true) } else { rhs }),
+            (lhs, _) => Ok(lhs),
         }
     }
 
