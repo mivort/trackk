@@ -23,7 +23,7 @@ pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
         (v * mlt).round() / mlt
     };
 
-    if abs >= YEAR {
+    if abs >= MONTH * 11.5 {
         format!("{}y", round(diff / YEAR))
     } else if abs >= MONTH {
         format!("{}mo", round(diff / MONTH))
@@ -53,7 +53,7 @@ pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
         (val, if val > 1. { "s" } else { "" })
     };
 
-    if abs >= YEAR {
+    if abs >= MONTH * 11.5 {
         let (val, s) = round(abs / YEAR);
         format!("{val} year{s}{ago}")
     } else if abs >= MONTH {
