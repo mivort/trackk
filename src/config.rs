@@ -170,13 +170,22 @@ impl Config {
         }
 
         Cow::Owned(ReportConfig {
-            sections: vec![SectionConfig {
-                index: IndexType::Active,
-                sorting: "+urgency".into(),
-                _grouping: "".into(),
-                _filter: "".into(),
-                template: "next".into(),
-            }],
+            sections: vec![
+                SectionConfig {
+                    index: IndexType::All,
+                    sorting: "+created".into(),
+                    _grouping: "".into(),
+                    _filter: "".into(),
+                    template: "all".into(),
+                },
+                SectionConfig {
+                    index: IndexType::Active,
+                    sorting: "+urgency".into(),
+                    _grouping: "".into(),
+                    _filter: "".into(),
+                    template: "next".into(),
+                },
+            ],
         })
     }
 

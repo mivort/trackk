@@ -32,6 +32,8 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>)
     app.templates.init(app);
 
     for section in &report.sections {
+        println!("--- {} ---", section.template); // TODO: P3: add header template
+
         show_section(ids, section, app)?;
     }
 
