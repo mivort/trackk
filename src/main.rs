@@ -48,6 +48,9 @@ pub struct App<'env> {
     /// Sorting override.
     sort: Vec<sort::SortingRule>,
 
+    /// Parsed urgency expression.
+    urgency: RefCell<Vec<token::Token>>,
+
     /// UTC timestamp during the init.
     ts: i64,
 
@@ -98,6 +101,21 @@ impl<'env> App<'env> {
 
         let utc = UtcDateTime::from_unix_timestamp(self.ts)?;
         Ok(utc.to_offset(UtcOffset::current_local_offset()?))
+    }
+
+    /// Give reference to parsed urgency expression.
+    pub fn urgency(&self) -> Result<Ref<'_, Vec<token::Token>>> {
+        let urgency = self.urgency.borrow();
+        if !urgency.is_empty() {
+            return Ok(urgency);
+        }
+        drop(urgency);
+
+        let mut _urgency = self.urgency.borrow_mut();
+        // TODO: P3: parse urgency
+        drop(_urgency);
+
+        Ok(self.urgency.borrow())
     }
 }
 
