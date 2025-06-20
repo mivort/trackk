@@ -130,19 +130,22 @@ pub fn show_diff(before: &Issue, after: &Issue) {
         info!("Status:   {} -> {}", before.status, after.status);
     }
     if before.title != after.title {
-        info!(
-            "Title:    {} -> {} bytes",
-            before.title.len(),
-            after.title.len()
-        );
+        let before = before.title.len();
+        let after = after.title.len();
+        info!("Title:    {before} -> {after} bytes");
     }
 
     if before.tags != after.tags {
-        info!(
-            "Tags:     {} -> {} tags",
-            before.tags.len(),
-            after.tags.len()
-        );
+        let before = before.tags.len();
+        let after = after.tags.len();
+        let s = if after > 1 { "s" } else { "" };
+        info!("Tags:     {before} -> {after} tag{s}");
+    }
+
+    if before.repeat != after.repeat {
+        let before = before.repeat.as_deref().unwrap_or("no repeat");
+        let after = after.repeat.as_deref().unwrap_or("no repeat");
+        info!("Repeat:   {before} -> {after}");
     }
 
     // TODO: P3: nicer due/end dates format
