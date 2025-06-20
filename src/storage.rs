@@ -119,6 +119,8 @@ fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>
     let path = app.config.issues_path()?;
 
     let index = app.index()?;
+    let local = app.local_time()?;
+    let urgency = &*app.urgency()?;
     let mut op_stack = Vec::new();
 
     for entry in WalkDir::new(&path) {
@@ -143,6 +145,9 @@ fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>
             if !app.filter.match_issue(&issue, app, &mut op_stack)? {
                 continue;
             }
+
+            op_stack.clear();
+            issue.calculate_urgency(&mut op_stack, local, urgency)?;
 
             if app.config.values.active_status.contains(&issue.status) {
                 issue.sid = index.find_id(&issue.id);
