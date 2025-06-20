@@ -386,6 +386,9 @@ fn format_config(config: &Config) -> Result<String> {
         active_status = json5::to_string(&config.values.active_status)?,
         permit_status = json5::to_string(&config.values.permit_status)?,
         urgency_formula = config.values.urgency_formula(),
+        status_initial = config.defaults.status_initial(),
+        status_complete = config.defaults.status_complete(),
+        status_deleted = config.defaults.status_deleted(),
     ))
 }
 
