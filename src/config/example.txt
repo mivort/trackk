@@ -1,0 +1,37 @@
+{{
+  {c}// Relative or absolute path to data directory.
+  // Will pre prefixed with platform-dependent directory, unless 'data_path_prefix'
+  // is set to 'none'. Default: {pkg}{cl}
+  data_path: "{data_path}",
+
+  {c}// Prefix which is added to the data path.
+  // Possible values: data_dir, config_dir, home_dir, none.
+  // Default: data_dir{cl}
+  data_path_prefix: {data_path_prefix},
+
+  {c}// Sub-path to issue files in data directory.
+  // Default: issues{cl}
+  issues_path: "{issues_path}",
+
+  {c}// Editor command used for issue editing. If not defined, value will be taken
+  // from the EDITOR environment variable.{cl}
+  editor: "{editor}",
+
+  {c}// Named custom date formats used by 'datefmt' method. Without arguments,
+  // it uses 'default' template, which can be overridden here.
+  // Example: {{ default: "[hour]-[minute]", myformat: "[year]-[month]-[day]" }}{cl}
+  date_formats: {date_formats},
+
+  {c}// Issue values options.{cl}
+  values: {{
+    {c}// List of statuses which are considered as 'active' (and tracked in 'active'
+    // index for quick access).{cl}
+    active_status: {active_status},
+
+    {c}// List of valid status values.{cl}
+    permit_status: {permit_status},
+
+    {c}// Urgency formula used for dynamic issue sorting.{cl}
+    urgency_formula: "{urgency_formula}",
+  }},
+}}

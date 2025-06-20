@@ -364,7 +364,7 @@ pub enum PrefixType {
 
 /// Print all configuration values along with documentation.
 pub fn print_config(config: &Config) -> Result<()> {
-    println!("{}", format_config(config)?);
+    print!("{}", format_config(config)?);
     Ok(())
 }
 
@@ -374,32 +374,7 @@ fn format_config(config: &Config) -> Result<String> {
     let clear = if config.no_color() { "" } else { colors::RESET };
 
     Ok(format!(
-        concat!(
-            "{{\n{c}",
-            "  // Relative or absolute path to data directory.\n",
-            "  // Will pre prefixed with platform-dependent directory, unless 'data_path_prefix'\n",
-            "  // is set to 'none'. Default: {pkg}{cl}\n",
-            "  data_path: \"{data_path}\",\n",
-            "\n{c}",
-            "  // Prefix which is added to the data path.\n",
-            "  // Possible values: data_dir, config_dir, home_dir, none.\n",
-            "  // Default: data_dir{cl}\n",
-            "  data_path_prefix: {data_path_prefix},\n",
-            "\n{c}",
-            "  // Sub-path to issue files in data directory.\n",
-            "  // Default: issues{cl}\n",
-            "  issues_path: \"{issues_path}\",\n",
-            "\n{c}",
-            "  // Editor command used for issue editing. If not defined, value will be taken\n",
-            "  // from the EDITOR environment variable.{cl}\n",
-            "  editor: \"{editor}\",\n",
-            "\n{c}",
-            "  // Named custom date formats used by 'datefmt' method. Without arguments,\n",
-            "  // it uses 'default' template, which can be overridden here.\n",
-            "  // Example: {{ default: \"[hour]-[minute]\", myformat: \"[year]-[month]-[day]\" }}{cl}\n",
-            "  date_formats: {date_formats},\n",
-            "}}",
-        ),
+        include_str!("config/example.txt"),
         pkg = env!("CARGO_PKG_NAME"),
         c = color,
         cl = clear,
@@ -408,6 +383,9 @@ fn format_config(config: &Config) -> Result<String> {
         editor = &config.editor(),
         date_formats = json5::to_string(&config.date_formats)?,
         issues_path = config.issues_path_fallback(),
+        active_status = json5::to_string(&config.values.active_status)?,
+        permit_status = json5::to_string(&config.values.permit_status)?,
+        urgency_formula = config.values.urgency_formula(),
     ))
 }
 
@@ -420,6 +398,7 @@ fn hash_set(items: &[&str]) -> HashSet<String> {
         .collect::<HashSet<String>>()
 }
 
+/// Ensure that config produced by 'config' command is valid JSON5 and follows the schema.
 #[test]
 fn config_doc_is_sane() {
     let mut config = Config::default();
