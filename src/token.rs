@@ -137,6 +137,9 @@ pub enum Token {
     #[token("ln")]
     Ln,
 
+    #[token("abs")]
+    Abs,
+
     #[token("(")]
     LParen,
 
@@ -166,7 +169,7 @@ impl Token {
         use Token::*;
 
         match self {
-            Not | Sqrt | Ln => (8, false),
+            Not | Sqrt | Ln | Abs => (8, false),
             At | FuzzyEq => (7, true),
             Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
@@ -239,7 +242,6 @@ impl Token {
                 }
                 Ok(Duration(lhs / rhs))
             }
-            (Bool(lhs), Bool(rhs)) => Ok(Bool(lhs || rhs)),
             _ => bail!("Unsupported '/' operator arguments"),
         }
     }
@@ -335,19 +337,12 @@ impl Token {
         }
     }
 
-    /// Calculate square root of the value.
-    pub fn sqrt(self) -> Result<Self> {
+    /// Apply unary operation to single numeric value.
+    #[inline]
+    pub fn unary_op(self, f: impl Fn(f64) -> f64) -> Result<Self> {
         match self {
-            Self::Duration(val) => Ok(Self::Duration(val.sqrt())),
-            _ => bail!("'sqrt' can only be applied to numbers"),
-        }
-    }
-
-    /// Calculate natural logarithm of the value.
-    pub fn ln(self) -> Result<Self> {
-        match self {
-            Self::Duration(val) => Ok(Self::Duration(val.ln())),
-            _ => bail!("'ln' can only be applied to numbers"),
+            Self::Duration(val) => Ok(Self::Duration(f(val))),
+            _ => bail!("'abs' can only be applied to numbers"),
         }
     }
 
