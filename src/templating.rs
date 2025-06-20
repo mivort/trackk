@@ -2,7 +2,7 @@ use minijinja as mj;
 use std::cell::{Cell, RefCell};
 use unicode_width::UnicodeWidthStr;
 
-use crate::templates::{colors, dates, layout};
+use crate::templates::{colors, dates, layout, strings};
 use crate::{App, prelude::*};
 
 /// Rendering template lazy loader.
@@ -35,8 +35,8 @@ impl<'env> Templates<'env> {
         j2.set_keep_trailing_newline(true);
         j2.set_auto_escape_callback(|_| mj::AutoEscape::None);
 
-        j2.add_filter("format", format);
-        j2.add_filter("firstline", firstline);
+        j2.add_filter("format", strings::format);
+        j2.add_filter("firstline", strings::firstline);
 
         let now = app.ts;
         j2.add_filter("reldate", move |d: i64, p: Option<i32>| {
@@ -78,13 +78,13 @@ impl<'env> Templates<'env> {
             j2.add_function("fg", |_: u8| "");
             j2.add_function("bg", |_: u8| "");
         } else {
+            j2.add_function("fg", colors::fg);
+            j2.add_function("bg", colors::bg);
+
             j2.add_global("reset", colors::RESET);
             j2.add_global("bold", colors::BOLD);
             j2.add_global("italic", colors::ITALIC);
             j2.add_global("underline", colors::UNDERLINE);
-
-            j2.add_function("fg", colors::fg);
-            j2.add_function("bg", colors::bg);
         }
 
         j2.add_function("min", |a: i32, b: i32| a.min(b));
@@ -124,19 +124,4 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
         "issue" => Some(("issue", ISSUE)),
         _ => None,
     }
-}
-
-/// Use format string to format the value.
-fn format(fmt: &str, value: String) -> Result<String, mj::Error> {
-    match formatx::formatx!(fmt, value) {
-        Ok(r) => Ok(r),
-        Err(e) => Err(mj::Error::new(mj::ErrorKind::SyntaxError, e.to_string())),
-    }
-}
-
-/// Truncate string to only leave the first line.
-fn firstline(mut input: String) -> String {
-    let pos = input.lines().next().unwrap_or_default().len();
-    input.truncate(pos);
-    input
 }

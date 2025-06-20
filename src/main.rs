@@ -15,6 +15,7 @@ mod templates {
     pub(crate) mod colors;
     pub(crate) mod dates;
     pub(crate) mod layout;
+    pub(crate) mod strings;
 }
 mod templating;
 mod token;
