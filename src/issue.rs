@@ -97,12 +97,16 @@ impl Issue {
         }
 
         let due = if let Some(due) = &args.due {
-            Some(parse_date(due, app, self).context("Unable to parse the due date")?)
+            let res = parse_date(due, app, self)
+                .with_context(|| format!("Unable to parse the due date: '{}'", due))?;
+            Some(res)
         } else {
             self.due
         };
         let end = if let Some(end) = &args.end {
-            Some(parse_date(end, app, self).context("Unable to parse the end date")?)
+            let res = parse_date(end, app, self)
+                .with_context(|| format!("Unable to parse the end date: '{}'", end))?;
+            Some(res)
         } else {
             self.end
         };

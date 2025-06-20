@@ -39,8 +39,9 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
 
     let mut mode = Mode::Arg;
 
-    for tok in lexer {
-        let tok = tok?;
+    for (tok, span) in lexer.spanned() {
+        let tok =
+            tok.with_context(|| format!("Unable to process token at position {}", span.start))?;
 
         match tok {
             Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
@@ -56,7 +57,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
                 let (tok, left_assoc) = if !mode.expects_op() {
                     let (tok, left_assoc) = tok.to_unary();
                     if left_assoc {
-                        bail!("Unexpected operator");
+                        bail!("Unexpected operator at position {}", span.start);
                     }
                     (tok, left_assoc)
                 } else {
@@ -77,14 +78,14 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
             }
             LParen => {
                 if !mode.expects_arg() {
-                    bail!("Unexpected opening bracket");
+                    bail!("Unexpected opening bracket at position {}", span.start);
                 }
                 op_stack.push(tok);
                 mode = Mode::Arg;
             }
             RParen => {
                 if !tilt(&mut op_stack, output) {
-                    bail!("Mismatched closing bracket");
+                    bail!("Mismatched closing bracket at position {}", span.end);
                 }
                 mode = Mode::Op;
             }

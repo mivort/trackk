@@ -186,6 +186,7 @@ impl Token {
             Add(_) => (Add(true), false),
             Sub(_) => (Sub(true), false),
             Not => (Not, false),
+            Sqrt | Ln => (self.clone(), false),
             _ => (self.clone(), true),
         }
     }
@@ -386,7 +387,7 @@ impl Token {
 #[derive(Clone, Default, Debug, PartialEq, Error)]
 pub enum LexerError {
     #[default]
-    #[error("Unknown lexer error")]
+    #[error("Unrecognized token")]
     UnknownError,
 
     #[error("Unable to parse token: {token}")]
