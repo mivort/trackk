@@ -195,6 +195,15 @@ impl Issue {
 
         false
     }
+
+    /// Check issue validity and produce error message in case if required data is missing.
+    pub fn validate(&self) -> Result<()> {
+        if self.title.is_empty() {
+            bail!("Issue title should not be empty");
+        }
+
+        Ok(())
+    }
 }
 
 /// Build-in issue field reference.
