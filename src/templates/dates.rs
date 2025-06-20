@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
-use time::format_description::{self, OwnedFormatItem};
-use time::macros::format_description;
+use time::format_description::{self, OwnedFormatItem, well_known};
 use time::{UtcDateTime, UtcOffset};
 
 use crate::prelude::*;
@@ -48,7 +47,7 @@ pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
     let abs = diff.abs();
 
     let round = |v: f64| -> (f64, &str) {
-        let mlt = 10_f64.powi(precision.unwrap_or(1));
+        let mlt = 10_f64.powi(precision.unwrap_or(0));
         let val = (v * mlt).round() / mlt;
         (val, if val > 1. { "s" } else { "" })
     };
@@ -93,8 +92,21 @@ pub fn datefmt(
     if let Some(fmt) = formats.get(fmt) {
         date.format(fmt).unwrap()
     } else {
-        let fmt = format_description!("[year]-[month]-[day] [hour]:[minute]:[second]");
-        date.format(fmt).unwrap()
+        match fmt {
+            "rfc2822" | "long" => date.format(&well_known::Rfc2822),
+            "rfc3339" => date.format(&well_known::Rfc3339),
+            _ => {
+                use well_known::iso8601::{Config, FormattedComponents, Iso8601, TimePrecision};
+                const CONFIG: u128 = Config::DEFAULT
+                    .set_formatted_components(FormattedComponents::DateTime)
+                    .set_time_precision(TimePrecision::Second {
+                        decimal_digits: None,
+                    })
+                    .encode();
+                date.format(&Iso8601::<CONFIG>)
+            }
+        }
+        .unwrap()
     }
 }
 

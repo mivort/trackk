@@ -1,17 +1,17 @@
 {#- Created date -#}
 {%- set created -%}
-  {{ issue.created | datefmt }} ({{ issue.created | longreldate }})
+  {{ issue.created | datefmt('long') }} ({{ issue.created | longreldate }})
 {%- endset -%}
 
 {#- Modified date -#}
 {%- set modified -%}
-  {{ issue.created | datefmt }} ({{ issue.modified | longreldate }})
+  {{ issue.created | datefmt('long') }} ({{ issue.modified | longreldate }})
 {%- endset -%}
 
 {#- Due date -#}
 {%- set due -%}
   {%- if issue.due -%}
-    {{ issue.due | datefmt }} ({{ issue.due | longreldate }})
+    {{ issue.due | datefmt('long') }} ({{ issue.due | longreldate }})
   {%- else -%}
     {{ fg(lightblack) }}--{{ reset }}
   {%- endif -%}
