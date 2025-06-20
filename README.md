@@ -16,8 +16,9 @@ Inspired by [Taskwarrior][1] and [dstask][2].
 * Recurrent tasks which use same date input syntax, allowing to use flexible
   re-occurrence rules (`monday at 7:00am`) and enabling the usage as habit
   tracker.
-* Highly-customizable output format using [Minijinja][3] template syntax with
-  helper methods for screen-size dependent output.
+* Highly-customizable reporting using [Minijinja][3] template syntax with
+  helper methods for screen-size dependent output, similar to PS1 customization
+  in shells.
 * Ability to perform multiple queries in customizable reports, with adjustable
   headers and grouping.
 * User-defined formula for task urgency with option to override urgency.
