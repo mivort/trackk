@@ -7,6 +7,7 @@ use serde_derive::{Deserialize, Serialize};
 
 use crate::args::{Args, ColorMode};
 use crate::prelude::*;
+use crate::templates::colors;
 
 #[derive(Deserialize, Default)]
 pub struct Config {
@@ -369,22 +370,35 @@ pub fn print_config(config: &Config) -> Result<()> {
 
 /// Produce example config with current values.
 fn format_config(config: &Config) -> Result<String> {
+    let color = if config.no_color() { "" } else { colors::fg(11) };
+    let clear = if config.no_color() { "" } else { colors::RESET };
+
     Ok(format!(
         concat!(
-            "{{\n",
-            "  // Relative or absolute path to data directory.\n",
+            "{{\n{c}",
+            "  // Relative or absolute path to data directory.{cl}\n",
             "  data_path: \"{data_path}\",\n",
-            "\n",
+            "\n{c}",
             "  // Prefix which is added to the data path.\n",
             "  // Possible values: data_dir, config_dir, home_dir, none.\n",
+            "  // Default: data_dir{cl}\n",
             "  data_path_prefix: {data_path_prefix},\n",
-            "\n",
+            "\n{c}",
             "  // Sub-path to issue files in data directory.\n",
+            "  // Default: issues{cl}\n",
             "  issues_path: \"{issues_path}\",\n",
+            "\n{c}",
+            "  // Named custom date formats used by 'datefmt' method. Without arguments,\n",
+            "  // it uses 'default' template, which can be overridden here.\n",
+            "  // Example: {{ default: \"[hour]-[minute]\", myformat: \"[year]-[month]-[day]\" }}{cl}\n",
+            "  date_formats: {date_formats},\n",
             "}}",
         ),
+        c = color,
+        cl = clear,
         data_path = config.data_path_fallback(),
         data_path_prefix = json5::to_string(&config.data_prefix)?,
+        date_formats = json5::to_string(&config.date_formats)?,
         issues_path = config.issues_path_fallback(),
     ))
 }
@@ -400,7 +414,9 @@ fn hash_set(items: &[&str]) -> HashSet<String> {
 
 #[test]
 fn config_doc_is_sane() {
-    let config = Config::default();
+    let mut config = Config::default();
+    config.color_mode = crate::config::ColorMode::Never;
+
     let format = format_config(&config).unwrap();
     json5::from_str::<'_, Config>(format.as_str()).unwrap();
 }

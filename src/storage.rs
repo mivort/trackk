@@ -120,8 +120,16 @@ fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>
 
     let index = app.index()?;
     let local = app.local_time()?;
-    let urgency = &*app.urgency()?;
+    let urgency = app.urgency()?;
     let mut op_stack = Vec::new();
+
+    if !path.exists() {
+        bail!(
+            "Path {} doesn't exist. Run '{} init' to initiate task repository.",
+            path.to_string_lossy(),
+            env!("CARGO_PKG_NAME")
+        );
+    }
 
     for entry in WalkDir::new(&path) {
         let entry = entry?;
@@ -166,7 +174,7 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
     let cache = &mut *app.cache.borrow_mut();
     let index = app.index()?;
     let local = app.local_time()?;
-    let urgency = &*app.urgency()?;
+    let urgency = app.urgency()?;
     let mut op_stack = Vec::new();
 
     for (idx, e) in index.active().iter().enumerate() {

@@ -7,6 +7,10 @@ fn init_storage() {
     let dir = env!("CARGO_TARGET_TMPDIR");
 
     let mut cmd = Command::cargo_bin("trackit").unwrap();
-    let cmd = cmd.args(&["--data", dir]);
+    let cmd = cmd.args(&["--data", dir, "init"]);
+    cmd.assert().success();
+
+    let mut cmd = Command::cargo_bin("trackit").unwrap();
+    let cmd = cmd.args(&["--data", dir, "all"]);
     cmd.assert().success();
 }

@@ -16,8 +16,9 @@ pub fn check_repo(config: &Config) -> Result<()> {
 /// Run git to create repo, set the main settings.
 pub fn init_repo(config: &Config) -> Result<()> {
     let data_path = config.data_path()?;
+    let issues_path = config.issues_path()?;
 
-    fs::create_dir_all(&data_path).with_context(|| {
+    fs::create_dir_all(&issues_path).with_context(|| {
         format!(
             "Unable to create storage directory at '{}'",
             data_path.to_string_lossy()
