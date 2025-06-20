@@ -61,6 +61,10 @@ pub struct Config {
     /// Index of available reports.
     #[serde(default)]
     pub _reports: HashMap<String, ReportConfig>, // TODO: P2: handle custom reports
+
+    /// Date formats which can be used by 'datefmt' filter.
+    #[serde(default)]
+    pub date_formats: HashMap<String, String>,
 }
 
 #[derive(Deserialize, Default)]

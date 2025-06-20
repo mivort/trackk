@@ -1,3 +1,11 @@
+use std::collections::HashMap;
+
+use time::format_description::{self, OwnedFormatItem};
+use time::macros::format_description;
+use time::{UtcDateTime, UtcOffset};
+
+use crate::prelude::*;
+
 const YEAR: f64 = 365. * DAY;
 const MONTH: f64 = 30. * DAY;
 const WEEK: f64 = 7. * DAY;
@@ -67,4 +75,37 @@ pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
         let (val, s) = round(abs);
         format!("{val} second{s}{ago}")
     }
+}
+
+/// Format date/time using one of the defined formatters.
+pub fn datefmt(
+    ts: i64,
+    fmt: Option<&str>,
+    formats: &HashMap<String, OwnedFormatItem>,
+    offset: UtcOffset,
+) -> String {
+    let fmt = fmt.unwrap_or("default");
+
+    let date = UtcDateTime::from_unix_timestamp(ts)
+        .unwrap_or_else(|_| panic!("Timestamp value is outside of the valid range: {}", ts))
+        .to_offset(offset);
+
+    if let Some(fmt) = formats.get(fmt) {
+        date.format(fmt).unwrap()
+    } else {
+        let fmt = format_description!("[year]-[month]-[day] [hour]:[minute]:[second]");
+        date.format(fmt).unwrap()
+    }
+}
+
+/// Convert defined parse formats into parsed format items.
+pub fn parse_formats(
+    formats: &HashMap<String, String>,
+) -> Result<HashMap<String, OwnedFormatItem>> {
+    let mut output = HashMap::<String, _>::default();
+    for (k, v) in formats {
+        output.insert(k.to_owned(), format_description::parse_owned::<2>(v)?);
+    }
+
+    Ok(output)
 }

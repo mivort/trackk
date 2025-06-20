@@ -24,18 +24,18 @@ impl<'env> Default for Templates<'env> {
 
 impl<'env> Templates<'env> {
     /// Initialize the templating environment.
-    pub fn init(&self, app: &App) {
+    pub fn init(&self, app: &App) -> Result<()> {
         use terminal_size::*;
 
         if self.init.get() {
-            return;
+            return Ok(());
         }
 
         let mut j2 = self.j2.borrow_mut();
         j2.set_keep_trailing_newline(true);
         j2.set_auto_escape_callback(|_| mj::AutoEscape::None);
 
-        j2.add_filter("numformat", strings::numformat);
+        j2.add_filter("numfmt", strings::numfmt);
         j2.add_filter("firstline", strings::firstline);
 
         let now = app.ts;
@@ -45,7 +45,12 @@ impl<'env> Templates<'env> {
         j2.add_filter("longreldate", move |d: i64, p: Option<i32>| {
             dates::longreldate(d, now, p)
         });
-        j2.add_filter("date", || ""); // TODO: P3: add date formatter
+
+        let formats = dates::parse_formats(&app.config.date_formats)?;
+        let offset = time::UtcOffset::current_local_offset()?;
+        j2.add_filter("datefmt", move |ts: i64, fmt: Option<&str>| {
+            dates::datefmt(ts, fmt, &formats, offset)
+        });
 
         j2.add_filter("uwidth", |s: &str| s.width());
         j2.add_filter("width", layout::width);
@@ -91,6 +96,8 @@ impl<'env> Templates<'env> {
         j2.add_function("max", |a: i32, b: i32| a.max(b));
 
         self.init.set(true);
+
+        Ok(())
     }
 
     /// Check template ID existence, if template doesn't exist yet - load and parse it.

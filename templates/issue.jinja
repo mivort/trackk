@@ -1,22 +1,28 @@
-{#- Meta tags -#}
-{%- set created %}{{ issue.created | longreldate }}{% endset -%}
-{%- set modified %}{{ issue.modified | longreldate }}{% endset -%}
+{#- Created date -#}
+{%- set created -%}
+  {{ issue.created | datefmt }} ({{ issue.created | longreldate }})
+{%- endset -%}
+
+{#- Modified date -#}
+{%- set modified -%}
+  {{ issue.created | datefmt }} ({{ issue.modified | longreldate }})
+{%- endset -%}
 
 {#- Due date -#}
 {%- set due -%}
-  {%- if issue.date -%}
-    {{ issue.due | longreldate }}
+  {%- if issue.due -%}
+    {{ issue.due | datefmt }} ({{ issue.due | longreldate }})
   {%- else -%}
-    {{ fg(lightblack) }}---{{ reset }}
+    {{ fg(lightblack) }}--{{ reset }}
   {%- endif -%}
 {%- endset -%}
 
 {#- End date -#}
 {%- set end -%}
-  {%- if issue.date -%}
-    {{ issue.end | longreldate }}
+  {%- if issue.end -%}
+    {{ issue.end | datefmt }} ({{ issue.end | longreldate }})
   {%- else -%}
-    {{ fg(lightblack) }}---{{ reset }}
+    {{ fg(lightblack) }}--{{ reset }}
   {%- endif -%}
 {%- endset -%}
 
@@ -27,7 +33,7 @@
       {{ fg(magenta) }}#{{ fg(lightmagenta) }}{{ tag }} {# -#}
     {%- endfor -%}
   {%- else -%}
-    {{ fg(lightblack) }}---
+    {{ fg(lightblack) }}--
   {%- endif -%}
   {{ reset }}
 {%- endset -%}

@@ -29,7 +29,7 @@ struct RowContext<'a> {
 
 /// Render the list of filtered entries.
 pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>) -> Result<()> {
-    app.templates.init(app);
+    app.templates.init(app)?;
 
     for section in &report.sections {
         println!("--- {} ---", section.template); // TODO: P3: add header template
@@ -83,7 +83,7 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
 
 /// Render single entry.
 pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Result<()> {
-    app.templates.init(app);
+    app.templates.init(app)?;
 
     let template_id = app.config.issue_view();
     app.templates.load_template(template_id)?;
