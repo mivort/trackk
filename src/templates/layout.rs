@@ -40,10 +40,7 @@ pub fn width(input: &str) -> usize {
 }
 
 /// Truncate string to a maximum length and add optional character at the end.
-pub fn trunc(mut input: String, max: i32, _end: Option<&str>) -> String {
-    // TODO: P2: implement more precise truncation
-    // TODO: P2: implement truncate chararater support
-
+pub fn trunc(mut input: String, max: i32, end: Option<&str>) -> String {
     use vte::{Parser, Perform};
 
     let mut parser = Parser::new();
@@ -67,17 +64,24 @@ pub fn trunc(mut input: String, max: i32, _end: Option<&str>) -> String {
     }
 
     for g in input.graphemes(true) {
+        performer.byte += g.len();
         parser.advance(&mut performer, g.as_bytes());
         if performer.printable {
+            performer.printable = false;
             performer.count += g.width();
 
-            if performer.count >= max as usize {
-                break;
+            if performer.count < max as usize {
+                continue;
             }
 
-            performer.printable = false;
+            if let Some(end) = end {
+                input.truncate(performer.byte - g.len());
+                input.push_str(end);
+                return input;
+            }
+
+            break;
         }
-        performer.byte += g.len();
     }
 
     input.truncate(performer.byte);

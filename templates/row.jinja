@@ -27,14 +27,14 @@
 {%- set metaw = meta | width -%}
 
 {#- Issue title -#}
-{%- set title | trunc(maxw - metaw - 8) -%}
+{%- set title | trunc(maxw - metaw - 8, '…') -%}
   {{ fg(lightcyan) }}{{ issue.title | firstline }}
 {%- endset -%}
 {%- set titlew = title | width -%}
 
 {#- Shorthand ID -#}
 {%- if sid -%}
-{{ fg(lightblue) }}{{ "{:3}. " | format(sid) }}
+{{ fg(lightblue) }}{{ '{:3}. ' | format(sid) }}
 {%- else -%}
   {{ fg(blue) }}{{ issue.id[0:4] }} {# -#}
 {%- endif -%}
