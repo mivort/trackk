@@ -256,7 +256,7 @@ impl ValuesConfig {
     /// Default urgency formula string.
     pub fn urgency_formula(&self) -> &str {
         if self.urgency_formula.is_empty() {
-            return "sqrt 8";
+            return "sig((now - (due or someday)) / 1000000) * 10";
         }
         &self.urgency_formula
     }

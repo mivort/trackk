@@ -36,6 +36,7 @@ pub enum Token {
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time_sec)]
     #[regex(r"(?i)now", |lex| lex.extras.unix_timestamp())]
+    #[regex(r"(?i)someday", |_| 253402300799 - 86400)]
     #[regex(r"(?i)(sod|today)", |lex| lex.extras.replace_time(Time::MIDNIGHT).unix_timestamp())]
     #[regex(r"(?i)tomorrow", |lex| relative_sod(lex, 1))]
     #[regex(r"(?i)yesterday", |lex| relative_sod(lex, -1))]
@@ -140,6 +141,9 @@ pub enum Token {
     #[token("abs")]
     Abs,
 
+    #[token("sig")]
+    Sig,
+
     #[token("(")]
     LParen,
 
@@ -169,7 +173,7 @@ impl Token {
         use Token::*;
 
         match self {
-            Not | Sqrt | Ln | Abs => (8, false),
+            Not | Sqrt | Ln | Abs | Sig => (8, false),
             At | FuzzyEq => (7, true),
             Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
@@ -189,7 +193,7 @@ impl Token {
             Add(_) => (Add(true), false),
             Sub(_) => (Sub(true), false),
             Not => (Not, false),
-            Sqrt | Ln => (self.clone(), false),
+            Sqrt | Ln | Abs | Sig => (self.clone(), false),
             _ => (self.clone(), true),
         }
     }
@@ -342,7 +346,7 @@ impl Token {
     pub fn unary_op(self, f: impl Fn(f64) -> f64) -> Result<Self> {
         match self {
             Self::Duration(val) => Ok(Self::Duration(f(val))),
-            _ => bail!("'abs' can only be applied to numbers"),
+            _ => bail!("Unary function got incompatible arguments"),
         }
     }
 

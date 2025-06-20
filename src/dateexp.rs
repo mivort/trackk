@@ -52,7 +52,7 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
                 mode = Mode::Op;
             }
             Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln | Abs => {
+            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln | Abs | Sig => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
                 let (tok, left_assoc) = if !mode.expects_op() {
                     let (tok, left_assoc) = tok.to_unary();
@@ -214,6 +214,13 @@ pub fn eval(
                 ),
                 _ => bail!("'abs' operator haven't got the argument"),
             },
+            Sig => match stack.pop() {
+                Some(val) => stack.push(
+                    val.unary_op(|v| sigmoid(v))
+                        .context("'sig' can only be applied to numbers")?,
+                ),
+                _ => bail!("'sig' operator haven't got the argument"),
+            },
             Greater => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs)?),
                 _ => bail!("'>' operator haven't got enough arguments"),
@@ -246,6 +253,14 @@ pub fn eval(
     let last = stack.last();
     last.context("Expression didn't produced any result")
         .cloned()
+}
+
+/// Sigmoid function for urgency values normalization.
+/// TODO: P1: move to utils mod.
+#[inline]
+fn sigmoid(input: f64) -> f64 {
+    use std::f64::consts::E;
+    1_f64 / (1_f64 + E.powf(-input))
 }
 
 #[test]

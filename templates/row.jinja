@@ -25,7 +25,7 @@
   {%- endif -%}
 
   {#- Urgency -#}
-  / {{ fg(lightred) }}{{ urgency | numfmt('{:.1}') }}{{ reset }}
+  / {{ fg(lightred) }}{{ urgency | numfmt('{:.3}') }}{{ reset }}
 {%- endset -%}
 {%- set metaw = meta | width -%}
 

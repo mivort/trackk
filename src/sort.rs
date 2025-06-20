@@ -126,8 +126,8 @@ impl SortingRule {
             Self::EndAsc => a.end.cmp(&b.end),
             Self::EndDesc => b.end.cmp(&a.end),
 
-            Self::UrgencyAsc => a.created.cmp(&b.created), // TODO: P3: compare urgency, not created
-            Self::UrgencyDesc => b.created.cmp(&a.created),
+            Self::UrgencyAsc => a.urgency.partial_cmp(&b.urgency).unwrap_or(Ordering::Equal),
+            Self::UrgencyDesc => b.urgency.partial_cmp(&a.urgency).unwrap_or(Ordering::Equal),
 
             Self::IdAsc => a.id.cmp(&b.id),
             Self::IdDesc => b.id.cmp(&a.id),
