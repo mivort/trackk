@@ -3,7 +3,7 @@ use crate::bucket::Bucket;
 use crate::config::{Config, IndexType};
 use crate::filter::IdFilter;
 use crate::issue::Issue;
-use crate::{App, display, prelude::*};
+use crate::{app::App, display, prelude::*};
 
 use std::fs;
 use std::path::Path;

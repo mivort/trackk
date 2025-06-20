@@ -36,7 +36,7 @@ pub struct Config {
 
     /// User-defined fields.
     #[serde(default)]
-    pub fields: HashMap<String, FieldType>,
+    pub _fields: HashMap<String, FieldType>, // TODO: P2: perform custom fields resolution
 
     /// New issue default values.
     #[serde(default)]
@@ -48,7 +48,7 @@ pub struct Config {
 
     /// Options related to VCS used with the storage.
     #[serde(default)]
-    pub sync: SyncConfig,
+    pub _sync: SyncConfig,
 
     /// Default output report.
     #[serde(default)]
@@ -60,43 +60,51 @@ pub struct Config {
 
     /// Index of available reports.
     #[serde(default)]
-    pub custom_reports: HashMap<String, ReportConfig>,
+    pub _reports: HashMap<String, ReportConfig>, // TODO: P2: handle custom reports
 }
 
 #[derive(Deserialize, Default)]
 pub struct DefaultsConfig {
     /// Default status to assign upon creation.
+    #[serde(default)]
     status_initial: Box<str>,
 
     /// Status which is applied when 'done' command is called.
+    #[serde(default)]
     status_complete: Box<str>,
 
     /// Status which is applied upon entry removal.
+    #[serde(default)]
     status_deleted: Box<str>,
 
     /// Default time string to assign as 'due'.
-    due: Box<str>,
+    #[serde(default)]
+    _due: Box<str>,
 }
 
 #[derive(Deserialize, Default)]
 pub struct ValuesConfig {
     /// List of statuses which are considered as 'active'.
+    #[serde(default)]
     pub active_status: HashSet<String>,
 
     /// Only allow to assign tags from this list. Allow any tag if empty.
-    pub permit_tags: HashSet<String>,
+    #[serde(default)]
+    pub _permit_tags: HashSet<String>, // TODO: P1: support list of permitted tags
 
     /// Only allow one of the provided statuses. Don't check status if empty.
+    #[serde(default)]
     pub permit_status: HashSet<String>,
 
     /// Urgency formula to use on entries.
-    pub urgency_formula: Box<str>, // TODO: P3: implement urgency calculation
+    #[serde(default)]
+    pub _urgency_formula: Box<str>, // TODO: P3: implement urgency calculation
 }
 
 #[derive(Deserialize, Default)]
 pub struct SyncConfig {
     /// Select one of the supported sync drivers.
-    pub driver: SyncDriver,
+    pub _driver: SyncDriver, // TODO: P1: support multiple vcs drivers
 }
 
 impl Config {
@@ -256,8 +264,9 @@ impl DefaultsConfig {
     }
 
     /// Default due date expression.
-    pub fn due(&self) -> &str {
-        &self.due
+    pub fn _due(&self) -> &str {
+        // TODO: P2: assign default due date on creation
+        &self._due
     }
 }
 

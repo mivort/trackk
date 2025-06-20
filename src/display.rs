@@ -6,7 +6,7 @@ use serde_derive::Serialize;
 use crate::config::{ReportConfig, SectionConfig};
 use crate::filter::IdFilter;
 use crate::issue::Issue;
-use crate::{App, prelude::*, sort, storage};
+use crate::{app::App, prelude::*, sort, storage};
 
 #[derive(Serialize)]
 struct RowContext<'a> {

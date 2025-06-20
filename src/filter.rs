@@ -4,7 +4,7 @@ use crate::args::Args;
 use crate::dateexp::{eval, parse_filter};
 use crate::issue::{FieldRef, Issue};
 use crate::token::Token;
-use crate::{App, prelude::*};
+use crate::{app::App, prelude::*};
 
 /// List of filter rules.
 #[derive(Default)]

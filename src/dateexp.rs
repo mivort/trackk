@@ -2,7 +2,7 @@ use logos::Logos as _;
 use time::OffsetDateTime;
 
 use crate::issue::Issue;
-use crate::{App, prelude::*, token::Token};
+use crate::{app::App, prelude::*, token::Token};
 
 /// Parse date expression and produce the timestamp.
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.

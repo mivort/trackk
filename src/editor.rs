@@ -11,7 +11,7 @@ use crate::config::IndexType;
 use crate::dateexp::parse_date;
 use crate::filter::IdFilter;
 use crate::issue::Issue;
-use crate::{App, display, prelude::*, storage};
+use crate::{app::App, display, prelude::*, storage};
 
 /// Run editor, apply changes and return the exit status.
 pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {

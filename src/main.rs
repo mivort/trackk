@@ -1,3 +1,4 @@
+mod app;
 mod args;
 mod bucket;
 mod config;
@@ -20,10 +21,7 @@ mod templates {
 mod templating;
 mod token;
 
-use std::cell::{Ref, RefCell, RefMut};
-use std::collections::HashMap;
 use std::path::PathBuf;
-use std::rc::Rc;
 use std::{env, fs, io};
 
 use args::{Args, Command};
@@ -34,99 +32,10 @@ use prelude::*;
 
 use self::config::IndexType;
 
-#[derive(Default)]
-pub struct App<'env> {
-    /// Application config.
-    config: config::Config,
-
-    /// Active entry index.
-    index: RefCell<index::Index>,
-
-    /// Current global entry filter.
-    filter: filter::Filter,
-
-    /// Sorting override.
-    sort: Vec<sort::SortingRule>,
-
-    /// Parsed urgency expression.
-    urgency: RefCell<Vec<token::Token>>,
-
-    /// UTC timestamp during the init.
-    ts: i64,
-
-    /// Tera templates reference.
-    templates: templating::Templates<'env>,
-
-    /// Parsed entries cache.
-    cache: RefCell<HashMap<String, Rc<bucket::Bucket>>>,
-}
-
-impl<'env> App<'env> {
-    /// Lazy load and access the active entry index.
-    pub fn index(&self) -> Result<Ref<'_, index::Index>> {
-        let index = self.index.borrow();
-        if index.loaded() {
-            return Ok(index);
-        }
-        drop(index);
-
-        let mut index = self.index.borrow_mut();
-        index.load(&self.config)?;
-        drop(index);
-
-        Ok(self.index.borrow())
-    }
-
-    /// Load load and get mutable reference to the index.
-    pub fn index_mut(&self) -> Result<RefMut<'_, index::Index>> {
-        let mut index = self.index.borrow_mut();
-        if !index.loaded() {
-            index.load(&self.config)?;
-        }
-        Ok(index)
-    }
-
-    /// Get reference to empty index.
-    pub fn index_empty_mut(&self) -> Result<RefMut<'_, index::Index>> {
-        let mut index = self.index.borrow_mut();
-        index.load_path(&self.config)?;
-        index.clear();
-
-        Ok(index)
-    }
-
-    /// Convert start timestamp to time with offset.
-    pub fn local_time(&self) -> Result<time::OffsetDateTime> {
-        use time::*;
-
-        let utc = UtcDateTime::from_unix_timestamp(self.ts)?;
-        Ok(utc.to_offset(UtcOffset::current_local_offset()?))
-    }
-
-    /// Give reference to parsed urgency expression.
-    pub fn urgency(&self) -> Result<Ref<'_, Vec<token::Token>>> {
-        let urgency = self.urgency.borrow();
-        if !urgency.is_empty() {
-            return Ok(urgency);
-        }
-        drop(urgency);
-
-        let mut _urgency = self.urgency.borrow_mut();
-        // TODO: P3: parse urgency
-        drop(_urgency);
-
-        Ok(self.urgency.borrow())
-    }
-}
-
 fn main() -> Result<()> {
     let args = Args::parse();
 
-    let mut app = App {
-        config: read_config(&args)?,
-        ts: time::UtcDateTime::now().unix_timestamp(),
-        ..Default::default()
-    };
+    let mut app = app::App::new(read_config(&args)?);
 
     app.filter = filter::parse_filter_args(&args, &app)?;
     if let Some(sort) = &args.filter_args.sort {

@@ -3,7 +3,7 @@ use std::cell::{Cell, RefCell};
 use unicode_width::UnicodeWidthStr;
 
 use crate::templates::{colors, dates, layout, strings};
-use crate::{App, prelude::*};
+use crate::{app::App, prelude::*};
 
 /// Rendering template lazy loader.
 pub struct Templates<'env> {

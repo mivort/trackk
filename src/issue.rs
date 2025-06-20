@@ -7,7 +7,7 @@ use crate::args::EntryArgs;
 use crate::config::Config;
 use crate::dateexp::{eval, parse_date};
 use crate::token::Token;
-use crate::{App, prelude::*};
+use crate::{app::App, prelude::*};
 
 /// Base entry storage with ID, title text and date properties.
 #[derive(Serialize, Deserialize, Default, Clone)]
