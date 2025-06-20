@@ -23,6 +23,8 @@ pub enum Token {
     #[regex(r"\d+(\.\d+)?M", |l| parse_suffix_span(l, 1, 2592000.))]
     #[regex(r"\d+(\.\d+)?[Mm][Oo]", |l| parse_suffix_span(l, 2, 2592000.))]
     #[regex(r"\d+(\.\d+)?[Yy]", |l| parse_suffix_span(l, 1, 946080000.))]
+    #[regex(r"\d+(\.\d+)?k", |l| parse_suffix_span(l, 1, 1000.))]
+    #[regex(r"\d+(\.\d+)?mil", |l| parse_suffix_span(l, 3, 1000000.))]
     Duration(f64),
 
     #[regex(r"(?i)\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
