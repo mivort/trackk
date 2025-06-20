@@ -284,6 +284,9 @@ impl Token {
     }
 
     /// Perform logical AND.
+    ///
+    /// NOTE: It's intentionally not allowed to have right argument as boolean to\
+    /// prevent ternary operator usage caveat (`x < 0 and false or true`).
     pub fn and(self, rhs: Self) -> Result<Self> {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs && rhs)),
