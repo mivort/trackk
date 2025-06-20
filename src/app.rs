@@ -2,6 +2,8 @@ use std::cell::{Ref, RefCell, RefMut};
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use once_cell::unsync::OnceCell;
+
 use crate::dateexp::parse_local_exp;
 use crate::prelude::*;
 use crate::{bucket, config, filter, index, sort, templating, token};
@@ -31,7 +33,7 @@ pub struct App<'env> {
     index: RefCell<index::Index>,
 
     /// Parsed urgency expression.
-    urgency: RefCell<Vec<token::Token>>,
+    urgency: OnceCell<Vec<token::Token>>,
 }
 
 impl<'env> App<'env> {
@@ -85,19 +87,13 @@ impl<'env> App<'env> {
     }
 
     /// Give reference to parsed urgency expression.
-    pub fn urgency(&self) -> Result<Ref<'_, Vec<token::Token>>> {
-        let urgency = self.urgency.borrow();
-        if !urgency.is_empty() {
-            return Ok(urgency);
-        }
-        drop(urgency);
-
-        let mut urgency = self.urgency.borrow_mut();
-        let formula = self.config.values.urgency_formula();
-        parse_local_exp(formula, self, &mut urgency)
-            .with_context(|| format!("Unable to parse urgency formula: '{}'", formula))?;
-        drop(urgency);
-
-        Ok(self.urgency.borrow())
+    pub fn urgency(&self) -> Result<&Vec<token::Token>> {
+        self.urgency.get_or_try_init(|| {
+            let mut urgency = Vec::new();
+            let formula = self.config.values.urgency_formula();
+            parse_local_exp(formula, self, &mut urgency)
+                .with_context(|| format!("Unable to parse urgency formula: '{}'", formula))?;
+            Ok(urgency)
+        })
     }
 }

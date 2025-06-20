@@ -822,6 +822,7 @@ dependencies = [
  "log",
  "logos",
  "minijinja",
+ "once_cell",
  "regex",
  "serde",
  "serde_derive",
