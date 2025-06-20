@@ -133,7 +133,7 @@ fn tilt(stack: &mut Vec<Token>, output: &mut Vec<Token>) -> bool {
 
 /// Iterate over stack and calculate the result.
 pub fn eval(
-    queue: &Vec<Token>,
+    queue: &[Token],
     ts: OffsetDateTime,
     stack: &mut Vec<Token>,
     issue: &Issue,

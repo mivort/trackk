@@ -129,11 +129,13 @@ impl Issue {
         &mut self,
         stack: &mut Vec<Token>,
         ts: OffsetDateTime,
-        _app: &App,
+        urgency: &[Token],
     ) -> Result<()> {
-        let _res = eval(&Vec::new(), ts, stack, self);
+        let res = eval(urgency, ts, stack, self)?;
+        if let Token::Duration(urg) = res {
+            self.urgency = urg;
+        }
 
-        self.urgency = 0.0;
         Ok(())
     }
 

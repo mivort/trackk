@@ -161,6 +161,7 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
     let cache = &mut *app.cache.borrow_mut();
     let index = app.index()?;
     let local = app.local_time()?;
+    let urgency = &*app.urgency()?;
     let mut op_stack = Vec::new();
 
     for (idx, e) in index.active().iter().enumerate() {
@@ -185,7 +186,7 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
 
             op_stack.clear();
             let mut issue_owned = issue.with_shorthand(idx + 1);
-            issue_owned.calculate_urgency(&mut op_stack, local, app)?;
+            issue_owned.calculate_urgency(&mut op_stack, local, urgency)?;
 
             result.push((issue_owned, Rc::from(bucket_path)));
         } else {

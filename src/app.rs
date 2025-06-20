@@ -30,7 +30,7 @@ pub struct App<'env> {
     index: RefCell<index::Index>,
 
     /// Parsed urgency expression.
-    _urgency: RefCell<Vec<token::Token>>,
+    urgency: RefCell<Vec<token::Token>>,
 }
 
 impl<'env> App<'env> {
@@ -84,17 +84,17 @@ impl<'env> App<'env> {
     }
 
     /// Give reference to parsed urgency expression.
-    pub fn _urgency(&self) -> Result<Ref<'_, Vec<token::Token>>> {
-        let urgency = self._urgency.borrow();
+    pub fn urgency(&self) -> Result<Ref<'_, Vec<token::Token>>> {
+        let urgency = self.urgency.borrow();
         if !urgency.is_empty() {
             return Ok(urgency);
         }
         drop(urgency);
 
-        let mut _urgency = self._urgency.borrow_mut();
-        // TODO: P3: parse urgency
-        drop(_urgency);
+        let mut urgency = self.urgency.borrow_mut();
+        urgency.push(token::Token::Duration(1.)); // TODO: P3: parse urgency
+        drop(urgency);
 
-        Ok(self._urgency.borrow())
+        Ok(self.urgency.borrow())
     }
 }
