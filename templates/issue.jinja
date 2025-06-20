@@ -1,17 +1,17 @@
 {#- Created date -#}
 {%- set created -%}
-  {{ issue.created | datefmt('long') }} ({{ issue.created | longreldate }})
+  {{ fg(lightwhite) }}{{ issue.created | datefmt('long') }}{{ reset }} ({{ issue.created | longreldate }})
 {%- endset -%}
 
 {#- Modified date -#}
 {%- set modified -%}
-  {{ issue.created | datefmt('long') }} ({{ issue.modified | longreldate }})
+  {{ fg(lightwhite) }}{{ issue.created | datefmt('long') }}{{ reset }} ({{ issue.modified | longreldate }})
 {%- endset -%}
 
 {#- Due date -#}
 {%- set due -%}
   {%- if issue.due -%}
-    {{ issue.due | datefmt('long') }} ({{ issue.due | longreldate }})
+    {{ fg(lightwhite) }}{{ issue.due | datefmt('long') }}{{ reset }} ({{ issue.due | longreldate }})
   {%- else -%}
     {{ fg(lightblack) }}--{{ reset }}
   {%- endif -%}
@@ -20,7 +20,7 @@
 {#- End date -#}
 {%- set end -%}
   {%- if issue.end -%}
-    {{ issue.end | datefmt }} ({{ issue.end | longreldate }})
+    {{ fg(lightwhite) }}{{ issue.end | datefmt('long') }}{{ reset }} ({{ issue.end | longreldate }})
   {%- else -%}
     {{ fg(lightblack) }}--{{ reset }}
   {%- endif -%}

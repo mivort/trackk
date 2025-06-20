@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use time::format_description::{self, OwnedFormatItem, well_known};
+use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
 use crate::prelude::*;
@@ -83,6 +84,7 @@ pub fn datefmt(
     formats: &HashMap<String, OwnedFormatItem>,
     offset: UtcOffset,
 ) -> String {
+    use well_known::iso8601::{Config, FormattedComponents, Iso8601, TimePrecision};
     let fmt = fmt.unwrap_or("default");
 
     let date = UtcDateTime::from_unix_timestamp(ts)
@@ -95,8 +97,9 @@ pub fn datefmt(
         match fmt {
             "rfc2822" | "long" => date.format(&well_known::Rfc2822),
             "rfc3339" => date.format(&well_known::Rfc3339),
+            "date" => date.format(&Iso8601::DATE),
+            "time" => date.format(format_description!("[hour]:[minute]:[second]")),
             _ => {
-                use well_known::iso8601::{Config, FormattedComponents, Iso8601, TimePrecision};
                 const CONFIG: u128 = Config::DEFAULT
                     .set_formatted_components(FormattedComponents::DateTime)
                     .set_time_precision(TimePrecision::Second {
