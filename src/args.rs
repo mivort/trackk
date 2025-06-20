@@ -249,7 +249,12 @@ pub struct TemplateArgs {
 
 #[derive(Parser)]
 pub struct ImportArgs {
-    pub format: i32,
+    /// One of the supported import formats.
+    #[arg(long)]
+    pub format: ImportMode,
+
+    /// Input file (read from stdin if not specified).
+    pub input: Option<Box<str>>,
 }
 
 #[derive(Parser)]
@@ -286,4 +291,11 @@ impl Display for ColorMode {
             Self::Never => f.write_str("never"),
         }
     }
+}
+
+#[derive(ValueEnum, Default, Clone, Copy)]
+pub enum ImportMode {
+    #[default]
+    Native,
+    TaskwarriorV2,
 }
