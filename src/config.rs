@@ -144,7 +144,7 @@ impl Config {
     /// Single issue view template.
     pub fn issue_view(&self) -> &str {
         if !self.issue_view.is_empty() {
-            return &*self.issue_view;
+            return &self.issue_view;
         }
 
         "issue"

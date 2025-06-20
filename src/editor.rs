@@ -56,7 +56,7 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
             continue;
         }
 
-        display::show_diff(&prev_issue, &issue);
+        display::show_diff(prev_issue, &issue);
 
         if prev_issue.status != issue.status {
             issue.update_end(&app.config);

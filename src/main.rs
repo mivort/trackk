@@ -112,7 +112,7 @@ fn main() -> Result<()> {
 
     app.filter = filter::parse_filter_args(&args, &app)?;
     if let Some(sort) = &args.filter_args.sort {
-        app.sort = sort::parse_rules(&*sort)?;
+        app.sort = sort::parse_rules(sort)?;
     }
 
     setup_logging(app.config.no_color(), args.verbose)?;

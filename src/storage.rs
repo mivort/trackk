@@ -160,6 +160,7 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
 
     let cache = &mut *app.cache.borrow_mut();
     let index = app.index()?;
+    let local = app.local_time()?;
     let mut op_stack = Vec::new();
 
     for (idx, e) in index.active().iter().enumerate() {
@@ -178,9 +179,15 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
             }
 
             op_stack.clear();
-            if app.filter.match_issue(issue, app, &mut op_stack)? {
-                result.push((issue.with_shorthand(idx + 1), Rc::from(bucket_path)));
+            if !app.filter.match_issue(issue, app, &mut op_stack)? {
+                continue;
             }
+
+            op_stack.clear();
+            let mut issue_owned = issue.with_shorthand(idx + 1);
+            issue_owned.calculate_urgency(&mut op_stack, local, app)?;
+
+            result.push((issue_owned, Rc::from(bucket_path)));
         } else {
             warn!("Index ID is missing: {id}. Run 'refresh --force' to rebuild the index.");
         }

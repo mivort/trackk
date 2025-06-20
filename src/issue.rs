@@ -1,11 +1,11 @@
 use serde_derive::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use time::UtcDateTime;
+use time::{OffsetDateTime, UtcDateTime};
 use uuid::Uuid;
 
 use crate::args::EntryArgs;
 use crate::config::Config;
-use crate::dateexp::parse_date;
+use crate::dateexp::{eval, parse_date};
 use crate::token::Token;
 use crate::{App, prelude::*};
 
@@ -58,6 +58,10 @@ pub struct Issue {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub end: Option<i64>,
+
+    /// Formula-based urgency value.
+    #[serde(skip)]
+    pub urgency: f64,
 
     /// Custom field values.
     #[serde(skip_serializing_if = "HashMap::is_empty")]
@@ -117,6 +121,19 @@ impl Issue {
         self.end = end;
 
         self.update_ts();
+        Ok(())
+    }
+
+    /// Evaluate urgency expression and assign the result.
+    pub fn calculate_urgency(
+        &mut self,
+        stack: &mut Vec<Token>,
+        ts: OffsetDateTime,
+        _app: &App,
+    ) -> Result<()> {
+        let _res = eval(&Vec::new(), ts, stack, self);
+
+        self.urgency = 0.0;
         Ok(())
     }
 

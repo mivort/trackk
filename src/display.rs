@@ -79,7 +79,7 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
 pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Result<()> {
     app.templates.init(app);
 
-    let template_id = &*app.config.issue_view();
+    let template_id = app.config.issue_view();
     app.templates.load_template(template_id)?;
 
     let j2 = app.templates.j2.borrow();
