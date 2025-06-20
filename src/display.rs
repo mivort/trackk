@@ -14,6 +14,9 @@ struct RowContext<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     sid: Option<usize>,
 
+    /// Calculated issue urgency.
+    urgency: f64,
+
     /// Flag if current row is odd or even.
     lineno: usize,
 
@@ -63,6 +66,7 @@ fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -
     for (lineno, (issue, path)) in entries.iter().enumerate() {
         let context = RowContext {
             sid: issue.sid,
+            urgency: issue.urgency,
             issue: Cow::Borrowed(issue),
             path: Cow::Borrowed(path),
             lineno,
@@ -88,6 +92,7 @@ pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
 
     let context = RowContext {
         sid: issue.sid,
+        urgency: issue.urgency,
         issue: Cow::Borrowed(issue),
         path: Cow::Borrowed(path),
         lineno: 0,

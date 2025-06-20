@@ -7,8 +7,8 @@ pub fn firstline(mut input: String) -> String {
     input
 }
 
-/// Use format string to format the value.
-pub fn format(fmt: &str, value: String) -> Result<String, mj::Error> {
+/// Use format string to format the numeric value.
+pub fn numformat(value: f64, fmt: &str) -> Result<String, mj::Error> {
     match formatx::formatx!(fmt, value) {
         Ok(r) => Ok(r),
         Err(e) => Err(mj::Error::new(mj::ErrorKind::SyntaxError, e.to_string())),

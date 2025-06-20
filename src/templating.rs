@@ -35,7 +35,7 @@ impl<'env> Templates<'env> {
         j2.set_keep_trailing_newline(true);
         j2.set_auto_escape_callback(|_| mj::AutoEscape::None);
 
-        j2.add_filter("format", strings::format);
+        j2.add_filter("numformat", strings::numformat);
         j2.add_filter("firstline", strings::firstline);
 
         let now = app.ts;
