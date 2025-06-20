@@ -51,7 +51,7 @@ fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result
                 mode = Mode::Op;
             }
             Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-            | GreaterEq | NotEq | And | Or | Not => {
+            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
                 let (tok, left_assoc) = if !mode.expects_op() {
                     let (tok, left_assoc) = tok.to_unary();
@@ -191,6 +191,14 @@ pub fn eval(
             Not => match stack.pop() {
                 Some(val) => stack.push(val.not()?),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
+            },
+            Sqrt => match stack.pop() {
+                Some(val) => stack.push(val.sqrt()?),
+                _ => bail!("'sqrt' operator haven't got the argument"),
+            },
+            Ln => match stack.pop() {
+                Some(val) => stack.push(val.ln()?),
+                _ => bail!("'log' operator haven't got the argument"),
             },
             Greater => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs)?),

@@ -131,6 +131,12 @@ pub enum Token {
     #[token("not")]
     Not,
 
+    #[token("sqrt")]
+    Sqrt,
+
+    #[token("ln")]
+    Ln,
+
     #[token("(")]
     LParen,
 
@@ -160,7 +166,7 @@ impl Token {
         use Token::*;
 
         match self {
-            Not => (8, false),
+            Not | Sqrt | Ln => (8, false),
             At | FuzzyEq => (7, true),
             Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
@@ -320,6 +326,22 @@ impl Token {
             Self::Bool(val) => Ok(Self::Bool(!val)),
             Self::Date(_) => Ok(Self::Bool(false)),
             _ => bail!("'not' ('!') can only be applied to boolean expressions"),
+        }
+    }
+
+    /// Calculate square root of the value.
+    pub fn sqrt(self) -> Result<Self> {
+        match self {
+            Self::Duration(val) => Ok(Self::Duration(val.sqrt())),
+            _ => bail!("'sqrt' can only be applied to numbers"),
+        }
+    }
+
+    /// Calculate natural logarithm of the value.
+    pub fn ln(self) -> Result<Self> {
+        match self {
+            Self::Duration(val) => Ok(Self::Duration(val.ln())),
+            _ => bail!("'ln' can only be applied to numbers"),
         }
     }
 
