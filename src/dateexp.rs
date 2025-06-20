@@ -25,13 +25,13 @@ pub fn parse_date(input: &str, app: &App, issue: &Issue) -> Result<i64> {
 }
 
 /// Parse and append to filter expression, return number of token added.
-pub fn parse_filter(input: &str, app: &App, filter: &mut Vec<Token>) -> Result<()> {
+pub fn parse_local_exp(input: &str, app: &App, output: &mut Vec<Token>) -> Result<()> {
     let local = app.local_time()?;
-    parse_exp(input, local, filter)
+    parse_exp(input, local, output)
 }
 
 /// Produce parsed ASP tree ready for evaluation from the input.
-fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result<()> {
+pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result<()> {
     use Token::*;
 
     let mut op_stack = Vec::<Token>::new();

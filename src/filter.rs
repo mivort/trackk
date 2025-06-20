@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::args::Args;
-use crate::dateexp::{eval, parse_filter};
+use crate::dateexp::{eval, parse_local_exp};
 use crate::issue::{FieldRef, Issue};
 use crate::token::Token;
 use crate::{app::App, prelude::*};
@@ -47,7 +47,7 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
 
     for expr in &args.filter_args.filter {
         let append = !expression.is_empty();
-        parse_filter(expr, app, expression)?;
+        parse_local_exp(expr, app, expression)?;
 
         if append {
             expression.push(Token::And)
@@ -168,7 +168,7 @@ fn match_issue() {
 
     let match_filter = |input: &str| {
         let mut exp = Vec::new();
-        parse_filter(input, &app, &mut exp).unwrap();
+        parse_local_exp(input, &app, &mut exp).unwrap();
 
         Filter {
             expression: exp,

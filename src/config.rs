@@ -98,7 +98,7 @@ pub struct ValuesConfig {
 
     /// Urgency formula to use on entries.
     #[serde(default)]
-    pub _urgency_formula: Box<str>, // TODO: P3: implement urgency calculation
+    pub urgency_formula: Box<str>, // TODO: P3: implement urgency calculation
 }
 
 #[derive(Deserialize, Default)]
@@ -235,6 +235,16 @@ impl Config {
     /// Issues path default value.
     fn issues_path_fallback(&self) -> &str {
         if self.issues_path.is_empty() { "issues" } else { &self.issues_path }
+    }
+}
+
+impl ValuesConfig {
+    /// Default urgency formula string.
+    pub fn urgency_formula(&self) -> &str {
+        if self.urgency_formula.is_empty() {
+            return "sqrt 8";
+        }
+        &self.urgency_formula
     }
 }
 
