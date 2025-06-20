@@ -5,7 +5,7 @@ const DAY: f64 = 86400.;
 const HOUR: f64 = 3600.;
 const MINUTE: f64 = 60.;
 
-/// Format as relative date adding a unit suffix (Y, M, W, D, h, m, s).
+/// Format as short relative date adding a unit suffix (y, mo, w, d, h, m, s).
 pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
     let diff = (date - now) as f64;
     let abs = diff.abs();
@@ -32,32 +32,39 @@ pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
     }
 }
 
+/// Produce long relative date (e.g. '1 day ago') with integer precision by default.
 pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
     let diff = (date - now) as f64;
     let ago = if diff < 0. { " ago" } else { "" };
 
     let abs = diff.abs();
 
-    let round = |v: f64| {
-        let mlt = 10_f64.powi(precision.unwrap_or(0));
-        (v * mlt).round() / mlt
+    let round = |v: f64| -> (f64, &str) {
+        let mlt = 10_f64.powi(precision.unwrap_or(1));
+        let val = (v * mlt).round() / mlt;
+        (val, if val > 1. { "s" } else { "" })
     };
 
-    let s = "s"; // TODO: P2: correct plural forms
-
     if abs >= YEAR {
-        format!("{} year{s}{ago}", round(abs / YEAR))
+        let (val, s) = round(abs / YEAR);
+        format!("{val} year{s}{ago}")
     } else if abs >= MONTH {
-        format!("{} month{s}{ago}", round(abs / MONTH))
+        let (val, s) = round(abs / MONTH);
+        format!("{val} month{s}{ago}")
     } else if abs >= WEEK {
-        format!("{} week{s}{ago}", round(abs / WEEK))
+        let (val, s) = round(abs / WEEK);
+        format!("{val} week{s}{ago}")
     } else if abs >= DAY {
-        format!("{} day{s}{ago}", round(abs / DAY))
+        let (val, s) = round(abs / DAY);
+        format!("{val} day{s}{ago}")
     } else if abs >= HOUR {
-        format!("{} hour{s}{ago}", round(abs / HOUR))
+        let (val, s) = round(abs / HOUR);
+        format!("{val} hour{s}{ago}")
     } else if abs >= MINUTE {
-        format!("{} minute{s}{ago}", round(abs / MINUTE))
+        let (val, s) = round(abs / MINUTE);
+        format!("{val} minute{s}{ago}")
     } else {
-        format!("{} second{s}{ago}", abs)
+        let (val, s) = round(abs);
+        format!("{val} second{s}{ago}")
     }
 }
