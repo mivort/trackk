@@ -128,6 +128,17 @@ fn main() -> Result<()> {
         Some(Command::Refresh(args)) => {
             storage::refresh_index(&app, args.force)?;
         }
+        Some(Command::Calc(exp)) => {
+            let expr = exp.expr.join(" ");
+            let mut output = Vec::new();
+            let mut op_stack = Vec::new();
+            let local = app.local_time()?;
+
+            dateexp::parse_exp(&expr, local, &mut output)?;
+            let res = dateexp::eval(&output, local, &mut op_stack, &issue::Issue::default())?;
+
+            println!("{res:?}"); // TODO: P1: pretty-print the result
+        }
         Some(Command::Init(_)) => {
             repo::init_repo(&app.config)?;
         }

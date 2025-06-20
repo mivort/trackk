@@ -68,6 +68,9 @@ pub enum Command {
     /// Print current configuration values and comments about possible options.
     Config,
 
+    /// Evaluate provided expression and print the result.
+    Calc(CalcArgs),
+
     /// List all entries using set of filters
     All,
 
@@ -218,6 +221,16 @@ pub struct ListArgs {
     /// Output in JSON format.
     #[arg(long)]
     pub json: bool,
+}
+
+#[derive(Parser, Default)]
+pub struct CalcArgs {
+    /// Evaluate the expression.
+    pub expr: Vec<String>,
+
+    /// Issue ID used as expression context.
+    #[arg(long)]
+    pub context: Option<Box<str>>,
 }
 
 #[derive(Parser, Default)]
