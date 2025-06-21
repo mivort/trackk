@@ -4,9 +4,18 @@ use std::path::PathBuf;
 use clap_derive::{Parser, Subcommand, ValueEnum};
 use serde_derive::Deserialize;
 
+const LOGO: &str = r#"
+///  _                  _    _
+/// | |_ _ __ __ _  ___| | _| | __
+/// | __| '__/ _` |/ __| |/ / |/ /
+/// | |_| | | (_| | (__|   <|   <
+///  \__|_|  \__,_|\___|_|\_\_|\_\
+///
+/// Task, event and project tracker."#;
+
 /// Trackit command line arguments.
 #[derive(Parser)]
-#[command(author, version, about = None, long_about = None)]
+#[command(author, version, about = LOGO, long_about = None)]
 #[command(args_override_self = true, allow_external_subcommands = true)]
 pub struct Args {
     #[command(subcommand)]
@@ -53,7 +62,7 @@ pub enum Command {
     _Copy,
 
     /// Remove specified entry.
-    #[command(visible_aliases(["rm", "delete", "del"]))]
+    #[command(visible_aliases(["rm"]))]
     Remove(ModArgs),
 
     /// Modify specified entry
@@ -61,14 +70,14 @@ pub enum Command {
     Modify(ModArgs),
 
     /// Mark specified tasks as done.
-    #[command(visible_aliases(["c", "comp", "close"]))]
+    #[command(visible_aliases(["c"]))]
     Complete(ModArgs),
 
     /// Mark specified tasks as started.
     Start(ModArgs),
 
     /// Set task status to the initial.
-    #[command(visible_aliases(["stop", "open"]))]
+    #[command(visible_aliases(["stop"]))]
     Reset(ModArgs),
 
     /// List active entries using set of filters
