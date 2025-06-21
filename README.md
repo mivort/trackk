@@ -10,7 +10,7 @@ Inspired by [Taskwarrior][1] and [dstask][2].
 * VCS-friendly storage format and multi-device synchronization capabilities.
   Data is stored as JSON files and by default synchronized using Git. Custom
   JSON merge driver prevents conflicts on synchronization.
-* Dates input and filtering [query syntax](docs/EXPRESSIONS.md) which allows to
+* Dates input and filtering query [DSL](docs/EXPRESSIONS.md) which allows to
   enter dates using relative expressions (`tomorrow at 14:00`), or perform
   context filtering on tasks (`tag:home and status:started`).
 * Recurrent tasks which use same date input syntax, allowing to use flexible

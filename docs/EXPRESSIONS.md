@@ -7,6 +7,11 @@ it's possible to enter it as relative expressions: `1d` will add 24 hours to
 the current date, `monday` will pick the next closest Monday, `2nd` will pick
 the second day of the closest month.
 
+The expression format is a DSL with support for math, conditionals and focus on
+shell friendliness and natural date input (so, there's a lot of built-in
+literals such as `today`, `tomorrow` etc., and it's possible to enter dates in
+ISO 8601 layout (`YYYY-MM-DD`) without need to add quotes).
+
 Recurrent tasks store the expression as parameter, and when the recurring task
 is complete, it gets copied with the expression re-evaluated. That way it's
 possible to define more complex repeating patterns.
@@ -23,12 +28,17 @@ This document provides the description of syntax available in the expressions.
 * Boolean: `&&`, `||`, `!`. It's also possible to use `and`, `or` and `not`.
 * Comparison: `>`, `>=`, `<`, `<=`, `==`.
 * Fuzzy comparison: `:`. Allows to check if string contains another string, or
-  if issue includes the tag. Examples:
+  if entry list of tags includes the tag. Examples:
   * `title:example` (`true` if issue's title contains `'example'`).
   * `tag:mytag` (`true` if issue has `mytag` tag).
-* Built-in functions: `sqrt`, `ln`.
 * 'At' operator: `@` (`at`). Provides means to override time part of the date.
-  Example: `monday at 17:00`
+  Example: `monday at 17:00`.
+* Built-in math functions: `sqrt`, `ln`, `sig`.
+* Other functions:
+  * `has`: checks if string, date or tags are not empty.
+    Example: `has(due) == true`.
+  * `len`: string value length in bytes, number of issue tags.
+    Example: `len(tag) > 2`.
 
 ## Literals
 
