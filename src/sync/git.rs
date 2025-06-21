@@ -3,8 +3,8 @@ use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 use crate::index::ACTIVE_INDEX;
-use crate::prelude::*;
 use crate::sync::driver::SyncDriver;
+use crate::{input, prelude::*};
 
 use std::process::Command;
 
@@ -32,36 +32,58 @@ impl SyncDriver for Git {
             Ok(mut spawn) => spawn.wait()?,
         };
 
-        let mut path = PathBuf::from(path.as_ref());
-        path.push(".gitignore");
+        'index_ignore: {
+            let mut ignorepath = PathBuf::from(path.as_ref());
+            ignorepath.push(".gitignore");
 
-        let gitignore = match File::open(&path) {
-            Err(e) if matches!(e.kind(), ErrorKind::NotFound) => File::create(&path)?,
-            Err(e) => return Err(anyhow!(e)).context("Unable to access .gitignore"),
-            Ok(f) => f,
-        };
+            let gitignore = match File::open(&ignorepath) {
+                Err(e) if matches!(e.kind(), ErrorKind::NotFound) => File::create(&ignorepath)?,
+                Err(e) => return Err(anyhow!(e)).context("Unable to access .gitignore"),
+                Ok(f) => f,
+            };
 
-        let reader = BufReader::new(gitignore);
-        for line in reader.lines() {
-            if line?.trim_end() == ACTIVE_INDEX {
-                info!("Local index is already in .gitignore: skip");
-                return Ok(());
+            let reader = BufReader::new(gitignore);
+            for line in reader.lines() {
+                if line?.trim_end() == ACTIVE_INDEX {
+                    info!("Local index is already in .gitignore: skip");
+                    break 'index_ignore;
+                }
             }
-        }
 
-        info!("Adding local index to .gitignore");
-        let mut file = OpenOptions::new()
-            .create(true)
-            .write(true)
-            .append(true)
-            .open(&path)
-            .context("Unable to open .gitignore for writing")?;
-        file.write(ACTIVE_INDEX.as_bytes())?;
+            info!("Adding local index to .gitignore");
+            let mut file = OpenOptions::new()
+                .create(true)
+                .write(true)
+                .append(true)
+                .open(&ignorepath)
+                .context("Unable to open .gitignore for writing")?;
+            file.write(ACTIVE_INDEX.as_bytes())?;
+        }
 
         // TODO: P3: create .gitattributes
         // TODO: P3: setup git merge driver
-        // TODO: P3: ask git user name
-        // TODO: P3: ask git user email
+
+        info!("Setting up 'git config'");
+
+        git_config(&path, "user.name", || {
+            let name = input::prompt(concat!(
+                "Enter git config user.name: [",
+                env!("CARGO_PKG_NAME"),
+                "] "
+            ))
+            .unwrap_or_default();
+            if name.is_empty() { String::from(env!("CARGO_PKG_NAME")) } else { name }
+        })?;
+
+        git_config(&path, "user.email", || {
+            let name = input::prompt(concat!(
+                "Enter git config user.email: [@",
+                env!("CARGO_PKG_NAME"),
+                "] "
+            ))
+            .unwrap_or_default();
+            if name.is_empty() { String::from(concat!("@", env!("CARGO_PKG_NAME"))) } else { name }
+        })?;
 
         Ok(())
     }
@@ -91,6 +113,7 @@ impl SyncDriver for Git {
         let output = cmd.output()?;
         let file = String::from_utf8_lossy(&output.stdout);
         let file = file.lines().next().unwrap_or("n/a");
+        let file = format!("sync: {}", file);
 
         let mut cmd = git_command(&target);
         cmd.args(["commit", "-m"]);
@@ -122,4 +145,21 @@ fn git_command(path: impl AsRef<Path>) -> Command {
     let mut cmd = Command::new("git");
     cmd.current_dir(&path);
     cmd
+}
+
+/// Set git config value.
+fn git_config(path: impl AsRef<Path>, key: &str, value: impl FnOnce() -> String) -> Result<()> {
+    let mut cmd = git_command(&path);
+    cmd.args(["config", "user.email"]);
+    if cmd.output()?.status.success() {
+        return Ok(());
+    }
+    let mut cmd = git_command(&path);
+    cmd.arg("config");
+    cmd.arg(key);
+    cmd.arg(value());
+    if !cmd.spawn()?.wait()?.success() {
+        bail!("Unable to set git config {}", key);
+    }
+    Ok(())
 }

@@ -7,6 +7,7 @@ mod display;
 mod editor;
 mod filter;
 mod index;
+mod input;
 mod issue;
 mod prelude;
 mod repo;

@@ -33,7 +33,7 @@ pub fn init_repo(config: &Config, args: &InitArgs) -> Result<()> {
 
     if args.no_sync {
         info!("Sync setup disabled: skip");
-        return Ok(())
+        return Ok(());
     }
 
     match config.sync.driver {
