@@ -32,7 +32,8 @@
     permit_status: {permit_status},
 
     {c}// Urgency formula used for dynamic issue sorting.{cl}
-    urgency_formula: "{urgency_formula}",
+    urgency_formula:
+      "{urgency_formula}",
   }},
 
   {c}// Issue values assigned by default.{cl}

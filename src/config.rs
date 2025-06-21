@@ -295,7 +295,7 @@ impl ValuesConfig {
     pub fn urgency_formula(&self) -> &str {
         if self.urgency_formula.is_empty() {
             return concat!(
-                "sig((now - (due or someday)) / 10mil) * 10 +",
+                "sig((now - (due or someday)) / 10mil) * 10 + ",
                 "sig((now - created) / 10mil) * 0.5"
             );
         }

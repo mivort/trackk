@@ -52,7 +52,7 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
                 mode = Mode::Op;
             }
             Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln | Abs | Sig => {
+            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln | Abs | Sig | Len => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
                 let (tok, left_assoc) = if !mode.expects_op() {
                     let (tok, left_assoc) = tok.to_unary();
@@ -219,6 +219,10 @@ pub fn eval(
                     val.unary_op(sigmoid)
                         .context("'sig' can only be applied to numbers")?,
                 ),
+                _ => bail!("'sig' operator haven't got the argument"),
+            },
+            Len => match stack.pop() {
+                Some(val) => stack.push(val.length()?),
                 _ => bail!("'sig' operator haven't got the argument"),
             },
             Greater => match (stack.pop(), stack.pop()) {

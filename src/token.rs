@@ -14,6 +14,12 @@ use crate::prelude::*;
 pub const SOMEDAY: i64 = 253402300799 - 86400;
 
 /// Parsed token types.
+///
+/// When operator token is added, it needs to be acounted in four places:
+/// * Precedence and associativity: [Token::prec_and_assoc].
+/// * Unary conversion: [Token::to_unary].
+/// * Date exp lexing.
+/// * Date exp evaluation.
 #[derive(Clone, Debug, Logos)]
 #[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
 pub enum Token {
@@ -96,7 +102,7 @@ pub enum Token {
     #[token("at")]
     At,
 
-    // TODO: P2: add 'functions': 'min', 'max', 'clamp', 'sqrt', 'pow'
+    // TODO: P2: add 'functions': 'min', 'max', 'clamp', 'pow'
     // TODO: P2: add 'until' operator which compares the value vs. max
     //           and returns either value itself or 'false'
     #[token(":")]
@@ -149,6 +155,9 @@ pub enum Token {
     #[token("sig")]
     Sig,
 
+    #[token("len")]
+    Len,
+
     #[token("(")]
     LParen,
 
@@ -178,7 +187,7 @@ impl Token {
         use Token::*;
 
         match self {
-            Not | Sqrt | Ln | Abs | Sig => (8, false),
+            Not | Sqrt | Ln | Abs | Sig | Len => (8, false),
             At | FuzzyEq => (7, true),
             Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
@@ -198,7 +207,7 @@ impl Token {
             Add(_) => (Add(true), false),
             Sub(_) => (Sub(true), false),
             Not => (Not, false),
-            Sqrt | Ln | Abs | Sig => (self.clone(), false),
+            Sqrt | Ln | Abs | Sig | Len => (self.clone(), false),
             _ => (self.clone(), true),
         }
     }
@@ -361,6 +370,16 @@ impl Token {
             Self::Duration(val) => Ok(Self::Duration(f(val))),
             _ => bail!(
                 "Unary function got incompatible argument ({})",
+                self.ttype()
+            ),
+        }
+    }
+
+    pub fn length(self) -> Result<Self> {
+        match self {
+            Self::String(val) => Ok(Self::Duration(val.len() as f64)),
+            _ => bail!(
+                "'len' function got incompatible argument ({})",
                 self.ttype()
             ),
         }
