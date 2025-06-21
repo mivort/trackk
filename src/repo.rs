@@ -37,7 +37,7 @@ pub fn init_repo(config: &Config, args: &InitArgs) -> Result<()> {
     }
 
     match config.sync.driver {
-        SyncDriverMode::Git => init_driver::<Git>(data_path, &args),
+        SyncDriverMode::Git => init_driver::<Git>(data_path, args),
         SyncDriverMode::Custom => todo!(),
     }
     .context("Repo init failed")
@@ -49,7 +49,7 @@ where
     D: SyncDriver,
 {
     if let Some(url) = &args.clone {
-        D::clone_repo(&url, args, path)
+        D::clone_repo(url, args, path)
     } else {
         D::init_repo(args, path)
     }

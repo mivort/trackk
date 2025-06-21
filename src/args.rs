@@ -281,16 +281,17 @@ pub struct ImportArgs {
     pub input: Option<Box<str>>,
 }
 
+/// Merge driver arguments.
 #[derive(Parser)]
 pub struct MergeArgs {
-    /// Current file state in repo.
-    pub ours: Box<str>,
+    /// Ancestor of the current version.
+    pub ancestor: PathBuf,
 
-    /// Incomfing changes.
-    pub theirs: Box<str>,
+    /// Current version.
+    pub ours: PathBuf,
 
-    /// Merge output.
-    pub output: Box<str>,
+    /// Incoming change.
+    pub theirs: PathBuf,
 }
 
 #[derive(Parser)]

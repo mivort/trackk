@@ -54,11 +54,10 @@ impl SyncDriver for Git {
             info!("Adding local index to .gitignore");
             let mut file = OpenOptions::new()
                 .create(true)
-                .write(true)
                 .append(true)
                 .open(&ignorepath)
                 .context("Unable to open .gitignore for writing")?;
-            file.write(ACTIVE_INDEX.as_bytes())?;
+            file.write_all(ACTIVE_INDEX.as_bytes())?;
         }
 
         // TODO: P3: create .gitattributes

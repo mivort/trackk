@@ -9,6 +9,7 @@ mod filter;
 mod index;
 mod input;
 mod issue;
+mod merge;
 mod prelude;
 mod repo;
 mod sort;
@@ -177,6 +178,9 @@ fn main() -> Result<()> {
         Some(Command::Sync) => {
             repo::sync_repo(&app.config)?;
         }
+        Some(Command::Merge(merge)) => {
+            merge::merge_driver(&merge)?;
+        }
 
         Some(Command::Template(args)) => {
             use templates::colors::{RESET, fg};
@@ -190,9 +194,6 @@ fn main() -> Result<()> {
         }
         Some(Command::Import(_)) => {
             // TODO: P3: implement import from taskwarrior
-        }
-        Some(Command::Merge(_)) => {
-            // TODO: P3: implement merge driver
         }
         Some(Command::Report(report)) => {
             // TODO: P2: handle custom reports
