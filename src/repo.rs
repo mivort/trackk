@@ -18,9 +18,12 @@ pub fn check_repo(config: &Config) -> Result<()> {
 /// Run VCS to create repo, set the main settings.
 pub fn init_repo(config: &Config, clone: Option<&str>) -> Result<()> {
     let data_path = config.data_path()?;
-    let issues_path = config.issues_path()?;
+    let entries_path = config.issues_path()?;
 
-    fs::create_dir_all(&issues_path).with_context(|| {
+    info!("Data directory: {}", data_path.to_string_lossy());
+    info!("Entries directory: {}", entries_path.to_string_lossy());
+
+    fs::create_dir_all(&entries_path).with_context(|| {
         format!(
             "Unable to create storage directory at '{}'",
             data_path.to_string_lossy()
