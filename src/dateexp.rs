@@ -52,12 +52,16 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
                 mode = Mode::Op;
             }
             Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln | Abs | Sig | Len => {
+            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln | Abs | Sig | Len | Has => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
                 let (tok, left_assoc) = if !mode.expects_op() {
                     let (tok, left_assoc) = tok.to_unary();
                     if left_assoc {
-                        bail!("Unexpected operator at position {}", span.start);
+                        bail!(
+                            "Unexpected operator '{}' at position {}",
+                            &input[span.clone()],
+                            span.start
+                        );
                     }
                     (tok, left_assoc)
                 } else {
@@ -223,7 +227,11 @@ pub fn eval(
             },
             Len => match stack.pop() {
                 Some(val) => stack.push(val.length()?),
-                _ => bail!("'sig' operator haven't got the argument"),
+                _ => bail!("'len' operator haven't got the argument"),
+            },
+            Has => match stack.pop() {
+                Some(val) => stack.push(val.has(issue)?),
+                _ => bail!("'has' operator haven't got the argument"),
             },
             Greater => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs, ts)?),

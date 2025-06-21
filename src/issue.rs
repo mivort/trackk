@@ -269,6 +269,18 @@ impl FieldRef {
             _ => bail!("Unable to compare the value with field reference"),
         }
     }
+
+    /// Check if referenced value is 'not empty'
+    pub fn has(&self, entry: &Issue) -> bool {
+        match self {
+            Self::Desc => !entry.title.is_empty(),
+            Self::Tag => !entry.tags.is_empty(),
+            Self::Status => !entry.status.is_empty(),
+            Self::Due => entry.due.is_some(),
+            Self::End => entry.end.is_some(),
+            _ => false,
+        }
+    }
 }
 
 /// Custom field value. The end data representation will depend the specific field settings.

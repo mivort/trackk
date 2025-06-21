@@ -158,6 +158,9 @@ pub enum Token {
     #[token("len")]
     Len,
 
+    #[token("has")]
+    Has,
+
     #[token("(")]
     LParen,
 
@@ -187,7 +190,7 @@ impl Token {
         use Token::*;
 
         match self {
-            Not | Sqrt | Ln | Abs | Sig | Len => (8, false),
+            Not | Sqrt | Ln | Abs | Sig | Len | Has => (8, false),
             At | FuzzyEq => (7, true),
             Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
@@ -207,7 +210,7 @@ impl Token {
             Add(_) => (Add(true), false),
             Sub(_) => (Sub(true), false),
             Not => (Not, false),
-            Sqrt | Ln | Abs | Sig | Len => (self.clone(), false),
+            Sqrt | Ln | Abs | Sig | Len | Has => (self.clone(), false),
             _ => (self.clone(), true),
         }
     }
@@ -375,11 +378,27 @@ impl Token {
         }
     }
 
+    /// Produce length of the token value.
     pub fn length(self) -> Result<Self> {
         match self {
             Self::String(val) => Ok(Self::Duration(val.len() as f64)),
             _ => bail!(
                 "'len' function got incompatible argument ({})",
+                self.ttype()
+            ),
+        }
+    }
+
+    /// Convert various values to boolean. Strings and arrays are 'true' if not
+    /// empty, dates if less than 'someday'.
+    pub fn has(self, entry: &Issue) -> Result<Self> {
+        match self {
+            Self::String(val) => Ok(Self::Bool(!val.is_empty())),
+            Self::Bool(val) => Ok(Self::Bool(val)),
+            Self::Date(val) => Ok(Self::Bool(val <= SOMEDAY)),
+            Self::Reference(field) => Ok(Self::Bool(field.has(entry))),
+            _ => bail!(
+                "'has' function got incompatible argument ({})",
                 self.ttype()
             ),
         }
@@ -469,6 +488,9 @@ pub enum LexerError {
     #[error("Unable to parse token: {token}")]
     TokenError { token: String },
 
+    #[error("Unable to parse date token: {token}")]
+    DateError { token: String },
+
     #[error(transparent)]
     ParseInt(#[from] ParseIntError),
 
@@ -479,6 +501,12 @@ pub enum LexerError {
 impl LexerError {
     fn token_error(token: &str) -> Self {
         Self::TokenError {
+            token: token.to_owned(),
+        }
+    }
+
+    fn date_error(token: &str) -> Self {
+        Self::DateError {
             token: token.to_owned(),
         }
     }
@@ -591,7 +619,7 @@ fn parse_ordinal(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 fn parse_full_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let format = format_description!("[year]-[month]-[day]");
     let res = unwrap_ok_or!(Date::parse(lex.slice(), &format), _, {
-        return Err(LexerError::token_error(lex.slice()));
+        return Err(LexerError::date_error(lex.slice()));
     });
     let time = res.with_time(Time::MIDNIGHT);
     Ok(time.assume_offset(lex.extras.offset()).unix_timestamp())
@@ -601,7 +629,7 @@ fn parse_full_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 fn parse_date_time(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let format = format_description!("[year]-[month]-[day]T[hour]:[minute]");
     let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
-        return Err(LexerError::token_error(lex.slice()));
+        return Err(LexerError::date_error(lex.slice()));
     });
     Ok(res.assume_offset(lex.extras.offset()).unix_timestamp())
 }
@@ -610,7 +638,7 @@ fn parse_date_time(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
     let res = unwrap_ok_or!(PrimitiveDateTime::parse(lex.slice(), &format), _, {
-        return Err(LexerError::token_error(lex.slice()));
+        return Err(LexerError::date_error(lex.slice()));
     });
     Ok(res.assume_offset(lex.extras.offset()).unix_timestamp())
 }
