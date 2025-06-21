@@ -19,6 +19,8 @@ pub struct Index {
     path: PathBuf,
 }
 
+pub const ACTIVE_INDEX: &str = "active";
+
 impl Default for Index {
     fn default() -> Self {
         Self {
@@ -58,7 +60,7 @@ impl Index {
     /// Initialize active entry index path.
     pub fn load_path(&mut self, config: &Config) -> Result<()> {
         self.path = config.data_path()?;
-        self.path.push("active");
+        self.path.push(ACTIVE_INDEX);
         Ok(())
     }
 
