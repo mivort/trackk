@@ -49,7 +49,7 @@ pub struct Config {
 
     /// Options related to VCS used with the storage.
     #[serde(default)]
-    pub _sync: SyncConfig,
+    pub sync: SyncConfig,
 
     /// Default output report.
     #[serde(default)]
@@ -109,7 +109,7 @@ pub struct ValuesConfig {
 #[derive(Deserialize, Default)]
 pub struct SyncConfig {
     /// Select one of the supported sync drivers.
-    pub _driver: SyncDriver, // TODO: P1: support multiple vcs drivers
+    pub driver: SyncDriverMode, // TODO: P1: support multiple vcs drivers
 }
 
 impl Config {
@@ -393,10 +393,13 @@ pub enum IndexType {
 }
 
 #[derive(Deserialize, Default)]
-pub enum SyncDriver {
+pub enum SyncDriverMode {
     #[default]
     #[serde(rename = "git")]
     Git,
+
+    #[serde(rename = "custom")]
+    Custom,
 }
 
 #[derive(Serialize, Deserialize, Default)]

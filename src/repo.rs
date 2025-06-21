@@ -1,8 +1,10 @@
 use std::fs;
-use std::process::Command;
+use std::path::Path;
 
-use crate::config::Config;
+use crate::config::{Config, SyncDriverMode};
 use crate::prelude::*;
+use crate::sync::driver::SyncDriver;
+use crate::sync::git::Git;
 
 /// Check repository validity: merge tool, etc.
 pub fn check_repo(config: &Config) -> Result<()> {
@@ -14,7 +16,7 @@ pub fn check_repo(config: &Config) -> Result<()> {
 }
 
 /// Run VCS to create repo, set the main settings.
-pub fn init_repo(config: &Config) -> Result<()> {
+pub fn init_repo(config: &Config, clone: Option<&str>) -> Result<()> {
     let data_path = config.data_path()?;
     let issues_path = config.issues_path()?;
 
@@ -25,16 +27,26 @@ pub fn init_repo(config: &Config) -> Result<()> {
         )
     })?;
 
-    Command::new("git")
-        .current_dir(&data_path)
-        .arg("init")
-        .output()
-        .with_context(|| format!("Unable to create repo at '{}'", data_path.to_string_lossy()))?;
+    match config.sync.driver {
+        SyncDriverMode::Git => init_driver::<Git>(data_path, clone)?,
+        SyncDriverMode::Custom => todo!(),
+    };
 
     Ok(())
 }
 
+/// Call specific init driver.
+pub fn init_driver<D>(path: impl AsRef<Path>, url: Option<&str>) -> Result<()>
+where
+    D: SyncDriver,
+{
+    if let Some(url) = url { D::clone_repo(url, path) } else { D::init_repo(path) }
+}
+
 /// Pull and push local changes.
-pub fn sync_repo(_config: &Config) -> Result<()> {
-    Ok(())
+pub fn sync_repo(config: &Config) -> Result<()> {
+    match config.sync.driver {
+        SyncDriverMode::Git => todo!(),
+        SyncDriverMode::Custom => todo!(),
+    }
 }

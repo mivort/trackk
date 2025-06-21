@@ -21,6 +21,7 @@ mod templates {
 mod templating;
 mod token;
 mod sync {
+    pub(crate) mod driver;
     pub(crate) mod git;
 }
 mod import {
@@ -163,8 +164,8 @@ fn main() -> Result<()> {
 
             println!("{}", res.to_string()?);
         }
-        Some(Command::Init(_)) => {
-            repo::init_repo(&app.config)?;
+        Some(Command::Init(init)) => {
+            repo::init_repo(&app.config, init.clone.as_deref())?;
         }
         Some(Command::Check) => {
             repo::check_repo(&app.config)?;
