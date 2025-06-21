@@ -23,7 +23,7 @@ impl SyncDriver for Git {
 
     fn clone_repo(url: &str, target: impl AsRef<Path>) -> Result<()> {
         let mut cmd = Command::new("git");
-        cmd.args(&["clone", url]);
+        cmd.args(["clone", url]);
         cmd.arg(target.as_ref());
 
         cmd.spawn()?;

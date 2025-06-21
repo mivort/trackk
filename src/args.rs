@@ -137,7 +137,7 @@ impl Default for Command {
 
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
-    /// Filter entries containing the tag.
+    /// Filter entries containing the tag (add '-' to tag name to exclude).
     #[arg(long, short, allow_hyphen_values = true)]
     pub tag: Vec<String>,
 
@@ -177,7 +177,7 @@ pub struct FilterArgs {
 /// Args to apply changes to the selected entries.
 #[derive(Parser, Default)]
 pub struct EntryArgs {
-    /// Entry title message and description.
+    /// Set entry title message and description.
     #[arg(short('m'), long)]
     pub desc: Vec<String>,
 
@@ -185,23 +185,23 @@ pub struct EntryArgs {
     #[arg(short, long)]
     pub append: Vec<String>,
 
-    /// Entry due date string.
+    /// Set entry due date string.
     #[arg(short, long, allow_hyphen_values = true)]
     pub due: Option<String>,
 
-    /// Entry end date string.
+    /// Set entry end date string.
     #[arg(long, short, allow_hyphen_values = true)]
     pub end: Option<String>,
 
-    /// Entry status
+    /// Set entry status
     #[arg(short, long)]
     pub status: Option<String>,
 
-    /// Add tag to the entry (add '-' to tag name to remove).
+    /// Set entry tag (add '-' to tag name to remove).
     #[clap(short, long, allow_hyphen_values = true)]
     pub tag: Vec<String>,
 
-    /// Repeat time specifier.
+    /// Set task recurrence query.
     #[arg(short, long)]
     pub repeat: Option<String>,
 }

@@ -86,10 +86,10 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
     }
 
     for tag in &args.filter_args.tag {
-        if tag.starts_with("-") {
+        if let Some(tag) = tag.strip_prefix("-") {
             filter.merge(|e| {
                 e.push(Token::Reference(FieldRef::Tag));
-                e.push(Token::String(Rc::from(&tag[1..])));
+                e.push(Token::String(Rc::from(tag)));
                 e.push(Token::FuzzyEq);
                 e.push(Token::Not);
             });

@@ -128,8 +128,8 @@ impl Issue {
 
         for tag in &args.tag {
             let tag = tag.replace(" ", "_");
-            if tag.starts_with("-") {
-                self.tags.remove(&tag[1..]);
+            if let Some(tag) = tag.strip_prefix("-") {
+                self.tags.remove(tag);
             } else {
                 self.tags.insert(tag);
             }
