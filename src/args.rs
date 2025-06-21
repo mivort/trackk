@@ -113,6 +113,9 @@ pub enum Command {
     /// Init the storage and VCS repo.
     Init(InitArgs),
 
+    /// Produce commit in data repository using selected VCS, but don't sync.
+    Commit,
+
     /// Sync repository with remote repo.
     Sync,
 

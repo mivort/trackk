@@ -51,6 +51,14 @@ where
     if let Some(url) = url { D::clone_repo(url, path) } else { D::init_repo(path) }
 }
 
+/// Create commit in the repo.
+pub fn commit_repo(config: &Config) -> Result<()> {
+    match config.sync.driver {
+        SyncDriverMode::Git => Git::commit_repo(config.data_path()?),
+        SyncDriverMode::Custom => todo!(),
+    }
+}
+
 /// Pull and push local changes.
 pub fn sync_repo(config: &Config) -> Result<()> {
     info!("Repo sync started");

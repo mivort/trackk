@@ -171,6 +171,9 @@ fn main() -> Result<()> {
         Some(Command::Check) => {
             repo::check_repo(&app.config)?;
         }
+        Some(Command::Commit) => {
+            repo::commit_repo(&app.config)?;
+        }
         Some(Command::Sync) => {
             repo::sync_repo(&app.config)?;
         }

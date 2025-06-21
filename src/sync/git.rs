@@ -99,6 +99,26 @@ impl SyncDriver for Git {
     }
 
     fn sync_repo(target: impl AsRef<Path>) -> Result<()> {
+        Self::commit_repo(&target)?;
+
+        info!("Running 'git pull --rebase'");
+        let mut cmd = git_command(&target);
+        cmd.args(["pull", "--rebase"]);
+        if !cmd.spawn()?.wait()?.success() {
+            bail!("Unable to pull remote changes");
+        }
+
+        info!("Running 'git push'");
+        let mut cmd = git_command(&target);
+        cmd.arg("push");
+        if !cmd.spawn()?.wait()?.success() {
+            bail!("Unable to push local changes to remote");
+        }
+
+        Ok(())
+    }
+
+    fn commit_repo(target: impl AsRef<Path>) -> Result<()> {
         info!("Creating new commit");
 
         let mut cmd = git_command(&target);
@@ -120,20 +140,6 @@ impl SyncDriver for Git {
         cmd.arg(file);
         if !cmd.spawn()?.wait()?.success() {
             bail!("Unable to commit changes");
-        }
-
-        info!("Running 'git pull --rebase'");
-        let mut cmd = git_command(&target);
-        cmd.args(["pull", "--rebase"]);
-        if !cmd.spawn()?.wait()?.success() {
-            bail!("Unable to pull remote changes");
-        }
-
-        info!("Running 'git push'");
-        let mut cmd = git_command(&target);
-        cmd.arg("push");
-        if !cmd.spawn()?.wait()?.success() {
-            bail!("Unable to push local changes to remote");
         }
 
         Ok(())
