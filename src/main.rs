@@ -48,20 +48,17 @@ fn main() -> Result<()> {
     setup_logging(app.config.no_color(), args.verbose)?;
 
     match args.command {
-        Some(Command::List(args)) => {
+        Some(Command::List(_args)) => {
             let ids = Default::default();
-            let index = if args.all { IndexType::All } else { IndexType::Active };
-            let entries = storage::fetch_entries(&ids, index, &app)?;
-            if args.json {
-                display::show_json(&entries)?;
-                return Ok(());
-            }
             let report = &app.config.report_next;
             display::show_entries(&ids, report, &app)?;
         }
         Some(Command::Info(args)) => {
-            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
-            let entries = storage::fetch_entries(&ids, IndexType::All, &app)?;
+            let filters = filter::Filter {
+                ids: &filter::IdFilter::from_shorthands(args.ids, &app)?,
+                query: &mut Default::default(),
+            };
+            let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
 
             for entry in &entries {
                 display::show_entry(entry, &app)?;

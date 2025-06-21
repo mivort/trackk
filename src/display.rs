@@ -4,7 +4,7 @@ use std::rc::Rc;
 use serde_derive::Serialize;
 
 use crate::config::{ReportConfig, SectionConfig};
-use crate::filter::IdFilter;
+use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::issue::Issue;
 use crate::{app::App, prelude::*, sort, storage};
 
@@ -31,28 +31,35 @@ struct RowContext<'a> {
 pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>) -> Result<()> {
     app.templates.init(app)?;
 
+    let query = &mut QueryFilter::default();
+    let mut filter = Filter { ids, query };
+
     for section in &report.sections {
         println!("--- {} ---", section.template); // TODO: P3: add header template
 
-        show_section(ids, section, app)?;
+        show_section(&mut filter, section, app)?;
     }
 
     Ok(())
 }
 
 /// Apply template and render single output section.
-fn show_section<'a>(ids: &IdFilter, section: &'a SectionConfig, app: &App<'a>) -> Result<()> {
+fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<'a>) -> Result<()> {
     let SectionConfig {
         template,
         index,
         sorting,
+        filter,
         ..
     } = section;
 
-    // TODO: P3: apply report-local filter
     // TODO: P2: propagate sorting override from args
 
-    let mut entries = storage::fetch_entries(ids, *index, app)?;
+    filters
+        .query
+        .replace(&filter, app)
+        .with_context(|| format!("Unable to parse filter predicate: '{filter}'"))?;
+    let mut entries = storage::fetch_entries(&filters, *index, app)?;
 
     let sort = if app.sort.is_empty() { &sort::parse_rules(sorting)? } else { &app.sort };
     sort::sort_entries(&mut entries, sort)?;
@@ -107,7 +114,7 @@ pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
 }
 
 /// Export entries as JSON.
-pub fn show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
+pub fn _show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
     // TODO: P2: support JSON in regular reports
     print!("[");
     for (i, (e, _)) in entries.iter().enumerate() {

@@ -95,7 +95,7 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
         bail!("Mismatched opening bracket");
     }
 
-    if !mode.expects_op() {
+    if !output.is_empty() && !mode.expects_op() {
         bail!("Dangling operator at the end of expression");
     }
 

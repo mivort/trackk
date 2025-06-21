@@ -1,7 +1,7 @@
 use crate::args::EntryArgs;
 use crate::bucket::Bucket;
 use crate::config::{Config, IndexType};
-use crate::filter::IdFilter;
+use crate::filter::{Filter, IdFilter};
 use crate::issue::Issue;
 use crate::{app::App, display, prelude::*};
 
@@ -33,7 +33,11 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
 pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()> {
     let mut changes = 0;
 
-    let entries = filter_all_entries(ids, app)?;
+    let filters = Filter {
+        ids,
+        query: &mut Default::default(),
+    };
+    let entries = filter_all_entries(&filters, app)?;
     let mut index = app.index_mut()?;
 
     // TODO: P2: ask if multiple entries are expected
@@ -70,18 +74,22 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
 }
 
 /// Produce the list of entries to display or modify.
-pub fn fetch_entries(ids: &IdFilter, index: IndexType, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
-    if ids.empty_set {
+pub fn fetch_entries(
+    filters: &Filter,
+    index: IndexType,
+    app: &App,
+) -> Result<Vec<(Issue, Rc<str>)>> {
+    if filters.ids.empty_set {
         return Ok(Vec::new());
     }
 
-    if !ids.index.is_empty() && !ids.unresolved {
-        return filter_active_entries(ids, app);
+    if !filters.ids.index.is_empty() && !filters.ids.unresolved {
+        return filter_active_entries(filters, app);
     }
 
     match index {
-        IndexType::All => filter_all_entries(ids, app),
-        IndexType::Active => filter_active_entries(ids, app),
+        IndexType::All => filter_all_entries(filters, app),
+        IndexType::Active => filter_active_entries(filters, app),
         IndexType::Recent => todo!(), // TODO: P1: introduce recent entries index
     }
 }
@@ -112,7 +120,7 @@ pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     trace!("Traversing all buckets");
 
     let mut output = Vec::new();
@@ -145,7 +153,12 @@ fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>
         trace!("Reading bucket: {}", path);
 
         for mut issue in bucket.entries {
-            if !ids.matches(&issue.id) {
+            if !filters.ids.matches(&issue.id) {
+                continue;
+            }
+
+            op_stack.clear();
+            if !filters.query.match_issue(&issue, app, &mut op_stack)? {
                 continue;
             }
 
@@ -168,7 +181,7 @@ fn filter_all_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>
 }
 
 /// Iterate over entries from the active index.
-fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     let mut result = Vec::new();
 
     let cache = &mut *app.cache.borrow_mut();
@@ -188,7 +201,12 @@ fn filter_active_entries(ids: &IdFilter, app: &App) -> Result<Vec<(Issue, Rc<str
 
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
-            if !ids.matches(&issue.id) {
+            if !filters.ids.matches(&issue.id) {
+                continue;
+            }
+
+            op_stack.clear();
+            if !filters.query.match_issue(issue, app, &mut op_stack)? {
                 continue;
             }
 

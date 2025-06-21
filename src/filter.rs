@@ -6,14 +6,23 @@ use crate::issue::{FieldRef, Issue};
 use crate::token::Token;
 use crate::{app::App, prelude::*};
 
+/// Set of ID and query based filters.
+pub struct Filter<'a> {
+    /// Match specific IDs.
+    pub ids: &'a IdFilter,
+
+    /// Filter by query expression.
+    pub query: &'a mut QueryFilter,
+}
+
 /// List of filter rules.
 #[derive(Default)]
-pub struct Filter {
+pub struct QueryFilter {
     /// Match expression to eval on entries.
     expression: Vec<Token>,
 }
 
-impl Filter {
+impl QueryFilter {
     /// Compare issue properties to the filter.
     pub fn match_issue(&self, issue: &Issue, app: &App, stack: &mut Vec<Token>) -> Result<bool> {
         if self.expression.is_empty() {
@@ -26,6 +35,12 @@ impl Filter {
             Token::Date(_) | Token::Duration(_) => Ok(true),
             _ => bail!("Filter expression produced non-boolean result"),
         }
+    }
+
+    /// Replace filter query re-using the vec.
+    pub fn replace(&mut self, expr: &str, app: &App) -> Result<()> {
+        self.expression.clear();
+        parse_local_exp(expr, app, &mut self.expression)
     }
 
     /// Append '&&' condition on top of the query.
@@ -41,8 +56,8 @@ impl Filter {
 }
 
 /// Parse filter expressions and combine these with 'and' operator.
-pub fn parse_filter_args(args: &Args, app: &App) -> Result<Filter> {
-    let mut filter = Filter::default();
+pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
+    let mut filter = QueryFilter::default();
     let expression = &mut filter.expression;
 
     for expr in &args.filter_args.filter {
@@ -170,7 +185,7 @@ fn match_issue() {
         let mut exp = Vec::new();
         parse_local_exp(input, &app, &mut exp).unwrap();
 
-        Filter {
+        QueryFilter {
             expression: exp,
             ..Default::default()
         }

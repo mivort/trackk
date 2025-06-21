@@ -177,17 +177,24 @@ impl Config {
         Cow::Owned(ReportConfig {
             sections: vec![
                 SectionConfig {
-                    index: IndexType::All,
-                    sorting: "+created".into(),
+                    index: IndexType::Active,
+                    sorting: "+urgency".into(),
                     _grouping: "".into(),
-                    _filter: "".into(),
-                    template: "all".into(),
+                    filter: "(due or someday) >= (now + 14d)".into(),
+                    template: "next".into(),
                 },
                 SectionConfig {
                     index: IndexType::Active,
                     sorting: "+urgency".into(),
                     _grouping: "".into(),
-                    _filter: "".into(),
+                    filter: "((due or someday) >= now) and ((due or someday) < (now + 14d))".into(),
+                    template: "next".into(),
+                },
+                SectionConfig {
+                    index: IndexType::Active,
+                    sorting: "+urgency".into(),
+                    _grouping: "".into(),
+                    filter: "(due or someday) < now".into(),
                     template: "next".into(),
                 },
             ],
@@ -205,7 +212,7 @@ impl Config {
                 index: IndexType::All,
                 sorting: "+created".into(),
                 _grouping: "".into(),
-                _filter: "".into(),
+                filter: "".into(),
                 template: "all".into(),
             }],
         })
@@ -315,11 +322,11 @@ pub struct SectionConfig {
     /// Sorting direction.
     pub sorting: Box<str>,
 
+    /// Section filter parameters.
+    pub filter: Box<str>,
+
     /// Grouping field.
     _grouping: Box<str>,
-
-    /// Section filter parameters.
-    _filter: Box<str>,
 }
 
 /// Custom field type.

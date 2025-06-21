@@ -15,7 +15,7 @@ pub struct App<'env> {
     pub config: config::Config,
 
     /// Current global entry filter.
-    pub filter: filter::Filter,
+    pub filter: filter::QueryFilter,
 
     /// Sorting override.
     pub sort: Vec<sort::SortingRule>,
