@@ -252,9 +252,7 @@ fn setup_logging(no_color: bool, verbose: bool) -> Result<(), log::SetLoggerErro
                     Level::Trace => fg(12),
                     _ => "",
                 };
-                out.finish(format_args!(
-                    "{color}●{reset} {message}",
-                ))
+                out.finish(format_args!("{color}●{reset} {message}",))
             }
         })
         .level(if verbose { Trace } else { Info })

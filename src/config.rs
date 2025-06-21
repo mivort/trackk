@@ -184,7 +184,7 @@ impl Config {
                 SectionConfig {
                     title: "Backlog".into(),
                     index: IndexType::Active,
-                    sorting: "+urgency".into(),
+                    sorting: "urgency+".into(),
                     _grouping: "".into(),
                     filter: "(due or someday) >= 365d and !status:started".into(),
                     header: "header".into(),
@@ -193,25 +193,29 @@ impl Config {
                 SectionConfig {
                     title: "Upcoming".into(),
                     index: IndexType::Active,
-                    sorting: "+urgency".into(),
+                    sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "(due or someday) >= 14d and (due or someday) < 365d and !status:started".into(),
+                    filter:
+                        "(due or someday) >= 14d and (due or someday) < 365d and !status:started"
+                            .into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
                 SectionConfig {
                     title: "Current".into(),
                     index: IndexType::Active,
-                    sorting: "+urgency".into(),
+                    sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "(due or someday) >= now and (due or someday) < 14d and !status:started".into(),
+                    filter:
+                        "(due or someday) >= now and (due or someday) < 14d and !status:started"
+                            .into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
                 SectionConfig {
                     title: "Overdue".into(),
                     index: IndexType::Active,
-                    sorting: "+urgency".into(),
+                    sorting: "urgency+".into(),
                     _grouping: "".into(),
                     filter: "(due or someday) < now and !status:started".into(),
                     header: "header".into(),
@@ -220,7 +224,7 @@ impl Config {
                 SectionConfig {
                     title: "Started".into(),
                     index: IndexType::Active,
-                    sorting: "+urgency".into(),
+                    sorting: "urgency+".into(),
                     _grouping: "".into(),
                     filter: "status:started".into(),
                     header: "header".into(),
@@ -240,7 +244,7 @@ impl Config {
             sections: vec![SectionConfig {
                 title: "All".into(),
                 index: IndexType::All,
-                sorting: "+end +created".into(),
+                sorting: "end+ created+".into(),
                 _grouping: "".into(),
                 filter: "".into(),
                 header: "".into(),

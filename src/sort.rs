@@ -26,31 +26,32 @@ pub fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
     use SortToken::*;
 
     let mut res = Vec::new();
-    let mut ascending: Option<bool> = None;
+    let mut field: Option<(usize, usize)> = None;
 
     for (tok, span) in SortToken::lexer(rule).spanned() {
         match tok {
             Ok(SortAsc) => {
-                if ascending.is_some() {
+                let f = unwrap_some_or!(field, {
                     bail!("Unexpected '+' in sorting rule: {rule}");
-                }
-                ascending = Some(true);
+                });
+                res.push(SortingRule::from_str(&rule[f.0..f.1], true));
+                field = None;
             }
             Ok(SortDesc) => {
-                if ascending.is_some() {
+                let f = unwrap_some_or!(field, {
                     bail!("Unexpected '-' in sorting rule: {rule}");
-                }
-                ascending = Some(false);
+                });
+                res.push(SortingRule::from_str(&rule[f.0..f.1], false));
+                field = None;
             }
             Ok(Field) => {
-                let asc = unwrap_some_or!(ascending, {
+                if field.is_some() {
                     bail!("Unexpected field '{}' in sorting rule: {rule}", &rule[span]);
-                });
-                res.push(SortingRule::from_str(&rule[span], asc));
-                ascending = None;
+                }
+                field = Some((span.start, span.end));
             }
             _ => {
-                bail!("Sorting rule parsing error: {rule}");
+                bail!("Sorting rule parsing error: '{rule}'");
             }
         }
     }
