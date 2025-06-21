@@ -66,9 +66,9 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
 
     filters
         .query
-        .replace(&filter, app)
+        .replace(filter, app)
         .with_context(|| format!("Unable to parse filter predicate: '{filter}'"))?;
-    let mut entries = storage::fetch_entries(&filters, *index, app)?;
+    let mut entries = storage::fetch_entries(filters, *index, app)?;
 
     if entries.is_empty() {
         return Ok(());

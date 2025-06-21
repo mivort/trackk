@@ -216,29 +216,29 @@ pub fn eval(
             },
             Sig => match stack.pop() {
                 Some(val) => stack.push(
-                    val.unary_op(|v| sigmoid(v))
+                    val.unary_op(sigmoid)
                         .context("'sig' can only be applied to numbers")?,
                 ),
                 _ => bail!("'sig' operator haven't got the argument"),
             },
             Greater => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs, ts)?),
                 _ => bail!("'>' operator haven't got enough arguments"),
             },
             GreaterEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.greater_eq(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.greater_eq(rhs, ts)?),
                 _ => bail!("'>=' operator haven't got enough arguments"),
             },
             Less => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.less(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.less(rhs, ts)?),
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
             LessEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.less_eq(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.less_eq(rhs, ts)?),
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
             FuzzyEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(rhs, issue)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(&rhs, issue)?),
                 _ => bail!("':' operator haven't got enough arguments"),
             },
             NotEq => {

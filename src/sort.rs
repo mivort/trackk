@@ -110,8 +110,6 @@ impl SortingRule {
 
     /// Compare two fields.
     fn compare(&self, a: &Issue, b: &Issue) -> Ordering {
-        use std::i64;
-
         match self {
             Self::TitleAsc => a.title.cmp(&b.title),
             Self::TitleDesc => b.title.cmp(&a.title),

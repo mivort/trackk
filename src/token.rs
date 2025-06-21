@@ -328,12 +328,17 @@ impl Token {
     }
 
     /// Peform loose comparison.
-    pub fn fuzzy_eq(self, rhs: Self, issue: &Issue) -> Result<Self> {
+    pub fn fuzzy_eq(&self, rhs: &Self, issue: &Issue) -> Result<Self> {
         match (self, rhs) {
-            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
-            (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(rhs)),
-            (Self::Reference(lhs), token) => Ok(Self::Bool(lhs.fuzzy_eq(&token, issue)?)),
-            _ => bail!("':' was used on incompatible values"),
+            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(*lhs == *rhs)),
+            (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(*rhs)),
+            (Self::String(lhs), Self::String(rhs)) => Ok(Self::Bool(lhs.contains(&**rhs))),
+            (Self::Reference(lhs), token) => Ok(Self::Bool(lhs.fuzzy_eq(token, issue)?)),
+            _ => bail!(
+                "':' was used on incompatible values ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
@@ -342,7 +347,10 @@ impl Token {
         match self {
             Self::Bool(val) => Ok(Self::Bool(!val)),
             Self::Date(_) => Ok(Self::Bool(false)),
-            _ => bail!("'not' ('!') can only be applied to boolean expressions"),
+            _ => bail!(
+                "'not' ('!') got incompatible argument ({}), can only be applied to boolean",
+                self.ttype()
+            ),
         }
     }
 
@@ -351,43 +359,83 @@ impl Token {
     pub fn unary_op(self, f: impl Fn(f64) -> f64) -> Result<Self> {
         match self {
             Self::Duration(val) => Ok(Self::Duration(f(val))),
-            _ => bail!("Unary function got incompatible arguments"),
+            _ => bail!(
+                "Unary function got incompatible argument ({})",
+                self.ttype()
+            ),
         }
     }
 
     /// Perform greater comparison.
-    pub fn greater(self, rhs: Self) -> Result<Self> {
+    pub fn greater(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
         match (self, rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs > rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs > rhs)),
+            (Self::Date(lhs), Self::Duration(rhs)) => {
+                Ok(Self::Bool(lhs > duration_to_date(rhs, ts)))
+            }
+            (Self::Duration(lhs), Self::Date(rhs)) => {
+                Ok(Self::Bool(duration_to_date(lhs, ts) > rhs))
+            }
             _ => bail!("'>' operator got incompatibe arguments"),
         }
     }
 
     /// Perform greater comparison.
-    pub fn greater_eq(self, rhs: Self) -> Result<Self> {
+    pub fn greater_eq(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
         match (self, rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs >= rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs >= rhs)),
+            (Self::Date(lhs), Self::Duration(rhs)) => {
+                Ok(Self::Bool(lhs >= duration_to_date(rhs, ts)))
+            }
+            (Self::Duration(lhs), Self::Date(rhs)) => {
+                Ok(Self::Bool(duration_to_date(lhs, ts) >= rhs))
+            }
             _ => bail!("'>=' operator got incompatibe arguments"),
         }
     }
 
     /// Perform greater comparison.
-    pub fn less(self, rhs: Self) -> Result<Self> {
+    pub fn less(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
         match (self, rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs < rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs < rhs)),
+            (Self::Date(lhs), Self::Duration(rhs)) => {
+                Ok(Self::Bool(lhs < duration_to_date(rhs, ts)))
+            }
+            (Self::Duration(lhs), Self::Date(rhs)) => {
+                Ok(Self::Bool(duration_to_date(lhs, ts) < rhs))
+            }
             _ => bail!("'<' operator got incompatibe arguments"),
         }
     }
 
     /// Perform greater comparison.
-    pub fn less_eq(self, rhs: Self) -> Result<Self> {
+    pub fn less_eq(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
         match (self, rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs <= rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs <= rhs)),
+            (Self::Date(lhs), Self::Duration(rhs)) => {
+                Ok(Self::Bool(lhs <= duration_to_date(rhs, ts)))
+            }
+            (Self::Duration(lhs), Self::Date(rhs)) => {
+                Ok(Self::Bool(duration_to_date(lhs, ts) <= rhs))
+            }
             _ => bail!("'<=' operator got incompatibe arguments"),
+        }
+    }
+
+    /// Produce type name of the token.
+    pub fn ttype(&self) -> &'static str {
+        use Token::*;
+        match self {
+            Date(_) => "date",
+            Duration(_) => "number",
+            Bool(_) => "boolean",
+            String(_) => "string",
+            Reference(_) => "reference",
+            _ => "operator",
         }
     }
 }
@@ -595,4 +643,10 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
     ts.saturating_add(offset.days())
         .replace_time(Time::MIDNIGHT)
         .unix_timestamp()
+}
+
+/// Convert f64 duration to i64 absolute time.
+#[inline]
+fn duration_to_date(duration: f64, ts: OffsetDateTime) -> i64 {
+    duration as i64 + ts.unix_timestamp()
 }
