@@ -85,6 +85,15 @@ impl Issue {
         Ok(new)
     }
 
+    /// Apply list of description arguments, merging them into a single line
+    /// if list is not empty.
+    pub fn apply_description(&mut self, description: &[Box<str>]) {
+        if description.is_empty() {
+            return
+        }
+        self.title = description.join(" ");
+    }
+
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
     pub fn apply_args(&mut self, args: &EntryArgs, app: &App) -> Result<()> {

@@ -77,6 +77,7 @@ fn main() -> Result<()> {
 
         Some(Command::Add(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
+            issue.apply_description(&a.description);
 
             if !a.no_edit {
                 let status = editor::edit_entry(&mut issue, &app)?;
@@ -89,6 +90,8 @@ fn main() -> Result<()> {
         }
         Some(Command::Log(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
+            issue.apply_description(&a.description);
+
             issue.status = app.config.defaults.status_complete().to_string();
             issue.update_end(&app.config);
 

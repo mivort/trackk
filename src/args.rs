@@ -169,7 +169,7 @@ pub struct FilterArgs {
 /// Args to apply changes to the selected entries.
 #[derive(Parser, Default)]
 pub struct EntryArgs {
-    /// Entry title message, description.
+    /// Entry title message and description.
     #[arg(short('m'), long)]
     pub desc: Vec<String>,
 
@@ -206,7 +206,7 @@ pub struct EntryArgs {
 #[derive(Parser, Default)]
 pub struct AddArgs {
     /// Entry title message and description.
-    pub description: Vec<String>,
+    pub description: Vec<Box<str>>,
 
     /// Don't use interactive input via default editor.
     #[arg(long)]
