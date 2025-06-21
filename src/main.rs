@@ -253,9 +253,7 @@ fn setup_logging(no_color: bool, verbose: bool) -> Result<(), log::SetLoggerErro
                     _ => "",
                 };
                 out.finish(format_args!(
-                    "{color}{}:{reset} {}",
-                    record.level(),
-                    message
+                    "{color}●{reset} {message}",
                 ))
             }
         })
