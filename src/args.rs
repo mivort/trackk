@@ -42,6 +42,16 @@ pub enum Command {
     #[command(visible_aliases(["l"]))]
     Log(AddArgs),
 
+    /// Duplicate entire entry.
+    // TODO: P2: implement duplicate command
+    #[command(skip)]
+    _Dup,
+
+    /// Copy task context from one entry to another.
+    // TODO: P2: implement copy command
+    #[command(skip)]
+    _Copy,
+
     /// Remove specified entry.
     #[command(visible_aliases(["rm", "delete", "del"]))]
     Remove(ModArgs),
@@ -159,9 +169,13 @@ pub struct FilterArgs {
 /// Args to apply changes to the selected entries.
 #[derive(Parser, Default)]
 pub struct EntryArgs {
-    /// Entry title
-    #[arg(short('m'), visible_aliases(["message", "msg"]), long)]
-    pub title: Option<String>,
+    /// Entry title message, description.
+    #[arg(short('m'), long)]
+    pub desc: Vec<String>,
+
+    /// Append text at the end of the entry title.
+    #[arg(short, long)]
+    pub append: Vec<String>,
 
     /// Entry due date string.
     #[arg(short, long)]
@@ -191,6 +205,9 @@ pub struct EntryArgs {
 /// Args specific for entry creation.
 #[derive(Parser, Default)]
 pub struct AddArgs {
+    /// Entry title message and description.
+    pub description: Vec<String>,
+
     /// Don't use interactive input via default editor.
     #[arg(long)]
     pub no_edit: bool,

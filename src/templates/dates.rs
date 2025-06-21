@@ -19,7 +19,7 @@ pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
     let abs = diff.abs();
 
     let round = |v: f64| {
-        let mlt = 10_f64.powi(precision.unwrap_or(1));
+        let mlt = 10_f64.powi(precision.unwrap_or(0));
         (v * mlt).round() / mlt
     };
 

@@ -88,9 +88,15 @@ impl Issue {
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
     pub fn apply_args(&mut self, args: &EntryArgs, app: &App) -> Result<()> {
-        if let Some(title) = &args.title {
-            self.title = title.clone();
+        if args.desc.len() > 0 {
+            self.title = args.desc.join(" ");
         }
+        for arg in &args.append {
+            // TODO: P2: append to the first line
+            self.title.push_str(" ");
+            self.title.push_str(&arg);
+        }
+
         if let Some(status) = &args.status {
             self.status = status.clone();
             self.update_end(&app.config);

@@ -53,6 +53,12 @@ fn main() -> Result<()> {
             let report = &app.config.report_next;
             display::show_entries(&ids, report, &app)?;
         }
+        Some(Command::All) => {
+            let ids = Default::default();
+            let report = app.config.report_all();
+            display::show_entries(&ids, &report, &app)?;
+        }
+
         Some(Command::Info(args)) => {
             let filters = filter::Filter {
                 ids: &filter::IdFilter::from_shorthands(args.ids, &app)?,
@@ -64,15 +70,11 @@ fn main() -> Result<()> {
                 display::show_entry(entry, &app)?;
             }
         }
-        Some(Command::All) => {
-            let ids = Default::default();
-            let report = app.config.report_all();
-            display::show_entries(&ids, &report, &app)?;
-        }
         Some(Command::Edit(args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
             editor::edit_entries(&ids, &app)?;
         }
+
         Some(Command::Add(a)) => {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
 
@@ -91,10 +93,24 @@ fn main() -> Result<()> {
             issue.update_end(&app.config);
 
             if !a.no_edit {
-                editor::edit_entry(&mut issue, &app)?;
+                let status = editor::edit_entry(&mut issue, &app)?;
+                if !status.success() {
+                    return Ok(());
+                }
             }
+            issue.validate()?;
             storage::add_entry(issue, &app)?;
         }
+
+        Some(Command::_Dup) => {
+            todo!()
+            // TODO: P2: implement duplicate command
+        }
+        Some(Command::_Copy) => {
+            todo!()
+            // TODO: P2: implement context copy command
+        }
+
         Some(Command::Modify(e)) => {
             let ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
             storage::modify_entries(&ids, &e.entry, &app)?;
@@ -123,6 +139,7 @@ fn main() -> Result<()> {
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }
+
         Some(Command::Config) => {
             config::print_config(&app.config)?;
         }

@@ -25,7 +25,7 @@
     {%- else -%}
       {{ fg(lightred) }}
     {%- endif -%}
-    {{ issue.due | reldate(1) }}{{ reset }} {# -#}
+    {{ issue.due | reldate }}{{ reset }} {# -#}
   {%- else -%}
     / {{ fg(lightblack) }}...{{ reset }} {# -#}
   {%- endif -%}
