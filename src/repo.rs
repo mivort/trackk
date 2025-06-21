@@ -13,7 +13,7 @@ pub fn check_repo(config: &Config) -> Result<()> {
     Ok(())
 }
 
-/// Run git to create repo, set the main settings.
+/// Run VCS to create repo, set the main settings.
 pub fn init_repo(config: &Config) -> Result<()> {
     let data_path = config.data_path()?;
     let issues_path = config.issues_path()?;
@@ -31,5 +31,10 @@ pub fn init_repo(config: &Config) -> Result<()> {
         .output()
         .with_context(|| format!("Unable to create repo at '{}'", data_path.to_string_lossy()))?;
 
+    Ok(())
+}
+
+/// Pull and push local changes.
+pub fn sync_repo(_config: &Config) -> Result<()> {
     Ok(())
 }

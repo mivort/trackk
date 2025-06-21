@@ -104,6 +104,9 @@ pub enum Command {
     /// Init the storage and VCS repo.
     Init(InitArgs),
 
+    /// Sync repository with remote repo.
+    Sync,
+
     /// Refresh the active entries index (in case if storage was edited manually).
     Refresh(RefreshArgs),
 

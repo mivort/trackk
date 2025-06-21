@@ -5,7 +5,7 @@ use logos::{Lexer, Logos};
 use thiserror::Error;
 use time::ext::NumericalDuration;
 use time::macros::format_description;
-use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, Weekday};
+use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, UtcDateTime, UtcOffset, Weekday};
 
 use crate::issue::{FieldRef, Issue};
 use crate::prelude::*;
@@ -220,11 +220,17 @@ impl Token {
     pub fn sum(self, rhs: Self) -> Result<Self> {
         use Token::*;
 
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs + rhs)),
-            (Date(lhs), Duration(rhs)) => Ok(Date(lhs + rhs as i64)),
-            (Duration(lhs), Date(rhs)) => Ok(Date(lhs as i64 + rhs)),
-            _ => bail!("Unsupported '+' operator arguments"),
+            (Date(lhs), Duration(rhs)) => Ok(Date(lhs + *rhs as i64)),
+            (Duration(lhs), Date(rhs)) => Ok(Date(*lhs as i64 + rhs)),
+            _ => {
+                bail!(
+                    "Unsupported '+' operator arguments ({} and {})",
+                    self.ttype(),
+                    rhs.ttype()
+                )
+            }
         }
     }
 
@@ -476,6 +482,23 @@ impl Token {
             Reference(_) => "reference",
             _ => "operator",
         }
+    }
+
+    /// Produce token string representation.
+    pub fn to_string(&self) -> Result<String> {
+        use Token::*;
+        Ok(match self {
+            Date(d) => {
+                let utc = UtcDateTime::from_unix_timestamp(*d)?;
+                let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
+                utc.to_offset(UtcOffset::current_local_offset()?);
+                utc.format(format)?
+            }
+            Duration(v) => format!("{:.0}", v.round()),
+            Bool(v) => v.to_string(),
+            String(v) => v.to_string(),
+            _ => format!("{:?}", self),
+        })
     }
 }
 

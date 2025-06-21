@@ -20,8 +20,11 @@ mod templates {
 }
 mod templating;
 mod token;
+mod sync {
+    pub(crate) mod git;
+}
 mod import {
-    mod twv2;
+    pub(crate) mod twv2;
 }
 
 use std::path::PathBuf;
@@ -158,7 +161,7 @@ fn main() -> Result<()> {
             dateexp::parse_exp(&expr, local, &mut output)?;
             let res = dateexp::eval(&output, local, &mut op_stack, &issue::Issue::default())?;
 
-            println!("{res:?}"); // TODO: P1: pretty-print the result
+            println!("{}", res.to_string()?);
         }
         Some(Command::Init(_)) => {
             repo::init_repo(&app.config)?;
@@ -166,6 +169,10 @@ fn main() -> Result<()> {
         Some(Command::Check) => {
             repo::check_repo(&app.config)?;
         }
+        Some(Command::Sync) => {
+            repo::sync_repo(&app.config)?;
+        }
+
         Some(Command::Template(args)) => {
             use templates::colors::{RESET, fg};
             let (color, reset) = if app.config.no_color() { ("", "") } else { (fg(10), RESET) };
