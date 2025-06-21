@@ -110,6 +110,8 @@ impl SortingRule {
 
     /// Compare two fields.
     fn compare(&self, a: &Issue, b: &Issue) -> Ordering {
+        use std::i64;
+
         match self {
             Self::TitleAsc => a.title.cmp(&b.title),
             Self::TitleDesc => b.title.cmp(&a.title),
@@ -120,11 +122,11 @@ impl SortingRule {
             Self::ModifiedAsc => a.modified.cmp(&b.modified),
             Self::ModifiedDesc => b.modified.cmp(&a.modified),
 
-            Self::DueAsc => a.due.cmp(&b.due),
-            Self::DueDesc => b.due.cmp(&a.due),
+            Self::DueAsc => a.due.unwrap_or(i64::MAX).cmp(&b.due.unwrap_or(i64::MAX)),
+            Self::DueDesc => b.due.unwrap_or(i64::MAX).cmp(&a.due.unwrap_or(i64::MAX)),
 
-            Self::EndAsc => a.end.cmp(&b.end),
-            Self::EndDesc => b.end.cmp(&a.end),
+            Self::EndAsc => a.end.unwrap_or(i64::MAX).cmp(&b.end.unwrap_or(i64::MAX)),
+            Self::EndDesc => b.end.unwrap_or(i64::MAX).cmp(&a.end.unwrap_or(i64::MAX)),
 
             Self::UrgencyAsc => a.urgency.partial_cmp(&b.urgency).unwrap_or(Ordering::Equal),
             Self::UrgencyDesc => b.urgency.partial_cmp(&a.urgency).unwrap_or(Ordering::Equal),

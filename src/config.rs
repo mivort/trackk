@@ -227,7 +227,7 @@ impl Config {
             sections: vec![SectionConfig {
                 title: "All".into(),
                 index: IndexType::All,
-                sorting: "+created".into(),
+                sorting: "+end +created".into(),
                 _grouping: "".into(),
                 filter: "".into(),
                 header: "".into(),
@@ -332,24 +332,31 @@ pub struct ReportConfig {
 #[derive(Deserialize, Default, Clone)]
 pub struct SectionConfig {
     /// Section header template.
+    #[serde(default)]
     pub header: Box<str>,
 
     /// Name of tera template file used for section output.
+    #[serde(default)]
     pub template: Box<str>,
 
     /// Index to use when report is produced.
+    #[serde(default)]
     pub index: IndexType,
 
     /// Sorting direction.
+    #[serde(default)]
     pub sorting: Box<str>,
 
     /// Section filter parameters.
+    #[serde(default)]
     pub filter: Box<str>,
 
     /// Section title.
+    #[serde(default)]
     pub title: Box<str>,
 
     /// Grouping field.
+    #[serde(default)]
     _grouping: Box<str>,
 }
 

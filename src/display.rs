@@ -71,7 +71,7 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
     let mut entries = storage::fetch_entries(&filters, *index, app)?;
 
     if entries.is_empty() {
-        return Ok(())
+        return Ok(());
     }
 
     if !header.is_empty() {
@@ -94,7 +94,10 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
 
     if !header.is_empty() {
         let header = j2.get_template(&section.header)?;
-        let context = HeaderContext { title, count: entries.len() };
+        let context = HeaderContext {
+            title,
+            count: entries.len(),
+        };
         header.render_to_write(context, &out).with_context(|| {
             format!(
                 "Unable to render report header template: {}",
