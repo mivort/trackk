@@ -18,7 +18,7 @@ pub fn check_repo(config: &Config) -> Result<()> {
 /// Run VCS to create repo, set the main settings.
 pub fn init_repo(config: &Config, clone: Option<&str>) -> Result<()> {
     let data_path = config.data_path()?;
-    let entries_path = config.issues_path()?;
+    let entries_path = config.entries_path()?;
 
     info!("Data directory: {}", data_path.to_string_lossy());
     info!("Entries directory: {}", entries_path.to_string_lossy());

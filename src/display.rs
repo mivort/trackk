@@ -10,11 +10,11 @@ use crate::{app::App, prelude::*, sort, storage};
 
 #[derive(Serialize)]
 struct RowContext<'a> {
-    /// Shorthand issue reference.
+    /// Shorthand entry reference.
     #[serde(skip_serializing_if = "Option::is_none")]
     sid: Option<usize>,
 
-    /// Calculated issue urgency.
+    /// Calculated entry urgency.
     urgency: f64,
 
     /// Flag if current row is odd or even.

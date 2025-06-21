@@ -19,7 +19,7 @@ pub struct Config {
     #[serde(default)]
     data_prefix: PrefixType,
 
-    /// Issues sub-directory.
+    /// Entries sub-directory.
     #[serde(default)]
     issues_path: Box<str>,
 
@@ -276,7 +276,7 @@ impl Config {
     }
 
     /// Produce full path to issues storage.
-    pub fn issues_path(&self) -> Result<PathBuf> {
+    pub fn entries_path(&self) -> Result<PathBuf> {
         let issues_path = self.issues_path_fallback();
         let mut path = self.data_path()?;
         path.push(issues_path);
@@ -290,7 +290,7 @@ impl Config {
 
     /// Issues path default value.
     fn issues_path_fallback(&self) -> &str {
-        if self.issues_path.is_empty() { "issues" } else { &self.issues_path }
+        if self.issues_path.is_empty() { "entries" } else { &self.issues_path }
     }
 }
 

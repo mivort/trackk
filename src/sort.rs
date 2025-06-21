@@ -32,7 +32,7 @@ pub fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
         match tok {
             Ok(SortAsc) => {
                 let f = unwrap_some_or!(field, {
-                    bail!("Unexpected '+' in sorting rule: {rule}");
+                    bail!("Unexpected '+' in sorting rule: '{rule}'");
                 });
                 res.push(SortingRule::from_str(&rule[f.0..f.1], true));
                 field = None;
@@ -54,6 +54,13 @@ pub fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
                 bail!("Sorting rule parsing error: '{rule}'");
             }
         }
+    }
+
+    if let Some(field) = field {
+        bail!(
+            "Sorting direction (+/-) is not specified for '{}'",
+            &rule[field.0..field.1]
+        )
     }
 
     Ok(res)
@@ -159,14 +166,15 @@ enum SortToken {
 fn parse_sorter() {
     use SortingRule::*;
 
-    let rule = "+created -urgency +due";
+    let rule = "created+ urgency- due+";
     let rules = parse_rules(rule).unwrap();
     assert_eq!(rules, vec![CreatedAsc, UrgencyDesc, DueAsc]);
 }
 
 #[test]
 fn parse_fail() {
-    assert!(parse_rules("++created").is_err());
+    assert!(parse_rules("+created").is_err());
+    assert!(parse_rules("created++").is_err());
     assert!(parse_rules("created").is_err());
     assert!(parse_rules("@created").is_err());
 }

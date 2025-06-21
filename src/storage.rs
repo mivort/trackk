@@ -99,7 +99,7 @@ pub fn fetch_entries(
 fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     let year = date.year();
     let month = date.month() as i32;
-    let mut full_path = config.issues_path()?;
+    let mut full_path = config.entries_path()?;
     full_path.push(year.to_string());
 
     fs::create_dir_all(&full_path).context("Unable to create storage directory")?;
@@ -114,7 +114,7 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 /// Serialize bucket data and store in provided path.
 pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<()> {
     let output = serde_json::to_string_pretty(data)?;
-    let path = app.config.issues_path()?.join(&path);
+    let path = app.config.entries_path()?.join(&path);
     fs::write(path, output)?;
 
     Ok(())
@@ -125,7 +125,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>
     trace!("Traversing all buckets");
 
     let mut output = Vec::new();
-    let path = app.config.issues_path()?;
+    let path = app.config.entries_path()?;
 
     let index = app.index()?;
     let local = app.local_time()?;
@@ -232,7 +232,7 @@ fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<s
 /// Iterate over files in storage directory and update the index. If 'force' is
 /// not set and mtime is lower or equal to index, skip the entry.
 pub fn refresh_index(app: &App, force: bool) -> Result<()> {
-    let path = app.config.issues_path()?;
+    let path = app.config.entries_path()?;
     let mut index = if force { app.index_empty_mut() } else { app.index_mut() }?;
 
     let mut changes = false;

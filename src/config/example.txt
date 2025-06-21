@@ -9,11 +9,11 @@
   // Default: data_dir{cl}
   data_path_prefix: {data_path_prefix},
 
-  {c}// Sub-path to issue files in data directory.
-  // Default: issues{cl}
-  issues_path: "{issues_path}",
+  {c}// Sub-path to entries files in data directory.
+  // Default: entries{cl}
+  entries_path: "{issues_path}",
 
-  {c}// Editor command used for issue editing. If not defined, value will be taken
+  {c}// Editor command used for entry editing. If not defined, value will be taken
   // from the EDITOR environment variable.{cl}
   editor: "{editor}",
 
@@ -22,7 +22,7 @@
   // Example: {{ default: "[hour]-[minute]", myformat: "[year]-[month]-[day]" }}{cl}
   date_formats: {date_formats},
 
-  {c}// Issue values options.{cl}
+  {c}// Entry value options.{cl}
   values: {{
     {c}// List of statuses which are considered as 'active' (and tracked in 'active'
     // index for quick access).{cl}
@@ -31,16 +31,16 @@
     {c}// List of valid status values.{cl}
     permit_status: {permit_status},
 
-    {c}// Urgency formula used for dynamic issue sorting.{cl}
+    {c}// Urgency formula used for dynamic entry sorting.{cl}
     urgency_formula:
       "{urgency_formula}",
   }},
 
-  {c}// Issue values assigned by default.{cl}
+  {c}// Entry values assigned by default.{cl}
   defaults: {{
-    status_initial: "{status_initial}", {c}// Status assigned upon issue creation.{cl}
-    status_complete: "{status_complete}", {c}// Status assigned upon issue completion.{cl}
-    status_deleted: "{status_deleted}", {c}// Status assigned upon issue deletion.{cl}
+    status_initial: "{status_initial}", {c}// Status assigned upon entry creation.{cl}
+    status_complete: "{status_complete}", {c}// Status assigned upon entry completion.{cl}
+    status_deleted: "{status_deleted}", {c}// Status assigned upon entry deletion.{cl}
     due: "", {c}// Default due date (none if empty).{cl}
   }}
 }}
