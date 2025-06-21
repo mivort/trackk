@@ -162,9 +162,11 @@ pub enum Token {
     Has,
 
     #[token("(")]
+    #[token("[")]
     LParen,
 
     #[token(")")]
+    #[token("]")]
     RParen,
 
     #[token("title", |_| FieldRef::Title)]
