@@ -129,12 +129,8 @@ impl Default for Command {
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
     /// Filter entries containing the tag.
-    #[arg(long, short)]
+    #[arg(long, short, allow_hyphen_values = true)]
     pub tag: Vec<String>,
-
-    /// Filter entries excluding the tag.
-    #[arg(long, short)]
-    pub notag: Vec<String>,
 
     /// Filter entries by due date.
     #[arg(long, short)]
@@ -181,24 +177,20 @@ pub struct EntryArgs {
     pub append: Vec<String>,
 
     /// Entry due date string.
-    #[arg(short, long)]
+    #[arg(short, long, allow_hyphen_values = true)]
     pub due: Option<String>,
 
     /// Entry end date string.
-    #[arg(long, short)]
+    #[arg(long, short, allow_hyphen_values = true)]
     pub end: Option<String>,
 
     /// Entry status
     #[arg(short, long)]
     pub status: Option<String>,
 
-    /// Tag to apply to the record.
-    #[clap(short, long)]
+    /// Add tag to the entry (add '-' to tag name to remove).
+    #[clap(short, long, allow_hyphen_values = true)]
     pub tag: Vec<String>,
-
-    /// Remove tag from the record.
-    #[clap(short, long)]
-    pub notag: Vec<String>,
 
     /// Repeat time specifier.
     #[arg(short, long)]

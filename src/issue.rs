@@ -127,10 +127,12 @@ impl Issue {
         };
 
         for tag in &args.tag {
-            self.tags.insert(tag.clone());
-        }
-        for notag in &args.notag {
-            self.tags.remove(notag);
+            let tag = tag.replace(" ", "_");
+            if tag.starts_with("-") {
+                self.tags.remove(&tag[1..]);
+            } else {
+                self.tags.insert(tag);
+            }
         }
         if let Some(repeat) = &args.repeat {
             self.repeat = if repeat.is_empty() { None } else { Some(repeat.clone()) };

@@ -86,20 +86,20 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
     }
 
     for tag in &args.filter_args.tag {
-        filter.merge(|e| {
-            e.push(Token::Reference(FieldRef::Tag));
-            e.push(Token::String(Rc::from(tag.as_str())));
-            e.push(Token::FuzzyEq);
-        });
-    }
-
-    for notag in &args.filter_args.notag {
-        filter.merge(|e| {
-            e.push(Token::Reference(FieldRef::Tag));
-            e.push(Token::String(Rc::from(notag.as_str())));
-            e.push(Token::FuzzyEq);
-            e.push(Token::Not);
-        });
+        if tag.starts_with("-") {
+            filter.merge(|e| {
+                e.push(Token::Reference(FieldRef::Tag));
+                e.push(Token::String(Rc::from(&tag[1..])));
+                e.push(Token::FuzzyEq);
+                e.push(Token::Not);
+            });
+        } else {
+            filter.merge(|e| {
+                e.push(Token::Reference(FieldRef::Tag));
+                e.push(Token::String(Rc::from(tag.as_str())));
+                e.push(Token::FuzzyEq);
+            });
+        }
     }
 
     // TODO: P3: add changes to filter from each argument type
