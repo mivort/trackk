@@ -16,21 +16,29 @@ impl SyncDriver for Git {
 
         let mut cmd = Command::new("git");
         cmd.current_dir(&path).arg("init");
-        cmd.spawn()
-            .with_context(|| {
-                format!(
-                    "Unable to create repo at '{}'",
-                    path.as_ref().to_string_lossy()
-                )
-            })?
-            .wait()?;
+        let spawn = cmd.spawn();
+
+        match spawn {
+            Err(e) if matches!(e.kind(), ErrorKind::NotFound) => {
+                return Err(anyhow!(e)).context("'git' command is not found");
+            }
+            Err(e) => {
+                return Err(anyhow!(e)).with_context(|| {
+                    format!(
+                        "Unable to create repo at '{}'",
+                        path.as_ref().to_string_lossy()
+                    )
+                });
+            }
+            Ok(mut spawn) => spawn.wait()?,
+        };
 
         let mut path = PathBuf::from(path.as_ref());
         path.push(".gitignore");
 
         let gitignore = match File::open(&path) {
             Err(e) if matches!(e.kind(), ErrorKind::NotFound) => File::create(&path)?,
-            Err(e) => return Err(anyhow!(e)),
+            Err(e) => return Err(anyhow!(e)).context("Unable to access .gitignore"),
             Ok(f) => f,
         };
 
@@ -61,6 +69,11 @@ impl SyncDriver for Git {
 
         cmd.spawn()?;
 
+        Ok(())
+    }
+
+    fn sync_repo(_target: impl AsRef<Path>) -> Result<()> {
+        info!("Creating new commit");
         Ok(())
     }
 }

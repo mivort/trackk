@@ -9,4 +9,7 @@ pub trait SyncDriver {
 
     /// Initialize new sync repo.
     fn init_repo(target: impl AsRef<Path>) -> Result<()>;
+
+    /// Download changes from the remote and upload local changes.
+    fn sync_repo(target: impl AsRef<Path>) -> Result<()>;
 }
