@@ -294,6 +294,10 @@ pub struct MergeArgs {
 pub struct InitArgs {
     /// Clone repository during init.
     pub clone: Option<Box<str>>,
+
+    /// Don't setup VCS for remote sync.
+    #[arg(long)]
+    pub no_sync: bool,
 }
 
 #[derive(ValueEnum, Default, Clone, Copy, Deserialize)]

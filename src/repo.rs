@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::Path;
 
+use crate::args::InitArgs;
 use crate::config::{Config, SyncDriverMode};
 use crate::prelude::*;
 use crate::sync::driver::SyncDriver;
@@ -16,7 +17,7 @@ pub fn check_repo(config: &Config) -> Result<()> {
 }
 
 /// Run VCS to create repo, set the main settings.
-pub fn init_repo(config: &Config, clone: Option<&str>) -> Result<()> {
+pub fn init_repo(config: &Config, args: &InitArgs) -> Result<()> {
     let data_path = config.data_path()?;
     let entries_path = config.entries_path()?;
 
@@ -30,12 +31,16 @@ pub fn init_repo(config: &Config, clone: Option<&str>) -> Result<()> {
         )
     })?;
 
-    match config.sync.driver {
-        SyncDriverMode::Git => init_driver::<Git>(data_path, clone)?,
-        SyncDriverMode::Custom => todo!(),
-    };
+    if args.no_sync {
+        info!("Sync setup disabled: skip");
+        return Ok(())
+    }
 
-    Ok(())
+    match config.sync.driver {
+        SyncDriverMode::Git => init_driver::<Git>(data_path, args.clone.as_deref()),
+        SyncDriverMode::Custom => todo!(),
+    }
+    .context("Repo init failed")
 }
 
 /// Call specific init driver.
@@ -54,4 +59,5 @@ pub fn sync_repo(config: &Config) -> Result<()> {
         SyncDriverMode::Git => Git::sync_repo(config.data_path()?),
         SyncDriverMode::Custom => todo!(),
     }
+    .context("Repo sync failed")
 }

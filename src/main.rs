@@ -165,7 +165,7 @@ fn main() -> Result<()> {
             println!("{}", res.to_string()?);
         }
         Some(Command::Init(init)) => {
-            repo::init_repo(&app.config, init.clone.as_deref())?;
+            repo::init_repo(&app.config, &init)?;
         }
         Some(Command::Check) => {
             repo::check_repo(&app.config)?;
