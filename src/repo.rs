@@ -48,6 +48,8 @@ where
 
 /// Pull and push local changes.
 pub fn sync_repo(config: &Config) -> Result<()> {
+    info!("Repo sync started");
+
     match config.sync.driver {
         SyncDriverMode::Git => todo!(),
         SyncDriverMode::Custom => todo!(),

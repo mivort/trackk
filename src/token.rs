@@ -190,8 +190,9 @@ impl Token {
         use Token::*;
 
         match self {
+            FuzzyEq => (9, true),
             Not | Sqrt | Ln | Abs | Sig | Len | Has => (8, false),
-            At | FuzzyEq => (7, true),
+            At => (7, true),
             Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
             Less | LessEq | Greater | GreaterEq => (4, true),
