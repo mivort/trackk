@@ -177,24 +177,40 @@ impl Config {
         Cow::Owned(ReportConfig {
             sections: vec![
                 SectionConfig {
+                    title: "Backlog".into(),
                     index: IndexType::Active,
                     sorting: "+urgency".into(),
                     _grouping: "".into(),
-                    filter: "(due or someday) >= (now + 14d)".into(),
+                    filter: "(due or someday) >= (now + 365d)".into(),
+                    header: "header".into(),
                     template: "next".into(),
                 },
                 SectionConfig {
+                    title: "Upcoming".into(),
+                    index: IndexType::Active,
+                    sorting: "+urgency".into(),
+                    _grouping: "".into(),
+                    filter: "(due or someday) >= (now + 14d) and (due or someday) < (now + 365d)"
+                        .into(),
+                    header: "header".into(),
+                    template: "next".into(),
+                },
+                SectionConfig {
+                    title: "Current".into(),
                     index: IndexType::Active,
                     sorting: "+urgency".into(),
                     _grouping: "".into(),
                     filter: "((due or someday) >= now) and ((due or someday) < (now + 14d))".into(),
+                    header: "header".into(),
                     template: "next".into(),
                 },
                 SectionConfig {
+                    title: "Overdue".into(),
                     index: IndexType::Active,
                     sorting: "+urgency".into(),
                     _grouping: "".into(),
                     filter: "(due or someday) < now".into(),
+                    header: "header".into(),
                     template: "next".into(),
                 },
             ],
@@ -209,10 +225,12 @@ impl Config {
 
         Cow::Owned(ReportConfig {
             sections: vec![SectionConfig {
+                title: "All".into(),
                 index: IndexType::All,
                 sorting: "+created".into(),
                 _grouping: "".into(),
                 filter: "".into(),
+                header: "".into(),
                 template: "all".into(),
             }],
         })
@@ -313,6 +331,9 @@ pub struct ReportConfig {
 /// Report section defined by filter and template.
 #[derive(Deserialize, Default, Clone)]
 pub struct SectionConfig {
+    /// Section header template.
+    pub header: Box<str>,
+
     /// Name of tera template file used for section output.
     pub template: Box<str>,
 
@@ -324,6 +345,9 @@ pub struct SectionConfig {
 
     /// Section filter parameters.
     pub filter: Box<str>,
+
+    /// Section title.
+    pub title: Box<str>,
 
     /// Grouping field.
     _grouping: Box<str>,

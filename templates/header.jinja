@@ -1,0 +1,10 @@
+{#- Header caption -#}
+{%- set caption -%}
+  {{ fg(blue) }}[=== {{ fg(lightwhite) }}{{ title | upper }} [{{ count }}]{{ reset }} {# -#}
+{%- endset -%}
+{%- set capw = caption | width -%}
+
+{#- Max rendering width -#}
+{%- set maxw = min(cols, 96) -%}
+
+{{ caption }}{{ fg(blue) }}{{ fill('=', maxw - capw - 1) }}]{{ reset }}

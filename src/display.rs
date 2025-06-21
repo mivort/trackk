@@ -27,6 +27,15 @@ struct RowContext<'a> {
     path: Cow<'a, str>,
 }
 
+#[derive(Serialize)]
+struct HeaderContext<'a> {
+    /// Section title.
+    title: &'a str,
+
+    /// Number of items in the section.
+    count: usize,
+}
+
 /// Render the list of filtered entries.
 pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>) -> Result<()> {
     app.templates.init(app)?;
@@ -35,8 +44,6 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>)
     let mut filter = Filter { ids, query };
 
     for section in &report.sections {
-        println!("--- {} ---", section.template); // TODO: P3: add header template
-
         show_section(&mut filter, section, app)?;
     }
 
@@ -46,10 +53,12 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>)
 /// Apply template and render single output section.
 fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<'a>) -> Result<()> {
     let SectionConfig {
+        header,
         template,
         index,
         sorting,
         filter,
+        title,
         ..
     } = section;
 
@@ -61,17 +70,44 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
         .with_context(|| format!("Unable to parse filter predicate: '{filter}'"))?;
     let mut entries = storage::fetch_entries(&filters, *index, app)?;
 
+    if entries.is_empty() {
+        return Ok(())
+    }
+
+    if !header.is_empty() {
+        app.templates
+            .load_template(header)
+            .with_context(|| format!("Unable to load header template: {header}"))?;
+    }
+
+    if !template.is_empty() {
+        app.templates
+            .load_template(template)
+            .with_context(|| format!("Unable to load template: {template}"))?;
+    }
+
     let sort = if app.sort.is_empty() { &sort::parse_rules(sorting)? } else { &app.sort };
     sort::sort_entries(&mut entries, sort)?;
 
-    app.templates
-        .load_template(template)
-        .with_context(|| format!("Unable to load template: {template}"))?;
-
     let j2 = app.templates.j2.borrow();
-    let template = j2.get_template(&section.template)?;
     let out = std::io::stdout();
 
+    if !header.is_empty() {
+        let header = j2.get_template(&section.header)?;
+        let context = HeaderContext { title, count: entries.len() };
+        header.render_to_write(context, &out).with_context(|| {
+            format!(
+                "Unable to render report header template: {}",
+                section.header
+            )
+        })?;
+    }
+
+    if template.is_empty() {
+        return Ok(());
+    }
+
+    let template = j2.get_template(&section.template)?;
     for (lineno, (issue, path)) in entries.iter().enumerate() {
         let context = RowContext {
             sid: issue.sid,
