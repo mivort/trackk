@@ -213,6 +213,15 @@ impl Config {
                     header: "header".into(),
                     template: "next".into(),
                 },
+                SectionConfig {
+                    title: "Started".into(),
+                    index: IndexType::Active,
+                    sorting: "+urgency".into(),
+                    _grouping: "".into(),
+                    filter: "status:started".into(),
+                    header: "header".into(),
+                    template: "next".into(),
+                },
             ],
         })
     }

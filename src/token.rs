@@ -10,6 +10,9 @@ use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, Weekday};
 use crate::issue::{FieldRef, Issue};
 use crate::prelude::*;
 
+/// Max date value supported by time-rs.
+pub const SOMEDAY: i64 = 253402300799 - 86400;
+
 /// Parsed token types.
 #[derive(Clone, Debug, Logos)]
 #[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
@@ -38,7 +41,7 @@ pub enum Token {
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time_sec)]
     #[regex(r"(?i)now", |lex| lex.extras.unix_timestamp())]
-    #[regex(r"(?i)someday", |_| 253402300799 - 86400)]
+    #[regex(r"(?i)someday", |_| SOMEDAY)]
     #[regex(r"(?i)(sod|today)", |lex| lex.extras.replace_time(Time::MIDNIGHT).unix_timestamp())]
     #[regex(r"(?i)tomorrow", |lex| relative_sod(lex, 1))]
     #[regex(r"(?i)yesterday", |lex| relative_sod(lex, -1))]
