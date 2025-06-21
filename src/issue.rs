@@ -212,9 +212,18 @@ impl Issue {
     }
 
     /// Check issue validity and produce error message in case if required data is missing.
-    pub fn validate(&self) -> Result<()> {
+    pub fn validate(&self, app: &App) -> Result<()> {
         if self.title.is_empty() {
-            bail!("Issue title should not be empty");
+            bail!("Entry title should not be empty");
+        }
+
+        let config = &app.config.values;
+
+        if !config.permit_status.iter().any(|s| **s == self.status) {
+            bail!(
+                "Entry status should be one of: {}. Update config to allow more statuses.",
+                app.config.values.permit_status.join(", ")
+            );
         }
 
         Ok(())

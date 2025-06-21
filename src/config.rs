@@ -99,7 +99,7 @@ pub struct ValuesConfig {
 
     /// Only allow one of the provided statuses. Don't check status if empty.
     #[serde(default)]
-    pub permit_status: HashSet<String>,
+    pub permit_status: Vec<Box<str>>,
 
     /// Urgency formula to use on entries.
     #[serde(default)]
@@ -137,8 +137,13 @@ impl Config {
         }
 
         if self.values.permit_status.is_empty() {
-            self.values.permit_status =
-                hash_set(&["pending", "started", "blocked", "complete", "deleted"]);
+            self.values.permit_status = vec![
+                "pending".into(),
+                "started".into(),
+                "blocked".into(),
+                "complete".into(),
+                "deleted".into(),
+            ];
         }
     }
 
