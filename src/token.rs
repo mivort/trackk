@@ -25,8 +25,11 @@ pub const SOMEDAY: i64 = 253402300799 - 86400;
 pub enum Token {
     #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
     #[regex(r"\d+(\.\d+)?s", |l| parse_suffix_span(l, 1, 1.))]
+    #[regex(r"\d+(\.\d+)?sec", |l| parse_suffix_span(l, 3, 1.))]
     #[regex(r"\d+(\.\d+)?m", |l| parse_suffix_span(l, 1, 60.))]
+    #[regex(r"\d+(\.\d+)?min", |l| parse_suffix_span(l, 3, 60.))]
     #[regex(r"\d+(\.\d+)?h", |l| parse_suffix_span(l, 1, 3600.))]
+    #[regex(r"\d+(\.\d+)?hrs", |l| parse_suffix_span(l, 3, 3600.))]
     #[regex(r"\d+(\.\d+)?[Dd]", |l| parse_suffix_span(l, 1, 86400.))]
     #[regex(r"\d+(\.\d+)?[Ww]", |l| parse_suffix_span(l, 1, 604800.))]
     #[regex(r"\d+(\.\d+)?M", |l| parse_suffix_span(l, 1, 2592000.))]
