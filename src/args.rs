@@ -298,6 +298,14 @@ pub struct InitArgs {
     /// Clone repository during init.
     pub clone: Option<Box<str>>,
 
+    /// User name to apply during setup.
+    #[arg(long)]
+    pub user: Option<Box<str>>,
+
+    /// User e-mail to apply during setup.
+    #[arg(long)]
+    pub email: Option<Box<str>>,
+
     /// Don't setup VCS for remote sync.
     #[arg(long)]
     pub no_sync: bool,

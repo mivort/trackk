@@ -2,6 +2,7 @@ use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
+use crate::args::InitArgs;
 use crate::index::ACTIVE_INDEX;
 use crate::sync::driver::SyncDriver;
 use crate::{input, prelude::*};
@@ -11,7 +12,7 @@ use std::process::Command;
 pub struct Git;
 
 impl SyncDriver for Git {
-    fn init_repo(path: impl AsRef<Path>) -> Result<()> {
+    fn init_repo(args: &InitArgs, path: impl AsRef<Path>) -> Result<()> {
         info!("Running 'git init' in repo directory");
 
         let mut cmd = git_command(&path);
@@ -63,39 +64,17 @@ impl SyncDriver for Git {
         // TODO: P3: create .gitattributes
         // TODO: P3: setup git merge driver
 
-        info!("Setting up 'git config'");
-
-        git_config(&path, "user.name", || {
-            let name = input::prompt(concat!(
-                "Enter git config user.name: [",
-                env!("CARGO_PKG_NAME"),
-                "] "
-            ))
-            .unwrap_or_default();
-            if name.is_empty() { String::from(env!("CARGO_PKG_NAME")) } else { name }
-        })?;
-
-        git_config(&path, "user.email", || {
-            let name = input::prompt(concat!(
-                "Enter git config user.email: [@",
-                env!("CARGO_PKG_NAME"),
-                "] "
-            ))
-            .unwrap_or_default();
-            if name.is_empty() { String::from(concat!("@", env!("CARGO_PKG_NAME"))) } else { name }
-        })?;
-
-        Ok(())
+        git_config_setup(&path, args)
     }
 
-    fn clone_repo(url: &str, target: impl AsRef<Path>) -> Result<()> {
+    fn clone_repo(url: &str, args: &InitArgs, target: impl AsRef<Path>) -> Result<()> {
         let mut cmd = Command::new("git");
         cmd.args(["clone", url]);
         cmd.arg(target.as_ref());
 
         cmd.spawn().context("Unable to run 'git clone'")?.wait()?;
 
-        Ok(())
+        git_config_setup(&target, args)
     }
 
     fn sync_repo(target: impl AsRef<Path>) -> Result<()> {
@@ -167,5 +146,38 @@ fn git_config(path: impl AsRef<Path>, key: &str, value: impl FnOnce() -> String)
     if !cmd.spawn()?.wait()?.success() {
         bail!("Unable to set git config {}", key);
     }
+    Ok(())
+}
+
+/// Perform setup common for new repos and clones.
+fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
+    info!("Setting up 'git config'");
+
+    git_config(&path, "user.name", || {
+        if let Some(user) = &args.user {
+            return user.to_string();
+        }
+        let name = input::prompt(concat!(
+            "Enter git config user.name: [",
+            env!("CARGO_PKG_NAME"),
+            "] "
+        ))
+        .unwrap_or_default();
+        if name.is_empty() { String::from(env!("CARGO_PKG_NAME")) } else { name }
+    })?;
+
+    git_config(&path, "user.email", || {
+        if let Some(email) = &args.email {
+            return email.to_string();
+        }
+        let email = input::prompt(concat!(
+            "Enter git config user.email: [@",
+            env!("CARGO_PKG_NAME"),
+            "] "
+        ))
+        .unwrap_or_default();
+        if email.is_empty() { String::from(concat!("@", env!("CARGO_PKG_NAME"))) } else { email }
+    })?;
+
     Ok(())
 }
