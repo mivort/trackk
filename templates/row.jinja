@@ -19,13 +19,19 @@
 
   {#- Due date -#}
   {%- if issue.due -%}
-    / {{ fg(lightwhite) }}{{ issue.due | reldate(1) }}{{ reset }} {# -#}
+    / {# -#}
+    {%- if issue.due > now -%}
+      {{ fg(lightwhite) }}
+    {%- else -%}
+      {{ fg(lightred) }}
+    {%- endif -%}
+    {{ issue.due | reldate(1) }}{{ reset }} {# -#}
   {%- else -%}
-    / {{ fg(lightblack) }}--{{ reset }} {# -#}
+    / {{ fg(lightblack) }}...{{ reset }} {# -#}
   {%- endif -%}
 
   {#- Urgency -#}
-  / {{ fg(lightred) }}{{ urgency | numfmt('{:.1}') }}{{ reset }}
+  / {{ fg(green) }}{{ urgency | numfmt('{:.1}') }}{{ reset }}
 {%- endset -%}
 {%- set metaw = meta | width -%}
 

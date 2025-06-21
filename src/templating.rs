@@ -45,6 +45,7 @@ impl<'env> Templates<'env> {
         j2.add_filter("longreldate", move |d: i64, p: Option<i32>| {
             dates::longreldate(d, now, p)
         });
+        j2.add_global("now", now);
 
         let formats = dates::parse_formats(&app.config.date_formats)?;
         let offset = time::UtcOffset::current_local_offset()?;
