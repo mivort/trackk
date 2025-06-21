@@ -117,15 +117,15 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         concat!(
             "# {title}\n\n",
             "--------------------------------------------------------------------------------\n",
-            "* Status:   {status}\n",
-            "* Tags:     {tags}\n",
-            "* Due:      {due}\n",
-            "* End:      {end}\n",
-            "* Repeat:   {repeat}\n",
+            "* *Status:*   {status}\n",
+            "* *Tags:*     {tags}\n",
+            "* *Due:*      {due}\n",
+            "* *End:*      {end}\n",
+            "* *Repeat:*   {repeat}\n",
             "--------------------------------------------------------------------------------\n",
-            "- ID:       {id}\n",
-            "- Created:  {created}\n",
-            "- Modified: {modified}\n",
+            "- *ID:*       {id}\n",
+            "- *Created:*  {created}\n",
+            "- *Modified:* {modified}\n",
         ),
         title = issue.title,
         status = issue.status,
@@ -165,7 +165,7 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
     let (_, [title, meta]) = caps.extract();
     issue.title = title.trim().to_owned();
 
-    let meta_re = RegexBuilder::new("^*\\s+(\\w+):(.*)$")
+    let meta_re = RegexBuilder::new("^*\\s+\\*(\\w+):\\*(.*)$")
         .multi_line(true)
         .build()
         .unwrap();
