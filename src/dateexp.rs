@@ -242,6 +242,7 @@ pub fn eval(
                 _ => bail!("':' operator haven't got enough arguments"),
             },
             NotEq => {
+                // TODO: P3: implement not equal
                 todo!()
             }
             LParen | RParen => {

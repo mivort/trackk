@@ -236,8 +236,12 @@ impl FieldRef {
     pub fn fuzzy_eq(&self, token: &Token, issue: &Issue) -> Result<bool> {
         // TODO: P3: support other operand types
         match (self, token) {
-            (Self::Title, Token::String(rhs)) => Ok(issue.title.contains(&**rhs)),
+            (Self::Title, Token::String(rhs)) => {
+                Ok(issue.title.lines().next().unwrap_or("").contains(&**rhs))
+            }
+            (Self::Desc, Token::String(rhs)) => Ok(issue.title.contains(&**rhs)),
             (Self::Tag, Token::String(rhs)) => Ok(issue.tags.contains(&**rhs)),
+            (Self::Status, Token::String(rhs)) => Ok(issue.status == **rhs),
             _ => bail!("Unable to compare the value with field reference"),
         }
     }
