@@ -807,8 +807,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "trackit"
-version = "0.1.0"
+name = "trackk"
+version = "0.2.0"
 dependencies = [
  "anstyle",
  "anyhow",
