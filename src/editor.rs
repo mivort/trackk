@@ -15,7 +15,8 @@ use crate::{app::App, display, prelude::*, storage};
 
 /// Run editor, apply changes and return the exit status.
 pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
-    let mut tempfile = tempfile::NamedTempFile::with_suffix(".trackit.md")?;
+    let mut tempfile =
+        tempfile::NamedTempFile::with_suffix(concat!(".", env!("CARGO_PKG_NAME"), ".md"))?;
     format_markdown(issue, tempfile.as_file_mut())?;
 
     let status = Command::new(&*app.config.editor())

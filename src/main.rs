@@ -212,7 +212,7 @@ fn read_config(args: &Args) -> Result<Config> {
     let path = if let Some(config) = &args.config {
         config
     } else {
-        &unwrap_ok_or!(env::var("TRACKIT_CONFIG").map(PathBuf::from), _, {
+        &unwrap_ok_or!(env::var("TRACKK_CONFIG").map(PathBuf::from), _, {
             let mut dir = dirs::config_dir().context("Unable to find config directory")?;
             dir.push(env!("CARGO_PKG_NAME"));
             dir.push("config.json5");

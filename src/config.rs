@@ -153,7 +153,7 @@ impl Config {
             return Cow::Borrowed(&*self.editor);
         }
 
-        unwrap_err_or!(env::var("TRACKIT_EDITOR"), editor, { return editor.into() });
+        unwrap_err_or!(env::var("TRACKK_EDITOR"), editor, { return editor.into() });
         unwrap_err_or!(env::var("EDITOR"), editor, { return editor.into() });
 
         "nano".into()

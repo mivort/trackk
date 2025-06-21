@@ -13,7 +13,7 @@ const LOGO: &str = r#"
 ///
 /// Task, event and project tracker."#;
 
-/// Trackit command line arguments.
+/// Trackk command line arguments.
 #[derive(Parser)]
 #[command(author, version, about = LOGO, long_about = None)]
 #[command(args_override_self = true, allow_external_subcommands = true)]
