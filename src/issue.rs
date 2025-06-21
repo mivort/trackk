@@ -251,7 +251,7 @@ impl FieldRef {
             Self::Created => Token::Date(issue.created),
             Self::Modified => Token::Date(issue.modified),
             Self::Due => issue.due.map(Token::Date).unwrap_or(Token::Bool(false)),
-            Self::End => issue.due.map(Token::Date).unwrap_or(Token::Bool(false)),
+            Self::End => issue.end.map(Token::Date).unwrap_or(Token::Bool(false)),
             _ => Token::Reference(*self),
         }
     }
@@ -267,6 +267,16 @@ impl FieldRef {
             (Self::Tag, Token::String(rhs)) => Ok(issue.tags.contains(&**rhs)),
             (Self::Status, Token::String(rhs)) => Ok(issue.status == **rhs),
             _ => bail!("Unable to compare the value with field reference"),
+        }
+    }
+
+    /// Calculate the length of referenced value.
+    pub fn length(&self, entry: &Issue) -> f64 {
+        match self {
+            Self::Desc => entry.title.len() as f64,
+            Self::Tag => entry.tags.len() as f64,
+            Self::Status => entry.status.len() as f64,
+            _ => 0.,
         }
     }
 

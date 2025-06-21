@@ -74,7 +74,6 @@ pub enum Token {
 
     #[token("true", |_| true)]
     #[token("false", |_| false)]
-    #[allow(unused)]
     Bool(bool),
 
     #[token("//", parse_regex)]
@@ -182,7 +181,6 @@ pub enum Token {
     /// String value token.
     #[regex(r"[A-Za-z]\w*", |l| Rc::from(l.slice()))]
     #[regex(r#"'[^']*'"#, parse_quoted_string)]
-    #[allow(unused)]
     String(Rc<str>),
 }
 
@@ -381,9 +379,10 @@ impl Token {
     }
 
     /// Produce length of the token value.
-    pub fn length(self) -> Result<Self> {
+    pub fn length(self, entry: &Issue) -> Result<Self> {
         match self {
             Self::String(val) => Ok(Self::Duration(val.len() as f64)),
+            Self::Reference(field) => Ok(Self::Duration(field.length(entry))),
             _ => bail!(
                 "'len' function got incompatible argument ({})",
                 self.ttype()

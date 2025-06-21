@@ -226,7 +226,7 @@ pub fn eval(
                 _ => bail!("'sig' operator haven't got the argument"),
             },
             Len => match stack.pop() {
-                Some(val) => stack.push(val.length()?),
+                Some(val) => stack.push(val.length(issue)?),
                 _ => bail!("'len' operator haven't got the argument"),
             },
             Has => match stack.pop() {
