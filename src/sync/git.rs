@@ -117,9 +117,7 @@ impl SyncDriver for Git {
         let mut cmd = git_command(&target);
         cmd.args(["commit", "-m"]);
         cmd.arg(file);
-        if !cmd.spawn()?.wait()?.success() {
-            bail!("Unable to commit changes");
-        }
+        cmd.spawn()?.wait()?;
 
         Ok(())
     }
