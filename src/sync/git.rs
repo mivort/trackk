@@ -134,7 +134,8 @@ fn git_command(path: impl AsRef<Path>) -> Command {
 /// Set git config value.
 fn git_config(path: impl AsRef<Path>, key: &str, value: impl FnOnce() -> String) -> Result<()> {
     let mut cmd = git_command(&path);
-    cmd.args(["config", "user.email"]);
+    cmd.arg("config");
+    cmd.arg(key);
     if cmd.output()?.status.success() {
         return Ok(());
     }
@@ -177,6 +178,17 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
         .unwrap_or_default();
         if email.is_empty() { String::from(concat!("@", env!("CARGO_PKG_NAME"))) } else { email }
     })?;
+
+    git_config(
+        &path,
+        concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name"),
+        || concat!("'", env!("CARGO_PKG_NAME"), " json driver'").into(),
+    )?;
+    git_config(
+        &path,
+        concat!("merge.", env!("CARGO_PKG_NAME"), "-driver.driver"),
+        || concat!("'", env!("CARGO_PKG_NAME"), " merge %O %A %B'").into(),
+    )?;
 
     Ok(())
 }
