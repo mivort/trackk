@@ -1,42 +1,14 @@
-{#- Created date -#}
-{%- set created -%}
-  {{ fg(lightwhite) }}{{ entry.created | datefmt('long') }}{{ reset }}
-  {%- if cols > 60 -%}
-    {#- #} ({{ entry.created | longreldate }})
-  {%- endif -%}
-{%- endset -%}
-
-{#- Modified date -#}
-{%- set modified -%}
-  {{ fg(lightwhite) }}{{ entry.modified | datefmt('long') }}{{ reset }}
-  {%- if cols > 60 -%}
-    {#- #} ({{ entry.modified | longreldate }})
-  {%- endif -%}
-{%- endset -%}
-
-{#- Due date -#}
-{%- set due -%}
-  {%- if entry.due -%}
-    {{ fg(lightwhite) }}{{ entry.due | datefmt('long') }}{{ reset }}
+{#- Date display macro -#}
+{% macro entry_date(date) %}
+  {%- if date -%}
+    {{ fg(lightwhite) }}{{ date | datefmt('long') }}{{ reset }}
     {%- if cols > 60 -%}
-      {#- #} ({{ entry.due | longreldate }})
+      {#- #} ({{ date | longreldate }})
     {%- endif -%}
   {%- else -%}
     {{ fg(lightblack) }}--{{ reset }}
   {%- endif -%}
-{%- endset -%}
-
-{#- End date -#}
-{%- set end -%}
-  {%- if entry.end -%}
-    {{ fg(lightwhite) }}{{ entry.end | datefmt('long') }}{{ reset }}
-    {%- if cols > 60 -%}
-      {#- #} ({{ entry.end | longreldate }})
-    {%- endif -%}
-  {%- else -%}
-    {{ fg(lightblack) }}--{{ reset }}
-  {%- endif -%}
-{%- endset -%}
+{% endmacro %}
 
 {#- Tag list -#}
 {%- set tags -%}
@@ -63,10 +35,10 @@
 {{ entry.title }}
 {{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
 {{ fg(lightblue) }} Status:   {{ reset }}{{ entry.status }}
-{{ fg(lightblue) }} Created:  {{ reset }}{{ break }}{{ created }}
-{{ fg(lightblue) }} Modified: {{ reset }}{{ break }}{{ modified }}
-{{ fg(lightblue) }} Due:      {{ reset }}{{ break }}{{ due }}
-{{ fg(lightblue) }} End:      {{ reset }}{{ break }}{{ end }}
+{{ fg(lightblue) }} Created:  {{ reset }}{{ break }}{{ entry_date(entry.created) }}
+{{ fg(lightblue) }} Modified: {{ reset }}{{ break }}{{ entry_date(entry.modified) }}
+{{ fg(lightblue) }} Due:      {{ reset }}{{ break }}{{ entry_date(entry.due) }}
+{{ fg(lightblue) }} End:      {{ reset }}{{ break }}{{ entry_date(entry.end) }}
 {{ fg(lightblue) }} Repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
 {{ fg(lightblue) }} Tags:     {{ reset }}{{ tags }}
 
