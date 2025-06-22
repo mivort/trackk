@@ -41,6 +41,9 @@
 
 {#- Issue title -#}
 {%- set title | trunc(maxw - metaw - 6, '…') -%}
+  {%- if issue.status == 'blocked' -%}
+    {{ fg(red) }}[b] {# -#}
+  {%- endif -%}
   {{ fg(lightcyan) }}{{ issue.title | firstline }}
 {%- endset -%}
 {%- set titlew = title | width -%}

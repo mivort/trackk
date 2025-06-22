@@ -305,7 +305,8 @@ impl ValuesConfig {
             return concat!(
                 "sig((now - (due or someday)) / 10mil) * 10 + ",
                 "sig((now - created) / 10mil) * 0.5 + ",
-                "(status:started and 1 or 0)"
+                "(status:started and 1 or 0) + ",
+                "(status:blocked and -1 or 0)"
             );
         }
         &self.urgency_formula
