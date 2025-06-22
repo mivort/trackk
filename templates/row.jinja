@@ -18,16 +18,18 @@
   {{- reset -}}
 
   {#- Due date -#}
-  {%- if issue.due -%}
-    / {# -#}
-    {%- if issue.due >= now -%}
-      {{ fg(lightwhite) }}
+  {%- if cols > 36 -%}
+    {%- if issue.due -%}
+      / {# -#}
+      {%- if issue.due >= now -%}
+        {{ fg(lightwhite) }}
+      {%- else -%}
+        {{ fg(lightred) }}
+      {%- endif -%}
+      {{ issue.due | reldate }}{{ reset }} {# -#}
     {%- else -%}
-      {{ fg(lightred) }}
+      / {{ fg(lightblack) }}..{{ reset }} {# -#}
     {%- endif -%}
-    {{ issue.due | reldate }}{{ reset }} {# -#}
-  {%- else -%}
-    / {{ fg(lightblack) }}..{{ reset }} {# -#}
   {%- endif -%}
 
   {#- Urgency -#}
@@ -52,4 +54,4 @@
 
 {#- Row output -#}
 {{ title -}}
-{{ reset }}{{ fg(lightblack) }}{{ fill('.', maxw - titlew - metaw - 5) }}{{ meta }}
+{{ reset }}{{ fg(lightblack) }}{{ fill('.', maxw - titlew - metaw - 6) }} {{ meta }}

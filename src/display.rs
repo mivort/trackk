@@ -199,19 +199,19 @@ pub fn show_diff(before: &Issue, after: &Issue, app: &App) {
 
     if before.due != after.due {
         let before = before.due.map(|d| dates::reldate(d, app.ts, Some(1)));
-        let before = before.as_deref().unwrap_or("--");
+        let before = before.as_deref().unwrap_or("..");
 
         let after = after.due.map(|d| dates::reldate(d, app.ts, Some(1)));
-        let after = after.as_deref().unwrap_or("--");
+        let after = after.as_deref().unwrap_or("..");
 
         info!("    due: {before} -> {after}");
     }
     if before.end != after.end {
         let before = before.end.map(|d| dates::reldate(d, app.ts, Some(1)));
-        let before = before.as_deref().unwrap_or("--");
+        let before = before.as_deref().unwrap_or("..");
 
         let after = after.end.map(|d| dates::reldate(d, app.ts, Some(1)));
-        let after = after.as_deref().unwrap_or("--");
+        let after = after.as_deref().unwrap_or("..");
 
         info!("    end: {before} -> {after}");
     }
