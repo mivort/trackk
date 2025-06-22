@@ -11,6 +11,7 @@ use crate::config::IndexType;
 use crate::dateexp::parse_date;
 use crate::filter::{Filter, IdFilter};
 use crate::issue::Issue;
+use crate::templates::dates;
 use crate::{app::App, display, prelude::*, storage};
 
 /// Run editor, apply changes and return the exit status.
@@ -94,8 +95,8 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
 ///
 /// ----
 ///
-/// * Field 1: value
-/// * Field 2: value
+/// * __Field 1__: value
+/// * __Field 2__: value
 /// ```
 fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
     let tags = issue.tags.iter().map(|t| &**t).collect::<Vec<_>>();
@@ -111,22 +112,32 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
         None => String::new(),
     };
 
-    let created = format_date(issue.created, offset)?;
-    let modified = format_date(issue.modified, offset)?;
+    let now = time::UtcDateTime::now().unix_timestamp();
+
+    let created = format!(
+        "{} *({})*",
+        format_date(issue.created, offset)?,
+        dates::longreldate(issue.created, now, None)
+    );
+    let modified = format!(
+        "{} *({})*",
+        format_date(issue.modified, offset)?,
+        dates::longreldate(issue.modified, now, None)
+    );
 
     file.write_fmt(format_args!(
         concat!(
             "# {title}\n\n",
             "--------------------------------------------------------------------------------\n",
-            "* *Status:*   {status}\n",
-            "* *Tags:*     {tags}\n",
-            "* *Due:*      {due}\n",
-            "* *End:*      {end}\n",
-            "* *Repeat:*   {repeat}\n",
+            "* __Status__  : {status}\n",
+            "* __Tags__    : {tags}\n",
+            "* __Due__     : {due}\n",
+            "* __End__     : {end}\n",
+            "* __Repeat__  : {repeat}\n",
             "--------------------------------------------------------------------------------\n",
-            "- *ID:*       {id}\n",
-            "- *Created:*  {created}\n",
-            "- *Modified:* {modified}\n",
+            "- __ID__      : {id}\n",
+            "- __Created__ : {created}\n",
+            "- __Modified__: {modified}\n",
         ),
         title = issue.title,
         status = issue.status,
@@ -166,7 +177,7 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
     let (_, [title, meta]) = caps.extract();
     issue.title = title.trim().to_owned();
 
-    let meta_re = RegexBuilder::new("^*\\s+\\*(\\w+):\\*(.*)$")
+    let meta_re = RegexBuilder::new(r"^\s*\*\s+__(\w+)__\s*:(.*)$")
         .multi_line(true)
         .build()
         .unwrap();

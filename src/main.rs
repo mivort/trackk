@@ -51,6 +51,8 @@ fn main() -> Result<()> {
         app.sort = sort::parse_rules(sort)?;
     }
 
+    // TODO: P2: customize default error handling
+
     setup_logging(app.config.no_color(), args.verbose)?;
 
     match args.command {
