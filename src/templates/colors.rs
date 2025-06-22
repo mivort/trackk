@@ -102,3 +102,5 @@ pub const RESET: &str = "\x1B[0m";
 pub const BOLD: &str = "\x1B[1m";
 pub const ITALIC: &str = "\x1B[3m";
 pub const UNDERLINE: &str = "\x1B[4m";
+pub const INVERSE: &str = "\x1B[7m";
+pub const CROSSEDOUT: &str = "\x1B[9m";

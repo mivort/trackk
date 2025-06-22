@@ -91,6 +91,8 @@ impl<'env> Templates<'env> {
             j2.add_global("bold", colors::BOLD);
             j2.add_global("italic", colors::ITALIC);
             j2.add_global("underline", colors::UNDERLINE);
+            j2.add_global("inverse", colors::INVERSE);
+            j2.add_global("crossedout", colors::CROSSEDOUT);
         }
 
         j2.add_function("min", |a: i32, b: i32| a.min(b));

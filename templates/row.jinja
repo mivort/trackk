@@ -39,22 +39,36 @@
 {%- endset -%}
 {%- set metaw = meta | width -%}
 
-{#- Entry title -#}
-{%- set title | trunc(maxw - metaw - 6, '…') -%}
+{#- Entry status -#}
+{%- set status -%}
   {%- if entry.status == 'blocked' -%}
-    {{ fg(red) }}[b] {# -#}
+    {{ fg(red) }} ##
+  {%- elif entry.status == 'started' -%}
+    {{ fg(lightblue) }} >>
   {%- endif -%}
-  {{ fg(lightcyan) }}{{ entry.title | firstline }}
+{%- endset -%}
+{%- set statusw = status | width -%}
+
+{#- Entry title -#}
+{%- set title | trunc(maxw - statusw - metaw - 6, '…') -%}
+  {%- if entry.status == 'deleted' -%}
+    {{ fg(lightblack) }}
+  {%- elif entry.status == 'complete' -%}
+    {{ fg(green) }}
+  {%- else -%}
+    {{ fg(white) }}
+  {%- endif -%}
+  {{ entry.title | firstline }}
 {%- endset -%}
 {%- set titlew = title | width -%}
 
 {#- Shorthand ID -#}
 {%- if sid -%}
-{{ fg(lightblue) }}{{ sid | numfmt('{:3}. ') }}
+  {{ fg(lightblue) }}{{ sid | numfmt('{:3}. ') }}
 {%- else -%}
   {{ fg(blue) }}{{ entry.id[0:4] }} {# -#}
 {%- endif -%}
 
 {#- Row output -#}
 {{ title -}}
-{{ reset }}{{ fg(lightblack) }}{{ fill('.', maxw - titlew - metaw - 6) }} {{ meta }}
+{{ reset }}{{ status }}{{ fg(lightblack) }}{{ fill('.', maxw - statusw - titlew - metaw - 6) }} {{ meta }}
