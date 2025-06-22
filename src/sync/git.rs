@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::path::{Path, PathBuf};
@@ -186,16 +187,24 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
         if email.is_empty() { String::from(concat!("@", env!("CARGO_PKG_NAME"))) } else { email }
     })?;
 
-    let driver_name = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name");
-    let driver_command = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.driver");
+    let name = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name");
+    let driver = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.driver");
 
-    git_config(&path, driver_name, true, || {
+    let exe = std::env::current_exe()
+        .context("Unable to locate own executable to set as merge driver")?;
+    let exe = exe
+        .file_name()
+        .unwrap_or_else(|| OsStr::new(env!("CARGO_PKG_NAME")))
+        .to_string_lossy();
+    info!("Setting current executable name ({}) as merge driver", exe);
+
+    let command = format!("'{} merge %O %A %B'", exe);
+
+    git_config(&path, name, true, || {
         concat!("'", env!("CARGO_PKG_NAME"), " json bucket merge driver'").into()
     })?;
 
-    git_config(&path, driver_command, true, || {
-        concat!("'", env!("CARGO_PKG_NAME"), " merge %O %A %B'").into()
-    })?;
+    git_config(&path, driver, true, || command)?;
 
     Ok(())
 }
