@@ -132,12 +132,19 @@ fn git_command(path: impl AsRef<Path>) -> Command {
 }
 
 /// Set git config value.
-fn git_config(path: impl AsRef<Path>, key: &str, value: impl FnOnce() -> String) -> Result<()> {
-    let mut cmd = git_command(&path);
-    cmd.arg("config");
-    cmd.arg(key);
-    if cmd.output()?.status.success() {
-        return Ok(());
+fn git_config(
+    path: impl AsRef<Path>,
+    key: &str,
+    overwrite: bool,
+    value: impl FnOnce() -> String,
+) -> Result<()> {
+    if !overwrite {
+        let mut cmd = git_command(&path);
+        cmd.arg("config");
+        cmd.arg(key);
+        if cmd.output()?.status.success() {
+            return Ok(());
+        }
     }
     let mut cmd = git_command(&path);
     cmd.arg("config");
@@ -153,7 +160,7 @@ fn git_config(path: impl AsRef<Path>, key: &str, value: impl FnOnce() -> String)
 fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
     info!("Setting up 'git config'");
 
-    git_config(&path, "user.name", || {
+    git_config(&path, "user.name", false, || {
         if let Some(user) = &args.user {
             return user.to_string();
         }
@@ -166,7 +173,7 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
         if name.is_empty() { String::from(env!("CARGO_PKG_NAME")) } else { name }
     })?;
 
-    git_config(&path, "user.email", || {
+    git_config(&path, "user.email", false, || {
         if let Some(email) = &args.email {
             return email.to_string();
         }
@@ -179,16 +186,16 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
         if email.is_empty() { String::from(concat!("@", env!("CARGO_PKG_NAME"))) } else { email }
     })?;
 
-    git_config(
-        &path,
-        concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name"),
-        || concat!("'", env!("CARGO_PKG_NAME"), " json driver'").into(),
-    )?;
-    git_config(
-        &path,
-        concat!("merge.", env!("CARGO_PKG_NAME"), "-driver.driver"),
-        || concat!("'", env!("CARGO_PKG_NAME"), " merge %O %A %B'").into(),
-    )?;
+    let driver_name = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name");
+    let driver_command = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.driver");
+
+    git_config(&path, driver_name, true, || {
+        concat!("'", env!("CARGO_PKG_NAME"), " json bucket merge driver'").into()
+    })?;
+
+    git_config(&path, driver_command, true, || {
+        concat!("'", env!("CARGO_PKG_NAME"), " merge %O %A %B'").into()
+    })?;
 
     Ok(())
 }
