@@ -1,5 +1,4 @@
 use std::fs;
-use std::path::Path;
 
 use crate::args::InitArgs;
 use crate::config::{Config, SyncDriverMode};
@@ -37,21 +36,21 @@ pub fn init_repo(config: &Config, args: &InitArgs) -> Result<()> {
     }
 
     match config.sync.driver {
-        SyncDriverMode::Git => init_driver::<Git>(data_path, args),
+        SyncDriverMode::Git => init_driver::<Git>(config, args),
         SyncDriverMode::Custom => todo!(),
     }
     .context("Repo init failed")
 }
 
 /// Call specific init driver.
-pub fn init_driver<D>(path: impl AsRef<Path>, args: &InitArgs) -> Result<()>
+pub fn init_driver<D>(config: &Config, args: &InitArgs) -> Result<()>
 where
     D: SyncDriver,
 {
     if let Some(url) = &args.clone {
-        D::clone_repo(url, args, path)
+        D::clone_repo(url, args, config)
     } else {
-        D::init_repo(args, path)
+        D::init_repo(args, config)
     }
 }
 

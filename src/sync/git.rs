@@ -4,6 +4,7 @@ use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 use crate::args::InitArgs;
+use crate::config::Config;
 use crate::index::ACTIVE_INDEX;
 use crate::sync::driver::SyncDriver;
 use crate::{input, prelude::*};
@@ -12,10 +13,14 @@ use std::process::Command;
 
 pub struct Git;
 
+/// Gitattributes file content.
+const GIT_ATTR: &str = "*.json merge=trackk-bucket";
+
 impl SyncDriver for Git {
-    fn init_repo(args: &InitArgs, path: impl AsRef<Path>) -> Result<()> {
+    fn init_repo(args: &InitArgs, config: &Config) -> Result<()> {
         info!("Running 'git init' in repo directory");
 
+        let path = config.data_path()?;
         let mut cmd = git_command(&path);
         let spawn = cmd.arg("init").spawn();
 
@@ -25,32 +30,29 @@ impl SyncDriver for Git {
             }
             Err(e) => {
                 return Err(anyhow!(e)).with_context(|| {
-                    format!(
-                        "Unable to create repo at '{}'",
-                        path.as_ref().to_string_lossy()
-                    )
+                    format!("Unable to create repo at '{}'", path.to_string_lossy())
                 });
             }
             Ok(mut spawn) => spawn.wait()?,
         };
 
-        'index_ignore: {
-            let mut ignorepath = PathBuf::from(path.as_ref());
+        'gitignore: {
+            let mut ignorepath = PathBuf::from(&path);
             ignorepath.push(".gitignore");
 
-            let gitignore = match File::open(&ignorepath) {
-                Err(e) if matches!(e.kind(), ErrorKind::NotFound) => File::create(&ignorepath)?,
+            match File::open(&ignorepath) {
+                Err(e) if matches!(e.kind(), ErrorKind::NotFound) => {}
                 Err(e) => return Err(anyhow!(e)).context("Unable to access .gitignore"),
-                Ok(f) => f,
-            };
-
-            let reader = BufReader::new(gitignore);
-            for line in reader.lines() {
-                if line?.trim_end() == ACTIVE_INDEX {
-                    info!("Local index is already in .gitignore: skip");
-                    break 'index_ignore;
+                Ok(f) => {
+                    let reader = BufReader::new(f);
+                    for line in reader.lines() {
+                        if line?.trim_end() == ACTIVE_INDEX {
+                            info!("Local index is already in .gitignore: skip");
+                            break 'gitignore;
+                        }
+                    }
                 }
-            }
+            };
 
             info!("Adding local index to .gitignore");
             let mut file = OpenOptions::new()
@@ -59,22 +61,49 @@ impl SyncDriver for Git {
                 .open(&ignorepath)
                 .context("Unable to open .gitignore for writing")?;
             file.write_all(ACTIVE_INDEX.as_bytes())?;
+            file.write_all("\n".as_bytes())?;
         }
 
-        // TODO: P3: create .gitattributes
-        // TODO: P3: setup git merge driver
+        'gitattributes: {
+            let mut attrpath = PathBuf::from(config.entries_path()?);
+            attrpath.push(".gitattributes");
+
+            match File::open(&attrpath) {
+                Err(e) if matches!(e.kind(), ErrorKind::NotFound) => {}
+                Err(e) => return Err(anyhow!(e)).context("Unable to access .gitattributes"),
+                Ok(f) => {
+                    let reader = BufReader::new(f);
+                    for line in reader.lines() {
+                        if line?.trim_end() == GIT_ATTR {
+                            info!("Driver glob is already in .gitattributes: skip");
+                            break 'gitattributes;
+                        }
+                    }
+                }
+            };
+
+            info!("Adding merge driver to .gitattributes");
+            let mut file = OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&attrpath)
+                .context("Unable to open .gitignore for writing")?;
+            file.write_all(GIT_ATTR.as_bytes())?;
+            file.write_all("\n".as_bytes())?;
+        }
 
         git_config_setup(&path, args)
     }
 
-    fn clone_repo(url: &str, args: &InitArgs, target: impl AsRef<Path>) -> Result<()> {
+    fn clone_repo(url: &str, args: &InitArgs, config: &Config) -> Result<()> {
+        let target = config.data_path()?;
+
         let mut cmd = Command::new("git");
         cmd.args(["clone", url]);
-        cmd.arg(target.as_ref());
-
+        cmd.arg(&target);
         cmd.spawn().context("Unable to run 'git clone'")?.wait()?;
 
-        git_config_setup(&target, args)
+        Self::init_repo(args, config)
     }
 
     fn sync_repo(target: impl AsRef<Path>) -> Result<()> {
