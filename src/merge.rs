@@ -13,7 +13,7 @@ pub fn merge_driver(args: &MergeArgs) -> Result<()> {
     let ours = Bucket::from_full_path(&args.ours)?;
     let theirs = Bucket::from_full_path(&args.theirs)?;
 
-    merge_buckets(ancestor, theirs, ours);
+    let _merged = merge_buckets(ancestor, theirs, ours);
 
     // TODO: write the result back
 
@@ -21,15 +21,15 @@ pub fn merge_driver(args: &MergeArgs) -> Result<()> {
 }
 
 /// Perform bucket merge on the current version.
-fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) {
-    let mut index = BTreeMap::<Box<str>, Issue>::new();
+fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) -> Bucket {
+    let mut merged = BTreeMap::<Box<str>, Issue>::new();
 
     for entry in ours.entries.into_iter() {
-        index.insert(entry.id.clone(), entry);
+        merged.insert(entry.id.clone(), entry);
     }
 
     for incoming in theirs.entries.into_iter() {
-        let entry = index.get_mut(&incoming.id);
+        let entry = merged.get_mut(&incoming.id);
         if let Some(entry) = entry {
             let ancestor = ancestor.entries.iter_mut().find(|a| a.id == entry.id);
             if let Some(ancestor) = ancestor {
@@ -38,8 +38,13 @@ fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) {
                 merge_2way(entry, incoming);
             }
         } else {
-            index.insert(incoming.id.clone(), incoming);
+            merged.insert(incoming.id.clone(), incoming);
         }
+    }
+
+    Bucket {
+        version: ours.version,
+        entries: merged.into_values().collect(),
     }
 }
 
@@ -48,6 +53,7 @@ fn merge_3way(ours: &mut Issue, parent: Issue, theirs: Issue) {
     let their_newer = ours.modified < theirs.modified;
 
     merge_field(&mut ours.title, parent.title, theirs.title, their_newer);
+    merge_field(&mut ours.status, parent.status, theirs.status, their_newer);
     merge_field(&mut ours.tags, parent.tags, theirs.tags, their_newer);
     merge_field(&mut ours.parent, parent.parent, theirs.parent, their_newer);
     merge_field(&mut ours.repeat, parent.repeat, theirs.repeat, their_newer);
@@ -87,4 +93,41 @@ where
     {
         *ours = incoming;
     }
+}
+
+#[test]
+fn try_merge() {
+    let parent = Bucket {
+        version: 1,
+        entries: vec![Issue {
+            status: "pending".into(),
+            title: "old name".into(),
+            modified: 5,
+            ..Default::default()
+        }],
+    };
+
+    let ours = Bucket {
+        version: 1,
+        entries: vec![Issue {
+            status: "started".into(),
+            title: "new name".into(),
+            modified: 10,
+            ..Default::default()
+        }],
+    };
+
+    let theirs = Bucket {
+        version: 1,
+        entries: vec![Issue {
+            status: "complete".into(),
+            title: "old name".into(),
+            modified: 15,
+            ..Default::default()
+        }],
+    };
+
+    let res = &merge_buckets(parent, theirs, ours).entries[0];
+    assert_eq!(res.status, "complete");
+    assert_eq!(res.title, "new name");
 }
