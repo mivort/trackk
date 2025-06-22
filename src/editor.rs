@@ -20,9 +20,11 @@ pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
         tempfile::NamedTempFile::with_suffix(concat!(".", env!("CARGO_PKG_NAME"), ".md"))?;
     format_markdown(issue, tempfile.as_file_mut())?;
 
-    let status = Command::new(&*app.config.editor())
+    let editor = &*app.config.editor();
+    let status = Command::new(editor)
         .arg(tempfile.path())
-        .spawn()?
+        .spawn()
+        .with_context(|| format!("Unable to start editor '{editor}'"))?
         .wait()?;
 
     if !status.success() {
