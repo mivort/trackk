@@ -20,7 +20,7 @@
   {#- Due date -#}
   {%- if issue.due -%}
     / {# -#}
-    {%- if issue.due > now -%}
+    {%- if issue.due >= now -%}
       {{ fg(lightwhite) }}
     {%- else -%}
       {{ fg(lightred) }}

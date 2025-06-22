@@ -13,7 +13,7 @@ use crate::{app::App, prelude::*};
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct Issue {
     /// Entry unique ID used for merging.
-    pub id: String,
+    pub id: Box<str>,
 
     /// Numeric shorthand.
     #[serde(skip)]
@@ -75,7 +75,7 @@ impl Issue {
         let new_uuid = Uuid::new_v4().to_string();
 
         let mut new = Self {
-            id: new_uuid,
+            id: new_uuid.into(),
             created: app.ts,
             status: app.config.defaults.status_initial().to_string(),
             ..Default::default()
