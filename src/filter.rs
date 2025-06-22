@@ -170,10 +170,10 @@ impl IdFilter {
 
 #[test]
 fn match_issue() {
-    use std::collections::HashSet;
+    use std::collections::BTreeSet;
 
     let app = Default::default();
-    let mut tags = HashSet::<String>::default();
+    let mut tags = BTreeSet::<String>::default();
     tags.extend(["a", "b", "c"].map(Into::into).into_iter());
 
     let issue = Issue {
