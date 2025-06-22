@@ -1,5 +1,5 @@
 use serde_derive::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap};
 use time::{OffsetDateTime, UtcDateTime};
 use uuid::Uuid;
 
@@ -25,7 +25,7 @@ pub struct Issue {
 
     /// List of issue's tags.
     #[serde(default)]
-    pub tags: HashSet<String>,
+    pub tags: BTreeSet<String>,
 
     /// Entry status string.
     #[serde(default)]
