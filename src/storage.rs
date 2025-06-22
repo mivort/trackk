@@ -140,7 +140,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>
         );
     }
 
-    for entry in WalkDir::new(&path) {
+    for entry in WalkDir::new(&path).min_depth(2) {
         let entry = entry?;
 
         if entry.file_type().is_dir() {

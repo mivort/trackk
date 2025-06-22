@@ -8,7 +8,7 @@ use crate::{bucket::Bucket, prelude::*};
 
 /// Implement 3-way merge driver for once ancestor and two JSON buckets.
 pub fn merge_driver(args: &MergeArgs) -> Result<()> {
-    info!("Merging conflict with 3-way strategy");
+    info!("Merging conflict using 3-way strategy");
 
     let ancestor = Bucket::from_full_path(&args.ancestor)?;
     let ours = Bucket::from_full_path(&args.ours)?;
