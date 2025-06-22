@@ -173,6 +173,8 @@ pub fn show_diff(before: &Issue, after: &Issue, app: &App) {
     let id = &before.id[..8];
     info!("Issue {id} updated");
 
+    // TODO: P2: use diff template to show the diff
+
     if before.status != after.status {
         info!(" status: {} -> {}", before.status, after.status);
     }

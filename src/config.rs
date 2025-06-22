@@ -27,9 +27,13 @@ pub struct Config {
     #[serde(default)]
     editor: Box<str>,
 
-    /// Template name for single issue view.
+    /// Template name for single entry view.
     #[serde(default)]
     issue_view: Box<str>,
+
+    /// Template used to display entry changes.
+    #[serde(default)]
+    _diff_view: Box<str>,
 
     /// Color mode used during output.
     #[serde(default)]
