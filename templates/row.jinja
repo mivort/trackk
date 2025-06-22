@@ -18,18 +18,14 @@
   {{- reset -}}
 
   {#- Due date -#}
-  {%- if cols > 36 and entry.status != 'complete' and entry.status != 'deleted' -%}
-    {%- if entry.due -%}
-      / {# -#}
-      {%- if entry.due >= now -%}
-        {{ fg(lightwhite) }}
-      {%- else -%}
-        {{ fg(lightred) }}
-      {%- endif -%}
-      {{ entry.due | reldate }}{{ reset }} {# -#}
+  {%- if entry.due and cols > 36 and entry.status != 'complete' and entry.status != 'deleted' -%}
+    / {# -#}
+    {%- if entry.due >= now -%}
+      {{ fg(lightwhite) }}
     {%- else -%}
-      / {{ fg(lightblack) }}..{{ reset }} {# -#}
+      {{ fg(lightred) }}
     {%- endif -%}
+    {{ entry.due | reldate }}{{ reset }} {# -#}
   {%- endif -%}
 
   {#- Urgency -#}
