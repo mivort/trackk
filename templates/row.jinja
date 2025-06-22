@@ -4,29 +4,29 @@
 {#- Limit amount of visible tags based on terminal width -#}
 {%- set taglimit = 2 if cols > 56 else 1 -%}
 
-{#- Issue details section -#}
+{#- Entry details section -#}
 {%- set meta -%}
   {#- Tag list -#}
   {%- if cols > 32 -%}
-    {%- for tag in issue.tags | batch(taglimit) | first -%}
+    {%- for tag in entry.tags | batch(taglimit) | first -%}
       {{ fg(magenta) }}#{{ fg(lightmagenta) }}{{ tag }} {# -#}
     {%- endfor -%}
-    {% if issue.tags | length > taglimit -%}
-      {{ fg(magenta) }}+{{ issue.tags | length - taglimit }} {# -#}
+    {% if entry.tags | length > taglimit -%}
+      {{ fg(magenta) }}+{{ entry.tags | length - taglimit }} {# -#}
     {% endif -%}
   {%- endif -%}
   {{- reset -}}
 
   {#- Due date -#}
   {%- if cols > 36 -%}
-    {%- if issue.due -%}
+    {%- if entry.due -%}
       / {# -#}
-      {%- if issue.due >= now -%}
+      {%- if entry.due >= now -%}
         {{ fg(lightwhite) }}
       {%- else -%}
         {{ fg(lightred) }}
       {%- endif -%}
-      {{ issue.due | reldate }}{{ reset }} {# -#}
+      {{ entry.due | reldate }}{{ reset }} {# -#}
     {%- else -%}
       / {{ fg(lightblack) }}..{{ reset }} {# -#}
     {%- endif -%}
@@ -39,12 +39,12 @@
 {%- endset -%}
 {%- set metaw = meta | width -%}
 
-{#- Issue title -#}
+{#- Entry title -#}
 {%- set title | trunc(maxw - metaw - 6, '…') -%}
-  {%- if issue.status == 'blocked' -%}
+  {%- if entry.status == 'blocked' -%}
     {{ fg(red) }}[b] {# -#}
   {%- endif -%}
-  {{ fg(lightcyan) }}{{ issue.title | firstline }}
+  {{ fg(lightcyan) }}{{ entry.title | firstline }}
 {%- endset -%}
 {%- set titlew = title | width -%}
 
@@ -52,7 +52,7 @@
 {%- if sid -%}
 {{ fg(lightblue) }}{{ sid | numfmt('{:3}. ') }}
 {%- else -%}
-  {{ fg(blue) }}{{ issue.id[0:4] }} {# -#}
+  {{ fg(blue) }}{{ entry.id[0:4] }} {# -#}
 {%- endif -%}
 
 {#- Row output -#}

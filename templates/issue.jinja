@@ -1,25 +1,25 @@
 {#- Created date -#}
 {%- set created -%}
-  {{ fg(lightwhite) }}{{ issue.created | datefmt('long') }}{{ reset }}
+  {{ fg(lightwhite) }}{{ entry.created | datefmt('long') }}{{ reset }}
   {%- if cols > 60 -%}
-    {#- #} ({{ issue.created | longreldate }})
+    {#- #} ({{ entry.created | longreldate }})
   {%- endif -%}
 {%- endset -%}
 
 {#- Modified date -#}
 {%- set modified -%}
-  {{ fg(lightwhite) }}{{ issue.modified | datefmt('long') }}{{ reset }}
+  {{ fg(lightwhite) }}{{ entry.modified | datefmt('long') }}{{ reset }}
   {%- if cols > 60 -%}
-    {#- #} ({{ issue.modified | longreldate }})
+    {#- #} ({{ entry.modified | longreldate }})
   {%- endif -%}
 {%- endset -%}
 
 {#- Due date -#}
 {%- set due -%}
-  {%- if issue.due -%}
-    {{ fg(lightwhite) }}{{ issue.due | datefmt('long') }}{{ reset }}
+  {%- if entry.due -%}
+    {{ fg(lightwhite) }}{{ entry.due | datefmt('long') }}{{ reset }}
     {%- if cols > 60 -%}
-      {#- #} ({{ issue.due | longreldate }})
+      {#- #} ({{ entry.due | longreldate }})
     {%- endif -%}
   {%- else -%}
     {{ fg(lightblack) }}--{{ reset }}
@@ -28,10 +28,10 @@
 
 {#- End date -#}
 {%- set end -%}
-  {%- if issue.end -%}
-    {{ fg(lightwhite) }}{{ issue.end | datefmt('long') }}{{ reset }}
+  {%- if entry.end -%}
+    {{ fg(lightwhite) }}{{ entry.end | datefmt('long') }}{{ reset }}
     {%- if cols > 60 -%}
-      {#- #} ({{ issue.end | longreldate }})
+      {#- #} ({{ entry.end | longreldate }})
     {%- endif -%}
   {%- else -%}
     {{ fg(lightblack) }}--{{ reset }}
@@ -40,8 +40,8 @@
 
 {#- Tag list -#}
 {%- set tags -%}
-  {%- if issue.tags | length > 0 -%}
-    {%- for tag in issue.tags -%}
+  {%- if entry.tags | length > 0 -%}
+    {%- for tag in entry.tags -%}
       {{ fg(magenta) }}#{{ fg(lightmagenta) }}{{ tag }} {# -#}
     {%- endfor -%}
   {%- else -%}
@@ -60,14 +60,14 @@
 
 {#- Field output -#}
 {{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
-{{ issue.title }}
+{{ entry.title }}
 {{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
-{{ fg(lightblue) }} Status:   {{ reset }}{{ issue.status }}
+{{ fg(lightblue) }} Status:   {{ reset }}{{ entry.status }}
 {{ fg(lightblue) }} Created:  {{ reset }}{{ break }}{{ created }}
 {{ fg(lightblue) }} Modified: {{ reset }}{{ break }}{{ modified }}
 {{ fg(lightblue) }} Due:      {{ reset }}{{ break }}{{ due }}
 {{ fg(lightblue) }} End:      {{ reset }}{{ break }}{{ end }}
-{{ fg(lightblue) }} Repeat:   {{ reset }}{{ issue.repeat | default(fg(lightblack) ~ "--") }}
+{{ fg(lightblue) }} Repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
 {{ fg(lightblue) }} Tags:     {{ reset }}{{ tags }}
 
 {{ fg(lightblue) }} Urgency:  {{ reset }}{{ urgency | numfmt('{:.3}') }}
@@ -75,6 +75,6 @@
 {% if sid -%}
   {{ fg(lightblue) }} SID:      {{ reset }}{{ sid }}
 {% endif -%}
-{{ fg(lightblue) }} UUID:     {{ reset }}{{ break }}{{ issue.id | trunc(maxw - 3) }}
+{{ fg(lightblue) }} UUID:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 3) }}
 {{ fg(lightblue) }} Path:     {{ reset }}{{ path }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}

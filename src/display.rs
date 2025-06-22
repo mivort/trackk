@@ -22,7 +22,7 @@ struct RowContext<'a> {
     lineno: usize,
 
     /// Reference to the issue data.
-    issue: Cow<'a, Issue>,
+    entry: Cow<'a, Issue>,
 
     /// Path to storage file which contains the entry.
     path: Cow<'a, str>,
@@ -112,11 +112,11 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
     }
 
     let template = j2.get_template(&section.template)?;
-    for (lineno, (issue, path)) in entries.iter().enumerate() {
+    for (lineno, (entry, path)) in entries.iter().enumerate() {
         let context = RowContext {
-            sid: issue.sid,
-            urgency: issue.urgency,
-            issue: Cow::Borrowed(issue),
+            sid: entry.sid,
+            urgency: entry.urgency,
+            entry: Cow::Borrowed(entry),
             path: Cow::Borrowed(path),
             lineno,
         };
@@ -129,7 +129,7 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
 }
 
 /// Render single entry.
-pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Result<()> {
+pub fn show_entry<'a>((entry, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Result<()> {
     app.templates.init(app)?;
 
     let template_id = app.config.issue_view();
@@ -140,15 +140,15 @@ pub fn show_entry<'a>((issue, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
     let out = std::io::stdout();
 
     let context = RowContext {
-        sid: issue.sid,
-        urgency: issue.urgency,
-        issue: Cow::Borrowed(issue),
+        sid: entry.sid,
+        urgency: entry.urgency,
+        entry: Cow::Borrowed(entry),
         path: Cow::Borrowed(path),
         lineno: 0,
     };
     template
         .render_to_write(context, &out)
-        .with_context(|| format!("Unable to render issue template: {}", template_id))?;
+        .with_context(|| format!("Unable to render entry template: {}", template_id))?;
 
     Ok(())
 }
