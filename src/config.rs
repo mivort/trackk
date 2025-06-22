@@ -246,12 +246,12 @@ impl Config {
 
         Cow::Owned(ReportConfig {
             sections: vec![SectionConfig {
-                title: "All".into(),
+                title: "All entries".into(),
                 index: IndexType::All,
                 sorting: "end+ created+".into(),
                 _grouping: "".into(),
                 filter: "".into(),
-                header: "".into(),
+                header: "header".into(),
                 template: "all".into(),
             }],
         })
