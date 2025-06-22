@@ -40,7 +40,7 @@ impl SyncDriver for Git {
         ignorepath.push(".gitignore");
         append_line(&ignorepath, ACTIVE_INDEX)?;
 
-        let mut attrpath = PathBuf::from(config.entries_path()?);
+        let mut attrpath = config.entries_path()?;
         attrpath.push(".gitattributes");
         append_line(&attrpath, GIT_ATTR)?;
 

@@ -214,14 +214,27 @@ impl Issue {
     }
 
     /// Check issue validity and produce error message in case if required data is missing.
-    pub fn validate(&self, app: &App) -> Result<()> {
+    /// If possible, fix the status value.
+    pub fn validate(&mut self, app: &App) -> Result<()> {
         if self.title.is_empty() {
             bail!("Entry title should not be empty");
         }
 
         let config = &app.config.values;
+        let permit_status = &config.permit_status;
 
-        if !config.permit_status.iter().any(|s| **s == self.status) {
+        let no_status = 'no_match: {
+            let mut filter = permit_status.iter().filter(|s| s.starts_with(&self.status));
+            let approx = filter.next();
+            let approx = unwrap_some_or!(approx, { break 'no_match true });
+            if filter.count() > 0 {
+                break 'no_match true;
+            }
+
+            self.status = approx.to_string();
+            false
+        };
+        if no_status {
             bail!(
                 "Entry status should be one of: {}. Update config to allow more statuses.",
                 app.config.values.permit_status.join(", ")
