@@ -5,7 +5,8 @@ use crate::filter::{Filter, IdFilter};
 use crate::issue::Issue;
 use crate::{app::App, display, prelude::*};
 
-use std::fs;
+use std::fs::{self, File};
+use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::rc::Rc;
 use time::{Date, UtcDateTime};
@@ -113,9 +114,11 @@ fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
 
 /// Serialize bucket data and store in provided path.
 pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<()> {
-    let output = serde_json::to_string_pretty(data)?;
     let path = app.config.entries_path()?.join(&path);
-    fs::write(path, output)?;
+    let file = File::create(path)?;
+    let mut writer = BufWriter::new(file);
+    serde_json::to_writer_pretty(&mut writer, data)?;
+    writer.write_all(b"\n")?;
 
     Ok(())
 }
