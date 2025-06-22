@@ -44,6 +44,8 @@ fn main() -> Result<()> {
     let args = Args::parse();
     let config = read_config(&args)?;
 
+    setup_logging(config.no_color(), args.verbose)?;
+
     if let Some(Command::Alias(alias)) = &args.command {
         // TODO: P3: replace with alias and re-parse
         warn!("Alias '{}' not found", alias.first().unwrap());
@@ -53,8 +55,6 @@ fn main() -> Result<()> {
     app.apply_args(&args)?;
 
     // TODO: P2: customize default error handling
-
-    setup_logging(app.config.no_color(), args.verbose)?;
 
     match args.command {
         Some(Command::List(_args)) => {

@@ -1,7 +1,13 @@
 {#- Date display macro -#}
 {% macro entry_date(date) %}
   {%- if date -%}
-    {{ fg(lightwhite) }}{{ date | datefmt('long') }}{{ reset }}
+    {{ fg(lightwhite) }}
+      {%- if cols > 42 -%}
+        {{ date | datefmt('long') }}
+      {%- else -%}
+        {{ date | datefmt }}
+      {%- endif -%}
+    {{ reset }}
     {%- if cols > 60 -%}
       {#- #} ({{ date | longreldate }})
     {%- endif -%}
@@ -24,7 +30,7 @@
 
 {#- Line break -#}
 {%- set break -%}
-  {% if cols < 44 %}{{ "\n * " }}{% endif %}
+  {% if cols < 44 %}{{ "\n " }}{% endif %}
 {%- endset -%}
 
 {#- Max width -#}
@@ -35,10 +41,10 @@
 {{ entry.title }}
 {{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
 {{ fg(lightblue) }} Status:   {{ reset }}{{ entry.status }}
-{{ fg(lightblue) }} Created:  {{ reset }}{{ break }}{{ entry_date(entry.created) }}
-{{ fg(lightblue) }} Modified: {{ reset }}{{ break }}{{ entry_date(entry.modified) }}
-{{ fg(lightblue) }} Due:      {{ reset }}{{ break }}{{ entry_date(entry.due) }}
-{{ fg(lightblue) }} End:      {{ reset }}{{ break }}{{ entry_date(entry.end) }}
+{{ fg(lightblue) }} Created:  {{ reset }}{{ entry_date(entry.created) }}
+{{ fg(lightblue) }} Modified: {{ reset }}{{ entry_date(entry.modified) }}
+{{ fg(lightblue) }} Due:      {{ reset }}{{ entry_date(entry.due) }}
+{{ fg(lightblue) }} End:      {{ reset }}{{ entry_date(entry.end) }}
 {{ fg(lightblue) }} Repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
 {{ fg(lightblue) }} Tags:     {{ reset }}{{ tags }}
 
@@ -47,6 +53,6 @@
 {% if sid -%}
   {{ fg(lightblue) }} SID:      {{ reset }}{{ sid }}
 {% endif -%}
-{{ fg(lightblue) }} UUID:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 3) }}
+{{ fg(lightblue) }} UUID:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 1, '…') }}
 {{ fg(lightblue) }} Path:     {{ reset }}{{ path }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
