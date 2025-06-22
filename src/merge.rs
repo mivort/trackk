@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::fs;
 
 use crate::args::MergeArgs;
 
@@ -7,17 +8,16 @@ use crate::{bucket::Bucket, prelude::*};
 
 /// Implement 3-way merge driver for once ancestor and two JSON buckets.
 pub fn merge_driver(args: &MergeArgs) -> Result<()> {
-    // TODO: P3: implement merge driver
+    info!("Merging conflict with 3-way strategy");
 
     let ancestor = Bucket::from_full_path(&args.ancestor)?;
     let ours = Bucket::from_full_path(&args.ours)?;
     let theirs = Bucket::from_full_path(&args.theirs)?;
 
-    let _merged = merge_buckets(ancestor, theirs, ours);
+    let merged = merge_buckets(ancestor, theirs, ours);
 
-    // TODO: write the result back
-
-    Ok(())
+    let output = serde_json::to_string_pretty(&merged)?;
+    fs::write(&args.ours, output).context("Unable to write merged bucket")
 }
 
 /// Perform bucket merge on the current version.
