@@ -196,7 +196,7 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
         .to_string_lossy();
     info!("Setting current executable name ({}) as merge driver", exe);
 
-    let command = format!("'{} merge %O %A %B'", exe);
+    let command = format!("{} merge %O %A %B", exe);
 
     git_config(&path, name, true, || {
         concat!("'", env!("CARGO_PKG_NAME"), " json bucket merge driver'").into()
