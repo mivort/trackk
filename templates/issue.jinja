@@ -70,6 +70,8 @@
 {{ fg(lightblue) }} Repeat:   {{ reset }}{{ issue.repeat | default(fg(lightblack) ~ "--") }}
 {{ fg(lightblue) }} Tags:     {{ reset }}{{ tags }}
 
+{{ fg(lightblue) }} Urgency:  {{ reset }}{{ urgency | numfmt('{:.3}') }}
+
 {% if sid -%}
   {{ fg(lightblue) }} SID:      {{ reset }}{{ sid }}
 {% endif -%}
