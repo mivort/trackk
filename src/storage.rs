@@ -53,7 +53,7 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
         }
 
         bucket_issue.validate(app)?;
-        display::show_diff(issue, bucket_issue);
+        display::show_diff(issue, bucket_issue, app);
 
         if issue.status != bucket_issue.status {
             bucket_issue.update_end(&app.config);

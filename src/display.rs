@@ -6,6 +6,7 @@ use serde_derive::Serialize;
 use crate::config::{ReportConfig, SectionConfig};
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::issue::Issue;
+use crate::templates::dates;
 use crate::{app::App, prelude::*, sort, storage};
 
 #[derive(Serialize)]
@@ -168,38 +169,48 @@ pub fn _show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
 }
 
 /// Print changes to the entry as the series of info messages.
-pub fn show_diff(before: &Issue, after: &Issue) {
+pub fn show_diff(before: &Issue, after: &Issue, app: &App) {
     let id = &before.id[..8];
     info!("Issue {id} updated");
 
     if before.status != after.status {
-        info!("Status:   {} -> {}", before.status, after.status);
+        info!(" status: {} -> {}", before.status, after.status);
     }
     if before.title != after.title {
         let before = before.title.len();
         let after = after.title.len();
-        info!("Title:    {before} -> {after} bytes");
+        info!("  title: {before} -> {after} bytes");
     }
 
     if before.tags != after.tags {
         let before = before.tags.len();
         let after = after.tags.len();
         let s = if after > 1 { "s" } else { "" };
-        info!("Tags:     {before} -> {after} tag{s}");
+        info!("   tags: {before} -> {after} tag{s}");
     }
 
     if before.repeat != after.repeat {
         let before = before.repeat.as_deref().unwrap_or("no repeat");
         let after = after.repeat.as_deref().unwrap_or("no repeat");
-        info!("Repeat:   {before} -> {after}");
+        info!(" repeat: {before} -> {after}");
     }
-
-    // TODO: P3: nicer due/end dates format
 
     if before.due != after.due {
-        info!("Due:      {:?} -> {:?}", before.due, after.due);
+        let before = before.due.map(|d| dates::reldate(d, app.ts, Some(1)));
+        let before = before.as_deref().unwrap_or("--");
+
+        let after = after.due.map(|d| dates::reldate(d, app.ts, Some(1)));
+        let after = after.as_deref().unwrap_or("--");
+
+        info!("    due: {before} -> {after}");
     }
     if before.end != after.end {
-        info!("End:      {:?} -> {:?}", before.end, after.end);
+        let before = before.end.map(|d| dates::reldate(d, app.ts, Some(1)));
+        let before = before.as_deref().unwrap_or("--");
+
+        let after = after.end.map(|d| dates::reldate(d, app.ts, Some(1)));
+        let after = after.as_deref().unwrap_or("--");
+
+        info!("    end: {before} -> {after}");
     }
 }
