@@ -72,9 +72,7 @@
 {%- endset -%}
 {%- set numberw = number | width -%}
 {%- set numbercolor -%}
-  {%- if entry.status == 'blocked' -%}
-    {{ fg(red) }}
-  {%- elif entry.status == 'deleted' -%}
+  {%- if entry.status == 'deleted' -%}
     {{ fg(lightblack) }}
   {%- elif entry.status == 'complete' -%}
     {{ fg(lightgreen) }}
