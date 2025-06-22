@@ -36,61 +36,13 @@ impl SyncDriver for Git {
             Ok(mut spawn) => spawn.wait()?,
         };
 
-        'gitignore: {
-            let mut ignorepath = PathBuf::from(&path);
-            ignorepath.push(".gitignore");
+        let mut ignorepath = PathBuf::from(&path);
+        ignorepath.push(".gitignore");
+        append_line(&ignorepath, ACTIVE_INDEX)?;
 
-            match File::open(&ignorepath) {
-                Err(e) if matches!(e.kind(), ErrorKind::NotFound) => {}
-                Err(e) => return Err(anyhow!(e)).context("Unable to access .gitignore"),
-                Ok(f) => {
-                    let reader = BufReader::new(f);
-                    for line in reader.lines() {
-                        if line?.trim_end() == ACTIVE_INDEX {
-                            info!("Local index is already in .gitignore: skip");
-                            break 'gitignore;
-                        }
-                    }
-                }
-            };
-
-            info!("Adding local index to .gitignore");
-            let mut file = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&ignorepath)
-                .context("Unable to open .gitignore for writing")?;
-            file.write_all(ACTIVE_INDEX.as_bytes())?;
-            file.write_all("\n".as_bytes())?;
-        }
-
-        'gitattributes: {
-            let mut attrpath = PathBuf::from(config.entries_path()?);
-            attrpath.push(".gitattributes");
-
-            match File::open(&attrpath) {
-                Err(e) if matches!(e.kind(), ErrorKind::NotFound) => {}
-                Err(e) => return Err(anyhow!(e)).context("Unable to access .gitattributes"),
-                Ok(f) => {
-                    let reader = BufReader::new(f);
-                    for line in reader.lines() {
-                        if line?.trim_end() == GIT_ATTR {
-                            info!("Driver glob is already in .gitattributes: skip");
-                            break 'gitattributes;
-                        }
-                    }
-                }
-            };
-
-            info!("Adding merge driver to .gitattributes");
-            let mut file = OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&attrpath)
-                .context("Unable to open .gitignore for writing")?;
-            file.write_all(GIT_ATTR.as_bytes())?;
-            file.write_all("\n".as_bytes())?;
-        }
+        let mut attrpath = PathBuf::from(config.entries_path()?);
+        attrpath.push(".gitattributes");
+        append_line(&attrpath, GIT_ATTR)?;
 
         git_config_setup(&path, args)
     }
@@ -232,6 +184,42 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
     })?;
 
     git_config(&path, driver, true, || command)?;
+
+    Ok(())
+}
+
+/// Check if file contains the line. If not, append at the end.
+fn append_line(path: impl AsRef<Path>, value: &str) -> Result<()> {
+    let name = path
+        .as_ref()
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy();
+
+    match File::open(&path) {
+        Err(e) if matches!(e.kind(), ErrorKind::NotFound) => {}
+        Err(e) => {
+            return Err(anyhow!(e)).with_context(|| format!("Unable to access {name}"));
+        }
+        Ok(f) => {
+            let reader = BufReader::new(f);
+            for line in reader.lines() {
+                if line?.trim_end() == value {
+                    info!("Repo's {name} already set: skip");
+                    return Ok(());
+                }
+            }
+        }
+    };
+
+    info!("Adding merge driver to {name}");
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&path)
+        .with_context(|| format!("Unable to open {name} for writing"))?;
+    file.write_all(value.as_bytes())?;
+    file.write_all("\n".as_bytes())?;
 
     Ok(())
 }
