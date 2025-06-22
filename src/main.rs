@@ -27,13 +27,13 @@ mod sync {
     pub(crate) mod git;
 }
 mod import {
-    pub(crate) mod twv2;
+    pub(crate) mod tw;
 }
 
 use std::path::PathBuf;
 use std::{env, fs, io};
 
-use args::{Args, Command};
+use args::{Args, Command, ImportMode};
 use clap::Parser;
 use config::Config;
 use config::IndexType;
@@ -195,9 +195,12 @@ fn main() -> Result<()> {
                 println!("{color}{{#- END OF TEMPLATE -#}}{reset}");
             }
         }
-        Some(Command::Import(_)) => {
-            // TODO: P3: implement import from taskwarrior
-        }
+        Some(Command::Import(import)) => match import.format {
+            ImportMode::Taskwarrior => import::tw::import(import.input)?,
+            ImportMode::Native => {
+                todo!()
+            }
+        },
         Some(Command::Alias(ids)) => {
             let filters = filter::Filter {
                 ids: &filter::IdFilter::from_shorthands(ids, &app)?,

@@ -277,7 +277,7 @@ pub struct ImportArgs {
     pub format: ImportMode,
 
     /// Input file (read from stdin if not specified).
-    pub input: Option<Box<str>>,
+    pub input: PathBuf,
 }
 
 /// Merge driver arguments.
