@@ -57,7 +57,7 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
             break;
         }
 
-        issue.validate(app)?;
+        issue.validate()?;
 
         let mut bucket = Bucket::from_path(&*path, app)?;
         let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();
@@ -192,7 +192,7 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
 
         match key.as_str() {
             "status" => {
-                issue.status = val.trim().to_owned();
+                issue.update_status(val.trim(), app)?;
             }
             "tags" => {
                 let tags = val.split_whitespace().filter(|s| !s.is_empty());

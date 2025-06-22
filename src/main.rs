@@ -94,7 +94,7 @@ fn main() -> Result<()> {
                     return Ok(());
                 }
             }
-            issue.validate(&app)?;
+            issue.validate()?;
             storage::add_entry(issue, &app)?;
         }
         Some(Command::Log(a)) => {
@@ -110,7 +110,7 @@ fn main() -> Result<()> {
                     return Ok(());
                 }
             }
-            issue.validate(&app)?;
+            issue.validate()?;
             storage::add_entry(issue, &app)?;
         }
 
