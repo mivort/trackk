@@ -36,17 +36,17 @@ use std::{env, fs, io};
 use args::{Args, Command};
 use clap::Parser;
 use config::Config;
+use config::IndexType;
 use log::Level;
 use prelude::*;
-
-use self::config::IndexType;
 
 fn main() -> Result<()> {
     let args = Args::parse();
     let config = read_config(&args)?;
 
-    if let Some(Command::Alias(_)) = &args.command {
+    if let Some(Command::Alias(alias)) = &args.command {
         // TODO: P3: replace with alias and re-parse
+        warn!("Alias '{}' not found", alias.first().unwrap());
     }
 
     let mut app = app::App::new(config);
@@ -198,12 +198,16 @@ fn main() -> Result<()> {
         Some(Command::Import(_)) => {
             // TODO: P3: implement import from taskwarrior
         }
-        Some(Command::Alias(report)) => {
-            // TODO: P2: handle custom reports
-            bail!(
-                "Custom report config '{}' not found",
-                report.first().unwrap()
-            );
+        Some(Command::Alias(ids)) => {
+            let filters = filter::Filter {
+                ids: &filter::IdFilter::from_shorthands(ids, &app)?,
+                query: &mut Default::default(),
+            };
+            let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
+
+            for entry in &entries {
+                display::show_entry(entry, &app)?;
+            }
         }
         None => {
             let ids = Default::default();
