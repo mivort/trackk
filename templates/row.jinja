@@ -27,16 +27,18 @@
     {%- endif -%}
     {{ issue.due | reldate }}{{ reset }} {# -#}
   {%- else -%}
-    / {{ fg(lightblack) }}...{{ reset }} {# -#}
+    / {{ fg(lightblack) }}..{{ reset }} {# -#}
   {%- endif -%}
 
   {#- Urgency -#}
-  / {{ fg(green) }}{{ urgency | numfmt('{:.1}') }}{{ reset }}
+  {%- if cols > 48 -%}
+    / {{ fg(green) }}{{ urgency | numfmt('{:.1}') }}{{ reset }} {# -#}
+  {%- endif -%}
 {%- endset -%}
 {%- set metaw = meta | width -%}
 
 {#- Issue title -#}
-{%- set title | trunc(maxw - metaw - 8, '…') -%}
+{%- set title | trunc(maxw - metaw - 6, '…') -%}
   {{ fg(lightcyan) }}{{ issue.title | firstline }}
 {%- endset -%}
 {%- set titlew = title | width -%}
@@ -50,4 +52,4 @@
 
 {#- Row output -#}
 {{ title -}}
-{{ reset }}{{ fg(lightblack) }} {{ fill('.', maxw - titlew - metaw - 8) }} {{ meta }}
+{{ reset }}{{ fg(lightblack) }}{{ fill('.', maxw - titlew - metaw - 5) }}{{ meta }}
