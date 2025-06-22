@@ -125,11 +125,10 @@ pub enum Command {
     /// Check data repository and VCS status.
     Check,
 
-    /// If no built-in command was matched, consider one of reports defined
-    /// in the config.
+    /// If no built-in command was matched, try to match with one of the aliases.
+    /// Otherwise, fallback to 'info' command.
     #[command(external_subcommand)]
-    #[allow(unused)]
-    Report(Vec<String>),
+    Alias(Vec<String>),
 }
 
 impl Default for Command {

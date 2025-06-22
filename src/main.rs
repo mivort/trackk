@@ -43,13 +43,14 @@ use self::config::IndexType;
 
 fn main() -> Result<()> {
     let args = Args::parse();
+    let config = read_config(&args)?;
 
-    let mut app = app::App::new(read_config(&args)?);
-
-    app.filter = filter::parse_filter_args(&args, &app)?;
-    if let Some(sort) = &args.filter_args.sort {
-        app.sort = sort::parse_rules(sort)?;
+    if let Some(Command::Alias(_)) = &args.command {
+        // TODO: P3: replace with alias and re-parse
     }
+
+    let mut app = app::App::new(config);
+    app.apply_args(&args)?;
 
     // TODO: P2: customize default error handling
 
@@ -197,7 +198,7 @@ fn main() -> Result<()> {
         Some(Command::Import(_)) => {
             // TODO: P3: implement import from taskwarrior
         }
-        Some(Command::Report(report)) => {
+        Some(Command::Alias(report)) => {
             // TODO: P2: handle custom reports
             bail!(
                 "Custom report config '{}' not found",
