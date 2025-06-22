@@ -178,9 +178,9 @@ pub fn show_diff(before: &Issue, after: &Issue, app: &App) {
     if before.status != after.status {
         info!(" status: {} -> {}", before.status, after.status);
     }
-    if before.title != after.title {
-        let before = before.title.len();
-        let after = after.title.len();
+    if before.desc != after.desc {
+        let before = before.desc.len();
+        let after = after.desc.len();
         info!("  title: {before} -> {after} bytes");
     }
 

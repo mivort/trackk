@@ -52,7 +52,7 @@ fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) -> Bucket {
 fn merge_3way(ours: &mut Issue, parent: Issue, theirs: Issue) {
     let their_newer = ours.modified < theirs.modified;
 
-    merge_field(&mut ours.title, parent.title, theirs.title, their_newer);
+    merge_field(&mut ours.desc, parent.desc, theirs.desc, their_newer);
     merge_field(&mut ours.status, parent.status, theirs.status, their_newer);
     merge_field(&mut ours.tags, parent.tags, theirs.tags, their_newer);
     merge_field(&mut ours.parent, parent.parent, theirs.parent, their_newer);
@@ -101,7 +101,7 @@ fn try_merge() {
         version: 1,
         entries: vec![Issue {
             status: "pending".into(),
-            title: "old name".into(),
+            desc: "old name".into(),
             modified: 5,
             ..Default::default()
         }],
@@ -111,7 +111,7 @@ fn try_merge() {
         version: 1,
         entries: vec![Issue {
             status: "started".into(),
-            title: "new name".into(),
+            desc: "new name".into(),
             modified: 10,
             ..Default::default()
         }],
@@ -121,7 +121,7 @@ fn try_merge() {
         version: 1,
         entries: vec![Issue {
             status: "complete".into(),
-            title: "old name".into(),
+            desc: "old name".into(),
             modified: 15,
             ..Default::default()
         }],
@@ -129,5 +129,5 @@ fn try_merge() {
 
     let res = &merge_buckets(parent, theirs, ours).entries[0];
     assert_eq!(res.status, "complete");
-    assert_eq!(res.title, "new name");
+    assert_eq!(res.desc, "new name");
 }

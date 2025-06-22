@@ -71,8 +71,8 @@ pub fn parse_rules(rule: &str) -> Result<Vec<SortingRule>> {
 pub enum SortingRule {
     UrgencyAsc,
     UrgencyDesc,
-    TitleAsc,
-    TitleDesc,
+    DescAsc,
+    DescDesc,
     CreatedAsc,
     CreatedDesc,
     ModifiedAsc,
@@ -95,8 +95,8 @@ impl SortingRule {
         use SortingRule::*;
 
         match (id, asc) {
-            ("title", true) => TitleAsc,
-            ("title", false) => TitleDesc,
+            ("desc", true) => DescAsc,
+            ("desc", false) => DescDesc,
             ("urgency", true) => UrgencyAsc,
             ("urgency", false) => UrgencyDesc,
             ("created", true) => CreatedAsc,
@@ -119,8 +119,8 @@ impl SortingRule {
     /// Compare two fields.
     fn compare(&self, a: &Issue, b: &Issue) -> Ordering {
         match self {
-            Self::TitleAsc => a.title.cmp(&b.title),
-            Self::TitleDesc => b.title.cmp(&a.title),
+            Self::DescAsc => a.desc.cmp(&b.desc),
+            Self::DescDesc => b.desc.cmp(&a.desc),
 
             Self::CreatedAsc => a.created.cmp(&b.created),
             Self::CreatedDesc => b.created.cmp(&a.created),

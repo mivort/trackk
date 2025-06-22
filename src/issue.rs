@@ -21,7 +21,7 @@ pub struct Issue {
 
     /// Issue main title.
     #[serde(default)]
-    pub title: String,
+    pub desc: String,
 
     /// List of issue's tags.
     #[serde(default)]
@@ -91,19 +91,19 @@ impl Issue {
         if description.is_empty() {
             return;
         }
-        self.title = description.join(" ");
+        self.desc = description.join(" ");
     }
 
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
     pub fn apply_args(&mut self, args: &EntryArgs, app: &App) -> Result<()> {
         if !args.desc.is_empty() {
-            self.title = args.desc.join(" ");
+            self.desc = args.desc.join(" ");
         }
         for arg in &args.append {
             // TODO: P2: append to the first line
-            self.title.push(' ');
-            self.title.push_str(arg);
+            self.desc.push(' ');
+            self.desc.push_str(arg);
         }
 
         if let Some(status) = &args.status {
@@ -213,7 +213,7 @@ impl Issue {
     pub fn differs(&self, other: &Self) -> bool {
         debug_assert_eq!(self.id, other.id, "compared entry ids should match");
 
-        if self.title != other.title {
+        if self.desc != other.desc {
             return true;
         }
         if self.due != other.due {
@@ -240,7 +240,7 @@ impl Issue {
     /// Check issue validity and produce error message in case if required data is missing.
     /// If possible, fix the status value.
     pub fn validate(&self) -> Result<()> {
-        if self.title.is_empty() {
+        if self.desc.is_empty() {
             bail!("Entry title should not be empty");
         }
 
@@ -279,9 +279,9 @@ impl FieldRef {
         // TODO: P3: support other operand types
         match (self, token) {
             (Self::Title, Token::String(rhs)) => {
-                Ok(issue.title.lines().next().unwrap_or("").contains(&**rhs))
+                Ok(issue.desc.lines().next().unwrap_or("").contains(&**rhs))
             }
-            (Self::Desc, Token::String(rhs)) => Ok(issue.title.contains(&**rhs)),
+            (Self::Desc, Token::String(rhs)) => Ok(issue.desc.contains(&**rhs)),
             (Self::Tag, Token::String(rhs)) => Ok(issue.tags.contains(&**rhs)),
             (Self::Status, Token::String(rhs)) => Ok(issue.status == **rhs),
             _ => bail!("Unable to compare the value with field reference"),
@@ -291,7 +291,7 @@ impl FieldRef {
     /// Calculate the length of referenced value.
     pub fn length(&self, entry: &Issue) -> f64 {
         match self {
-            Self::Desc => entry.title.len() as f64,
+            Self::Desc => entry.desc.len() as f64,
             Self::Tag => entry.tags.len() as f64,
             Self::Status => entry.status.len() as f64,
             _ => 0.,
@@ -301,7 +301,7 @@ impl FieldRef {
     /// Check if referenced value is 'not empty'
     pub fn has(&self, entry: &Issue) -> bool {
         match self {
-            Self::Desc => !entry.title.is_empty(),
+            Self::Desc => !entry.desc.is_empty(),
             Self::Tag => !entry.tags.is_empty(),
             Self::Status => !entry.status.is_empty(),
             Self::Due => entry.due.is_some(),

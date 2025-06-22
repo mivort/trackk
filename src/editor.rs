@@ -141,7 +141,7 @@ fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
             "- __Created__ : {created}\n",
             "- __Modified__: {modified}\n",
         ),
-        title = issue.title,
+        title = issue.desc,
         status = issue.status,
         due = due,
         end = end,
@@ -177,7 +177,7 @@ fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
         .context("Unable to find the metadata delimiter ('----')")?;
 
     let (_, [title, meta]) = caps.extract();
-    issue.title = title.trim().to_owned();
+    issue.desc = title.trim().to_owned();
 
     let meta_re = RegexBuilder::new(r"^\s*\*\s+__(\w+)__\s*:(.*)$")
         .multi_line(true)

@@ -333,5 +333,5 @@ impl Display for ColorMode {
 pub enum ImportMode {
     #[default]
     Native,
-    TaskwarriorV2,
+    Taskwarrior,
 }
