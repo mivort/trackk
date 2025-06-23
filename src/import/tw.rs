@@ -8,6 +8,7 @@ use time::macros::format_description;
 use time::{PrimitiveDateTime, UtcDateTime};
 
 use crate::app::App;
+use crate::bucket::Bucket;
 use crate::issue::Issue;
 use crate::{prelude::*, storage};
 
@@ -69,7 +70,10 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     let try_parse =
         |v: &str| PrimitiveDateTime::parse(v, format).map(|t| t.assume_utc().unix_timestamp());
 
-    let mut cache: HashMap<String, Issue> = Default::default();
+    let mut cache: HashMap<String, Bucket> = Default::default();
+
+    let mut write_count = 0;
+    let mut skip_count = 0;
 
     for e in entries {
         let imported = Issue {
@@ -87,15 +91,28 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
         let date = UtcDateTime::from_unix_timestamp(imported.created)?.date();
         let rel_path = storage::rel_path_by_date(&date);
 
-        if let Some(_bucket) = cache.get_mut(&rel_path) {
-            // TODO: P3: update cached bucket
+        if let Some(bucket) = cache.get_mut(&rel_path) {
+            if bucket.insert(imported).is_some() {
+                skip_count += 1;
+            } else {
+                write_count += 1;
+            }
         } else {
-            let (_bucket, _path) = storage::fetch_new_bucket(&date, &app.config)?;
-            // TODO: P3: update new bucket
+            let (mut bucket, _) = storage::fetch_new_bucket(&date, &app.config)?;
+            if bucket.insert(imported).is_some() {
+                skip_count += 1;
+            } else {
+                write_count += 1;
+            }
+            cache.insert(rel_path, bucket);
         }
     }
 
-    // TODO: P3: write buckets in cache
+    for (rel_path, bucket) in cache {
+        storage::write_bucket(&bucket, &rel_path, app)?;
+    }
+
+    info!("Imported: {write_count}, skipped: {skip_count}");
 
     Ok(())
 }

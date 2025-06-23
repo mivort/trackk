@@ -113,10 +113,12 @@ pub fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)
     Ok((bucket, rel_path))
 }
 
-/// Serialize bucket data and store in provided path.
-pub fn write_bucket(data: &Bucket, path: impl AsRef<Path>, app: &App) -> Result<()> {
-    let path = app.config.entries_path()?.join(&path);
-    let file = File::create(path)?;
+/// Serialize bucket data and store in provided relative path.
+pub fn write_bucket(data: &Bucket, rel_path: impl AsRef<Path>, app: &App) -> Result<()> {
+    let mut full_path = app.config.entries_path()?;
+    full_path.push(&rel_path);
+
+    let file = File::create(full_path)?;
     let mut writer = BufWriter::new(file);
     serde_json::to_writer_pretty(&mut writer, data)?;
     writer.write_all(b"\n")?;
