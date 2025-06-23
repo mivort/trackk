@@ -98,18 +98,17 @@ pub fn fetch_entries(
 
 /// Create or get the storage bucket using the current date.
 fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
-    let year = date.year();
-    let month = date.month() as i32;
+    let rel_path = rel_path_by_date(date);
     let mut full_path = config.entries_path()?;
-    full_path.push(year.to_string());
+    full_path.push(&rel_path);
 
-    fs::create_dir_all(&full_path).context("Unable to create storage directory")?;
+    if let Some(parent) = full_path.parent() {
+        fs::create_dir_all(parent).context("Unable to create storage directory")?;
+    }
 
-    full_path.push(format!("{month:02}.json"));
-    let path = format!("{year}/{month:02}.json");
     let bucket = Bucket::from_full_path_or_default(&full_path)?;
 
-    Ok((bucket, path))
+    Ok((bucket, rel_path))
 }
 
 /// Serialize bucket data and store in provided path.
@@ -266,4 +265,12 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Produce bucket path from the provided date.
+pub fn rel_path_by_date(date: &Date) -> String {
+    let year = date.year();
+    let month = date.month();
+
+    format!("{year}/{month:02}.json")
 }

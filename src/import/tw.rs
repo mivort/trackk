@@ -67,9 +67,8 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     let _cache = &mut *app.cache.borrow_mut();
 
     let format = format_description!("[year][month][day]T[hour][minute][second]Z");
-    let try_parse = |v: &Box<str>| {
-        PrimitiveDateTime::parse(&v, format).map(|t| t.assume_utc().unix_timestamp())
-    };
+    let try_parse =
+        |v: &str| PrimitiveDateTime::parse(v, format).map(|t| t.assume_utc().unix_timestamp());
 
     for e in entries {
         let _imported = Issue {
