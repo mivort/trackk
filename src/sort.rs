@@ -85,6 +85,8 @@ pub enum SortingRule {
     IdDesc,
     TagsAsc,
     TagsDesc,
+    StatusAsc,
+    StatusDesc,
     _MetaAsc(String), // TODO: P2: implement meta fields sorting
     _MetaDesc(String),
 }
@@ -111,6 +113,8 @@ impl SortingRule {
             ("tags", false) => TagsDesc,
             ("id", true) => IdAsc,
             ("id", false) => IdDesc,
+            ("status", true) => StatusAsc,
+            ("status", false) => StatusDesc,
 
             _ => todo!(), // TODO: P2: support custom field sorting
         }
@@ -142,6 +146,9 @@ impl SortingRule {
 
             Self::TagsAsc => a.tags.len().cmp(&b.tags.len()),
             Self::TagsDesc => b.tags.len().cmp(&a.tags.len()),
+
+            Self::StatusAsc => a.status.cmp(&b.status),
+            Self::StatusDesc => b.status.cmp(&a.status),
 
             Self::_MetaAsc(_) | Self::_MetaDesc(_) => todo!(),
         }
