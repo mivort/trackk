@@ -83,4 +83,7 @@
 {{- numbercolor -}}{{- number -}}
 {{- title -}}{{ reset }}{{ status -}}
 {{- fg(lightblack) }}{{ fill('.', maxw - statusw - titlew - metaw - numberw - 1) }} {# -#}
-{{- meta }}
+{{- meta -}}
+
+{% if lineno == count - 1 %}
+{% endif %}

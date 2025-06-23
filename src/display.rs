@@ -21,6 +21,9 @@ struct RowContext<'a> {
     /// Flag if current row is odd or even.
     lineno: usize,
 
+    /// Number of items in the section.
+    count: usize,
+
     /// Reference to the issue data.
     entry: Cow<'a, Issue>,
 
@@ -119,6 +122,7 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
             entry: Cow::Borrowed(entry),
             path: Cow::Borrowed(path),
             lineno,
+            count: entries.len(),
         };
         template
             .render_to_write(context, &out)
@@ -145,6 +149,7 @@ pub fn show_entry<'a>((entry, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
         entry: Cow::Borrowed(entry),
         path: Cow::Borrowed(path),
         lineno: 0,
+        count: 1,
     };
     template
         .render_to_write(context, &out)
