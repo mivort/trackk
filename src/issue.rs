@@ -274,6 +274,25 @@ impl FieldRef {
         }
     }
 
+    /// Perform strict comparison.
+    pub fn eq(&self, token: &Token, issue: &Issue) -> Result<bool> {
+        match (self, token) {
+            (Self::Title, Token::String(rhs)) => {
+                Ok(issue.desc.lines().next().unwrap_or("") == rhs.as_ref())
+            }
+            (Self::Desc, Token::String(rhs)) => Ok(issue.desc == rhs.as_ref()),
+            (Self::Status, Token::String(rhs)) => Ok(issue.status == rhs.as_ref()),
+            (Self::Tag, _) => bail!(
+                "':' got incompatible arguments (tags and {})",
+                token.ttype()
+            ),
+            _ => bail!(
+                "':' got incompatible arguments (reference and {})",
+                token.ttype()
+            ),
+        }
+    }
+
     /// Compare referenced value to provided token.
     pub fn fuzzy_eq(&self, token: &Token, issue: &Issue) -> Result<bool> {
         // TODO: P3: support other operand types
@@ -283,8 +302,11 @@ impl FieldRef {
             }
             (Self::Desc, Token::String(rhs)) => Ok(issue.desc.contains(&**rhs)),
             (Self::Tag, Token::String(rhs)) => Ok(issue.tags.contains(&**rhs)),
-            (Self::Status, Token::String(rhs)) => Ok(issue.status == **rhs),
-            _ => bail!("Unable to compare the value with field reference"),
+            (Self::Status, Token::String(rhs)) => Ok(issue.status.starts_with(&**rhs)),
+            _ => bail!(
+                "':' got incompatible arguments (reference and {})",
+                token.ttype()
+            ),
         }
     }
 

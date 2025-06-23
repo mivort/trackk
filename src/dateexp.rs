@@ -225,7 +225,7 @@ pub fn eval(
                 _ => bail!("'or' ('||') operator haven't got enough arguments"),
             },
             Eq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.eq(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.eq(rhs, issue)?),
                 _ => bail!("'eq' ('==') operator haven't got enough arguments"),
             },
             NotEq => match (stack.pop(), stack.pop()) {

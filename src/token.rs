@@ -329,13 +329,15 @@ impl Token {
     }
 
     /// Check if two are exactly the same.
-    pub fn eq(self, rhs: Self) -> Result<Self> {
+    pub fn eq(self, rhs: Self, issue: &Issue) -> Result<Self> {
         match (&self, &rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(*rhs)),
             (Self::Bool(lhs), Self::Date(_rhs)) => Ok(Self::Bool(*lhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs == rhs)),
+            (Self::Reference(lhs), rhs) => Ok(Self::Bool(lhs.eq(rhs, issue)?)),
+            (lhs, Self::Reference(rhs)) => Ok(Self::Bool(rhs.eq(lhs, issue)?)),
             _ => bail!(
                 "'eq' ('==') was used on incompatible values ({} and {})",
                 self.ttype(),
@@ -363,6 +365,8 @@ impl Token {
     /// Peform loose comparison.
     pub fn fuzzy_eq(&self, rhs: &Self, issue: &Issue) -> Result<Self> {
         match (self, rhs) {
+            // TODO: P3: support comparison of dates - check if within same day
+            // TODO: P3: support comparison of numbers - convert to dates
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(*lhs == *rhs)),
             (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(*rhs)),
             (Self::String(lhs), Self::String(rhs)) => Ok(Self::Bool(lhs.contains(&**rhs))),
