@@ -7,6 +7,7 @@ use time::ext::NumericalDuration;
 use time::macros::format_description;
 use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, UtcDateTime, UtcOffset, Weekday};
 
+use crate::functions::FuncRef;
 use crate::issue::{FieldRef, Issue};
 use crate::prelude::*;
 
@@ -145,23 +146,13 @@ pub enum Token {
     #[token("not")]
     Not,
 
-    #[token("sqrt")]
-    Sqrt,
-
-    #[token("ln")]
-    Ln,
-
-    #[token("abs")]
-    Abs,
-
-    #[token("sig")]
-    Sig,
-
-    #[token("len")]
-    Len,
-
-    #[token("has")]
-    Has,
+    #[token("abs", |_| FuncRef::Abs)]
+    #[token("has", |_| FuncRef::Has)]
+    #[token("len", |_| FuncRef::Len)]
+    #[token("ln", |_| FuncRef::Ln)]
+    #[token("sig", |_| FuncRef::Sig)]
+    #[token("sqrt", |_| FuncRef::Sqrt)]
+    Func(FuncRef),
 
     #[token("(")]
     #[token("[")]
@@ -194,7 +185,7 @@ impl Token {
 
         match self {
             FuzzyEq => (9, true),
-            Not | Sqrt | Ln | Abs | Sig | Len | Has => (8, false),
+            Not => (8, false),
             At => (7, true),
             Mul | Div | Mod => (6, true),
             Add(_) | Sub(_) => (5, true),
@@ -202,7 +193,8 @@ impl Token {
             Eq | NotEq => (3, true),
             And => (2, true),
             Or => (1, true),
-            _ => panic!("Token {:?} is not operator", self),
+            String(_) | Reference(_) | LParen | RParen | Bool(_) | Regex(_) | Duration(_)
+            | Date(_) | Func(_) => panic!("Token {:?} is not operator", self),
         }
     }
 
@@ -214,7 +206,6 @@ impl Token {
             Add(_) => (Add(true), false),
             Sub(_) => (Sub(true), false),
             Not => (Not, false),
-            Sqrt | Ln | Abs | Sig | Len | Has => (self.clone(), false),
             _ => (self.clone(), true),
         }
     }
@@ -339,13 +330,17 @@ impl Token {
 
     /// Check if two are exactly the same.
     pub fn eq(self, rhs: Self) -> Result<Self> {
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
-            (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(rhs)),
-            (Self::Bool(lhs), Self::Date(_rhs)) => Ok(Self::Bool(lhs)),
+            (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(*rhs)),
+            (Self::Bool(lhs), Self::Date(_rhs)) => Ok(Self::Bool(*lhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs == rhs)),
-            _ => bail!("'eq' ('==') was used on incompatible values"),
+            _ => bail!(
+                "'eq' ('==') was used on incompatible values ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
@@ -371,45 +366,6 @@ impl Token {
             Self::Date(_) => Ok(Self::Bool(false)),
             _ => bail!(
                 "'not' ('!') got incompatible argument ({}), can only be applied to boolean",
-                self.ttype()
-            ),
-        }
-    }
-
-    /// Apply unary operation to single numeric value.
-    #[inline]
-    pub fn unary_op(self, f: impl Fn(f64) -> f64) -> Result<Self> {
-        match self {
-            Self::Duration(val) => Ok(Self::Duration(f(val))),
-            _ => bail!(
-                "Unary function got incompatible argument ({})",
-                self.ttype()
-            ),
-        }
-    }
-
-    /// Produce length of the token value.
-    pub fn length(self, entry: &Issue) -> Result<Self> {
-        match self {
-            Self::String(val) => Ok(Self::Duration(val.len() as f64)),
-            Self::Reference(field) => Ok(Self::Duration(field.length(entry))),
-            _ => bail!(
-                "'len' function got incompatible argument ({})",
-                self.ttype()
-            ),
-        }
-    }
-
-    /// Convert various values to boolean. Strings and arrays are 'true' if not
-    /// empty, dates if less than 'someday'.
-    pub fn has(self, entry: &Issue) -> Result<Self> {
-        match self {
-            Self::String(val) => Ok(Self::Bool(!val.is_empty())),
-            Self::Bool(val) => Ok(Self::Bool(val)),
-            Self::Date(val) => Ok(Self::Bool(val <= SOMEDAY)),
-            Self::Reference(field) => Ok(Self::Bool(field.has(entry))),
-            _ => bail!(
-                "'has' function got incompatible argument ({})",
                 self.ttype()
             ),
         }

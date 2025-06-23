@@ -6,6 +6,7 @@ mod dateexp;
 mod display;
 mod editor;
 mod filter;
+mod functions;
 mod index;
 mod input;
 mod issue;

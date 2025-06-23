@@ -51,8 +51,11 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
                 output.push(tok);
                 mode = Mode::Op;
             }
+            Func(_) => {
+                op_stack.push(tok);
+            }
             Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-            | GreaterEq | NotEq | And | Or | Not | Sqrt | Ln | Abs | Sig | Len | Has => {
+            | GreaterEq | NotEq | And | Or | Not => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
                 let (tok, left_assoc) = if !mode.expects_op() {
                     let (tok, left_assoc) = tok.to_unary();
@@ -91,6 +94,13 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
                 if !tilt(&mut op_stack, output) {
                     bail!("Mismatched closing bracket at position {}", span.end);
                 }
+                op_stack.pop_if(|top| {
+                    if matches!(top, Func(_)) {
+                        output.push(top.clone());
+                        return true;
+                    }
+                    false
+                });
                 mode = Mode::Op;
             }
         }
@@ -197,42 +207,10 @@ pub fn eval(
                 Some(val) => stack.push(val.not()?),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
             },
-            Sqrt => match stack.pop() {
-                Some(val) => stack.push(
-                    val.unary_op(|v| v.sqrt())
-                        .context("'sqrt' can only be applied to numbers")?,
-                ),
-                _ => bail!("'sqrt' operator haven't got the argument"),
-            },
-            Ln => match stack.pop() {
-                Some(val) => stack.push(
-                    val.unary_op(|v| v.ln())
-                        .context("'ln' can only be applied to numbers")?,
-                ),
-                _ => bail!("'log' operator haven't got the argument"),
-            },
-            Abs => match stack.pop() {
-                Some(val) => stack.push(
-                    val.unary_op(|v| v.abs())
-                        .context("'abs' can only be applied to numbers")?,
-                ),
-                _ => bail!("'abs' operator haven't got the argument"),
-            },
-            Sig => match stack.pop() {
-                Some(val) => stack.push(
-                    val.unary_op(sigmoid)
-                        .context("'sig' can only be applied to numbers")?,
-                ),
-                _ => bail!("'sig' operator haven't got the argument"),
-            },
-            Len => match stack.pop() {
-                Some(val) => stack.push(val.length(issue)?),
-                _ => bail!("'len' operator haven't got the argument"),
-            },
-            Has => match stack.pop() {
-                Some(val) => stack.push(val.has(issue)?),
-                _ => bail!("'has' operator haven't got the argument"),
-            },
+            Func(funcref) => {
+                let out = funcref.exec(stack, issue)?;
+                stack.push(out);
+            }
             Greater => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs, ts)?),
                 _ => bail!("'>' operator haven't got enough arguments"),
@@ -268,14 +246,6 @@ pub fn eval(
         .cloned()
 }
 
-/// Sigmoid function for urgency values normalization.
-/// TODO: P1: move to utils mod.
-#[inline]
-fn sigmoid(input: f64) -> f64 {
-    use std::f64::consts::E;
-    1_f64 / (1_f64 + E.powf(-input))
-}
-
 #[test]
 fn full_exp_parsing() {
     let (app, issue) = (&App::default(), &Issue::default());
@@ -303,4 +273,27 @@ fn unexpected_tokens() {
     assert_eq!(parse_date("1d(2d)", app, issue).is_err(), true);
     assert_eq!(parse_date("(", app, issue).is_err(), true);
     assert_eq!(parse_date(")", app, issue).is_err(), true);
+}
+
+#[test]
+fn functions() {
+    let (app, issue) = (&App::default(), &Issue::default());
+
+    let test_eval = |expr: &str| {
+        let mut output = Vec::new();
+        let mut op_stack = Vec::new();
+        let local = app.local_time().unwrap();
+        parse_exp(expr, local, &mut output).unwrap();
+
+        eval(&output, local, &mut op_stack, &issue)
+    };
+
+    let res = test_eval("sqrt(4)");
+    assert!(matches!(res, Ok(Token::Duration(2.))));
+
+    let res = test_eval("len(tag)");
+    assert!(matches!(res, Ok(Token::Duration(0.))));
+
+    let res = test_eval("len(tag) == 0");
+    assert!(matches!(res, Ok(Token::Bool(true))));
 }
