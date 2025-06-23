@@ -46,7 +46,11 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
         match tok {
             Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
                 if !mode.expects_arg() {
-                    bail!("Unexpected argument at position {}", span.start);
+                    bail!(
+                        "Expected {}, got argument at position {}",
+                        mode.expected(),
+                        span.start
+                    );
                 }
                 output.push(tok);
                 mode = Mode::Op;
@@ -62,7 +66,8 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
                     let (tok, left_assoc) = tok.to_unary();
                     if left_assoc {
                         bail!(
-                            "Unexpected operator '{}' at position {}",
+                            "Expected {}, got operator '{}' at position {}",
+                            mode.expected(),
                             &input[span.clone()],
                             span.start
                         );
@@ -86,14 +91,18 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
             }
             LParen => {
                 if !mode.expects_paren() {
-                    bail!("Unexpected opening bracket at position {}", span.start);
+                    bail!(
+                        "Expected {}, got '(' at position {}",
+                        mode.expected(),
+                        span.start
+                    );
                 }
                 op_stack.push(tok);
                 mode = Mode::Arg;
             }
             RParen => {
                 if !tilt(&mut op_stack, output) {
-                    bail!("Mismatched closing bracket at position {}", span.end);
+                    bail!("Mismatched ')' at position {}", span.end);
                 }
                 op_stack.pop_if(|top| {
                     if matches!(top, Func(_)) {
@@ -138,6 +147,15 @@ impl Mode {
     #[inline]
     fn expects_paren(&self) -> bool {
         matches!(self, Self::Arg | Self::FnParen)
+    }
+
+    /// Show what to expect in each mode.
+    fn expected(&self) -> &'static str {
+        match self {
+            Self::Arg => "argument, unary op or '('",
+            Self::Op => "operator",
+            Self::FnParen => "'('",
+        }
     }
 }
 
@@ -280,6 +298,10 @@ fn unexpected_tokens() {
     assert_eq!(parse_date("1d(2d)", app, issue).is_err(), true);
     assert_eq!(parse_date("(", app, issue).is_err(), true);
     assert_eq!(parse_date(")", app, issue).is_err(), true);
+
+    assert_eq!(parse_date("sqrt 5", app, issue).is_err(), true);
+    assert_eq!(parse_date("4 5", app, issue).is_err(), true);
+    assert_eq!(parse_date("4 ( 5 )", app, issue).is_err(), true);
 }
 
 #[test]
