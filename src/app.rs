@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use once_cell::unsync::OnceCell;
 
-use crate::args::Args;
+use crate::args::FilterArgs;
 use crate::dateexp::parse_local_exp;
 use crate::prelude::*;
 use crate::{bucket, config, filter, index, sort, templating, token};
@@ -47,10 +47,13 @@ impl<'env> App<'env> {
     }
 
     /// Set app-level options taken from arguments.
-    pub fn apply_args(&mut self, args: &Args) -> Result<()> {
-        self.filter = filter::parse_filter_args(args, self)?;
+    pub fn merge_filter_args(&mut self, args: &FilterArgs) -> Result<()> {
+        let mut filter = std::mem::take(&mut self.filter);
+        filter::merge_filter_args(&mut filter, args, self)?;
 
-        if let Some(sort) = &args.filter_args.sort {
+        self.filter = filter;
+
+        if let Some(sort) = &args.sort {
             self.sort = sort::parse_rules(sort)?;
         }
 

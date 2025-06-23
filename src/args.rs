@@ -80,18 +80,18 @@ pub enum Command {
     #[command(visible_aliases(["stop"]))]
     Reset(ModArgs),
 
-    /// List active entries using set of filters
+    /// List active entries using set of filters.
     #[command(visible_aliases(["ls"]))]
     List(ListArgs),
+
+    /// List all entries using set of filters.
+    All(ListArgs),
 
     /// Print current configuration values and comments about possible options.
     Config,
 
     /// Evaluate provided expression and print the result.
     Calc(CalcArgs),
-
-    /// List all entries using set of filters
-    All,
 
     /// Show count of tasks with filter applied.
     Count,
@@ -240,13 +240,12 @@ pub struct RefreshArgs {
 
 #[derive(Parser, Default)]
 pub struct ListArgs {
-    /// List all entries.
-    #[arg(long, short)]
-    pub all: bool,
-
     /// Output in JSON format.
     #[arg(long)]
     pub json: bool,
+
+    #[command(flatten)]
+    pub filter_args: FilterArgs,
 }
 
 #[derive(Parser, Default)]

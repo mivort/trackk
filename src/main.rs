@@ -52,17 +52,19 @@ fn main() -> Result<()> {
     }
 
     let mut app = app::App::new(config);
-    app.apply_args(&args)?;
+    app.merge_filter_args(&args.filter_args)?;
 
     // TODO: P2: customize default error handling
 
     match args.command {
         Some(Command::List(_args)) => {
+            app.merge_filter_args(&args.filter_args)?;
             let ids = Default::default();
             let report = &app.config.report_next;
             display::show_entries(&ids, report, &app)?;
         }
-        Some(Command::All) => {
+        Some(Command::All(args)) => {
+            app.merge_filter_args(&args.filter_args)?;
             let ids = Default::default();
             let report = app.config.report_all();
             display::show_entries(&ids, &report, &app)?;

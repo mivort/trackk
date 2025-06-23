@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::args::Args;
+use crate::args::FilterArgs;
 use crate::dateexp::{eval, parse_local_exp};
 use crate::issue::{FieldRef, Issue};
 use crate::token::Token;
@@ -56,11 +56,10 @@ impl QueryFilter {
 }
 
 /// Parse filter expressions and combine these with 'and' operator.
-pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
-    let mut filter = QueryFilter::default();
+pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App) -> Result<()> {
     let expression = &mut filter.expression;
 
-    for expr in &args.filter_args.filter {
+    for expr in &args.filter {
         let append = !expression.is_empty();
         parse_local_exp(expr, app, expression)?;
 
@@ -69,7 +68,7 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
         }
     }
 
-    for title in &args.filter_args.title {
+    for title in &args.title {
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Title));
             e.push(Token::String(Rc::from(title.as_str())));
@@ -77,7 +76,7 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
         });
     }
 
-    for desc in &args.filter_args.desc {
+    for desc in &args.desc {
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Desc));
             e.push(Token::String(Rc::from(desc.as_str())));
@@ -85,7 +84,7 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
         });
     }
 
-    for tag in &args.filter_args.tag {
+    for tag in &args.tag {
         if let Some(tag) = tag.strip_prefix("-") {
             filter.merge(|e| {
                 e.push(Token::Reference(FieldRef::Tag));
@@ -104,7 +103,7 @@ pub fn parse_filter_args(args: &Args, app: &App) -> Result<QueryFilter> {
 
     // TODO: P3: add changes to filter from each argument type
 
-    Ok(filter)
+    Ok(())
 }
 
 /// Store provided list of IDs as index.
