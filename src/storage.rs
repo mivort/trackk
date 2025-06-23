@@ -274,7 +274,7 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
 /// Produce bucket path from the provided date.
 pub fn rel_path_by_date(date: &Date) -> String {
     let year = date.year();
-    let month = date.month();
+    let month = date.month() as i32;
 
     format!("{year}/{month:02}.json")
 }
