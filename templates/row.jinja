@@ -18,7 +18,7 @@
   {{- reset -}}
 
   {#- Due date -#}
-  {%- if entry.due and cols > 36 and entry.status != 'complete' and entry.status != 'deleted' -%}
+  {%- if entry.due and cols > 36 and entry.status != 'completed' and entry.status != 'deleted' -%}
     / {# -#}
     {%- if entry.due >= now -%}
       {{ fg(lightwhite) }}
@@ -49,7 +49,7 @@
 {%- set title | trunc(maxw - statusw - metaw - 6, '…') -%}
   {%- if entry.status == 'deleted' -%}
     {{ fg(lightblack) }}
-  {%- elif entry.status == 'complete' -%}
+  {%- elif entry.status == 'completed' -%}
     {{ fg(green) }}
   {%- else -%}
     {{ fg(white) }}
@@ -70,7 +70,7 @@
 {%- set numbercolor -%}
   {%- if entry.status == 'deleted' -%}
     {{ fg(lightblack) }}
-  {%- elif entry.status == 'complete' -%}
+  {%- elif entry.status == 'completed' -%}
     {{ fg(lightgreen) }}
   {%- elif sid -%}
     {{ fg(lightblue) }}

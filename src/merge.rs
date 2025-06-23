@@ -120,7 +120,7 @@ fn try_merge() {
     let theirs = Bucket {
         version: 1,
         entries: vec![Issue {
-            status: "complete".into(),
+            status: "completed".into(),
             desc: "old name".into(),
             modified: 15,
             ..Default::default()
@@ -128,6 +128,6 @@ fn try_merge() {
     };
 
     let res = &merge_buckets(parent, theirs, ours).entries[0];
-    assert_eq!(res.status, "complete");
+    assert_eq!(res.status, "completed");
     assert_eq!(res.desc, "new name");
 }

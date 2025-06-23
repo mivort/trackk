@@ -145,7 +145,7 @@ impl Config {
                 "pending".into(),
                 "started".into(),
                 "blocked".into(),
-                "complete".into(),
+                "completed".into(),
                 "deleted".into(),
             ];
         }
@@ -325,7 +325,7 @@ impl DefaultsConfig {
     /// Status which is assigned when entry is marked as done.
     pub fn status_complete(&self) -> &str {
         if self.status_complete.is_empty() {
-            return "complete";
+            return "completed";
         }
         &self.status_complete
     }
