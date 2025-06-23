@@ -130,7 +130,7 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     if has_project {
         warn!("'Project' field import is not supported yet.");
     }
-    if has_project {
+    if has_annotations {
         warn!("'Annotations' field import is not supported yet.");
     }
 
