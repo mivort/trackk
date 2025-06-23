@@ -46,16 +46,26 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>)
 
     let query = &mut QueryFilter::default();
     let mut filter = Filter { ids, query };
+    let mut shown = 0;
 
     for section in &report.sections {
-        show_section(&mut filter, section, app)?;
+        shown += show_section(&mut filter, section, app)?;
+    }
+
+    if shown == 0 {
+        info!("No results");
     }
 
     Ok(())
 }
 
 /// Apply template and render single output section.
-fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<'a>) -> Result<()> {
+/// Return the number of shown entries.
+fn show_section<'a>(
+    filters: &mut Filter,
+    section: &'a SectionConfig,
+    app: &App<'a>,
+) -> Result<usize> {
     let SectionConfig {
         header,
         template,
@@ -75,7 +85,7 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
     let mut entries = storage::fetch_entries(filters, *index, app)?;
 
     if entries.is_empty() {
-        return Ok(());
+        return Ok(0);
     }
 
     if !header.is_empty() {
@@ -111,7 +121,7 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
     }
 
     if template.is_empty() {
-        return Ok(());
+        return Ok(0);
     }
 
     let template = j2.get_template(&section.template)?;
@@ -129,7 +139,7 @@ fn show_section<'a>(filters: &mut Filter, section: &'a SectionConfig, app: &App<
             .with_context(|| format!("Unable to render report template: {}", section.template))?;
     }
 
-    Ok(())
+    Ok(entries.len())
 }
 
 /// Render single entry.
