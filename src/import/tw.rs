@@ -64,7 +64,7 @@ pub fn import_from_file(file: impl AsRef<Path>, app: &App) -> Result<()> {
 
 /// Iterate of array of TW entries and use bucket cache to avoid flushing on each change.
 fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
-    let _cache = &*app.cache.borrow_mut();
+    let _cache = &mut *app.cache.borrow_mut();
 
     let format = format_description!("[year][month][day]T[hour][minute][second]Z");
     let try_parse = |v: &Box<str>| {
@@ -83,6 +83,8 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
             end: e.end.map_or(Ok(None), |v| try_parse(&v).map(Some))?,
             ..Default::default()
         };
+
+        let _bucket_path = "";
     }
 
     Ok(())

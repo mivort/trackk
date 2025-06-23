@@ -55,7 +55,7 @@ fn merge_3way(ours: &mut Issue, parent: Issue, theirs: Issue) {
     merge_field(&mut ours.desc, parent.desc, theirs.desc, their_newer);
     merge_field(&mut ours.status, parent.status, theirs.status, their_newer);
     merge_field(&mut ours.tags, parent.tags, theirs.tags, their_newer);
-    merge_field(&mut ours.parent, parent.parent, theirs.parent, their_newer);
+    merge_field(&mut ours.linked, parent.linked, theirs.linked, their_newer);
     merge_field(&mut ours.repeat, parent.repeat, theirs.repeat, their_newer);
     merge_field(
         &mut ours.created,

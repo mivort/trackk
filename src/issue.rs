@@ -31,10 +31,10 @@ pub struct Issue {
     #[serde(default)]
     pub status: String,
 
-    /// Parent issue ID.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// IDs of linked issues.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
-    pub parent: Option<String>,
+    pub linked: Vec<Box<str>>,
 
     /// Repeat string which is applied to task copy upon completion.
     #[serde(skip_serializing_if = "Option::is_none")]

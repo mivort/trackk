@@ -14,7 +14,7 @@ use walkdir::WalkDir;
 
 /// Access storage bucket if it exists and add new entry to it.
 pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
-    let date = UtcDateTime::now().date();
+    let date = UtcDateTime::from_unix_timestamp(app.ts)?.date();
 
     let (mut bucket, path) = fetch_new_bucket(&date, &app.config)?;
 
