@@ -93,6 +93,9 @@ pub enum Command {
     /// List all entries using set of filters
     All,
 
+    /// Show count of tasks with filter applied.
+    Count,
+
     /// Show info about specified entry
     #[command(visible_aliases(["inf", "i"]))]
     Info(InfoArgs),

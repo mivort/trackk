@@ -67,6 +67,14 @@ fn main() -> Result<()> {
             let report = app.config.report_all();
             display::show_entries(&ids, &report, &app)?;
         }
+        Some(Command::Count) => {
+            let filters = filter::Filter {
+                ids: &Default::default(),
+                query: &mut Default::default(),
+            };
+            let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
+            println!("{}", entries.len());
+        }
 
         Some(Command::Info(args)) => {
             let filters = filter::Filter {
