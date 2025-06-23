@@ -97,7 +97,7 @@ pub fn fetch_entries(
 }
 
 /// Create or get the storage bucket using the current date.
-fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
+pub fn fetch_new_bucket(date: &Date, config: &Config) -> Result<(Bucket, String)> {
     let rel_path = rel_path_by_date(date);
     let mut full_path = config.entries_path()?;
     full_path.push(&rel_path);

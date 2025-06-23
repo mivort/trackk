@@ -1,14 +1,15 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
 use serde_derive::Deserialize;
-use time::PrimitiveDateTime;
 use time::macros::format_description;
+use time::{PrimitiveDateTime, UtcDateTime};
 
 use crate::app::App;
 use crate::issue::Issue;
-use crate::prelude::*;
+use crate::{prelude::*, storage};
 
 /// Taskwarrior export data format schema.
 #[derive(Deserialize)]
@@ -64,14 +65,14 @@ pub fn import_from_file(file: impl AsRef<Path>, app: &App) -> Result<()> {
 
 /// Iterate of array of TW entries and use bucket cache to avoid flushing on each change.
 fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
-    let _cache = &mut *app.cache.borrow_mut();
-
     let format = format_description!("[year][month][day]T[hour][minute][second]Z");
     let try_parse =
         |v: &str| PrimitiveDateTime::parse(v, format).map(|t| t.assume_utc().unix_timestamp());
 
+    let mut cache: HashMap<String, Issue> = Default::default();
+
     for e in entries {
-        let _imported = Issue {
+        let imported = Issue {
             id: e.uuid,
             desc: e.description.into_string(),
             status: e.status.into_string(),
@@ -83,8 +84,18 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
             ..Default::default()
         };
 
-        let _bucket_path = "";
+        let date = UtcDateTime::from_unix_timestamp(imported.created)?.date();
+        let rel_path = storage::rel_path_by_date(&date);
+
+        if let Some(_bucket) = cache.get_mut(&rel_path) {
+            // TODO: P3: update cached bucket
+        } else {
+            let (_bucket, _path) = storage::fetch_new_bucket(&date, &app.config)?;
+            // TODO: P3: update new bucket
+        }
     }
+
+    // TODO: P3: write buckets in cache
 
     Ok(())
 }
