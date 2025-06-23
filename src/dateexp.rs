@@ -46,18 +46,19 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
         match tok {
             Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
                 if !mode.expects_arg() {
-                    bail!("Unexpected argument");
+                    bail!("Unexpected argument at position {}", span.start);
                 }
                 output.push(tok);
                 mode = Mode::Op;
             }
             Func(_) => {
                 op_stack.push(tok);
+                mode = Mode::FnParen;
             }
             Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
             | GreaterEq | NotEq | And | Or | Not => {
                 let (prec, left_assoc) = tok.prec_and_assoc();
-                let (tok, left_assoc) = if !mode.expects_op() {
+                let (tok, left_assoc) = if mode.expects_arg() {
                     let (tok, left_assoc) = tok.to_unary();
                     if left_assoc {
                         bail!(
@@ -84,7 +85,7 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
                 mode = Mode::Arg;
             }
             LParen => {
-                if !mode.expects_arg() {
+                if !mode.expects_paren() {
                     bail!("Unexpected opening bracket at position {}", span.start);
                 }
                 op_stack.push(tok);
@@ -120,6 +121,7 @@ pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Re
 enum Mode {
     Arg,
     Op,
+    FnParen,
 }
 
 impl Mode {
@@ -131,6 +133,11 @@ impl Mode {
     #[inline]
     fn expects_arg(&self) -> bool {
         matches!(self, Self::Arg)
+    }
+
+    #[inline]
+    fn expects_paren(&self) -> bool {
+        matches!(self, Self::Arg | Self::FnParen)
     }
 }
 
@@ -296,4 +303,7 @@ fn functions() {
 
     let res = test_eval("len(tag) == 0");
     assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = test_eval("+2-sqrt(4)*15");
+    assert!(matches!(res, Ok(Token::Duration(-28.))));
 }
