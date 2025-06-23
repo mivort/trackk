@@ -76,6 +76,14 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         });
     }
 
+    for status in &args.status {
+        filter.merge(|e| {
+            e.push(Token::Reference(FieldRef::Status));
+            e.push(Token::String(Rc::from(status.as_ref())));
+            e.push(Token::FuzzyEq);
+        });
+    }
+
     for desc in &args.desc {
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Desc));
@@ -101,7 +109,8 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         }
     }
 
-    // TODO: P3: add changes to filter from each argument type
+    // TODO: P3: add due, end, created and modified filters
+    // TODO: P3: add glob filter
 
     Ok(())
 }

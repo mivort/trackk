@@ -142,6 +142,18 @@ impl Default for Command {
 
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
+    /// Filter entries by title.
+    #[arg(long, short = 'm')]
+    pub title: Vec<String>,
+
+    /// Filter entries by description.
+    #[arg(long, short = 'M')]
+    pub desc: Vec<String>,
+
+    /// Filter entries by status.
+    #[arg(long, short)]
+    pub status: Vec<String>,
+
     /// Filter entries containing the tag (add '-' to tag name to exclude).
     #[arg(long, short, allow_hyphen_values = true)]
     pub tag: Vec<String>,
@@ -158,14 +170,6 @@ pub struct FilterArgs {
     #[arg(long, short)]
     pub created: Vec<String>,
 
-    /// Filter entries by title.
-    #[arg(long, short = 'm')]
-    pub title: Vec<String>,
-
-    /// Filter entries by description.
-    #[arg(long, short = 'M')]
-    pub desc: Vec<String>,
-
     /// Filter by description using regular expression.
     #[arg(long, short)]
     pub glob: Vec<String>,
@@ -175,7 +179,7 @@ pub struct FilterArgs {
     pub filter: Vec<String>,
 
     /// Sort by provided sorting rule, overriding report sorting.
-    #[arg(long, short)]
+    #[arg(long, short = 'S')]
     pub sort: Option<Box<str>>,
 }
 
