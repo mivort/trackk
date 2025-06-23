@@ -84,12 +84,16 @@ impl Bucket {
     }
 
     /// Insert new entry at the sorted position.
-    pub fn insert(&mut self, issue: Issue) {
-        if let Some(pos) = self.entries.iter().position(|e| issue.id < e.id) {
-            self.entries.insert(pos, issue);
+    pub fn insert(&mut self, insert: Issue) -> Option<usize> {
+        if let Some(pos) = self.entries.iter().position(|e| insert.id <= e.id) {
+            if self.entries[pos].id == insert.id {
+                return Some(pos);
+            }
+            self.entries.insert(pos, insert);
         } else {
-            self.entries.push(issue);
+            self.entries.push(insert);
         };
+        None
     }
 
     /// Fetch the reference to a bucket entry.
