@@ -1,10 +1,11 @@
 use std::fs;
 
+use crate::app::App;
 use crate::args::InitArgs;
 use crate::config::{Config, SyncDriverMode};
-use crate::prelude::*;
 use crate::sync::driver::SyncDriver;
 use crate::sync::git::Git;
+use crate::{prelude::*, storage};
 
 /// Check repository validity: merge tool, etc.
 pub fn check_repo(config: &Config) -> Result<()> {
@@ -16,9 +17,9 @@ pub fn check_repo(config: &Config) -> Result<()> {
 }
 
 /// Run VCS to create repo, set the main settings.
-pub fn init_repo(config: &Config, args: &InitArgs) -> Result<()> {
-    let data_path = config.data_path()?;
-    let entries_path = config.entries_path()?;
+pub fn init_repo(app: &App, args: &InitArgs) -> Result<()> {
+    let data_path = app.config.data_path()?;
+    let entries_path = app.config.entries_path()?;
 
     info!("Data directory: {}", data_path.to_string_lossy());
     info!("Entries directory: {}", entries_path.to_string_lossy());
@@ -35,22 +36,24 @@ pub fn init_repo(config: &Config, args: &InitArgs) -> Result<()> {
         return Ok(());
     }
 
-    match config.sync.driver {
-        SyncDriverMode::Git => init_driver::<Git>(config, args),
+    match app.config.sync.driver {
+        SyncDriverMode::Git => init_driver::<Git>(app, args),
         SyncDriverMode::Custom => todo!(),
     }
-    .context("Repo init failed")
+    .context("Repo init failed")?;
+
+    storage::refresh_index(app, false)
 }
 
 /// Call specific init driver.
-pub fn init_driver<D>(config: &Config, args: &InitArgs) -> Result<()>
+pub fn init_driver<D>(app: &App, args: &InitArgs) -> Result<()>
 where
     D: SyncDriver,
 {
     if let Some(url) = &args.clone {
-        D::clone_repo(url, args, config)
+        D::clone_repo(url, args, app)
     } else {
-        D::init_repo(args, config)
+        D::init_repo(args, app)
     }
 }
 
@@ -63,12 +66,14 @@ pub fn commit_repo(config: &Config) -> Result<()> {
 }
 
 /// Pull and push local changes.
-pub fn sync_repo(config: &Config) -> Result<()> {
+pub fn sync_repo(app: &App) -> Result<()> {
     info!("Repo sync started");
 
-    match config.sync.driver {
-        SyncDriverMode::Git => Git::sync_repo(config.data_path()?),
+    match app.config.sync.driver {
+        SyncDriverMode::Git => Git::sync_repo(app.config.data_path()?),
         SyncDriverMode::Custom => todo!(),
     }
-    .context("Repo sync failed")
+    .context("Repo sync failed")?;
+
+    storage::refresh_index(app, false)
 }

@@ -178,7 +178,7 @@ fn main() -> Result<()> {
             println!("{}", res.to_string()?);
         }
         Some(Command::Init(init)) => {
-            repo::init_repo(&app.config, &init)?;
+            repo::init_repo(&app, &init)?;
         }
         Some(Command::Check) => {
             repo::check_repo(&app.config)?;
@@ -187,7 +187,7 @@ fn main() -> Result<()> {
             repo::commit_repo(&app.config)?;
         }
         Some(Command::Sync) => {
-            repo::sync_repo(&app.config)?;
+            repo::sync_repo(&app)?;
         }
         Some(Command::Merge(merge)) => {
             merge::merge_driver(&merge)?;

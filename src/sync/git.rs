@@ -3,8 +3,8 @@ use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
+use crate::app::App;
 use crate::args::InitArgs;
-use crate::config::Config;
 use crate::index::ACTIVE_INDEX;
 use crate::sync::driver::SyncDriver;
 use crate::{input, prelude::*};
@@ -17,10 +17,10 @@ pub struct Git;
 const GIT_ATTR: &str = "*.json merge=trackk-bucket";
 
 impl SyncDriver for Git {
-    fn init_repo(args: &InitArgs, config: &Config) -> Result<()> {
+    fn init_repo(args: &InitArgs, app: &App) -> Result<()> {
         info!("Running 'git init' in repo directory");
 
-        let path = config.data_path()?;
+        let path = app.config.data_path()?;
         let mut cmd = git_command(&path);
         let spawn = cmd.arg("init").spawn();
 
@@ -40,22 +40,22 @@ impl SyncDriver for Git {
         ignorepath.push(".gitignore");
         append_line(&ignorepath, ACTIVE_INDEX)?;
 
-        let mut attrpath = config.entries_path()?;
+        let mut attrpath = app.config.entries_path()?;
         attrpath.push(".gitattributes");
         append_line(&attrpath, GIT_ATTR)?;
 
         git_config_setup(&path, args)
     }
 
-    fn clone_repo(url: &str, args: &InitArgs, config: &Config) -> Result<()> {
-        let target = config.data_path()?;
+    fn clone_repo(url: &str, args: &InitArgs, app: &App) -> Result<()> {
+        let target = app.config.data_path()?;
 
         let mut cmd = Command::new("git");
         cmd.args(["clone", url]);
         cmd.arg(&target);
         cmd.spawn().context("Unable to run 'git clone'")?.wait()?;
 
-        Self::init_repo(args, config)
+        Self::init_repo(args, app)
     }
 
     fn sync_repo(target: impl AsRef<Path>) -> Result<()> {

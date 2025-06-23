@@ -240,7 +240,7 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
 
     let mut changes = false;
 
-    for entry in WalkDir::new(&path) {
+    for entry in WalkDir::new(&path).min_depth(2) {
         let entry = entry?;
 
         if entry.file_type().is_dir() {
