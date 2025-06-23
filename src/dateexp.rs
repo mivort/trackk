@@ -228,6 +228,10 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => stack.push(lhs.eq(rhs)?),
                 _ => bail!("'eq' ('==') operator haven't got enough arguments"),
             },
+            NotEq => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.not_eq(rhs)?),
+                _ => bail!("'eq' ('!=') operator haven't got enough arguments"),
+            },
             Not => match stack.pop() {
                 Some(val) => stack.push(val.not()?),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
@@ -256,10 +260,6 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(&rhs, issue)?),
                 _ => bail!("':' operator haven't got enough arguments"),
             },
-            NotEq => {
-                // TODO: P3: implement not equal
-                todo!()
-            }
             LParen | RParen => {
                 panic!()
             }
