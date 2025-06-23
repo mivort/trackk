@@ -32,6 +32,9 @@ struct TWData {
     end: Option<Box<str>>,
 
     #[serde(default)]
+    project: Option<Box<str>>,
+
+    #[serde(default)]
     status: Box<str>,
 
     #[serde(default)]
@@ -75,6 +78,9 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     let mut write_count = 0;
     let mut skip_count = 0;
 
+    let mut has_project = false;
+    let mut has_annotations = false;
+
     for e in entries {
         let imported = Issue {
             id: e.uuid,
@@ -87,6 +93,13 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
             end: e.end.map_or(Ok(None), |v| try_parse(&v).map(Some))?,
             ..Default::default()
         };
+
+        if e.project.is_some() {
+            has_project = true;
+        }
+        if !e.annotations.is_empty() {
+            has_annotations = true;
+        }
 
         let date = UtcDateTime::from_unix_timestamp(imported.created)?.date();
         let rel_path = storage::rel_path_by_date(&date);
@@ -113,6 +126,13 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     }
 
     info!("Imported: {write_count}, skipped: {skip_count}");
+
+    if has_project {
+        warn!("'Project' field import is not supported yet.");
+    }
+    if has_project {
+        warn!("'Annotations' field import is not supported yet.");
+    }
 
     Ok(())
 }
