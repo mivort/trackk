@@ -23,17 +23,22 @@ pub struct QueryFilter {
 }
 
 impl QueryFilter {
-    /// Compare issue properties to the filter.
-    pub fn match_issue(&self, issue: &Issue, app: &App, stack: &mut Vec<Token>) -> Result<bool> {
+    /// Compare entry properties to the filter.
+    pub fn match_issue(&self, entry: &Issue, app: &App, stack: &mut Vec<Token>) -> Result<bool> {
         if self.expression.is_empty() {
             return Ok(true);
         }
 
-        let res = eval(&self.expression, app.local_time()?, stack, issue)?;
+        let res = eval(&self.expression, app.local_time()?, stack, entry)?;
         match res {
             Token::Bool(res) => Ok(res),
             Token::Date(_) | Token::Duration(_) => Ok(true),
-            _ => bail!("Filter expression produced non-boolean result"),
+            Token::String(s) => Ok(entry.desc.contains(&*s)),
+            Token::Regex(r) => Ok(r.is_match(&entry.desc)),
+            _ => bail!(
+                "Filter expression produced output which can't be matched against entries ({})",
+                res.ttype()
+            ),
         }
     }
 
