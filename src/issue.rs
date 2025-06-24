@@ -309,10 +309,12 @@ impl FieldRef {
             (Self::Desc, Regex(regex)) => Ok(regex.is_match(&issue.desc)),
 
             (Self::Tag, String(rhs)) => Ok(issue.tags.contains(&**rhs)),
-            (Self::Tag, Regex(regex)) => Ok(issue.tags.iter().any(|t| regex.is_match(&t))),
+            (Self::Tag, Regex(regex)) => Ok(issue.tags.iter().any(|t| regex.is_match(t))),
 
             (Self::Status, String(rhs)) => Ok(issue.status.starts_with(&**rhs)),
             (Self::Status, Regex(regex)) => Ok(regex.is_match(&issue.status)),
+
+            // TODO: P2: support matching with custom fields
             _ => bail!(
                 "':' got incompatible arguments (reference and {})",
                 token.ttype()

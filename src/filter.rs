@@ -45,7 +45,7 @@ impl QueryFilter {
 
     /// Append '&&' condition on top of the query.
     #[inline]
-    fn merge(&mut self, merger: impl Fn(&mut Vec<Token>)) {
+    fn merge(&mut self, merger: impl FnOnce(&mut Vec<Token>)) {
         let was_empty = self.expression.is_empty();
         merger(&mut self.expression);
 
@@ -69,9 +69,31 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
     }
 
     for title in &args.title {
+        let token = if title.starts_with('/') && title.ends_with('/') && title.len() > 1 {
+            let slice = &title[1..(title.len() - 1)];
+            Token::Regex(Rc::from(regex::Regex::new(slice)?))
+        } else {
+            Token::String(Rc::from(title.as_str()))
+        };
+
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Title));
-            e.push(Token::String(Rc::from(title.as_str())));
+            e.push(token);
+            e.push(Token::FuzzyEq);
+        });
+    }
+
+    for desc in &args.desc {
+        let token = if desc.starts_with('/') && desc.ends_with('/') && desc.len() > 1 {
+            let slice = &desc[1..(desc.len() - 1)];
+            Token::Regex(Rc::from(regex::Regex::new(slice)?))
+        } else {
+            Token::String(Rc::from(desc.as_str()))
+        };
+
+        filter.merge(|e| {
+            e.push(Token::Reference(FieldRef::Desc));
+            e.push(token);
             e.push(Token::FuzzyEq);
         });
     }
@@ -80,14 +102,6 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Status));
             e.push(Token::String(Rc::from(status.as_ref())));
-            e.push(Token::FuzzyEq);
-        });
-    }
-
-    for desc in &args.desc {
-        filter.merge(|e| {
-            e.push(Token::Reference(FieldRef::Desc));
-            e.push(Token::String(Rc::from(desc.as_str())));
             e.push(Token::FuzzyEq);
         });
     }
@@ -110,7 +124,6 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
     }
 
     // TODO: P3: add due, end, created and modified filters
-    // TODO: P3: add glob filter
 
     Ok(())
 }

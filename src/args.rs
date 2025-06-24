@@ -170,10 +170,6 @@ pub struct FilterArgs {
     #[arg(long, short)]
     pub created: Vec<String>,
 
-    /// Filter by description using regular expression.
-    #[arg(long, short)]
-    pub glob: Vec<String>,
-
     /// Filter query to apply to the results.
     #[arg(long, short)]
     pub filter: Vec<String>,
