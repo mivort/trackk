@@ -42,5 +42,11 @@
     status_complete: "{status_complete}", {c}// Status assigned upon entry completion.{cl}
     status_deleted: "{status_deleted}", {c}// Status assigned upon entry deletion.{cl}
     due: "", {c}// Default due date (none if empty).{cl}
-  }}
+  }},
+
+  {c}// Templates for non-report output.{cl}
+  templates: {{
+    entry: "{entry}", {c}// Single entry view template.{cl}
+    picker: "{picker}", {c}// Picker which is shown when multiple items are matched.{cl}
+  }},
 }}

@@ -462,6 +462,8 @@ fn format_config(config: &Config) -> Result<String> {
         status_initial = config.defaults.status_initial(),
         status_complete = config.defaults.status_complete(),
         status_deleted = config.defaults.status_deleted(),
+        picker = config.templates.picker(),
+        entry = config.issue_view(),
     ))
 }
 

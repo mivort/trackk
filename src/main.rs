@@ -227,6 +227,7 @@ fn main() -> Result<()> {
         Some(Command::Import(import)) => match import.format {
             ImportMode::Taskwarrior => import::tw::import_from_file(import.input, &app)?,
             ImportMode::Native => {
+                // TODO: P2: implement native format import
                 todo!()
             }
         },
