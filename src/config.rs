@@ -84,7 +84,7 @@ pub struct DefaultsConfig {
 
     /// Default time string to assign as 'due'.
     #[serde(default)]
-    _due: Box<str>,
+    _due: Box<str>, // TODO: P2: support default due value
 }
 
 #[derive(Deserialize, Default)]
@@ -238,6 +238,15 @@ impl Config {
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
                     filter: "status:started".into(),
+                    header: "header".into(),
+                    template: "next".into(),
+                },
+                SectionConfig {
+                    title: "Done today".into(),
+                    index: IndexType::All,
+                    sorting: "end+".into(),
+                    _grouping: "".into(),
+                    filter: "end >= today".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
