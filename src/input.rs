@@ -21,7 +21,11 @@ pub fn prompt(prompt: &str) -> Result<String> {
 }
 
 /// When several tasks match criteria, show the task picker.
-pub fn pick_prompt(action: &str, mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+pub fn pick_prompt(
+    action: &str,
+    mut entries: Vec<(Issue, Rc<str>)>,
+    app: &App,
+) -> Result<Vec<(Issue, Rc<str>)>> {
     // TODO: P2: check terminal state/config/args to suppress the prompt
     // TODO: P2: check the limit of entries to show in prompt
 

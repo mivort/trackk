@@ -231,12 +231,16 @@ impl Token {
     pub fn sub(self, rhs: Self) -> Result<Self> {
         use Token::*;
 
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs - rhs)),
-            (Date(lhs), Duration(rhs)) => Ok(Date(lhs - rhs as i64)),
+            (Date(lhs), Duration(rhs)) => Ok(Date(lhs - *rhs as i64)),
             (Date(lhs), Date(rhs)) => Ok(Duration((lhs - rhs) as f64)),
             (Duration(_), Date(_)) => bail!("Unable substract date from span"),
-            _ => bail!("Unsupported '-' operator arguments"),
+            _ => bail!(
+                "Unsupported '-' operator arguments ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
@@ -244,9 +248,13 @@ impl Token {
     pub fn mul(self, rhs: Self) -> Result<Self> {
         use Token::*;
 
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs * rhs)),
-            _ => bail!("Unsupported '*' operator arguments"),
+            _ => bail!(
+                "Unsupported '*' operator arguments ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
@@ -255,14 +263,18 @@ impl Token {
     pub fn div(self, rhs: Self) -> Result<Self> {
         use Token::*;
 
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Duration(lhs), Duration(rhs)) => {
                 if rhs.abs() == 0.0 {
                     bail!("Division '/' by zero");
                 }
                 Ok(Duration(lhs / rhs))
             }
-            _ => bail!("Unsupported '/' operator arguments"),
+            _ => bail!(
+                "Unsupported '/' operator arguments ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 

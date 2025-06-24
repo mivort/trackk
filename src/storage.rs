@@ -44,7 +44,8 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
     let entries = filter_all_entries(&filters, app)?;
 
     // TODO: P3: show picker in case if id query contains partial matches
-    let entries = if ids.index.is_empty() { input::pick_prompt("Modify", entries, app)? } else { entries };
+    let entries =
+        if ids.index.is_empty() { input::pick_prompt("Modify", entries, app)? } else { entries };
 
     let mut index = app.index_mut()?;
 
