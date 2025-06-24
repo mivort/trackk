@@ -27,14 +27,6 @@ pub struct Config {
     #[serde(default)]
     editor: Box<str>,
 
-    /// Template name for single entry view.
-    #[serde(default)]
-    issue_view: Box<str>,
-
-    /// Template used to display entry changes.
-    #[serde(default)]
-    _diff_view: Box<str>,
-
     /// Color mode used during output.
     #[serde(default)]
     pub color_mode: ColorMode,
@@ -47,9 +39,13 @@ pub struct Config {
     #[serde(default)]
     pub defaults: DefaultsConfig,
 
-    /// Issue values config.
+    /// Entry values config.
     #[serde(default)]
     pub values: ValuesConfig,
+
+    /// Templates used for non-report command outputs.
+    #[serde(default)]
+    pub templates: TemplatesConfig,
 
     /// Options related to VCS used with the storage.
     #[serde(default)]
@@ -111,6 +107,21 @@ pub struct ValuesConfig {
 }
 
 #[derive(Deserialize, Default)]
+pub struct TemplatesConfig {
+    /// Template name for single entry view.
+    #[serde(default)]
+    entry: Box<str>,
+
+    /// Template used to display entry changes.
+    #[serde(default)]
+    picker: Box<str>,
+
+    /// Template used to display entry changes.
+    #[serde(default)]
+    _diff: Box<str>,
+}
+
+#[derive(Deserialize, Default)]
 pub struct SyncConfig {
     /// Select one of the supported sync drivers.
     pub driver: SyncDriverMode, // TODO: P1: support multiple vcs drivers
@@ -165,8 +176,8 @@ impl Config {
 
     /// Single issue view template.
     pub fn issue_view(&self) -> &str {
-        if !self.issue_view.is_empty() {
-            return &self.issue_view;
+        if !self.templates.entry.is_empty() {
+            return &self.templates.entry;
         }
 
         "issue"
@@ -199,9 +210,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter:
-                        "due >= 14d and due < 365d and !status:started"
-                            .into(),
+                    filter: "due >= 14d and due < 365d and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
@@ -210,9 +219,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter:
-                        "due >= now and due < today - 14d and !status:started"
-                            .into(),
+                    filter: "due >= now and due < today - 14d and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
@@ -316,32 +323,30 @@ impl ValuesConfig {
 impl DefaultsConfig {
     /// Status which is assigned by default when entry is created.
     pub fn status_initial(&self) -> &str {
-        if self.status_initial.is_empty() {
-            return "pending";
-        }
-        &self.status_initial
+        if self.status_initial.is_empty() { "pending" } else { &self.status_initial }
     }
 
     /// Status which is assigned when entry is marked as done.
     pub fn status_complete(&self) -> &str {
-        if self.status_complete.is_empty() {
-            return "completed";
-        }
-        &self.status_complete
+        if self.status_complete.is_empty() { "completed" } else { &self.status_complete }
     }
 
     /// Status which is assigned when entry is deleted.
     pub fn status_deleted(&self) -> &str {
-        if self.status_deleted.is_empty() {
-            return "deleted";
-        }
-        &self.status_deleted
+        if self.status_deleted.is_empty() { "deleted" } else { &self.status_deleted }
     }
 
     /// Default due date expression.
     pub fn _due(&self) -> &str {
         // TODO: P2: assign default due date on creation
         &self._due
+    }
+}
+
+impl TemplatesConfig {
+    /// Picker template with default value.
+    pub fn picker(&self) -> &str {
+        if self.picker.is_empty() { "picker" } else { &self.picker }
     }
 }
 

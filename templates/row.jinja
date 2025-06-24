@@ -88,6 +88,6 @@
 {%- if lineno == limit - 1 %}
 {# #}
   {%- if lineno != count - 1 -%}
-    {# #}     {{ fg(lightblack) }}+{{ count - limit }} more{{ clear }}
+    {# #}     {{ fg(lightblack) }}+{{ count - limit }} more{{ reset }}
   {%- endif -%}
 {%- endif %}

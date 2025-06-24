@@ -139,6 +139,7 @@ fn main() -> Result<()> {
             storage::modify_entries(&ids, &e.entry, &app)?;
         }
         Some(Command::Complete(mut args)) => {
+            // TODO: P2: only look for active/non-complete entries?
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
             if args.entry.status.is_none() {
                 args.entry.status = Some(app.config.defaults.status_complete().to_string());

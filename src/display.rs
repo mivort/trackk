@@ -10,28 +10,28 @@ use crate::templates::dates;
 use crate::{app::App, prelude::*, sort, storage};
 
 #[derive(Serialize)]
-struct RowContext<'a> {
+pub struct RowContext<'a> {
     /// Shorthand entry reference.
     #[serde(skip_serializing_if = "Option::is_none")]
-    sid: Option<usize>,
+    pub sid: Option<usize>,
 
     /// Calculated entry urgency.
-    urgency: f64,
+    pub urgency: f64,
 
     /// Flag if current row is odd or even.
-    lineno: usize,
+    pub lineno: usize,
 
     /// Number of items in the section.
-    count: usize,
+    pub count: usize,
 
     /// Limit number of shown entries.
-    limit: usize,
+    pub limit: usize,
 
     /// Reference to the issue data.
-    entry: Cow<'a, Issue>,
+    pub entry: Cow<'a, Issue>,
 
     /// Path to storage file which contains the entry.
-    path: Cow<'a, str>,
+    pub path: Cow<'a, str>,
 }
 
 #[derive(Serialize)]

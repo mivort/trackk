@@ -134,6 +134,8 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
         "next" => Some(("next", ROW)),
         "all" => Some(("all", ROW)),
         "issue" => Some(("issue", ISSUE)),
+        "entry" => Some(("entry", ISSUE)),
+        "picker" => Some(("picker", ROW)),
         "none" => Some(("none", "")),
         _ => None,
     }

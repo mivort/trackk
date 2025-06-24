@@ -2,6 +2,7 @@ use crate::args::EntryArgs;
 use crate::bucket::Bucket;
 use crate::config::{Config, IndexType};
 use crate::filter::{Filter, IdFilter};
+use crate::input;
 use crate::issue::Issue;
 use crate::{app::App, display, prelude::*};
 
@@ -41,9 +42,10 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
         query: &mut Default::default(),
     };
     let entries = filter_all_entries(&filters, app)?;
+    let entries = input::pick_prompt(entries, app)?;
+
     let mut index = app.index_mut()?;
 
-    // TODO: P3: ask if multiple entries are expected
     // TODO: P1: use cache to reduce amount of re-parsing/writes?
 
     for (issue, path) in &entries {
