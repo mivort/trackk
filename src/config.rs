@@ -107,7 +107,7 @@ pub struct ValuesConfig {
 
     /// Urgency formula to use on entries.
     #[serde(default)]
-    pub urgency_formula: Box<str>, // TODO: P3: implement urgency calculation
+    pub urgency_formula: Box<str>,
 }
 
 #[derive(Deserialize, Default)]

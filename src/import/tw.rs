@@ -58,7 +58,7 @@ struct TWAnnotation {
 
 // Importer for Taskwarrior v2 JSON export format.
 pub fn import_from_file(file: impl AsRef<Path>, app: &App) -> Result<()> {
-    // TODO: P3: implement import from taskwarrior
+    // TODO: P2: implement import from stdin
 
     let file = File::open(file).context("Unable to open imported file")?;
     let buf = BufReader::new(file);
@@ -99,6 +99,7 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
         }
         if !e.annotations.is_empty() {
             has_annotations = true;
+            // TODO: P3: append annotations to description
         }
 
         let date = UtcDateTime::from_unix_timestamp(imported.created)?.date();
