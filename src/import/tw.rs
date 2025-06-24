@@ -4,6 +4,7 @@ use std::io::BufReader;
 use std::path::Path;
 
 use serde_derive::Deserialize;
+use serde_json::Value;
 use time::macros::format_description;
 use time::{PrimitiveDateTime, UtcDateTime};
 
@@ -16,6 +17,9 @@ use crate::{prelude::*, storage};
 #[derive(Deserialize)]
 #[allow(unused)]
 struct TWData {
+    #[serde(default)]
+    id: Option<i64>,
+
     uuid: Box<str>,
     description: Box<str>,
 
@@ -31,8 +35,37 @@ struct TWData {
     #[serde(default)]
     end: Option<Box<str>>,
 
+    // TODO: P2: add 'start' handling as custom field
+    #[serde(default)]
+    start: Option<Box<str>>,
+
+    // TODO: P2: add 'wait' handling as custom field
+    #[serde(default)]
+    wait: Option<Box<str>>,
+
+    // TODO: P1: resolve 'depends' as 'link'
+    #[serde(default)]
+    depends: Vec<Box<str>>,
+
+    // TODO: P2: add 'project' handling as custom field
     #[serde(default)]
     project: Option<Box<str>>,
+
+    // TODO: P1: add 'recur' handling
+    #[serde(default)]
+    recur: Option<Box<str>>,
+
+    // TODO: P1: add 'parent' handling
+    #[serde(default)]
+    parent: Option<Box<str>>,
+
+    // TODO: P1: add 'mask' handling
+    #[serde(default)]
+    mask: Option<Box<str>>,
+
+    // TODO: P1: add 'imask' handling
+    #[serde(default)]
+    imask: Option<f64>,
 
     #[serde(default)]
     status: Box<str>,
@@ -42,8 +75,13 @@ struct TWData {
 
     #[serde(default)]
     annotations: Vec<TWAnnotation>,
-    // TODO: P1: add 'depends' handling
+
     // TODO: P1: support uda import
+    #[serde(flatten)]
+    extra: HashMap<Box<str>, Value>,
+
+    #[serde(default)]
+    urgency: Option<f64>,
 }
 
 #[derive(Deserialize)]
@@ -80,6 +118,7 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
 
     let mut project_count = 0;
     let mut annotations_count = 0;
+    let mut uda_count = 0;
 
     for e in entries {
         let mut imported = Issue {
@@ -93,6 +132,10 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
             end: e.end.map_or(Ok(None), |v| try_parse(&v).map(Some))?,
             ..Default::default()
         };
+
+        if !e.extra.is_empty() {
+            uda_count += e.extra.len();
+        }
 
         if e.project.is_some() {
             project_count += 1;
@@ -131,14 +174,17 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
         storage::write_bucket(&bucket, &rel_path, app)?;
     }
 
-    info!("Imported: {write_count}, skipped: {skip_count}");
-
+    if uda_count > 0 {
+        warn!("UDA field import is not supported yet ({uda_count} not imported).");
+    }
     if project_count > 0 {
-        warn!("'Project' field import is not supported yet ({project_count}).");
+        warn!("'Project' field import is not supported yet ({project_count} no imported).");
     }
     if annotations_count > 0 {
-        warn!("{annotations_count} annotations are merged with description.");
+        warn!("{annotations_count} annotations are merged with descriptions.");
     }
+
+    info!("Imported: {write_count}, skipped: {skip_count}");
 
     storage::refresh_index(app, false)
 }
