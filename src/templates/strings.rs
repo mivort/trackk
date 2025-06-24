@@ -7,6 +7,11 @@ pub fn firstline(mut input: String) -> String {
     input
 }
 
+/// Determine if entry title has second line, i.e. an attached note.
+pub fn hasnote(input: &str) -> bool {
+    input.lines().skip(1).next().is_some()
+}
+
 /// Use format string to format the numeric value.
 pub fn numfmt(value: f64, fmt: &str) -> Result<String, mj::Error> {
     match formatx::formatx!(fmt, value) {

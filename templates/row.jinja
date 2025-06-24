@@ -47,6 +47,9 @@
   {%- elif entry.status == 'started' -%}
     {{ fg(lightblue) }} >>
   {%- endif -%}
+  {%- if entry.desc | hasnote -%}
+    {{ fg(cyan) }} *
+  {%- endif -%}
 {%- endset -%}
 {%- set statusw = status | width -%}
 

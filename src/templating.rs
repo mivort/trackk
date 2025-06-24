@@ -37,6 +37,7 @@ impl<'env> Templates<'env> {
 
         j2.add_filter("numfmt", strings::numfmt);
         j2.add_filter("firstline", strings::firstline);
+        j2.add_filter("hasnote", strings::hasnote);
 
         let now = app.ts;
         j2.add_filter("reldate", move |d: i64, p: Option<i32>| {
