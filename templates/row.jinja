@@ -30,7 +30,7 @@
 
   {#- End date -#}
   {%- if entry.end and cols > 36 -%}
-    / {{ fg(cyan) }}{{ entry.end | datefmt('date') }}{{ reset }} {# -#}
+    / {{ fg(cyan) }}{{ (2 * now - entry.end) | reldate }}{{ reset }} {# -#}
   {%- endif -%}
 
   {#- Urgency -#}
