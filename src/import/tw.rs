@@ -78,11 +78,11 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     let mut write_count = 0;
     let mut skip_count = 0;
 
-    let mut has_project = false;
-    let mut has_annotations = false;
+    let mut project_count = 0;
+    let mut annotations_count = 0;
 
     for e in entries {
-        let imported = Issue {
+        let mut imported = Issue {
             id: e.uuid,
             desc: e.description.into_string(),
             status: e.status.into_string(),
@@ -95,11 +95,16 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
         };
 
         if e.project.is_some() {
-            has_project = true;
+            project_count += 1;
         }
-        if !e.annotations.is_empty() {
-            has_annotations = true;
-            // TODO: P3: append annotations to description
+
+        for ann in e.annotations {
+            annotations_count += 1;
+
+            imported.desc.push('\n');
+            imported.desc.push_str(&ann.entry);
+            imported.desc.push_str(" -- ");
+            imported.desc.push_str(&ann.description);
         }
 
         let date = UtcDateTime::from_unix_timestamp(imported.created)?.date();
@@ -128,11 +133,11 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
 
     info!("Imported: {write_count}, skipped: {skip_count}");
 
-    if has_project {
-        warn!("'Project' field import is not supported yet.");
+    if project_count > 0 {
+        warn!("'Project' field import is not supported yet ({project_count}).");
     }
-    if has_annotations {
-        warn!("'Annotations' field import is not supported yet.");
+    if annotations_count > 0 {
+        warn!("{annotations_count} annotations are merged with description.");
     }
 
     storage::refresh_index(app, false)
