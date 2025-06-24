@@ -43,6 +43,7 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum Command {
+    // TODO: P2: replace one-letter aliases with custom ones
     /// Create new entry.
     #[command(visible_aliases(["a"]))]
     Add(AddArgs),
@@ -70,7 +71,7 @@ pub enum Command {
     Modify(ModArgs),
 
     /// Mark specified tasks as done.
-    #[command(visible_aliases(["c"]))]
+    #[command(visible_aliases(["done", "c", "d"]))]
     Complete(ModArgs),
 
     /// Mark specified tasks as started.

@@ -74,13 +74,17 @@ pub struct DefaultsConfig {
     #[serde(default)]
     status_initial: Box<str>,
 
-    /// Status which is applied when 'done' command is called.
+    /// Status which is applied when 'complete' command is called.
     #[serde(default)]
     status_complete: Box<str>,
 
     /// Status which is applied upon entry removal.
     #[serde(default)]
     status_deleted: Box<str>,
+
+    /// Status which is applied on 'start' command'
+    #[serde(default)]
+    status_started: Box<str>,
 
     /// Default time string to assign as 'due'.
     #[serde(default)]
@@ -349,6 +353,11 @@ impl DefaultsConfig {
     /// Status which is assigned when entry is deleted.
     pub fn status_deleted(&self) -> &str {
         if self.status_deleted.is_empty() { "deleted" } else { &self.status_deleted }
+    }
+
+    /// Status which is assigned when 'start' command is called.
+    pub fn status_started(&self) -> &str {
+        if self.status_started.is_empty() { "started" } else { &self.status_started }
     }
 
     /// Default due date expression.

@@ -163,8 +163,12 @@ fn main() -> Result<()> {
             }
             storage::modify_entries(&ids, &args.entry, &app)?;
         }
-        Some(Command::Start(_args)) => {
-            todo!(); // TODO: P3: implement start command
+        Some(Command::Start(mut args)) => {
+            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
+            if args.entry.status.is_none() {
+                args.entry.status = Some(app.config.defaults.status_started().to_string());
+            }
+            storage::modify_entries(&ids, &args.entry, &app)?;
         }
         Some(Command::Reset(mut args)) => {
             let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
