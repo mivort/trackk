@@ -391,61 +391,77 @@ impl Token {
 
     /// Perform greater comparison.
     pub fn greater(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs > rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs > rhs)),
             (Self::Date(lhs), Self::Duration(rhs)) => {
-                Ok(Self::Bool(lhs > duration_to_date(rhs, ts)))
+                Ok(Self::Bool(*lhs > duration_to_date(*rhs, ts)))
             }
             (Self::Duration(lhs), Self::Date(rhs)) => {
-                Ok(Self::Bool(duration_to_date(lhs, ts) > rhs))
+                Ok(Self::Bool(duration_to_date(*lhs, ts) > *rhs))
             }
-            _ => bail!("'>' operator got incompatibe arguments"),
+            _ => bail!(
+                "'>' operator got incompatibe arguments ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
     /// Perform greater comparison.
     pub fn greater_eq(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs >= rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs >= rhs)),
             (Self::Date(lhs), Self::Duration(rhs)) => {
-                Ok(Self::Bool(lhs >= duration_to_date(rhs, ts)))
+                Ok(Self::Bool(*lhs >= duration_to_date(*rhs, ts)))
             }
             (Self::Duration(lhs), Self::Date(rhs)) => {
-                Ok(Self::Bool(duration_to_date(lhs, ts) >= rhs))
+                Ok(Self::Bool(duration_to_date(*lhs, ts) >= *rhs))
             }
-            _ => bail!("'>=' operator got incompatibe arguments"),
+            _ => bail!(
+                "'>=' operator got incompatibe arguments ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
     /// Perform greater comparison.
     pub fn less(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs < rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs < rhs)),
             (Self::Date(lhs), Self::Duration(rhs)) => {
-                Ok(Self::Bool(lhs < duration_to_date(rhs, ts)))
+                Ok(Self::Bool(*lhs < duration_to_date(*rhs, ts)))
             }
             (Self::Duration(lhs), Self::Date(rhs)) => {
-                Ok(Self::Bool(duration_to_date(lhs, ts) < rhs))
+                Ok(Self::Bool(duration_to_date(*lhs, ts) < *rhs))
             }
-            _ => bail!("'<' operator got incompatibe arguments"),
+            _ => bail!(
+                "'<' operator got incompatibe arguments ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
     /// Perform greater comparison.
     pub fn less_eq(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs <= rhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs <= rhs)),
             (Self::Date(lhs), Self::Duration(rhs)) => {
-                Ok(Self::Bool(lhs <= duration_to_date(rhs, ts)))
+                Ok(Self::Bool(*lhs <= duration_to_date(*rhs, ts)))
             }
             (Self::Duration(lhs), Self::Date(rhs)) => {
-                Ok(Self::Bool(duration_to_date(lhs, ts) <= rhs))
+                Ok(Self::Bool(duration_to_date(*lhs, ts) <= *rhs))
             }
-            _ => bail!("'<=' operator got incompatibe arguments"),
+            _ => bail!(
+                "'<=' operator got incompatibe arguments ({} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
