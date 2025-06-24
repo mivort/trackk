@@ -36,7 +36,7 @@ pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<
         .load_template(app.config.templates.picker())
         .with_context(|| format!("Unable to load picker template: {template_id}"))?;
 
-    // TODO: P2: apply sorting to picker results
+    // TODO: P2: apply configurable sorting to picker results
 
     let count = entries.len();
     let limit = count.min(10);

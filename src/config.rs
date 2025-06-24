@@ -310,10 +310,11 @@ impl ValuesConfig {
     pub fn urgency_formula(&self) -> &str {
         if self.urgency_formula.is_empty() {
             return concat!(
-                "sig((now - (due or someday)) / 10mil) * 10 + ",
-                "sig((now - created) / 10mil) * 0.5 + ",
-                "(status:started and 1 or 0) + ",
-                "(status:blocked and -1 or 0)"
+                "sig((now - (due or someday)) / 10mil) * 10",
+                " + sig((now - created) / 10mil) * 0.5",
+                " + (status == started and 1 or 0)",
+                " + (status == blocked and -1 or 0)",
+                " + (status == deleted and -20 or 0)",
             );
         }
         &self.urgency_formula
