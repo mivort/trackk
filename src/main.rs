@@ -87,6 +87,13 @@ fn main() -> Result<()> {
             };
             let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
 
+            let entries = if filters.ids.index.is_empty() {
+                // TODO: P3: check for partial uuid matches
+                input::pick_prompt(entries, &app)?
+            } else {
+                entries
+            };
+
             for entry in &entries {
                 display::show_entry(entry, &app)?;
             }

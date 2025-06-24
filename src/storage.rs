@@ -42,7 +42,9 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
         query: &mut Default::default(),
     };
     let entries = filter_all_entries(&filters, app)?;
-    let entries = input::pick_prompt(entries, app)?;
+
+    // TODO: P3: show picker in case if id query contains partial matches
+    let entries = if ids.index.is_empty() { input::pick_prompt(entries, app)? } else { entries };
 
     let mut index = app.index_mut()?;
 

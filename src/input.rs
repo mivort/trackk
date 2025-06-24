@@ -5,7 +5,7 @@ use std::rc::Rc;
 use crate::app::App;
 use crate::display::RowContext;
 use crate::issue::Issue;
-use crate::prelude::*;
+use crate::{prelude::*, sort};
 
 /// Read user input from stdin.
 pub fn prompt(prompt: &str) -> Result<String> {
@@ -37,6 +37,8 @@ pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<
         .with_context(|| format!("Unable to load picker template: {template_id}"))?;
 
     // TODO: P2: apply configurable sorting to picker results
+    let sort = &sort::parse_rules("urgency+")?;
+    sort::sort_entries(&mut entries, sort)?;
 
     let count = entries.len();
     let limit = count.min(10);
@@ -49,7 +51,7 @@ pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<
 
     for (lineno, (entry, path)) in subset.iter().enumerate() {
         let context = RowContext {
-            sid: Some(lineno + 1),
+            sid: Some(limit - lineno),
             urgency: entry.urgency,
             entry: Cow::Borrowed(entry),
             path: Cow::Borrowed(path),
@@ -82,14 +84,17 @@ pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<
         selected.push(pick);
     }
 
-    let mut retain_idx: usize = 1;
+    let mut retain_idx: usize = 0;
     entries.retain(|_| {
-        let retain = if selected.contains(&retain_idx) { true } else { false };
-        retain_idx += 1;
-        retain
+        let rev_idx = count - retain_idx;
+        if rev_idx <= limit && selected.contains(&rev_idx) {
+            retain_idx += 1;
+            true
+        } else {
+            retain_idx += 1;
+            false
+        }
     });
 
     Ok(entries)
-
-    // Ok(entries.iter().enumerate().filter(||)
 }
