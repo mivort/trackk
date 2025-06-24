@@ -18,7 +18,7 @@
   {{- reset -}}
 
   {#- Due date -#}
-  {%- if entry.due and cols > 36 and entry.status != 'completed' and entry.status != 'deleted' -%}
+  {%- if entry.due and cols > 36 and not entry.end -%}
     / {# -#}
     {%- if entry.due >= now -%}
       {{ fg(lightwhite) }}
@@ -28,8 +28,13 @@
     {{ entry.due | reldate }}{{ reset }} {# -#}
   {%- endif -%}
 
+  {#- End date -#}
+  {%- if entry.end and cols > 36 -%}
+    / {{ fg(cyan) }}{{ entry.end | datefmt('date') }}{{ reset }} {# -#}
+  {%- endif -%}
+
   {#- Urgency -#}
-  {%- if cols > 48 -%}
+  {%- if cols > 48 and not entry.end -%}
     / {{ fg(green) }}{{ urgency | numfmt('{:.1}') }}{{ reset }} {# -#}
   {%- endif -%}
 {%- endset -%}
