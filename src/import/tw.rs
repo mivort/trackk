@@ -135,7 +135,7 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
         warn!("'Annotations' field import is not supported yet.");
     }
 
-    Ok(())
+    storage::refresh_index(app, false)
 }
 
 #[cfg(test)]
