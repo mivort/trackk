@@ -1,3 +1,6 @@
+use std::ops::Range;
+use std::rc::Rc;
+
 use logos::Logos as _;
 use time::OffsetDateTime;
 
@@ -31,89 +34,100 @@ pub fn parse_local_exp(input: &str, app: &App, output: &mut Vec<Token>) -> Resul
 }
 
 /// Produce parsed ASP tree ready for evaluation from the input.
-pub fn parse_exp(input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result<()> {
+pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result<()> {
     use Token::*;
 
     let mut op_stack = Vec::<Token>::new();
-    let lexer = Token::lexer_with_extras(input, ts);
-
     let mut mode = Mode::Arg;
 
-    for (tok, span) in lexer.spanned() {
-        let tok =
-            tok.with_context(|| format!("Unable to process token at position {}", span.start))?;
+    'outer: loop {
+        let lexer = Token::lexer_with_extras(input, ts);
+        for (tok, Range { start, end }) in lexer.spanned() {
+            let tok =
+                tok.with_context(|| format!("Unable to process token at position {}", start))?;
 
-        match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
-                if !mode.expects_arg() {
-                    bail!(
-                        "Expected {}, got argument at position {}",
-                        mode.expected(),
-                        span.start
-                    );
-                }
-                output.push(tok);
-                mode = Mode::Op;
-            }
-            Func(_) => {
-                op_stack.push(tok);
-                mode = Mode::FnParen;
-            }
-            Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-            | GreaterEq | NotEq | And | Or | Not => {
-                let (prec, left_assoc) = tok.prec_and_assoc();
-                let (tok, left_assoc) = if mode.expects_arg() {
-                    let (tok, left_assoc) = tok.to_unary();
-                    if left_assoc {
+            match tok {
+                Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
+                    if !mode.expects_arg() {
                         bail!(
-                            "Expected {}, got operator '{}' at position {}",
+                            "Expected {}, got argument at position {}",
                             mode.expected(),
-                            &input[span.clone()],
-                            span.start
+                            start
                         );
                     }
-                    (tok, left_assoc)
-                } else {
-                    (tok, left_assoc)
-                };
-
-                while let Some(top) = op_stack.pop_if(|top| {
-                    if let LParen = top {
-                        return false;
-                    }
-                    let (top_prec, _) = top.prec_and_assoc();
-                    (top_prec > prec) || (top_prec == prec && left_assoc)
-                }) {
-                    output.push(top)
+                    output.push(tok);
+                    mode = Mode::Op;
                 }
-                op_stack.push(tok);
-                mode = Mode::Arg;
-            }
-            LParen => {
-                if !mode.expects_paren() {
+                Func(_) => {
+                    op_stack.push(tok);
+                    mode = Mode::FnParen;
+                }
+                Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
+                | GreaterEq | NotEq | And | Or | Not => {
+                    let (prec, left_assoc) = tok.prec_and_assoc();
+                    let (tok, left_assoc) = if mode.expects_arg() {
+                        if let Div = tok {
+                            let (regex, remainder) = parse_regex(&input[end..])?;
+                            output.push(Regex(regex));
+                            mode = Mode::Op;
+                            input = remainder;
+                            continue 'outer;
+                        }
+
+                        let (tok, left_assoc) = tok.to_unary();
+                        if left_assoc {
+                            bail!(
+                                "Expected {}, got operator '{}' at position {}",
+                                mode.expected(),
+                                &input[start..end],
+                                start
+                            );
+                        }
+                        (tok, left_assoc)
+                    } else {
+                        (tok, left_assoc)
+                    };
+
+                    while let Some(top) = op_stack.pop_if(|top| {
+                        if let LParen = top {
+                            return false;
+                        }
+                        let (top_prec, _) = top.prec_and_assoc();
+                        (top_prec > prec) || (top_prec == prec && left_assoc)
+                    }) {
+                        output.push(top)
+                    }
+                    op_stack.push(tok);
+                    mode = Mode::Arg;
+                }
+                LParen => {
+                    if mode.expects_paren() {
+                        op_stack.push(tok);
+                        mode = Mode::Arg;
+                        continue;
+                    }
                     bail!(
                         "Expected {}, got '(' at position {}",
                         mode.expected(),
-                        span.start
+                        start
                     );
                 }
-                op_stack.push(tok);
-                mode = Mode::Arg;
-            }
-            RParen => {
-                if !tilt(&mut op_stack, output) {
-                    bail!("Mismatched ')' at position {}", span.end);
-                }
-                op_stack.pop_if(|top| {
-                    if matches!(top, Func(_)) {
-                        output.push(top.clone());
-                        return true;
+                RParen => {
+                    if !tilt(&mut op_stack, output) {
+                        bail!("Mismatched ')' at position {}", end);
                     }
-                    false
-                });
-                mode = Mode::Op;
+                    op_stack.pop_if(|top| {
+                        if matches!(top, Func(_)) {
+                            output.push(top.clone());
+                            return true;
+                        }
+                        false
+                    });
+                    mode = Mode::Op;
+                }
             }
         }
+        break;
     }
     if tilt(&mut op_stack, output) {
         bail!("Mismatched opening bracket");
@@ -269,6 +283,17 @@ pub fn eval(
     let last = stack.last();
     last.context("Expression didn't produced any result")
         .cloned()
+}
+
+/// Find the the boundaries of regex.
+fn parse_regex(input: &str) -> Result<(Rc<regex::Regex>, &str)> {
+    // TODO: P2: support escaped backslashes
+    let end = unwrap_some_or!(input.find("/"), {
+        bail!("Non-terminated regex: {}", input);
+    });
+
+    let regex = Rc::new(regex::Regex::new(&input[..end])?);
+    Ok((regex, &input[end + 1..]))
 }
 
 #[test]

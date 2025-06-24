@@ -80,8 +80,6 @@ pub enum Token {
     #[token("false", |_| false)]
     Bool(bool),
 
-    #[token("//", parse_regex)]
-    #[allow(unused)]
     Regex(Rc<regex::Regex>),
 
     /// Addition operator with unary mode flag.
@@ -460,6 +458,7 @@ impl Token {
             Bool(_) => "boolean",
             String(_) => "string",
             Reference(_) => "reference",
+            Regex(_) => "regex",
             _ => "operator",
         }
     }
@@ -645,21 +644,6 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
         return Err(LexerError::date_error(lex.slice()));
     });
     Ok(res.assume_offset(lex.extras.offset()).unix_timestamp())
-}
-
-/// Find the the boundaries of regex.
-fn parse_regex(lex: &mut Lexer<Token>) -> Result<Rc<regex::Regex>, LexerError> {
-    let remainder = lex.remainder();
-    let end = unwrap_some_or!(remainder.find(lex.slice()), {
-        return Err(LexerError::token_error("regex teminator ('//') not found"));
-    });
-
-    let regex = Rc::new(unwrap_ok_or!(regex::Regex::new(&remainder[..end]), _, {
-        return Err(LexerError::token_error(&remainder[..end]));
-    }));
-
-    lex.bump(end + lex.slice().len());
-    Ok(regex)
 }
 
 /// Exclude quotes and return reference-counted str.

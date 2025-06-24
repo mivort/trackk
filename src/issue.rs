@@ -295,14 +295,24 @@ impl FieldRef {
 
     /// Compare referenced value to provided token.
     pub fn fuzzy_eq(&self, token: &Token, issue: &Issue) -> Result<bool> {
-        // TODO: P3: support other operand types
+        use Token::*;
+
         match (self, token) {
             (Self::Title, Token::String(rhs)) => {
                 Ok(issue.desc.lines().next().unwrap_or("").contains(&**rhs))
             }
-            (Self::Desc, Token::String(rhs)) => Ok(issue.desc.contains(&**rhs)),
-            (Self::Tag, Token::String(rhs)) => Ok(issue.tags.contains(&**rhs)),
-            (Self::Status, Token::String(rhs)) => Ok(issue.status.starts_with(&**rhs)),
+            (Self::Title, Token::Regex(regex)) => {
+                Ok(regex.is_match(issue.desc.lines().next().unwrap_or("")))
+            }
+
+            (Self::Desc, String(rhs)) => Ok(issue.desc.contains(&**rhs)),
+            (Self::Desc, Regex(regex)) => Ok(regex.is_match(&issue.desc)),
+
+            (Self::Tag, String(rhs)) => Ok(issue.tags.contains(&**rhs)),
+            (Self::Tag, Regex(regex)) => Ok(issue.tags.iter().any(|t| regex.is_match(&t))),
+
+            (Self::Status, String(rhs)) => Ok(issue.status.starts_with(&**rhs)),
+            (Self::Status, Regex(regex)) => Ok(regex.is_match(&issue.status)),
             _ => bail!(
                 "':' got incompatible arguments (reference and {})",
                 token.ttype()
