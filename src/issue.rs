@@ -1,4 +1,5 @@
 use serde_derive::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::{BTreeSet, HashMap};
 use time::{OffsetDateTime, UtcDateTime};
 use uuid::Uuid;
@@ -66,7 +67,7 @@ pub struct Issue {
     /// Custom field values.
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     #[serde(default)]
-    pub meta: HashMap<String, FieldValue>,
+    pub meta: HashMap<String, Value>,
 }
 
 impl Issue {
@@ -342,13 +343,4 @@ impl FieldRef {
             _ => false,
         }
     }
-}
-
-/// Custom field value. The end data representation will depend the specific field settings.
-#[derive(Serialize, Deserialize, Clone)]
-#[serde(untagged)]
-pub enum FieldValue {
-    String(String),
-    F64(f64),
-    I64(i64),
 }
