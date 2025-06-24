@@ -147,6 +147,7 @@ pub enum Token {
     #[token("abs", |_| FuncRef::Abs)]
     #[token("has", |_| FuncRef::Has)]
     #[token("len", |_| FuncRef::Len)]
+    #[token("lines", |_| FuncRef::Lines)]
     #[token("ln", |_| FuncRef::Ln)]
     #[token("sig", |_| FuncRef::Sig)]
     #[token("sqrt", |_| FuncRef::Sqrt)]
