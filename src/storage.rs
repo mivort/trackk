@@ -43,7 +43,7 @@ pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()>
     let entries = filter_all_entries(&filters, app)?;
     let mut index = app.index_mut()?;
 
-    // TODO: P2: ask if multiple entries are expected
+    // TODO: P3: ask if multiple entries are expected
     // TODO: P1: use cache to reduce amount of re-parsing/writes?
 
     for (issue, path) in &entries {

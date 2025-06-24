@@ -85,5 +85,9 @@
 {{- fg(lightblack) }}{{ fill('.', maxw - statusw - titlew - metaw - numberw - 1) }} {# -#}
 {{- meta -}}
 
-{% if lineno == count - 1 %}
-{% endif %}
+{%- if lineno == limit - 1 %}
+{# #}
+  {%- if lineno != count - 1 -%}
+    {# #}     {{ fg(lightblack) }}+{{ count - limit }} more{{ clear }}
+  {%- endif -%}
+{%- endif %}

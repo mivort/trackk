@@ -21,6 +21,9 @@ pub struct App<'env> {
     /// Sorting override.
     pub sort: Vec<sort::SortingRule>,
 
+    /// Global entry count limit.
+    pub limit: usize,
+
     /// Tera templates reference.
     pub templates: templating::Templates<'env>,
 
@@ -56,6 +59,8 @@ impl<'env> App<'env> {
         if let Some(sort) = &args.sort {
             self.sort = sort::parse_rules(sort)?;
         }
+
+        self.limit = args.limit.unwrap_or(usize::MAX);
 
         Ok(())
     }

@@ -24,6 +24,9 @@ struct RowContext<'a> {
     /// Number of items in the section.
     count: usize,
 
+    /// Limit number of shown entries.
+    limit: usize,
+
     /// Reference to the issue data.
     entry: Cow<'a, Issue>,
 
@@ -76,8 +79,6 @@ fn show_section<'a>(
         ..
     } = section;
 
-    // TODO: P2: propagate sorting override from args
-
     filters
         .query
         .replace(filter, app)
@@ -124,15 +125,19 @@ fn show_section<'a>(
         return Ok(0);
     }
 
+    let count = entries.len();
+    let limit = app.limit.min(entries.len()); // TODO: P2: support report-defined limit
+
     let template = j2.get_template(&section.template)?;
-    for (lineno, (entry, path)) in entries.iter().enumerate() {
+    for (lineno, (entry, path)) in entries[(count - limit)..].iter().enumerate() {
         let context = RowContext {
             sid: entry.sid,
             urgency: entry.urgency,
             entry: Cow::Borrowed(entry),
             path: Cow::Borrowed(path),
             lineno,
-            count: entries.len(),
+            count,
+            limit,
         };
         template
             .render_to_write(context, &out)
@@ -160,6 +165,7 @@ pub fn show_entry<'a>((entry, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
         path: Cow::Borrowed(path),
         lineno: 0,
         count: 1,
+        limit: 1,
     };
     template
         .render_to_write(context, &out)

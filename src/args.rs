@@ -177,6 +177,10 @@ pub struct FilterArgs {
     /// Sort by provided sorting rule, overriding report sorting.
     #[arg(long, short = 'S')]
     pub sort: Option<Box<str>>,
+
+    /// Limit the output by the provided value.
+    #[arg(long, short)]
+    pub limit: Option<usize>,
 }
 
 /// Args to apply changes to the selected entries.
