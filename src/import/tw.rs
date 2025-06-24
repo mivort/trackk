@@ -35,19 +35,15 @@ struct TWData {
     #[serde(default)]
     end: Option<Box<str>>,
 
-    // TODO: P2: add 'start' handling as custom field
     #[serde(default)]
     start: Option<Box<str>>,
 
-    // TODO: P2: add 'wait' handling as custom field
     #[serde(default)]
     wait: Option<Box<str>>,
 
-    // TODO: P1: resolve 'depends' as 'link'
     #[serde(default)]
-    depends: Vec<Box<str>>,
+    depends: Option<Vec<String>>,
 
-    // TODO: P2: add 'project' handling as custom field
     #[serde(default)]
     project: Option<Box<str>>,
 
@@ -133,12 +129,24 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
             ..Default::default()
         };
 
-        if !e.extra.is_empty() {
-            uda_count += e.extra.len();
+        let meta = &mut imported.meta;
+
+        if let Some(start) = e.start {
+            meta.insert("start".into(), try_parse(&start)?.into());
+        }
+        if let Some(wait) = e.wait {
+            meta.insert("wait".into(), try_parse(&wait)?.into());
+        }
+        if let Some(project) = e.project {
+            meta.insert("project".into(), try_parse(&project)?.into());
+            project_count += 1;
+        }
+        if let Some(depends) = e.depends {
+            meta.insert("depends".into(), depends.into());
         }
 
-        if e.project.is_some() {
-            project_count += 1;
+        if !e.extra.is_empty() {
+            uda_count += e.extra.len();
         }
 
         for ann in e.annotations {
@@ -175,10 +183,10 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     }
 
     if uda_count > 0 {
-        warn!("UDA field import is not supported yet ({uda_count} not imported).");
+        warn!("UDA field import is not supported yet (total: {uda_count}).");
     }
     if project_count > 0 {
-        warn!("'Project' field import is not supported yet ({project_count} no imported).");
+        warn!("'Project' field is added as meta field (total: {project_count}).");
     }
     if annotations_count > 0 {
         warn!("{annotations_count} annotations are merged with descriptions.");
