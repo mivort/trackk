@@ -215,10 +215,18 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Template(args)) => {
+            let template = match args {
+                args::TemplateCommand::List => {
+                    templating::print_builtin_templates();
+                    return Ok(());
+                }
+                args::TemplateCommand::Show(template) => template,
+            };
+
             use templates::colors::{RESET, fg};
             let (color, reset) = if app.config.no_color() { ("", "") } else { (fg(10), RESET) };
 
-            if let Some((id, content)) = &templating::builtin_template(&args.template) {
+            if let Some((id, content)) = &templating::builtin_template(&template.template) {
                 println!("{color}{{#- TEMPLATE: {} -#}}{reset}", id);
                 print!("{}", content);
                 println!("{color}{{#- END OF TEMPLATE -#}}{reset}");

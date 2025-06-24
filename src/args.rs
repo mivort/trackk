@@ -105,7 +105,8 @@ pub enum Command {
     Edit(ModArgs),
 
     /// Show one of the built-in or config-defined report templates.
-    Template(TemplateArgs),
+    #[command(subcommand)]
+    Template(TemplateCommand),
 
     /// Import data from one of the supported formats.
     Import(ImportArgs),
@@ -271,8 +272,18 @@ pub struct ModArgs {
     pub entry: EntryArgs,
 }
 
+#[derive(Subcommand)]
+pub enum TemplateCommand {
+    /// Show source code of selected template.
+    Show(TemplateArgs),
+
+    /// List available templates.
+    List,
+}
+
 #[derive(Parser)]
 pub struct TemplateArgs {
+    /// Template name to display.
     pub template: Box<str>,
 }
 

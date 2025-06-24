@@ -141,3 +141,20 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
         _ => None,
     }
 }
+
+/// List of built-in templates.
+const BUILTIN_TEMPLATES: [&str; 7] = ["header", "next", "all", "issue", "entry", "picker", "none"];
+
+/// Print the list of available templates.
+pub fn print_builtin_templates() {
+    for t in BUILTIN_TEMPLATES {
+        println!("{}", t);
+    }
+}
+
+#[test]
+fn check_builtin_list() {
+    for b in BUILTIN_TEMPLATES {
+        assert!(builtin_template(b).unwrap().0 == b);
+    }
+}
