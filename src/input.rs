@@ -70,7 +70,7 @@ pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<
         match tok {
             "A" | "a" => return Ok(entries),
             "Q" | "q" => return Ok(vec![]),
-            _ => {},
+            _ => {}
         }
 
         let pick = tok

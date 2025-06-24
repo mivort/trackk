@@ -243,7 +243,7 @@ pub fn eval(
                 _ => bail!("'eq' ('==') operator haven't got enough arguments"),
             },
             NotEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.not_eq(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.not_eq(rhs, issue)?),
                 _ => bail!("'eq' ('!=') operator haven't got enough arguments"),
             },
             Not => match stack.pop() {

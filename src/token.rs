@@ -327,15 +327,15 @@ impl Token {
     }
 
     /// Check if two are exactly the same.
-    pub fn eq(self, rhs: Self, issue: &Issue) -> Result<Self> {
+    pub fn eq(self, rhs: Self, entry: &Issue) -> Result<Self> {
         match (&self, &rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(*rhs)),
             (Self::Bool(lhs), Self::Date(_rhs)) => Ok(Self::Bool(*lhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs == rhs)),
-            (Self::Reference(lhs), rhs) => Ok(Self::Bool(lhs.eq(rhs, issue)?)),
-            (lhs, Self::Reference(rhs)) => Ok(Self::Bool(rhs.eq(lhs, issue)?)),
+            (Self::Reference(lhs), rhs) => Ok(Self::Bool(lhs.eq(rhs, entry)?)),
+            (lhs, Self::Reference(rhs)) => Ok(Self::Bool(rhs.eq(lhs, entry)?)),
             _ => bail!(
                 "'eq' ('==') was used on incompatible values ({} and {})",
                 self.ttype(),
@@ -345,13 +345,15 @@ impl Token {
     }
 
     /// Check if two values are not equal.
-    pub fn not_eq(self, rhs: Self) -> Result<Self> {
+    pub fn not_eq(self, rhs: Self, entry: &Issue) -> Result<Self> {
         match (&self, &rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs != rhs)),
             (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(!rhs)),
             (Self::Bool(lhs), Self::Date(_rhs)) => Ok(Self::Bool(!lhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs != rhs)),
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs != rhs)),
+            (Self::Reference(lhs), rhs) => Ok(Self::Bool(!lhs.eq(rhs, entry)?)),
+            (lhs, Self::Reference(rhs)) => Ok(Self::Bool(!rhs.eq(lhs, entry)?)),
             _ => bail!(
                 "'eq' ('!=') was used on incompatible values ({} and {})",
                 self.ttype(),

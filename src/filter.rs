@@ -45,7 +45,7 @@ impl QueryFilter {
 
     /// Append '&&' condition on top of the query.
     #[inline]
-    fn merge(&mut self, merger: impl FnOnce(&mut Vec<Token>)) {
+    pub fn merge(&mut self, merger: impl FnOnce(&mut Vec<Token>)) {
         let was_empty = self.expression.is_empty();
         merger(&mut self.expression);
 
