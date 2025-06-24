@@ -400,6 +400,13 @@ impl Token {
             (Self::Duration(lhs), Self::Date(rhs)) => {
                 Ok(Self::Bool(duration_to_date(*lhs, ts) > *rhs))
             }
+
+            (Self::Bool(false), Self::Duration(_)) => Ok(Self::Bool(false)),
+            (Self::Bool(false), Self::Date(_)) => Ok(Self::Bool(false)),
+
+            (Self::Duration(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+            (Self::Date(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+
             _ => bail!(
                 "'>' operator got incompatibe arguments ({} and {})",
                 self.ttype(),
@@ -419,6 +426,13 @@ impl Token {
             (Self::Duration(lhs), Self::Date(rhs)) => {
                 Ok(Self::Bool(duration_to_date(*lhs, ts) >= *rhs))
             }
+
+            (Self::Bool(false), Self::Duration(_)) => Ok(Self::Bool(false)),
+            (Self::Bool(false), Self::Date(_)) => Ok(Self::Bool(false)),
+
+            (Self::Duration(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+            (Self::Date(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+
             _ => bail!(
                 "'>=' operator got incompatibe arguments ({} and {})",
                 self.ttype(),
@@ -438,6 +452,13 @@ impl Token {
             (Self::Duration(lhs), Self::Date(rhs)) => {
                 Ok(Self::Bool(duration_to_date(*lhs, ts) < *rhs))
             }
+
+            (Self::Bool(false), Self::Duration(_)) => Ok(Self::Bool(false)),
+            (Self::Bool(false), Self::Date(_)) => Ok(Self::Bool(false)),
+
+            (Self::Duration(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+            (Self::Date(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+
             _ => bail!(
                 "'<' operator got incompatibe arguments ({} and {})",
                 self.ttype(),
@@ -457,6 +478,13 @@ impl Token {
             (Self::Duration(lhs), Self::Date(rhs)) => {
                 Ok(Self::Bool(duration_to_date(*lhs, ts) <= *rhs))
             }
+
+            (Self::Bool(false), Self::Duration(_)) => Ok(Self::Bool(false)),
+            (Self::Bool(false), Self::Date(_)) => Ok(Self::Bool(false)),
+
+            (Self::Duration(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+            (Self::Date(_), Self::Bool(false)) => Ok(Self::Bool(false)),
+
             _ => bail!(
                 "'<=' operator got incompatibe arguments ({} and {})",
                 self.ttype(),
