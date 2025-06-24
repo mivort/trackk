@@ -200,7 +200,7 @@ impl Config {
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
                     filter:
-                        "(due or someday) >= 14d and (due or someday) < 365d and !status:started"
+                        "due >= 14d and due < 365d and !status:started"
                             .into(),
                     header: "header".into(),
                     template: "next".into(),
@@ -211,7 +211,7 @@ impl Config {
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
                     filter:
-                        "(due or someday) >= now and (due or someday) < 14d and !status:started"
+                        "due >= now and due < today - 14d and !status:started"
                             .into(),
                     header: "header".into(),
                     template: "next".into(),
@@ -221,7 +221,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "(due or someday) < now and !status:started".into(),
+                    filter: "due < now and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
