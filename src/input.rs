@@ -21,7 +21,7 @@ pub fn prompt(prompt: &str) -> Result<String> {
 }
 
 /// When several tasks match criteria, show the task picker.
-pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+pub fn pick_prompt(action: &str, mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
     // TODO: P2: check terminal state/config/args to suppress the prompt
     // TODO: P2: check the limit of entries to show in prompt
 
@@ -41,7 +41,7 @@ pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<
     sort::sort_entries(&mut entries, sort)?;
 
     let count = entries.len();
-    let limit = count.min(10);
+    let limit = count.min(9);
 
     let j2 = app.templates.j2.borrow();
     let template = j2.get_template(template_id)?;
@@ -64,7 +64,9 @@ pub fn pick_prompt(mut entries: Vec<(Issue, Rc<str>)>, app: &App) -> Result<Vec<
             .with_context(|| format!("Unable to render picker template: {}", template_id))?;
     }
 
-    let input = prompt("Select entries / a: all / q: cancel: [1] ")?;
+    let input = prompt(&format!(
+        "{action}: a: all ({count}) / 1..{limit}: select / q: cancel: [1] "
+    ))?;
 
     let mut selected = vec![];
 

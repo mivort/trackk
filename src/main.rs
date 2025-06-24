@@ -89,7 +89,7 @@ fn main() -> Result<()> {
 
             let entries = if filters.ids.index.is_empty() {
                 // TODO: P3: check for partial uuid matches
-                input::pick_prompt(entries, &app)?
+                input::pick_prompt("Show", entries, &app)?
             } else {
                 entries
             };
