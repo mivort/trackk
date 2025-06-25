@@ -14,12 +14,6 @@ pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
     output.push(args.next().unwrap());
 
     'arg: for arg in args {
-        if let Some(new_context) = match_context(&arg) {
-            context = new_context;
-            output.push(arg);
-            continue;
-        }
-
         let rules = &index[context as usize];
 
         for (regex, replace) in rules {
@@ -37,6 +31,10 @@ pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
             }
 
             continue 'arg;
+        }
+
+        if let Some(new_context) = match_context(&arg) {
+            context = new_context;
         }
         output.push(arg);
     }
