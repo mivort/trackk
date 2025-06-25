@@ -21,14 +21,6 @@ pub struct Args {
     #[command(subcommand)]
     pub command: Option<Command>,
 
-    /// Path to an external configuration file.
-    #[arg(long)]
-    pub config: Option<PathBuf>,
-
-    /// Path to data storage.
-    #[arg(long)]
-    pub data: Option<Box<str>>,
-
     #[command(flatten)]
     pub filter_args: FilterArgs,
 
@@ -139,43 +131,43 @@ impl Default for Command {
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
     /// Filter entries by title.
-    #[arg(long, short = 'm')]
+    #[arg(long)]
     pub title: Vec<String>,
 
     /// Filter entries by description.
-    #[arg(long, short = 'M')]
+    #[arg(long)]
     pub desc: Vec<String>,
 
     /// Filter entries by status.
-    #[arg(long, short)]
+    #[arg(long)]
     pub status: Vec<String>,
 
     /// Filter entries containing the tag (add '-' to tag name to exclude).
-    #[arg(long, short, allow_hyphen_values = true)]
+    #[arg(long)]
     pub tag: Vec<String>,
 
     /// Filter entries by due date.
-    #[arg(long, short, allow_hyphen_values = true)]
+    #[arg(long)]
     pub due: Vec<String>,
 
     /// Filter entries by end date.
-    #[arg(long, short)]
+    #[arg(long)]
     pub end: Vec<String>,
 
     /// Filter entries by created date.
-    #[arg(long, short)]
+    #[arg(long)]
     pub created: Vec<String>,
 
     /// Filter query to apply to the results.
-    #[arg(long, short)]
+    #[arg(long)]
     pub filter: Vec<String>,
 
     /// Sort by provided sorting rule, overriding report sorting.
-    #[arg(long, short = 'S')]
+    #[arg(long)]
     pub sort: Option<Box<str>>,
 
     /// Limit the output by the provided value.
-    #[arg(long, short)]
+    #[arg(long)]
     pub limit: Option<usize>,
 }
 

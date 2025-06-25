@@ -269,7 +269,7 @@ fn read_config() -> Result<Config> {
         },
     };
 
-    config.fallback_values();
+    config.default_values();
 
     Ok(config)
 }

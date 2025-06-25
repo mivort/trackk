@@ -147,11 +147,6 @@ pub struct SyncConfig {
 impl Config {
     /// Override values from arguments.
     pub fn override_from_args(&mut self, args: &Args) {
-        if let Some(data) = &args.data {
-            self.data_path = data.clone();
-            self.data_prefix = PrefixType::None;
-        }
-
         if !matches!(args.color, ColorMode::Auto) {
             self.color_mode = args.color;
         } else {
@@ -163,7 +158,12 @@ impl Config {
     }
 
     /// Fill the empty values with default ones.
-    pub fn fallback_values(&mut self) {
+    pub fn default_values(&mut self) {
+        if let Ok(path) = std::env::var("TRACKK_DATA") {
+            self.data_path = path.into();
+            self.data_prefix = PrefixType::None;
+        }
+
         if self.values.active_status.is_empty() {
             self.values.active_status = hash_set(&["pending", "started", "blocked"]);
         }
