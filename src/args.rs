@@ -161,7 +161,7 @@ pub struct FilterArgs {
     pub tag: Vec<String>,
 
     /// Filter entries by due date.
-    #[arg(long, short)]
+    #[arg(long, short, allow_hyphen_values = true)]
     pub due: Vec<String>,
 
     /// Filter entries by end date.

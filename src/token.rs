@@ -122,6 +122,7 @@ pub enum Token {
     Less,
 
     #[token("<=")]
+    #[token("before-eq")]
     LessEq,
 
     #[token(">")]
@@ -129,6 +130,7 @@ pub enum Token {
     Greater,
 
     #[token(">=")]
+    #[token("after-eq")]
     GreaterEq,
 
     #[token("&&")]
@@ -291,10 +293,10 @@ impl Token {
 
     /// Produce a negative result of a value.
     pub fn neg(self) -> Result<Self> {
-        match self {
+        match &self {
             Self::Duration(duration) => Ok(Self::Duration(-duration)),
             Self::Date(_) => bail!("Date can't be negative"),
-            _ => panic!("Operator applied to the wrong token"),
+            _ => bail!("Unary '-' applied to the wrong token ({})", self.ttype()),
         }
     }
 
