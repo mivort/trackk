@@ -16,7 +16,7 @@ const LOGO: &str = r#"
 /// Trackk command line arguments.
 #[derive(Parser)]
 #[command(author, version, about = LOGO, long_about = None)]
-#[command(args_override_self = true, allow_external_subcommands = true)]
+#[command(args_override_self = true)]
 pub struct Args {
     #[command(subcommand)]
     pub command: Option<Command>,
@@ -43,14 +43,8 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum Command {
-    // TODO: P2: replace one-letter aliases with custom ones
     /// Create new entry.
-    #[command(visible_aliases(["a"]))]
     Add(AddArgs),
-
-    /// Create new entry and mark it as complete.
-    #[command(visible_aliases(["l"]))]
-    Log(AddArgs),
 
     /// Duplicate entire entry.
     // TODO: P2: implement duplicate command
@@ -63,12 +57,13 @@ pub enum Command {
     _Copy,
 
     /// Remove specified entry.
-    #[command(visible_aliases(["rm"]))]
+    // TODO: P3: replace with built-in alias
+    #[command(skip)]
+    #[allow(unused)]
     Remove(ModArgs),
 
     /// Modify specified entry
-    #[command(visible_aliases(["mod", "m"]))]
-    Modify(ModArgs),
+    Mod(ModArgs),
 
     /// Mark specified tasks as done.
     #[command(visible_aliases(["done", "c", "d"]))]
@@ -82,8 +77,7 @@ pub enum Command {
     Reset(ModArgs),
 
     /// List active entries using set of filters.
-    #[command(visible_aliases(["ls"]))]
-    List(ListArgs),
+    Ls(ListArgs),
 
     /// List all entries using set of filters.
     All(ListArgs),
@@ -98,11 +92,9 @@ pub enum Command {
     Count,
 
     /// Show info about specified entry
-    #[command(visible_aliases(["inf", "i"]))]
     Info(InfoArgs),
 
     /// Edit using default editor program.
-    #[command(visible_aliases(["e"]))]
     Edit(ModArgs),
 
     /// Show one of the built-in or config-defined report templates.
@@ -132,13 +124,15 @@ pub enum Command {
 
     /// If no built-in command was matched, try to match with one of the aliases.
     /// Otherwise, fallback to 'info' command.
-    #[command(external_subcommand)]
+    // TODO: P3: remove external subcommand
+    #[command(skip)]
+    #[allow(unused)]
     Alias(Vec<String>),
 }
 
 impl Default for Command {
     fn default() -> Self {
-        Self::List(ListArgs::default())
+        Self::Ls(ListArgs::default())
     }
 }
 

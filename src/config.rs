@@ -6,8 +6,8 @@ use std::path::PathBuf;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::args::{Args, ColorMode};
-use crate::prelude::*;
 use crate::templates::colors;
+use crate::{expansion, prelude::*};
 
 #[derive(Deserialize, Default)]
 pub struct Config {
@@ -467,17 +467,17 @@ pub enum PrefixType {
 #[allow(unused)]
 pub struct ExpansionConfig {
     /// Regular expression to match on argument.
-    expr: Box<str>,
+    pub expr: Box<str>,
 
     /// Replace command argument with one or more values.
     /// Capture groups can be accessed with '$1', '$2' etc.,
     /// '$$' is replaced with literal '$'.
-    replace: Vec<Box<str>>,
+    pub replace: Vec<String>,
 
     /// Command context to use the expansion in.
     /// If not specified, it will be used in root context.
     #[serde(default)]
-    context: Box<str>,
+    pub context: expansion::CmdContext,
 }
 
 /// Print all configuration values along with documentation.

@@ -45,17 +45,13 @@ use prelude::*;
 
 fn main() -> Result<()> {
     let mut config = read_config()?;
-    expansion::pre_process_args(&config)?;
+    let exp_args = expansion::pre_process_args(&config)?;
 
-    let args = Args::parse();
+    let args = Args::parse_from(&exp_args);
     config.override_from_args(&args);
 
     setup_logging(config.no_color(), args.verbose)?;
-
-    if let Some(Command::Alias(alias)) = &args.command {
-        // TODO: P3: replace with alias and re-parse
-        warn!("Alias '{}' not found", alias.first().unwrap());
-    }
+    trace!("Command expanded to: {:?}", exp_args);
 
     let mut app = app::App::new(config);
     app.merge_filter_args(&args.filter_args)?;
@@ -63,7 +59,7 @@ fn main() -> Result<()> {
     // TODO: P2: customize default error handling
 
     match args.command {
-        Some(Command::List(_args)) => {
+        Some(Command::Ls(_args)) => {
             app.merge_filter_args(&args.filter_args)?;
             let ids = Default::default();
             let report = &app.config.report_next();
@@ -120,22 +116,6 @@ fn main() -> Result<()> {
             issue.validate()?;
             storage::add_entry(issue, &app)?;
         }
-        Some(Command::Log(a)) => {
-            let mut issue = issue::Issue::new(&a.entry, &app)?;
-            issue.apply_description(&a.description);
-
-            issue.status = app.config.defaults.status_complete().to_string();
-            issue.update_end(&app.config);
-
-            if !a.no_edit {
-                let status = editor::edit_entry(&mut issue, &app)?;
-                if !status.success() {
-                    return Ok(());
-                }
-            }
-            issue.validate()?;
-            storage::add_entry(issue, &app)?;
-        }
 
         Some(Command::_Dup) => {
             todo!()
@@ -146,7 +126,7 @@ fn main() -> Result<()> {
             // TODO: P2: implement context copy command
         }
 
-        Some(Command::Modify(e)) => {
+        Some(Command::Mod(e)) => {
             let ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
             storage::modify_entries(&ids, &e.entry, &app)?;
         }

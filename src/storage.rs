@@ -151,6 +151,8 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>
         );
     }
 
+    let mut traverse_count = 0;
+
     for entry in WalkDir::new(&path).min_depth(2) {
         let entry = entry?;
 
@@ -162,7 +164,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>
         let relpath = entry.path().strip_prefix(&path)?;
         let path = Rc::<str>::from(relpath.to_string_lossy());
 
-        trace!("Reading bucket: {}", path);
+        traverse_count += 1;
 
         for mut issue in bucket.entries {
             if !filters.ids.matches(&issue.id) {
@@ -189,6 +191,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>
         }
     }
 
+    trace!("Traversed {} buckets", traverse_count);
     Ok(output)
 }
 

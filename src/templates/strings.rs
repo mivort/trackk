@@ -9,7 +9,7 @@ pub fn firstline(mut input: String) -> String {
 
 /// Determine if entry title has second line, i.e. an attached note.
 pub fn hasnote(input: &str) -> bool {
-    input.lines().skip(1).next().is_some()
+    input.lines().nth(1).is_some()
 }
 
 /// Use format string to format the numeric value.
