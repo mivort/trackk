@@ -5,6 +5,7 @@ mod config;
 mod dateexp;
 mod display;
 mod editor;
+mod expansion;
 mod filter;
 mod functions;
 mod index;
@@ -43,8 +44,11 @@ use log::Level;
 use prelude::*;
 
 fn main() -> Result<()> {
+    let mut config = read_config()?;
+    expansion::pre_process_args(&config)?;
+
     let args = Args::parse();
-    let config = read_config(&args)?;
+    config.override_from_args(&args);
 
     setup_logging(config.no_color(), args.verbose)?;
 
@@ -264,18 +268,17 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-/// Read config from file and (optionally) from storage directory.
-fn read_config(args: &Args) -> Result<Config> {
-    let path = if let Some(config) = &args.config {
-        config
-    } else {
-        &unwrap_ok_or!(env::var("TRACKK_CONFIG").map(PathBuf::from), _, {
-            let mut dir = dirs::config_dir().context("Unable to find config directory")?;
-            dir.push(env!("CARGO_PKG_NAME"));
-            dir.push("config.json5");
-            dir
-        })
-    };
+/// Read config from storage directory (if there's any) and merge it with config
+/// from config directory (so the config directory takes precedence).
+///
+/// If TRACKK_CONFIG env variable is defined, use it as the main config.
+fn read_config() -> Result<Config> {
+    let path = &unwrap_ok_or!(env::var("TRACKK_CONFIG").map(PathBuf::from), _, {
+        let mut dir = dirs::config_dir().context("Unable to find config directory")?;
+        dir.push(env!("CARGO_PKG_NAME"));
+        dir.push("config.json5");
+        dir
+    });
 
     let mut config: Config = match fs::read_to_string(path) {
         Ok(data) => json5::from_str(data.as_str())?,
@@ -284,7 +287,7 @@ fn read_config(args: &Args) -> Result<Config> {
             _ => bail!("Unable to read config: {}", path.to_string_lossy()),
         },
     };
-    config.override_from_args(args);
+
     config.fallback_values();
 
     Ok(config)
