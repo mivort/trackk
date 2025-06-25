@@ -58,20 +58,22 @@ pub enum Command {
     Mod(ModArgs),
 
     /// Mark specified tasks as done.
-    #[command(visible_aliases(["done", "c", "d"]))]
+    // TODO: P3: merge with mod
     Complete(ModArgs),
 
     /// Mark specified tasks as started.
+    // TODO: P3: merge with mod
     Start(ModArgs),
 
     /// Set task status to the initial.
-    #[command(visible_aliases(["stop"]))]
+    // TODO: P3: merge with mod
     Reset(ModArgs),
 
     /// List active entries using set of filters.
     List(ListArgs),
 
     /// List all entries using set of filters.
+    // TODO: P3: merge with list
     All(ListArgs),
 
     /// Print current configuration values and comments about possible options.
@@ -175,31 +177,35 @@ pub struct FilterArgs {
 #[derive(Parser, Default)]
 pub struct EntryArgs {
     /// Set entry title message and description.
-    #[arg(short('m'), long)]
+    #[arg(long)]
     pub desc: Vec<String>,
 
-    /// Append text at the end of the entry title.
-    #[arg(short, long)]
+    /// Add text to the entry title.
+    #[arg(long)]
     pub append: Vec<String>,
 
+    /// Append text after the last line of the description.
+    #[arg(long)]
+    pub annotate: Vec<String>,
+
     /// Set entry due date string.
-    #[arg(short, long, allow_hyphen_values = true)]
+    #[arg(long, allow_hyphen_values = true)]
     pub due: Option<String>,
 
     /// Set entry end date string.
-    #[arg(long, short, allow_hyphen_values = true)]
+    #[arg(long, allow_hyphen_values = true)]
     pub end: Option<String>,
 
     /// Set entry status
-    #[arg(short, long)]
+    #[arg(long)]
     pub status: Option<String>,
 
     /// Set entry tag (add '-' to tag name to remove).
-    #[clap(short, long, allow_hyphen_values = true)]
+    #[clap(long, allow_hyphen_values = true)]
     pub tag: Vec<String>,
 
     /// Set task recurrence query.
-    #[arg(short, long)]
+    #[arg(long)]
     pub repeat: Option<String>,
 }
 
