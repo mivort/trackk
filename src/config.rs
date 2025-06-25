@@ -65,7 +65,7 @@ pub struct Config {
 
     /// Index of available reports.
     #[serde(default)]
-    pub _reports: HashMap<String, ReportConfig>, // TODO: P2: handle custom reports
+    pub reports: HashMap<String, ReportConfig>, // TODO: P2: handle custom reports
 
     /// Date formats which can be used by 'datefmt' filter.
     #[serde(default)]
@@ -271,7 +271,7 @@ impl Config {
         })
     }
 
-    /// Report which display all entries.
+    /// Report which displays all entries.
     pub fn report_all(&self) -> Cow<ReportConfig> {
         if !self.report_all.sections.is_empty() {
             return Cow::Borrowed(&self.report_all);

@@ -1,7 +1,9 @@
 use minijinja as mj;
+use std::borrow::Cow;
 use std::cell::{Cell, RefCell};
 use unicode_width::UnicodeWidthStr;
 
+use crate::config::{Config, ReportConfig};
 use crate::templates::{colors, dates, layout, strings};
 use crate::{app::App, prelude::*};
 
@@ -139,6 +141,19 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
         "picker" => Some(("picker", ROW)),
         "none" => Some(("none", "")),
         _ => None,
+    }
+}
+
+/// Fetch report instance from provided ID.
+pub fn match_report<'a>(report: &str, config: &'a Config) -> Result<Cow<'a, ReportConfig>> {
+    match report {
+        "all" => Ok(config.report_all()),
+        "next" => Ok(config.report_next()),
+        _ => config
+            .reports
+            .get(report)
+            .map(|r| Cow::Borrowed(r))
+            .with_context(|| format!("Report '{}' not found", report)),
     }
 }
 

@@ -87,6 +87,8 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
                 Regex::new("^log$")?,
                 vec!["add".into(), "--status=completed".into()],
             ));
+            index[CmdContext::Root as usize]
+                .push((Regex::new("^all$")?, vec!["list".into(), "all".into()]));
             index[CmdContext::Root as usize].push((
                 Regex::new("^\\+(.+)")?,
                 vec!["--filter".into(), "tag:$1".into()],

@@ -72,10 +72,6 @@ pub enum Command {
     /// List active entries using set of filters.
     List(ListArgs),
 
-    /// List all entries using set of filters.
-    // TODO: P3: merge with list
-    All(ListArgs),
-
     /// Print current configuration values and comments about possible options.
     Config,
 
@@ -238,6 +234,9 @@ pub struct RefreshArgs {
 
 #[derive(Parser, Default)]
 pub struct ListArgs {
+    /// Report type to display.
+    pub report: Option<Box<str>>,
+
     /// Output in JSON format.
     #[arg(long)]
     pub json: bool,
