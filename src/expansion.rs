@@ -88,6 +88,10 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
     match config.expansion_style {
         ExpansionStyle::Taskwarrior => {
             index[CmdContext::Root as usize].push((
+                Regex::new("^log$")?,
+                vec!["add".into(), "--status=completed".into()],
+            ));
+            index[CmdContext::Root as usize].push((
                 Regex::new("^\\+(.+)")?,
                 vec!["--filter".into(), "tag:$1".into()],
             ));

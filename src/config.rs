@@ -27,6 +27,10 @@ pub struct Config {
     #[serde(default)]
     editor: Box<str>,
 
+    /// Open editor when new entry is added.
+    #[serde(default)]
+    pub editor_on_add: bool,
+
     /// Color mode used during output.
     #[serde(default)]
     pub color_mode: ColorMode,

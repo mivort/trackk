@@ -107,7 +107,7 @@ fn main() -> Result<()> {
             let mut issue = issue::Issue::new(&a.entry, &app)?;
             issue.apply_description(&a.description);
 
-            if !a.no_edit {
+            if a.edit || app.config.editor_on_add {
                 let status = editor::edit_entry(&mut issue, &app)?;
                 if !status.success() {
                     return Ok(());

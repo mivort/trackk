@@ -27,6 +27,11 @@ pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
     index.update_status(&app.config, &path, &new_entry);
     index.write()?;
 
+    info!(
+        "New entry ({}) added",
+        &new_entry.id[..(new_entry.id.len().min(8))]
+    );
+
     if let Some(idx) = bucket.insert(new_entry) {
         bail!("UUID collisiion detected: {}", bucket.entries[idx].id);
     }

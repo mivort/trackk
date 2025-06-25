@@ -217,9 +217,9 @@ pub struct AddArgs {
     /// Entry title message and description.
     pub description: Vec<Box<str>>,
 
-    /// Don't use interactive input via default editor.
+    /// Open editor when entry is created.
     #[arg(long)]
-    pub no_edit: bool,
+    pub edit: bool,
 
     #[command(flatten)]
     pub entry: EntryArgs,
