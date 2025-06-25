@@ -59,7 +59,7 @@ fn main() -> Result<()> {
     // TODO: P2: customize default error handling
 
     match args.command {
-        Some(Command::Ls(_args)) => {
+        Some(Command::List(_args)) => {
             app.merge_filter_args(&args.filter_args)?;
             let ids = Default::default();
             let report = &app.config.report_next();
@@ -71,6 +71,7 @@ fn main() -> Result<()> {
             let report = app.config.report_all();
             display::show_entries(&ids, &report, &app)?;
         }
+
         Some(Command::Count) => {
             let filters = filter::Filter {
                 ids: &Default::default(),

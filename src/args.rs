@@ -77,7 +77,7 @@ pub enum Command {
     Reset(ModArgs),
 
     /// List active entries using set of filters.
-    Ls(ListArgs),
+    List(ListArgs),
 
     /// List all entries using set of filters.
     All(ListArgs),
@@ -132,7 +132,7 @@ pub enum Command {
 
 impl Default for Command {
     fn default() -> Self {
-        Self::Ls(ListArgs::default())
+        Self::List(ListArgs::default())
     }
 }
 

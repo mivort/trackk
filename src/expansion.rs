@@ -74,11 +74,9 @@ fn apply_captures(value: &str, captures: &regex::Captures) -> String {
     output
 }
 
-type RuleIndex = [Vec<(Regex, Vec<String>)>; 8];
-
 /// Produce index table with parsed regex expansion rules.
 fn rule_index(config: &Config) -> Result<RuleIndex> {
-    let mut index: RuleIndex = [const { Vec::new() }; 8];
+    let mut index: RuleIndex = [const { Vec::new() }; cmd_contexts()];
 
     for rule in &config.expansions {
         let regex = Regex::new(&rule.expr)?;
@@ -120,25 +118,57 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
     Ok(index)
 }
 
-/// Check if current argument should change the context.
-fn match_context(arg: &str) -> Option<CmdContext> {
-    match arg {
-        "add" => Some(CmdContext::Add),
-        "mod" => Some(CmdContext::Mod),
-        _ => None,
+/// Macro to create command context enum and corresponding matcher method.
+macro_rules! cmd_context {
+    ($($id:ident: $str:literal;)*) => {
+        /// Command context enum values.
+        #[derive(Clone, Copy, Deserialize, PartialEq, Eq, Hash)]
+        #[repr(u8)]
+        pub enum CmdContext {
+            $(
+                #[serde(rename = $str)]
+                $id,
+            )*
+        }
+
+        /// Check if current argument should change the context.
+        fn match_context(arg: &str) -> Option<CmdContext> {
+            match arg {
+                $( $str => Some(CmdContext::$id), )*
+                _ => None,
+            }
+        }
+
+        /// Provide constant number of defined command contexts.
+        const fn cmd_contexts() -> usize {
+            let mut count = 0;
+            $(
+                let _ = $str;
+                count += 1;
+            )*
+            count
+        }
     }
 }
 
-#[derive(Clone, Copy, Deserialize, Default, PartialEq, Eq, Hash)]
-#[repr(u8)]
-pub enum CmdContext {
-    #[default]
-    #[serde(rename = "root")]
-    Root = 0,
-    #[serde(rename = "add")]
-    Add = 1,
-    #[serde(rename = "mod")]
-    Mod = 2,
-    #[serde(rename = "ls")]
-    Ls = 3,
+cmd_context! {
+    Root: "root";
+    Add: "add";
+    Mod: "mod";
+    List: "list";
+    Edit: "edit";
+    Count: "count";
+    Info: "info";
+    Config: "config";
+    Sync: "sync";
 }
+
+impl Default for CmdContext {
+    #[inline(always)]
+    fn default() -> Self {
+        Self::Root
+    }
+}
+
+/// Matcher table for different command contexts.
+type RuleIndex = [Vec<(Regex, Vec<String>)>; cmd_contexts()];
