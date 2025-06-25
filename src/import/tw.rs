@@ -47,7 +47,6 @@ struct TWData {
     #[serde(default)]
     project: Option<Box<str>>,
 
-    // TODO: P1: add 'recur' handling
     #[serde(default)]
     recur: Option<Box<str>>,
 
@@ -55,7 +54,6 @@ struct TWData {
     #[serde(default)]
     parent: Option<Box<str>>,
 
-    // TODO: P1: add 'mask' handling
     #[serde(default)]
     mask: Option<Box<str>>,
 
@@ -72,7 +70,6 @@ struct TWData {
     #[serde(default)]
     annotations: Vec<TWAnnotation>,
 
-    // TODO: P1: support uda import
     #[serde(flatten)]
     extra: HashMap<Box<str>, Value>,
 
@@ -114,7 +111,6 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
 
     let mut project_count = 0;
     let mut annotations_count = 0;
-    let mut uda_count = 0;
 
     for e in entries {
         let mut imported = Issue {
@@ -144,9 +140,21 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
         if let Some(depends) = e.depends {
             meta.insert("depends".into(), depends.into());
         }
+        if let Some(recur) = e.recur {
+            meta.insert("recur".into(), recur.into_string().into());
+        }
+        if let Some(parent) = e.parent {
+            meta.insert("parent".into(), parent.into_string().into());
+        }
+        if let Some(mask) = e.mask {
+            meta.insert("mask".into(), mask.into_string().into());
+        }
+        if let Some(imask) = e.imask {
+            meta.insert("imask".into(), imask.into());
+        }
 
-        if !e.extra.is_empty() {
-            uda_count += e.extra.len();
+        for (k, v) in e.extra {
+            imported.meta.insert(k.into_string(), v);
         }
 
         for ann in e.annotations {
@@ -182,9 +190,6 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
         storage::write_bucket(&bucket, &rel_path, app)?;
     }
 
-    if uda_count > 0 {
-        warn!("UDA field import is not supported yet (total: {uda_count}).");
-    }
     if project_count > 0 {
         warn!("'Project' field is added as meta field (total: {project_count}).");
     }
