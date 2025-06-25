@@ -1,7 +1,7 @@
 use regex::Regex;
 use serde_derive::Deserialize;
 
-use crate::config::Config;
+use crate::config::{Config, ExpansionStyle};
 use crate::prelude::*;
 
 /// Perform expansion rules on arguments.
@@ -83,6 +83,34 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
     for rule in &config.expansions {
         let regex = Regex::new(&rule.expr)?;
         index[rule.context as usize].push((regex, rule.replace.clone()));
+    }
+
+    match config.expansion_style {
+        ExpansionStyle::Taskwarrior => {
+            index[CmdContext::Root as usize].push((
+                Regex::new("^\\+(.+)")?,
+                vec!["--filter".into(), "tag:$1".into()],
+            ));
+            index[CmdContext::Root as usize].push((
+                Regex::new("^-([^-].+)")?,
+                vec!["--filter".into(), "!tag:$1".into()],
+            ));
+
+            index[CmdContext::Add as usize]
+                .push((Regex::new("^\\+(.+)")?, vec!["--tag".into(), "$1".into()]));
+
+            index[CmdContext::Mod as usize]
+                .push((Regex::new("^\\+(.+)")?, vec!["--tag".into(), "$1".into()]));
+            index[CmdContext::Mod as usize].push((
+                Regex::new("^-([^-].+)")?,
+                vec!["--tag".into(), "-$1".into()],
+            ));
+            index[CmdContext::Mod as usize].push((
+                Regex::new("^status:(.+)")?,
+                vec!["--status".into(), "$1".into()],
+            ));
+        }
+        ExpansionStyle::None => {}
     }
 
     Ok(index)

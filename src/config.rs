@@ -71,6 +71,10 @@ pub struct Config {
     #[serde(default)]
     #[allow(unused)]
     pub expansions: Vec<ExpansionConfig>,
+
+    /// Built-in expansion style.
+    #[serde(default)]
+    pub expansion_style: ExpansionStyle,
 }
 
 #[derive(Deserialize, Default)]
@@ -463,8 +467,8 @@ pub enum PrefixType {
     None,
 }
 
+/// Expansion config entry.
 #[derive(Deserialize)]
-#[allow(unused)]
 pub struct ExpansionConfig {
     /// Regular expression to match on argument.
     pub expr: Box<str>,
@@ -478,6 +482,15 @@ pub struct ExpansionConfig {
     /// If not specified, it will be used in root context.
     #[serde(default)]
     pub context: expansion::CmdContext,
+}
+
+#[derive(Deserialize, Default)]
+pub enum ExpansionStyle {
+    #[default]
+    #[serde(rename = "taskwarrior")]
+    Taskwarrior,
+    #[serde(rename = "none")]
+    None,
 }
 
 /// Print all configuration values along with documentation.
