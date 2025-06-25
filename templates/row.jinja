@@ -1,10 +1,18 @@
-{#- Max rendering width -#}
+{#-
+  Max rendering width depending on terminal width ('cols').
+-#}
 {%- set maxw = min(cols, 96) -%}
 
-{#- Limit amount of visible tags based on terminal width -#}
+{#-
+  Limit amount of visible tags based on terminal width.
+  Defines a breakpoint which compacts the tag display.
+-#}
 {%- set taglimit = 2 if cols > 56 else 1 -%}
 
-{#- Entry details section -#}
+{#-
+  Entry details section.
+  Some of details get hidden when terminal width is small.
+-#}
 {%- set meta -%}
   {#- Tag list -#}
   {%- if cols > 32 -%}
@@ -53,7 +61,10 @@
 {%- endset -%}
 {%- set statusw = status | width -%}
 
-{#- Entry title -#}
+{#-
+  Entry title.
+  Color depends on the current status.
+-#}
 {%- set title | trunc(maxw - statusw - metaw - 6, '…') -%}
   {%- if entry.status == 'deleted' -%}
     {{ fg(lightblack) }}
@@ -66,7 +77,10 @@
 {%- endset -%}
 {%- set titlew = title | width -%}
 
-{#- Shorthand ID -#}
+{#-
+  Shorthand ID ('sid').
+  If no shorthand is available, trimmed version of UUID is shown.
+-#}
 {%- set number -%}
   {%- if sid -%}
     {{ sid | numfmt('{:3}. ') }}
@@ -75,6 +89,10 @@
   {%- endif -%}
 {%- endset -%}
 {%- set numberw = number | width -%}
+
+{#-
+  ID color depending on the entry's status.
+-#}
 {%- set numbercolor -%}
   {%- if entry.status == 'deleted' -%}
     {{ fg(lightblack) }}
@@ -87,12 +105,21 @@
   {%- endif -%}
 {%- endset -%}
 
-{#- Row output -#}
+{#-
+  Row output.
+  Combines together previously defined components and adds a filler in the middle.
+
+  [ number ] [ title ] [ status icons ] [ ....... filler ....... ] [ meta ]
+-#}
 {{- numbercolor -}}{{- number -}}
 {{- title -}}{{ reset }}{{ status -}}
 {{- fg(lightblack) }}{{ fill('.', maxw - statusw - titlew - metaw - numberw - 1) }} {# -#}
 {{- meta -}}
 
+{#-
+  Add new line on the last entry.
+  If limit is set, show the amount of entries outside the limit count.
+-#}
 {%- if lineno == limit - 1 %}
 {# #}
   {%- if lineno != count - 1 -%}
