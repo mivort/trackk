@@ -50,14 +50,12 @@ struct TWData {
     #[serde(default)]
     recur: Option<Box<str>>,
 
-    // TODO: P1: add 'parent' handling
     #[serde(default)]
     parent: Option<Box<str>>,
 
     #[serde(default)]
     mask: Option<Box<str>>,
 
-    // TODO: P1: add 'imask' handling
     #[serde(default)]
     imask: Option<f64>,
 
@@ -138,6 +136,7 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
             project_count += 1;
         }
         if let Some(depends) = e.depends {
+            // TODO: convert into entry linking?
             meta.insert("depends".into(), depends.into());
         }
         if let Some(recur) = e.recur {
