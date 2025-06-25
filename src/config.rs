@@ -66,6 +66,11 @@ pub struct Config {
     /// Date formats which can be used by 'datefmt' filter.
     #[serde(default)]
     pub date_formats: HashMap<String, String>,
+
+    /// Aliases which provide regex-based input argument expansion rules.
+    #[serde(default)]
+    #[allow(unused)]
+    pub expansions: Vec<ExpansionConfig>,
 }
 
 #[derive(Deserialize, Default)]
@@ -456,6 +461,23 @@ pub enum PrefixType {
     ConfigLocalDir,
     #[serde(rename = "none")]
     None,
+}
+
+#[derive(Deserialize)]
+#[allow(unused)]
+pub struct ExpansionConfig {
+    /// Regular expression to match on argument.
+    expr: Box<str>,
+
+    /// Replace command argument with one or more values.
+    /// Capture groups can be accessed with '$1', '$2' etc.,
+    /// '$$' is replaced with literal '$'.
+    replace: Vec<Box<str>>,
+
+    /// Command context to use the expansion in.
+    /// If not specified, it will be used in root context.
+    #[serde(default)]
+    context: Box<str>,
 }
 
 /// Print all configuration values along with documentation.
