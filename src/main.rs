@@ -62,7 +62,7 @@ fn main() -> Result<()> {
         Some(Command::List(_args)) => {
             app.merge_filter_args(&args.filter_args)?;
             let ids = Default::default();
-            let report = &app.config.report_next;
+            let report = &app.config.report_next();
             display::show_entries(&ids, report, &app)?;
         }
         Some(Command::All(args)) => {
