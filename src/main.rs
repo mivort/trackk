@@ -80,14 +80,17 @@ fn main() -> Result<()> {
             println!("{}", entries.len());
         }
 
-        Some(Command::Info(args)) => {
+        Some(Command::Info(info_args)) => {
+            let mut ids = filter::IdFilter::from_shorthands(info_args.ids, &app)?;
+            ids.append_shorthands(args.filter_args.id, &app)?;
+
             let filters = filter::Filter {
-                ids: &filter::IdFilter::from_shorthands(args.ids, &app)?,
+                ids: &ids,
                 query: &mut Default::default(),
             };
             let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
 
-            let entries = if filters.ids.index.is_empty() {
+            let entries = if entries.len() > ids.index.len() {
                 // TODO: P3: check for partial uuid matches
                 input::pick_prompt("Show", entries, &app)?
             } else {
@@ -191,9 +194,28 @@ fn main() -> Result<()> {
             }
         },
         None => {
-            let ids = Default::default();
-            let report = &app.config.report_next();
-            display::show_entries(&ids, report, &app)?;
+            let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
+            if ids.enabled {
+                let filters = filter::Filter {
+                    ids: &ids,
+                    query: &mut Default::default(),
+                };
+                let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
+
+                let entries = if entries.len() > ids.index.len() {
+                    // TODO: P3: check for partial uuid matches
+                    input::pick_prompt("Show", entries, &app)?
+                } else {
+                    entries
+                };
+
+                for entry in &entries {
+                    display::show_entry(entry, &app)?;
+                }
+            } else {
+                let report = &app.config.report_next();
+                display::show_entries(&ids, report, &app)?;
+            }
         }
     }
 
