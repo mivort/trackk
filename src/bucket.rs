@@ -117,12 +117,19 @@ impl Bucket {
     /// Read bucket file and deserialize the data.
     fn from_file(file: &File, path: impl AsRef<Path>) -> Result<Self> {
         let reader = BufReader::new(file);
-
-        serde_json::from_reader(reader).with_context(|| {
+        let bucket: Self = serde_json::from_reader(reader).with_context(|| {
             format!(
                 "Unable to parse bucket: {}",
                 path.as_ref().to_string_lossy()
             )
-        })
+        })?;
+
+        if bucket.version > Self::VERSION {
+            warn!("Bucket is using a newer version ({})", bucket.version);
+        }
+
+        // TODO: P1: add fallback in case if parsing has failed
+
+        Ok(bucket)
     }
 }
