@@ -14,6 +14,12 @@ pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
     output.push(args.next().unwrap());
 
     'arg: for arg in args {
+        if let Some(new_context) = match_context(&arg) {
+            context = new_context;
+            output.push(arg);
+            continue;
+        }
+
         let rules = &index[context as usize];
 
         for (regex, replace) in rules {
@@ -31,10 +37,6 @@ pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
             }
 
             continue 'arg;
-        }
-
-        if let Some(new_context) = match_context(&arg) {
-            context = new_context;
         }
         output.push(arg);
     }
@@ -107,6 +109,14 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
             index[CmdContext::Root as usize].push((
                 Regex::new("^(rm|delete)$")?,
                 vec!["mod".into(), "--status=deleted".into()],
+            ));
+            index[CmdContext::Root as usize].push((
+                Regex::new("^([0-9]+)$")?,
+                vec!["--id=$1".into()],
+            ));
+            index[CmdContext::Root as usize].push((
+                Regex::new("^([0-9a-f]{4,8}.*)")?,
+                vec!["--id=$1".into()],
             ));
 
             index[CmdContext::Root as usize].push((
