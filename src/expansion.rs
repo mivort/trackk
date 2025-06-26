@@ -87,8 +87,28 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
                 Regex::new("^log$")?,
                 vec!["add".into(), "--status=completed".into()],
             ));
+
             index[CmdContext::Root as usize]
                 .push((Regex::new("^all$")?, vec!["list".into(), "all".into()]));
+            index[CmdContext::Root as usize].push((Regex::new("^ls$")?, vec!["list".into()]));
+
+            index[CmdContext::Root as usize].push((
+                Regex::new("^done$")?,
+                vec!["mod".into(), "--status=completed".into()],
+            ));
+            index[CmdContext::Root as usize].push((
+                Regex::new("^start$")?,
+                vec!["mod".into(), "--status=started".into()],
+            ));
+            index[CmdContext::Root as usize].push((
+                Regex::new("^stop$")?,
+                vec!["mod".into(), "--status=pending".into()],
+            ));
+            index[CmdContext::Root as usize].push((
+                Regex::new("^(rm|delete)$")?,
+                vec!["mod".into(), "--status=deleted".into()],
+            ));
+
             index[CmdContext::Root as usize].push((
                 Regex::new("^\\+(.+)")?,
                 vec!["--filter".into(), "tag:$1".into()],

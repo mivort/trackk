@@ -48,26 +48,8 @@ pub enum Command {
     #[command(skip)]
     _Copy,
 
-    /// Remove specified entry.
-    // TODO: P3: replace with built-in alias
-    #[command(skip)]
-    #[allow(unused)]
-    Remove(ModArgs),
-
     /// Modify specified entry
     Mod(ModArgs),
-
-    /// Mark specified tasks as done.
-    // TODO: P3: merge with mod
-    Complete(ModArgs),
-
-    /// Mark specified tasks as started.
-    // TODO: P3: merge with mod
-    Start(ModArgs),
-
-    /// Set task status to the initial.
-    // TODO: P3: merge with mod
-    Reset(ModArgs),
 
     /// List active entries using set of filters.
     List(ListArgs),

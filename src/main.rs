@@ -33,7 +33,6 @@ mod import {
 }
 
 use std::path::PathBuf;
-use std::rc::Rc;
 use std::{env, fs, io};
 
 use args::{Args, Command, ImportMode};
@@ -130,44 +129,6 @@ fn main() -> Result<()> {
         Some(Command::Mod(e)) => {
             let ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
             storage::modify_entries(&ids, &e.entry, &app)?;
-        }
-        Some(Command::Complete(mut args)) => {
-            // TODO: P2: only look for active/non-complete entries?
-
-            app.filter.merge(|e| {
-                e.push(token::Token::Reference(issue::FieldRef::Status));
-                e.push(token::Token::String(Rc::from(
-                    app.config.defaults.status_complete(),
-                )));
-                e.push(token::Token::NotEq);
-            });
-
-            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
-            if args.entry.status.is_none() {
-                args.entry.status = Some(app.config.defaults.status_complete().to_string());
-            }
-            storage::modify_entries(&ids, &args.entry, &app)?;
-        }
-        Some(Command::Start(mut args)) => {
-            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
-            if args.entry.status.is_none() {
-                args.entry.status = Some(app.config.defaults.status_started().to_string());
-            }
-            storage::modify_entries(&ids, &args.entry, &app)?;
-        }
-        Some(Command::Reset(mut args)) => {
-            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
-            if args.entry.status.is_none() {
-                args.entry.status = Some(app.config.defaults.status_initial().to_string());
-            }
-            storage::modify_entries(&ids, &args.entry, &app)?;
-        }
-        Some(Command::Remove(mut args)) => {
-            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
-            if args.entry.status.is_none() {
-                args.entry.status = Some(app.config.defaults.status_deleted().to_string());
-            }
-            storage::modify_entries(&ids, &args.entry, &app)?;
         }
 
         Some(Command::Config) => {

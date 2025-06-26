@@ -87,18 +87,6 @@ pub struct DefaultsConfig {
     #[serde(default)]
     status_initial: Box<str>,
 
-    /// Status which is applied when 'complete' command is called.
-    #[serde(default)]
-    status_complete: Box<str>,
-
-    /// Status which is applied upon entry removal.
-    #[serde(default)]
-    status_deleted: Box<str>,
-
-    /// Status which is applied on 'start' command'
-    #[serde(default)]
-    status_started: Box<str>,
-
     /// Default time string to assign as 'due'.
     #[serde(default)]
     _due: Box<str>, // TODO: P2: support default due value
@@ -358,21 +346,6 @@ impl DefaultsConfig {
         if self.status_initial.is_empty() { "pending" } else { &self.status_initial }
     }
 
-    /// Status which is assigned when entry is marked as done.
-    pub fn status_complete(&self) -> &str {
-        if self.status_complete.is_empty() { "completed" } else { &self.status_complete }
-    }
-
-    /// Status which is assigned when entry is deleted.
-    pub fn status_deleted(&self) -> &str {
-        if self.status_deleted.is_empty() { "deleted" } else { &self.status_deleted }
-    }
-
-    /// Status which is assigned when 'start' command is called.
-    pub fn status_started(&self) -> &str {
-        if self.status_started.is_empty() { "started" } else { &self.status_started }
-    }
-
     /// Default due date expression.
     pub fn _due(&self) -> &str {
         // TODO: P2: assign default due date on creation
@@ -522,8 +495,6 @@ fn format_config(config: &Config) -> Result<String> {
         permit_status = json5::to_string(&config.values.permit_status)?,
         urgency_formula = config.values.urgency_formula(),
         status_initial = config.defaults.status_initial(),
-        status_complete = config.defaults.status_complete(),
-        status_deleted = config.defaults.status_deleted(),
         picker = config.templates.picker(),
         entry = config.issue_view(),
     ))
