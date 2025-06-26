@@ -4,7 +4,7 @@ use std::rc::Rc;
 use logos::Logos as _;
 use time::OffsetDateTime;
 
-use crate::issue::Issue;
+use crate::entry::Issue;
 use crate::{app::App, prelude::*, token::Token};
 
 /// Parse date expression and produce the timestamp.

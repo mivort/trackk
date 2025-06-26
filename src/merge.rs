@@ -3,7 +3,7 @@ use std::fs;
 
 use crate::args::MergeArgs;
 
-use crate::issue::Issue;
+use crate::entry::Issue;
 use crate::{bucket::Bucket, prelude::*};
 
 /// Implement 3-way merge driver for once ancestor and two JSON buckets.

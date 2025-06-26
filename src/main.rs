@@ -5,12 +5,12 @@ mod config;
 mod dateexp;
 mod display;
 mod editor;
+mod entry;
 mod expansion;
 mod filter;
 mod functions;
 mod index;
 mod input;
-mod issue;
 mod merge;
 mod prelude;
 mod repo;
@@ -104,7 +104,7 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Add(a)) => {
-            let mut issue = issue::Issue::new(&a.entry, &app)?;
+            let mut issue = entry::Issue::new(&a.entry, &app)?;
             issue.apply_description(&a.description);
 
             if a.edit || app.config.editor_on_add {
@@ -144,7 +144,7 @@ fn main() -> Result<()> {
             let local = app.local_time()?;
 
             dateexp::parse_exp(&expr, local, &mut output)?;
-            let res = dateexp::eval(&output, local, &mut op_stack, &issue::Issue::default())?;
+            let res = dateexp::eval(&output, local, &mut op_stack, &entry::Issue::default())?;
 
             println!("{}", res.to_string()?);
         }

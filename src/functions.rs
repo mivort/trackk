@@ -1,4 +1,4 @@
-use crate::issue::{FieldRef, Issue};
+use crate::entry::{FieldRef, Issue};
 use crate::prelude::*;
 use crate::token::{SOMEDAY, Token};
 

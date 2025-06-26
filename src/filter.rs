@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::args::FilterArgs;
 use crate::dateexp::{eval, parse_local_exp};
-use crate::issue::{FieldRef, Issue};
+use crate::entry::{FieldRef, Issue};
 use crate::token::Token;
 use crate::{app::App, prelude::*};
 

@@ -10,7 +10,7 @@ use time::{PrimitiveDateTime, UtcDateTime};
 
 use crate::app::App;
 use crate::bucket::Bucket;
-use crate::issue::Issue;
+use crate::entry::Issue;
 use crate::{prelude::*, storage};
 
 /// Taskwarrior export data format schema.

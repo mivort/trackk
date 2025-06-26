@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use crate::app::App;
 use crate::display::RowContext;
-use crate::issue::Issue;
+use crate::entry::Issue;
 use crate::{prelude::*, sort};
 
 /// Read user input from stdin.

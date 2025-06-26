@@ -4,8 +4,8 @@ use std::rc::Rc;
 use serde_derive::Serialize;
 
 use crate::config::{ReportConfig, SectionConfig};
+use crate::entry::Issue;
 use crate::filter::{Filter, IdFilter, QueryFilter};
-use crate::issue::Issue;
 use crate::templates::dates;
 use crate::{app::App, prelude::*, sort, storage};
 

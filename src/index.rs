@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::time::SystemTime;
 
 use crate::config::Config;
-use crate::issue::Issue;
+use crate::entry::Issue;
 use crate::prelude::*;
 
 #[derive(Debug, Clone)]

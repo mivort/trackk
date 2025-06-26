@@ -9,8 +9,8 @@ use time::{UtcDateTime, UtcOffset};
 use crate::bucket::Bucket;
 use crate::config::IndexType;
 use crate::dateexp::parse_date;
+use crate::entry::Issue;
 use crate::filter::{Filter, IdFilter};
-use crate::issue::Issue;
 use crate::templates::dates;
 use crate::{app::App, display, prelude::*, storage};
 

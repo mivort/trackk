@@ -1,9 +1,9 @@
 use crate::args::EntryArgs;
 use crate::bucket::Bucket;
 use crate::config::{Config, IndexType};
+use crate::entry::Issue;
 use crate::filter::{Filter, IdFilter};
 use crate::input;
-use crate::issue::Issue;
 use crate::{app::App, display, prelude::*};
 
 use std::fs::{self, File};

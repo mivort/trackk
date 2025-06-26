@@ -7,8 +7,8 @@ use time::ext::NumericalDuration;
 use time::macros::format_description;
 use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, UtcDateTime, UtcOffset, Weekday};
 
+use crate::entry::{FieldRef, Issue};
 use crate::functions::FuncRef;
-use crate::issue::{FieldRef, Issue};
 use crate::prelude::*;
 
 /// Max date value supported by time-rs.

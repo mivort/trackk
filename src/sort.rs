@@ -2,7 +2,7 @@ use logos::Logos;
 use std::cmp::Ordering;
 use std::rc::Rc;
 
-use crate::issue::Issue;
+use crate::entry::Issue;
 use crate::prelude::*;
 
 /// Parse sorting expression and sort entries in the provided array.

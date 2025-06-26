@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use serde_derive::{Deserialize, Serialize};
 
-use crate::issue::Issue;
+use crate::entry::Issue;
 use crate::{app::App, prelude::*};
 
 /// Storage bucket which groups several entries in a single file.
