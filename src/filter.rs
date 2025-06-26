@@ -136,61 +136,65 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
 /// Store provided list of IDs as index.
 #[derive(Default)]
 pub struct IdFilter {
-    pub index: Vec<String>,
+    pub index: Vec<Box<str>>,
 
-    /// Flag if ID filter shouldn't match anything.
-    pub empty_set: bool,
+    /// Flag if ID filter was provided.
+    pub enabled: bool,
 
     /// Flag if there was any unresolved shorthands. If query contained
     /// only shorthands, it's safe to only check the shorthands index.
-    pub unresolved: bool,
+    pub only_active: bool,
 }
 
 impl IdFilter {
     /// Convert list of IDs with shorthands into a set of fully resolved IDs.
-    pub fn from_shorthands(mut ids: Vec<String>, app: &App) -> Result<Self> {
+    pub fn from_shorthands(ids: Vec<Box<str>>, app: &App) -> Result<Self> {
+        let mut out = Self::default();
+        out.append_shorthands(ids, app)?;
+
+        Ok(out)
+    }
+
+    /// Convert shorthands list to resolved UUIDs.
+    pub fn append_shorthands(&mut self, ids: Vec<Box<str>>, app: &App) -> Result<()> {
         if ids.is_empty() {
-            return Ok(Self {
-                index: Default::default(),
-                unresolved: false,
-                empty_set: false,
-            });
+            return Ok(());
         }
+        self.enabled = true;
 
         let index = app.index()?;
-        let mut unresolved = false;
+        self.only_active = self.index.is_empty() || self.only_active;
 
-        ids.retain_mut(|id| {
+        for id in ids {
             let shorthand = unwrap_ok_or!(id.parse::<usize>(), _e, {
-                unresolved = true;
-                return true;
+                self.index.push(id);
+                self.only_active = false;
+                continue;
             });
-
             let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
-                unresolved = true;
-                return true;
+                self.index.push(id);
+                self.only_active = false;
+                continue;
             });
             let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
                 warn!("Index entry with missing path: {pointer}");
-                return false;
+                continue;
             });
 
-            *id = resolved.to_owned();
-            true
-        });
+            self.index.push(resolved.into());
+        }
 
-        let empty_set = ids.is_empty();
-
-        Ok(Self {
-            index: ids,
-            unresolved,
-            empty_set,
-        })
+        Ok(())
     }
 
     /// Check if ID filter matches the ID.
     pub fn matches(&self, value: &str) -> bool {
-        self.index.is_empty() || self.index.iter().any(|id| value.starts_with(id))
+        self.index.is_empty() || self.index.iter().any(|id| value.starts_with(id.as_ref()))
+    }
+
+    /// Check if ID set was provided, but no entries was resolved.
+    pub fn empty_set(&self) -> bool {
+        self.index.is_empty() && self.enabled
     }
 }
 

@@ -93,13 +93,6 @@ pub enum Command {
 
     /// Check data repository and VCS status.
     Check,
-
-    /// If no built-in command was matched, try to match with one of the aliases.
-    /// Otherwise, fallback to 'info' command.
-    // TODO: P3: remove external subcommand
-    #[command(skip)]
-    #[allow(unused)]
-    Alias(Vec<String>),
 }
 
 impl Default for Command {
@@ -208,7 +201,7 @@ pub struct AddArgs {
 #[derive(Parser, Default)]
 pub struct InfoArgs {
     /// List of IDs to display.
-    pub ids: Vec<String>,
+    pub ids: Vec<Box<str>>,
 }
 
 #[derive(Parser, Default)]
@@ -244,7 +237,7 @@ pub struct CalcArgs {
 #[derive(Parser, Default)]
 pub struct ModArgs {
     /// List of IDs to apply changes to.
-    pub ids: Vec<String>,
+    pub ids: Vec<Box<str>>,
 
     #[command(flatten)]
     pub entry: EntryArgs,

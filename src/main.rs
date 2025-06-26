@@ -60,7 +60,7 @@ fn main() -> Result<()> {
     match args.command {
         Some(Command::List(args)) => {
             app.merge_filter_args(&args.filter_args)?;
-            let ids = Default::default();
+            let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
 
             let report = if let Some(report) = args.report {
                 templating::match_report(&report, &app.config)?
@@ -127,7 +127,8 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Mod(e)) => {
-            let ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
+            let mut ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
+            ids.append_shorthands(args.filter_args.id, &app)?;
             storage::modify_entries(&ids, &e.entry, &app)?;
         }
 
@@ -189,17 +190,6 @@ fn main() -> Result<()> {
                 todo!()
             }
         },
-        Some(Command::Alias(ids)) => {
-            let filters = filter::Filter {
-                ids: &filter::IdFilter::from_shorthands(ids, &app)?,
-                query: &mut Default::default(),
-            };
-            let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
-
-            for entry in &entries {
-                display::show_entry(entry, &app)?;
-            }
-        }
         None => {
             let ids = Default::default();
             let report = &app.config.report_next();

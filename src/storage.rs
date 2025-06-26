@@ -93,11 +93,11 @@ pub fn fetch_entries(
     index: IndexType,
     app: &App,
 ) -> Result<Vec<(Entry, Rc<str>)>> {
-    if filters.ids.empty_set {
+    if filters.ids.empty_set() {
         return Ok(Vec::new());
     }
 
-    if !filters.ids.index.is_empty() && !filters.ids.unresolved {
+    if filters.ids.only_active {
         return filter_active_entries(filters, app);
     }
 
