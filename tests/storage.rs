@@ -4,15 +4,22 @@ use assert_cmd::Command;
 
 const BIN_NAME: &str = "trk";
 
+#[cfg(test)]
+fn cmd_base() -> Command {
+    let dir = env!("CARGO_TARGET_TMPDIR");
+    let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
+    cmd.env("TRACKK_DATA", dir).env("TRACKK_CONFIG", "");
+    cmd
+}
+
 #[test]
 fn init_storage() {
-    let dir = env!("CARGO_TARGET_TMPDIR");
-
-    let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
-    let cmd = cmd.args(&["--data", dir, "init", "--user", "test", "--email", "test"]);
+    let mut cmd = cmd_base();
+    cmd.args(&["init", "--user", "test", "--email", "test"]);
     cmd.assert().success();
 
-    let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
-    let cmd = cmd.args(&["--data", dir, "all"]);
+    let mut cmd = cmd_base();
+    cmd.args(&["all"]);
+
     cmd.assert().success();
 }
