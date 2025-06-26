@@ -93,7 +93,10 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
             index[CmdContext::Root as usize]
                 .push((Regex::new("^all$")?, vec!["list".into(), "all".into()]));
             index[CmdContext::Root as usize].push((Regex::new("^ls$")?, vec!["list".into()]));
-            index[CmdContext::Root as usize].push((Regex::new("^recent$")?, vec!["list".into(), "recent".into()]));
+            index[CmdContext::Root as usize].push((
+                Regex::new("^recent$")?,
+                vec!["list".into(), "recent".into()],
+            ));
 
             index[CmdContext::Root as usize].push((
                 Regex::new("^done$")?,

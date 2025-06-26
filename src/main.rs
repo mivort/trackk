@@ -37,7 +37,8 @@ use std::path::PathBuf;
 use std::{env, fs, io};
 
 use args::{Args, Command, ImportMode};
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::{Generator, generate};
 use config::Config;
 use config::IndexType;
 use log::Level;
@@ -141,6 +142,9 @@ fn main() -> Result<()> {
         }
         Some(Command::Refresh(args)) => {
             storage::refresh_index(&app, args.force)?;
+        }
+        Some(Command::Completions(shell)) => {
+            print_completions(shell.shell, &mut Args::command());
         }
         Some(Command::Calc(exp)) => {
             let expr = exp.expr.join(" ");
@@ -273,4 +277,14 @@ fn setup_logging(no_color: bool, verbose: bool) -> Result<(), log::SetLoggerErro
         .level(if verbose { Trace } else { Info })
         .chain(std::io::stdout())
         .apply()
+}
+
+/// Use of of the generators to output shell completions.
+fn print_completions<G: Generator>(generator: G, cmd: &mut clap::Command) {
+    generate(
+        generator,
+        cmd,
+        env!("CARGO_BIN_NAME").to_owned(),
+        &mut io::stdout(),
+    );
 }

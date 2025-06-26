@@ -88,6 +88,9 @@ pub enum Command {
     /// Sync repository with remote repo.
     Sync,
 
+    /// Provide shell completions.
+    Completions(CompletionsArgs),
+
     /// Refresh the active entries index (in case if storage was edited manually).
     Refresh(RefreshArgs),
 
@@ -202,6 +205,11 @@ pub struct AddArgs {
 pub struct InfoArgs {
     /// List of IDs to display.
     pub ids: Vec<Box<str>>,
+}
+
+#[derive(Parser)]
+pub struct CompletionsArgs {
+    pub shell: clap_complete::Shell,
 }
 
 #[derive(Parser, Default)]
