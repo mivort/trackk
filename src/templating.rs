@@ -146,9 +146,14 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
 
 /// Fetch report instance from provided ID.
 pub fn match_report<'a>(report: &str, config: &'a Config) -> Result<Cow<'a, ReportConfig>> {
+    if let Some(report) = config.reports.get(report) {
+        return Ok(Cow::Borrowed(report));
+    }
+
     match report {
-        "all" => Ok(config.report_all()),
-        "next" => Ok(config.report_next()),
+        "all" => Ok(Cow::Owned(config.report_all())),
+        "next" => Ok(Cow::Owned(config.report_next())),
+        "recent" => Ok(Cow::Owned(config.report_recent())),
         _ => config
             .reports
             .get(report)

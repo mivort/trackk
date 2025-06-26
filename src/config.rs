@@ -59,14 +59,6 @@ pub struct Config {
     #[serde(default)]
     pub sync: SyncConfig,
 
-    /// Default output report.
-    #[serde(default)]
-    pub report_next: ReportConfig,
-
-    /// All entries report.
-    #[serde(default)]
-    pub report_all: ReportConfig,
-
     /// Index of available reports.
     #[serde(default)]
     pub reports: HashMap<String, ReportConfig>, // TODO: P2: handle custom reports
@@ -198,12 +190,8 @@ impl Config {
     }
 
     /// Default report format.
-    pub fn report_next(&self) -> Cow<ReportConfig> {
-        if !self.report_next.sections.is_empty() {
-            return Cow::Borrowed(&self.report_next);
-        }
-
-        Cow::Owned(ReportConfig {
+    pub fn report_next(&self) -> ReportConfig {
+        ReportConfig {
             sections: vec![
                 SectionConfig {
                     title: "Backlog".into(),
@@ -260,16 +248,12 @@ impl Config {
                     template: "next".into(),
                 },
             ],
-        })
+        }
     }
 
     /// Report which displays all entries.
-    pub fn report_all(&self) -> Cow<ReportConfig> {
-        if !self.report_all.sections.is_empty() {
-            return Cow::Borrowed(&self.report_all);
-        }
-
-        Cow::Owned(ReportConfig {
+    pub fn report_all(&self) -> ReportConfig {
+        ReportConfig {
             sections: vec![SectionConfig {
                 title: "All entries".into(),
                 index: IndexType::All,
@@ -279,7 +263,22 @@ impl Config {
                 header: "header".into(),
                 template: "all".into(),
             }],
-        })
+        }
+    }
+
+    /// Report which displays all entries.
+    pub fn report_recent(&self) -> ReportConfig {
+        ReportConfig {
+            sections: vec![SectionConfig {
+                title: "All entries".into(),
+                index: IndexType::All,
+                sorting: "modified+".into(),
+                _grouping: "".into(),
+                filter: "modified > -14d".into(),
+                header: "header".into(),
+                template: "all".into(),
+            }],
+        }
     }
 
     /// Produce data path prefix.

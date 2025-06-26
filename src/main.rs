@@ -32,6 +32,7 @@ mod import {
     pub(crate) mod tw;
 }
 
+use std::borrow::Cow;
 use std::path::PathBuf;
 use std::{env, fs, io};
 
@@ -65,7 +66,7 @@ fn main() -> Result<()> {
             let report = if let Some(report) = args.report {
                 templating::match_report(&report, &app.config)?
             } else {
-                app.config.report_next()
+                Cow::Owned(app.config.report_next())
             };
 
             display::show_entries(&ids, &report, &app)?;

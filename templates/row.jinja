@@ -17,7 +17,7 @@
   {#- Tag list -#}
   {%- if cols > 32 -%}
     {%- for tag in entry.tags | batch(taglimit) | first -%}
-      {{ fg(magenta) }}#{{ fg(lightmagenta) }}{{ tag }} {# -#}
+      {{ fg(lightmagenta) }}+{{ tag }} {# -#}
     {%- endfor -%}
     {% if entry.tags | length > taglimit -%}
       {{ fg(magenta) }}+{{ entry.tags | length - taglimit }} {# -#}

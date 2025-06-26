@@ -20,7 +20,7 @@
 {%- set tags -%}
   {%- if entry.tags | length > 0 -%}
     {%- for tag in entry.tags -%}
-      {{ fg(magenta) }}#{{ fg(lightmagenta) }}{{ tag }} {# -#}
+      {{ fg(lightmagenta) }}+{{ tag }} {# -#}
     {%- endfor -%}
   {%- else -%}
     {{ fg(lightblack) }}--
@@ -40,19 +40,19 @@
 {{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
 {{ entry.desc }}
 {{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
-{{ fg(lightblue) }} Status:   {{ reset }}{{ entry.status }}
-{{ fg(lightblue) }} Created:  {{ reset }}{{ entry_date(entry.created) }}
-{{ fg(lightblue) }} Modified: {{ reset }}{{ entry_date(entry.modified) }}
-{{ fg(lightblue) }} Due:      {{ reset }}{{ entry_date(entry.due) }}
-{{ fg(lightblue) }} End:      {{ reset }}{{ entry_date(entry.end) }}
-{{ fg(lightblue) }} Repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
-{{ fg(lightblue) }} Tags:     {{ reset }}{{ tags }}
+{{ fg(lightblue) }} status:   {{ reset }}{{ entry.status }}
+{{ fg(lightblue) }} created:  {{ reset }}{{ entry_date(entry.created) }}
+{{ fg(lightblue) }} modified: {{ reset }}{{ entry_date(entry.modified) }}
+{{ fg(lightblue) }} due:      {{ reset }}{{ entry_date(entry.due) }}
+{{ fg(lightblue) }} end:      {{ reset }}{{ entry_date(entry.end) }}
+{{ fg(lightblue) }} repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
+{{ fg(lightblue) }} tags:     {{ reset }}{{ tags }}
 
-{{ fg(lightblue) }} Urgency:  {{ reset }}{{ urgency | numfmt('{:.3}') }}
+{{ fg(lightblue) }} urgency:  {{ reset }}{{ urgency | numfmt('{:.3}') }}
 
 {% if sid -%}
-  {{ fg(lightblue) }} SID:      {{ reset }}{{ sid }}
+  {{ fg(lightblue) }} sid:      {{ reset }}{{ sid }}
 {% endif -%}
-{{ fg(lightblue) }} UUID:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 1, '…') }}
-{{ fg(lightblue) }} Path:     {{ reset }}{{ path }}
+{{ fg(lightblue) }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 1, '…') }}
+{{ fg(lightblue) }} path:     {{ reset }}{{ path }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
