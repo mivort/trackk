@@ -39,6 +39,10 @@ pub struct Config {
     #[serde(default)]
     pub _fields: HashMap<String, FieldType>, // TODO: P2: perform custom fields resolution
 
+    /// Color highlight values.
+    #[serde(default)]
+    pub _colors: HashMap<String, ColorConfig>,
+
     /// New issue default values.
     #[serde(default)]
     pub defaults: DefaultsConfig,
@@ -459,6 +463,23 @@ pub struct ExpansionConfig {
     /// If not specified, it will be used in root context.
     #[serde(default)]
     pub context: expansion::CmdContext,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+#[allow(unused)]
+pub enum ColorConfig {
+    Options(ColorOptions),
+    Custom(Box<str>),
+}
+
+#[derive(Deserialize, Default)]
+pub struct ColorOptions {
+    _fg: Option<u8>,
+    _bg: Option<u8>,
+    _bold: bool,
+    _italic: bool,
+    _underscore: bool,
 }
 
 #[derive(Deserialize, Default)]
