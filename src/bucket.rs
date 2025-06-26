@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use serde_derive::{Deserialize, Serialize};
 
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::{app::App, prelude::*};
 
 /// Storage bucket which groups several entries in a single file.
@@ -17,7 +17,7 @@ pub struct Bucket {
 
     /// List of bucket entries.
     #[serde(default)]
-    pub entries: Vec<Issue>,
+    pub entries: Vec<Entry>,
 }
 
 impl Bucket {
@@ -84,7 +84,7 @@ impl Bucket {
     }
 
     /// Insert new entry at the sorted position.
-    pub fn insert(&mut self, insert: Issue) -> Option<usize> {
+    pub fn insert(&mut self, insert: Entry) -> Option<usize> {
         if let Some(pos) = self.entries.iter().position(|e| insert.id <= e.id) {
             if self.entries[pos].id == insert.id {
                 return Some(pos);
@@ -97,7 +97,7 @@ impl Bucket {
     }
 
     /// Fetch the reference to a bucket entry.
-    pub fn find_by_id(&self, id: &str) -> Option<&Issue> {
+    pub fn find_by_id(&self, id: &str) -> Option<&Entry> {
         // TODO: P1: bucket is sorted by id in most cases - attempt to find the issue
         // with a binary search.
 
@@ -105,7 +105,7 @@ impl Bucket {
     }
 
     /// Fetch the mutable reference to a bucket entry.
-    pub fn find_by_id_mut(&mut self, id: &str) -> Option<&mut Issue> {
+    pub fn find_by_id_mut(&mut self, id: &str) -> Option<&mut Entry> {
         self.entries
             .iter_mut()
             .find(|issue| issue.id.starts_with(id))

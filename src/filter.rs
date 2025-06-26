@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use crate::args::FilterArgs;
 use crate::dateexp::{eval, parse_local_exp};
-use crate::entry::{FieldRef, Issue};
+use crate::entry::{Entry, FieldRef};
 use crate::token::Token;
 use crate::{app::App, prelude::*};
 
@@ -24,7 +24,7 @@ pub struct QueryFilter {
 
 impl QueryFilter {
     /// Compare entry properties to the filter.
-    pub fn match_issue(&self, entry: &Issue, app: &App, stack: &mut Vec<Token>) -> Result<bool> {
+    pub fn match_issue(&self, entry: &Entry, app: &App, stack: &mut Vec<Token>) -> Result<bool> {
         if self.expression.is_empty() {
             return Ok(true);
         }
@@ -202,7 +202,7 @@ fn match_issue() {
     let mut tags = BTreeSet::<String>::default();
     tags.extend(["a", "b", "c"].map(Into::into).into_iter());
 
-    let issue = Issue {
+    let issue = Entry {
         tags,
         ..Default::default()
     };

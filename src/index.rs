@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::time::SystemTime;
 
 use crate::config::Config;
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::prelude::*;
 
 #[derive(Debug, Clone)]
@@ -65,7 +65,7 @@ impl Index {
     }
 
     /// Append entry to active/shorthand storage.
-    pub fn update_status(&mut self, config: &Config, path: &str, issue: &Issue) {
+    pub fn update_status(&mut self, config: &Config, path: &str, issue: &Entry) {
         let id = &issue.id;
         let status = &issue.status;
 

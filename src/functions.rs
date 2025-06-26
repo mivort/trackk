@@ -1,4 +1,4 @@
-use crate::entry::{FieldRef, Issue};
+use crate::entry::{Entry, FieldRef};
 use crate::prelude::*;
 use crate::token::{SOMEDAY, Token};
 
@@ -17,7 +17,7 @@ pub enum FuncRef {
 
 impl FuncRef {
     /// Take arguments from the stack and produce the result.
-    pub fn exec(&self, stack: &mut Vec<Token>, entry: &Issue) -> Result<Token> {
+    pub fn exec(&self, stack: &mut Vec<Token>, entry: &Entry) -> Result<Token> {
         use FuncRef::*;
 
         match self {
@@ -52,7 +52,7 @@ fn sigmoid(input: f64) -> f64 {
 
 /// Convert various values to boolean. Strings and arrays are 'true' if not
 /// empty, dates if less than 'someday'.
-fn has(tok: Option<Token>, entry: &Issue) -> Result<Token> {
+fn has(tok: Option<Token>, entry: &Entry) -> Result<Token> {
     use Token::*;
 
     let tok = unwrap_some_or!(tok, { bail!("'has' requires argument") });
@@ -67,7 +67,7 @@ fn has(tok: Option<Token>, entry: &Issue) -> Result<Token> {
 }
 
 /// Produce length of the token value.
-fn length(tok: Option<Token>, entry: &Issue) -> Result<Token> {
+fn length(tok: Option<Token>, entry: &Entry) -> Result<Token> {
     use Token::*;
 
     let tok = unwrap_some_or!(tok, { bail!("'has' requires argument") });
@@ -80,7 +80,7 @@ fn length(tok: Option<Token>, entry: &Issue) -> Result<Token> {
 }
 
 /// Calculate number of lines in string values - useful to filter entries with notes.
-fn lines(tok: Option<Token>, entry: &Issue) -> Result<Token> {
+fn lines(tok: Option<Token>, entry: &Entry) -> Result<Token> {
     use Token::*;
 
     let tok = unwrap_some_or!(tok, { bail!("'lines' requires argument") });

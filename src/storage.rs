@@ -1,7 +1,7 @@
 use crate::args::EntryArgs;
 use crate::bucket::Bucket;
 use crate::config::{Config, IndexType};
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter};
 use crate::input;
 use crate::{app::App, display, prelude::*};
@@ -14,7 +14,7 @@ use time::{Date, UtcDateTime};
 use walkdir::WalkDir;
 
 /// Access storage bucket if it exists and add new entry to it.
-pub fn add_entry(new_entry: Issue, app: &App) -> Result<()> {
+pub fn add_entry(new_entry: Entry, app: &App) -> Result<()> {
     let date = UtcDateTime::from_unix_timestamp(app.ts)?.date();
 
     let (mut bucket, path) = fetch_new_bucket(&date, &app.config)?;
@@ -92,7 +92,7 @@ pub fn fetch_entries(
     filters: &Filter,
     index: IndexType,
     app: &App,
-) -> Result<Vec<(Issue, Rc<str>)>> {
+) -> Result<Vec<(Entry, Rc<str>)>> {
     if filters.ids.empty_set {
         return Ok(Vec::new());
     }
@@ -137,7 +137,7 @@ pub fn write_bucket(data: &Bucket, rel_path: impl AsRef<Path>, app: &App) -> Res
 }
 
 /// Iterate over buckets and produce the list of entries which qualify.
-fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<str>)>> {
     trace!("Traversing all buckets");
 
     let mut output = Vec::new();
@@ -201,7 +201,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>
 }
 
 /// Iterate over entries from the active index.
-fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Issue, Rc<str>)>> {
+fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<str>)>> {
     let mut result = Vec::new();
 
     let cache = &mut *app.cache.borrow_mut();

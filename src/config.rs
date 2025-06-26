@@ -313,7 +313,7 @@ impl Config {
         if self.data_path.is_empty() { env!("CARGO_PKG_NAME") } else { &self.data_path }
     }
 
-    /// Issues path default value.
+    /// Entries path default value.
     fn issues_path_fallback(&self) -> &str {
         if self.issues_path.is_empty() { "entries" } else { &self.issues_path }
     }

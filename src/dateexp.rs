@@ -4,12 +4,12 @@ use std::rc::Rc;
 use logos::Logos as _;
 use time::OffsetDateTime;
 
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::{app::App, prelude::*, token::Token};
 
 /// Parse date expression and produce the timestamp.
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
-pub fn parse_date(input: &str, app: &App, issue: &Issue) -> Result<i64> {
+pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<i64> {
     let local = app.local_time()?;
 
     let mut exp = Vec::<Token>::new();
@@ -190,7 +190,7 @@ pub fn eval(
     queue: &[Token],
     ts: OffsetDateTime,
     stack: &mut Vec<Token>,
-    issue: &Issue,
+    issue: &Entry,
 ) -> Result<Token> {
     use Token::*;
 
@@ -298,7 +298,7 @@ fn parse_regex(input: &str) -> Result<(Rc<regex::Regex>, &str)> {
 
 #[test]
 fn full_exp_parsing() {
-    let (app, issue) = (&App::default(), &Issue::default());
+    let (app, issue) = (&App::default(), &Entry::default());
     assert_eq!(parse_date("1.5h+2h", app, issue).unwrap(), 12600);
     assert_eq!(
         parse_date("1s+2s*3", app, issue).unwrap(),
@@ -309,7 +309,7 @@ fn full_exp_parsing() {
 
 #[test]
 fn relative_dates() {
-    let (app, issue) = (&App::default(), &Issue::default());
+    let (app, issue) = (&App::default(), &Entry::default());
     let monday = parse_date("monday", app, issue).unwrap();
     let tuesday = parse_date("tuesday", app, issue).unwrap();
     assert_eq!(tuesday - monday, 86400);
@@ -317,7 +317,7 @@ fn relative_dates() {
 
 #[test]
 fn unexpected_tokens() {
-    let (app, issue) = (&App::default(), &Issue::default());
+    let (app, issue) = (&App::default(), &Entry::default());
     assert_eq!(parse_date("1d+", app, issue).is_err(), true);
     assert_eq!(parse_date("1d2d", app, issue).is_err(), true);
     assert_eq!(parse_date("1d(2d)", app, issue).is_err(), true);
@@ -331,7 +331,7 @@ fn unexpected_tokens() {
 
 #[test]
 fn functions() {
-    let (app, issue) = (&App::default(), &Issue::default());
+    let (app, issue) = (&App::default(), &Entry::default());
 
     let test_eval = |expr: &str| {
         let mut output = Vec::new();

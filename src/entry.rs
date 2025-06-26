@@ -12,7 +12,7 @@ use crate::{app::App, prelude::*};
 
 /// Base entry storage with ID, title text and date properties.
 #[derive(Serialize, Deserialize, Default, Clone)]
-pub struct Issue {
+pub struct Entry {
     /// Entry unique ID used for merging.
     pub id: Box<str>,
 
@@ -20,7 +20,7 @@ pub struct Issue {
     #[serde(skip)]
     pub sid: Option<usize>,
 
-    /// Issue main title.
+    /// Entry main title.
     #[serde(default)]
     pub desc: String,
 
@@ -70,7 +70,7 @@ pub struct Issue {
     pub meta: HashMap<String, Value>,
 }
 
-impl Issue {
+impl Entry {
     /// Create new entry using provided arguments.
     pub fn new(entry: &EntryArgs, app: &App) -> Result<Self> {
         let new_uuid = Uuid::new_v4().to_string();
@@ -265,7 +265,7 @@ pub enum FieldRef {
 impl FieldRef {
     /// Convert field reference to token value. Nulls (None) are converted to 'false'.
     /// If token is not cheaply copyable (e.g. string or set), keep the reference for now.
-    pub fn as_token(&self, issue: &Issue) -> Token {
+    pub fn as_token(&self, issue: &Entry) -> Token {
         match self {
             Self::Created => Token::Date(issue.created),
             Self::Modified => Token::Date(issue.modified),
@@ -276,7 +276,7 @@ impl FieldRef {
     }
 
     /// Perform strict comparison.
-    pub fn eq(&self, token: &Token, issue: &Issue) -> Result<bool> {
+    pub fn eq(&self, token: &Token, issue: &Entry) -> Result<bool> {
         match (self, token) {
             (Self::Title, Token::String(rhs)) => {
                 Ok(issue.desc.lines().next().unwrap_or("") == rhs.as_ref())
@@ -295,7 +295,7 @@ impl FieldRef {
     }
 
     /// Compare referenced value to provided token.
-    pub fn fuzzy_eq(&self, token: &Token, issue: &Issue) -> Result<bool> {
+    pub fn fuzzy_eq(&self, token: &Token, issue: &Entry) -> Result<bool> {
         use Token::*;
 
         match (self, token) {
@@ -325,7 +325,7 @@ impl FieldRef {
     }
 
     /// Calculate the length of referenced value.
-    pub fn length(&self, entry: &Issue) -> f64 {
+    pub fn length(&self, entry: &Entry) -> f64 {
         match self {
             Self::Desc => entry.desc.len() as f64,
             Self::Tag => entry.tags.len() as f64,
@@ -335,7 +335,7 @@ impl FieldRef {
     }
 
     /// Check if referenced value is 'not empty'
-    pub fn has(&self, entry: &Issue) -> bool {
+    pub fn has(&self, entry: &Entry) -> bool {
         match self {
             Self::Desc => !entry.desc.is_empty(),
             Self::Tag => !entry.tags.is_empty(),

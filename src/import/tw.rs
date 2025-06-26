@@ -10,7 +10,7 @@ use time::{PrimitiveDateTime, UtcDateTime};
 
 use crate::app::App;
 use crate::bucket::Bucket;
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::{prelude::*, storage};
 
 /// Taskwarrior export data format schema.
@@ -111,7 +111,7 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
     let mut annotations_count = 0;
 
     for e in entries {
-        let mut imported = Issue {
+        let mut imported = Entry {
             id: e.uuid,
             desc: e.description.into_string(),
             status: e.status.into_string(),

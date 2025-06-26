@@ -4,7 +4,7 @@ use std::rc::Rc;
 use serde_derive::Serialize;
 
 use crate::config::{ReportConfig, SectionConfig};
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::templates::dates;
 use crate::{app::App, prelude::*, sort, storage};
@@ -28,7 +28,7 @@ pub struct RowContext<'a> {
     pub limit: usize,
 
     /// Reference to the issue data.
-    pub entry: Cow<'a, Issue>,
+    pub entry: Cow<'a, Entry>,
 
     /// Path to storage file which contains the entry.
     pub path: Cow<'a, str>,
@@ -148,7 +148,7 @@ fn show_section<'a>(
 }
 
 /// Render single entry.
-pub fn show_entry<'a>((entry, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Result<()> {
+pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Result<()> {
     app.templates.init(app)?;
 
     let template_id = app.config.issue_view();
@@ -175,7 +175,7 @@ pub fn show_entry<'a>((entry, path): &(Issue, Rc<str>), app: &'a App<'a>) -> Res
 }
 
 /// Export entries as JSON.
-pub fn _show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
+pub fn _show_json(entries: &[(Entry, Rc<str>)]) -> Result<()> {
     // TODO: P2: support JSON in regular reports
     print!("[");
     for (i, (e, _)) in entries.iter().enumerate() {
@@ -190,9 +190,9 @@ pub fn _show_json(entries: &[(Issue, Rc<str>)]) -> Result<()> {
 }
 
 /// Print changes to the entry as the series of info messages.
-pub fn show_diff(before: &Issue, after: &Issue, app: &App) {
+pub fn show_diff(before: &Entry, after: &Entry, app: &App) {
     let id = &before.id[..8];
-    info!("Issue {id} updated");
+    info!("Entry {id} updated");
 
     // TODO: P2: use diff template to show the diff
 

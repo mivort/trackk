@@ -9,13 +9,13 @@ use time::{UtcDateTime, UtcOffset};
 use crate::bucket::Bucket;
 use crate::config::IndexType;
 use crate::dateexp::parse_date;
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter};
 use crate::templates::dates;
 use crate::{app::App, display, prelude::*, storage};
 
 /// Run editor, apply changes and return the exit status.
-pub fn edit_entry(issue: &mut Issue, app: &App) -> Result<ExitStatus> {
+pub fn edit_entry(issue: &mut Entry, app: &App) -> Result<ExitStatus> {
     let mut tempfile =
         tempfile::NamedTempFile::with_suffix(concat!(".", env!("CARGO_PKG_NAME"), ".md"))?;
     format_markdown(issue, tempfile.as_file_mut())?;
@@ -93,14 +93,14 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
 ///
 /// Format should look like this:
 /// ``` markdown
-/// Issue title and description
+/// Entry title and description
 ///
 /// ----
 ///
 /// * __Field 1__: value
 /// * __Field 2__: value
 /// ```
-fn format_markdown(issue: &Issue, file: &mut File) -> Result<()> {
+fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
     let tags = issue.tags.iter().map(|t| &**t).collect::<Vec<_>>();
 
     let offset = UtcOffset::current_local_offset()?;
@@ -163,7 +163,7 @@ fn format_date(date: i64, offset: UtcOffset) -> Result<String> {
 }
 
 /// Read edited entry back to the issue struct.
-fn parse_markdown(issue: &mut Issue, file: &mut File, app: &App) -> Result<()> {
+fn parse_markdown(issue: &mut Entry, file: &mut File, app: &App) -> Result<()> {
     let mut entry = String::new();
     file.read_to_string(&mut entry)?;
 

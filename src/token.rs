@@ -7,7 +7,7 @@ use time::ext::NumericalDuration;
 use time::macros::format_description;
 use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, UtcDateTime, UtcOffset, Weekday};
 
-use crate::entry::{FieldRef, Issue};
+use crate::entry::{Entry, FieldRef};
 use crate::functions::FuncRef;
 use crate::prelude::*;
 
@@ -349,7 +349,7 @@ impl Token {
     }
 
     /// Check if two are exactly the same.
-    pub fn eq(self, rhs: Self, entry: &Issue) -> Result<Self> {
+    pub fn eq(self, rhs: Self, entry: &Entry) -> Result<Self> {
         match (&self, &rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(*rhs)),
@@ -367,7 +367,7 @@ impl Token {
     }
 
     /// Check if two values are not equal.
-    pub fn not_eq(self, rhs: Self, entry: &Issue) -> Result<Self> {
+    pub fn not_eq(self, rhs: Self, entry: &Entry) -> Result<Self> {
         match (&self, &rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs != rhs)),
             (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(!rhs)),
@@ -385,7 +385,7 @@ impl Token {
     }
 
     /// Peform loose comparison.
-    pub fn fuzzy_eq(&self, rhs: &Self, issue: &Issue) -> Result<Self> {
+    pub fn fuzzy_eq(&self, rhs: &Self, issue: &Entry) -> Result<Self> {
         match (self, rhs) {
             // TODO: P3: support comparison of dates - check if within same day
             // TODO: P3: support comparison of numbers - convert to dates

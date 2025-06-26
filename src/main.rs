@@ -104,7 +104,7 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Add(a)) => {
-            let mut issue = entry::Issue::new(&a.entry, &app)?;
+            let mut issue = entry::Entry::new(&a.entry, &app)?;
             issue.apply_description(&a.description);
 
             if a.edit || app.config.editor_on_add {
@@ -144,7 +144,7 @@ fn main() -> Result<()> {
             let local = app.local_time()?;
 
             dateexp::parse_exp(&expr, local, &mut output)?;
-            let res = dateexp::eval(&output, local, &mut op_stack, &entry::Issue::default())?;
+            let res = dateexp::eval(&output, local, &mut op_stack, &entry::Entry::default())?;
 
             println!("{}", res.to_string()?);
         }

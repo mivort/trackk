@@ -236,7 +236,7 @@ pub struct CalcArgs {
     /// Evaluate the expression.
     pub expr: Vec<String>,
 
-    /// Issue ID used as expression context.
+    /// Entry ID used as expression context.
     #[arg(long)]
     pub context: Option<Box<str>>,
 }

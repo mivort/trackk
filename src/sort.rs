@@ -2,11 +2,11 @@ use logos::Logos;
 use std::cmp::Ordering;
 use std::rc::Rc;
 
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::prelude::*;
 
 /// Parse sorting expression and sort entries in the provided array.
-pub fn sort_entries(entries: &mut [(Issue, Rc<str>)], rules: &[SortingRule]) -> Result<()> {
+pub fn sort_entries(entries: &mut [(Entry, Rc<str>)], rules: &[SortingRule]) -> Result<()> {
     entries.sort_by(|(a, _), (b, _)| {
         let mut cmp = Ordering::Equal;
         for r in rules {
@@ -121,7 +121,7 @@ impl SortingRule {
     }
 
     /// Compare two fields.
-    fn compare(&self, a: &Issue, b: &Issue) -> Ordering {
+    fn compare(&self, a: &Entry, b: &Entry) -> Ordering {
         match self {
             Self::DescAsc => a.desc.cmp(&b.desc),
             Self::DescDesc => b.desc.cmp(&a.desc),

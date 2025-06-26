@@ -3,7 +3,7 @@ use std::fs;
 
 use crate::args::MergeArgs;
 
-use crate::entry::Issue;
+use crate::entry::Entry;
 use crate::{bucket::Bucket, prelude::*};
 
 /// Implement 3-way merge driver for once ancestor and two JSON buckets.
@@ -22,7 +22,7 @@ pub fn merge_driver(args: &MergeArgs) -> Result<()> {
 
 /// Perform bucket merge on the current version.
 fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) -> Bucket {
-    let mut merged = BTreeMap::<Box<str>, Issue>::new();
+    let mut merged = BTreeMap::<Box<str>, Entry>::new();
 
     for entry in ours.entries.into_iter() {
         merged.insert(entry.id.clone(), entry);
@@ -49,7 +49,7 @@ fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) -> Bucket {
 }
 
 /// Take ancestor, incoming change and write result in the output.
-fn merge_3way(ours: &mut Issue, parent: Issue, theirs: Issue) {
+fn merge_3way(ours: &mut Entry, parent: Entry, theirs: Entry) {
     let their_newer = ours.modified < theirs.modified;
 
     merge_field(&mut ours.desc, parent.desc, theirs.desc, their_newer);
@@ -74,7 +74,7 @@ fn merge_3way(ours: &mut Issue, parent: Issue, theirs: Issue) {
 }
 
 /// Select entry with more recent modified timestamp.
-fn merge_2way(ours: &mut Issue, incoming: Issue) {
+fn merge_2way(ours: &mut Entry, incoming: Entry) {
     if ours.modified >= incoming.modified {
         return;
     }
@@ -99,7 +99,7 @@ where
 fn try_merge() {
     let parent = Bucket {
         version: 1,
-        entries: vec![Issue {
+        entries: vec![Entry {
             status: "pending".into(),
             desc: "old name".into(),
             modified: 5,
@@ -109,7 +109,7 @@ fn try_merge() {
 
     let ours = Bucket {
         version: 1,
-        entries: vec![Issue {
+        entries: vec![Entry {
             status: "started".into(),
             desc: "new name".into(),
             modified: 10,
@@ -119,7 +119,7 @@ fn try_merge() {
 
     let theirs = Bucket {
         version: 1,
-        entries: vec![Issue {
+        entries: vec![Entry {
             status: "completed".into(),
             desc: "old name".into(),
             modified: 15,
