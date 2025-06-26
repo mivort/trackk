@@ -41,7 +41,7 @@ pub struct Config {
 
     /// Color highlight values.
     #[serde(default)]
-    pub _colors: HashMap<String, ColorConfig>,
+    pub colors: HashMap<String, ColorConfig>,
 
     /// New issue default values.
     #[serde(default)]
@@ -474,8 +474,8 @@ pub enum ColorConfig {
 
 #[derive(Deserialize, Default)]
 pub struct ColorOptions {
-    _fg: Option<u8>,
-    _bg: Option<u8>,
+    pub fg: Option<u8>,
+    pub bg: Option<u8>,
     _bold: bool,
     _italic: bool,
     _underscore: bool,

@@ -83,6 +83,11 @@ impl<'env> Templates<'env> {
         j2.add_global("lightcyan", anstyle::AnsiColor::BrightCyan as u8);
         j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
+        for (_key, value) in &app.config.colors {
+            let _color = colors::config_to_global(&value);
+            // TODO: P3: add colors to globals
+        }
+
         if app.config.no_color() {
             j2.add_function("fg", |_: u8| "");
             j2.add_function("bg", |_: u8| "");

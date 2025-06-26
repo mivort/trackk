@@ -71,7 +71,7 @@
   {%- elif entry.status == 'completed' -%}
     {{ fg(green) }}
   {%- else -%}
-    {{ fg(white) }}
+    {{ reset }}
   {%- endif -%}
   {{ entry.desc | firstline }}
 {%- endset -%}
