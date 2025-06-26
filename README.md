@@ -13,6 +13,8 @@ Inspired by [Taskwarrior][1] and [dstask][2].
 * Dates input and filtering query [DSL](docs/EXPRESSIONS.md) which allows to
   enter dates using relative expressions (`tomorrow at 14:00`), or perform
   context filtering on tasks (`tag:home and status:started`).
+* Customizable command-line syntax: regex-based user-defined macros to make
+  task creation as effortless as possible.
 * Recurrent tasks which use same date input syntax, allowing to use flexible
   re-occurrence rules (`monday at 7:00am`) and enabling the usage as habit
   tracker.
