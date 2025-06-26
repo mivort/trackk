@@ -163,6 +163,7 @@ pub enum Token {
     #[token("]")]
     RParen,
 
+    #[token("id", |_| FieldRef::Id)]
     #[token("title", |_| FieldRef::Title)]
     #[token("desc", |_| FieldRef::Desc)]
     #[token("status", |_| FieldRef::Status)]
@@ -711,7 +712,7 @@ fn parse_date_time_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 
 /// Exclude quotes and return reference-counted str.
 fn parse_quoted_string(lex: &Lexer<Token>) -> Rc<str> {
-    Rc::from(&lex.slice()[1..lex.slice().len() - 2])
+    Rc::from(&lex.slice()[1..lex.slice().len() - 1])
 }
 
 /// Parse relative date alias.

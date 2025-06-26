@@ -251,6 +251,7 @@ impl Issue {
 /// Build-in issue field reference.
 #[derive(Debug, Clone, Copy)]
 pub enum FieldRef {
+    Id,
     Title,
     Desc,
     Status,
@@ -298,6 +299,7 @@ impl FieldRef {
         use Token::*;
 
         match (self, token) {
+            (Self::Id, Token::String(rhs)) => Ok(issue.id.starts_with(&**rhs)),
             (Self::Title, Token::String(rhs)) => {
                 Ok(issue.desc.lines().next().unwrap_or("").contains(&**rhs))
             }

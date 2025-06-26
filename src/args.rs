@@ -110,6 +110,10 @@ impl Default for Command {
 
 #[derive(Parser, Deserialize, Default, Clone)]
 pub struct FilterArgs {
+    /// Filter by entry ID.
+    #[arg(long)]
+    pub id: Vec<Box<str>>,
+
     /// Filter entries by title.
     #[arg(long)]
     pub title: Vec<String>,
