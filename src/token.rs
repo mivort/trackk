@@ -321,18 +321,20 @@ impl Token {
     }
 
     /// Perform logical AND.
-    ///
-    /// NOTE: It's intentionally not allowed to have right argument as boolean to\
-    /// prevent ternary operator usage caveat (`x < 0 and false or true`).
     pub fn and(self, rhs: Self) -> Result<Self> {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs && rhs)),
             (Self::Bool(lhs), rhs) => Ok(if lhs { rhs } else { Self::Bool(false) }),
-            _ => bail!("'and' ('&&') left argument should be a boolean"),
+            (lhs, Self::Bool(rhs)) => Ok(if rhs { lhs } else { Self::Bool(false) }),
+            _ => bail!("At least one of 'and' ('&&') arguments should be a boolean"),
         }
     }
 
     /// Perform logical OR.
+    ///
+    /// NOTE: All non-boolean values are intentionally resolved to 'true' to
+    /// prevent ternary operator-like usage caveat (`x < 0 and false or true`)
+    /// and enable 'coalesce'-like usage (`possibly_empty or value`).
     pub fn or(self, rhs: Self) -> Result<Self> {
         match (self, rhs) {
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs || rhs)),
