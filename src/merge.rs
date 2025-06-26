@@ -98,7 +98,7 @@ where
 #[test]
 fn try_merge() {
     let parent = Bucket {
-        version: 1,
+        version: Bucket::VERSION,
         entries: vec![Entry {
             status: "pending".into(),
             desc: "old name".into(),
@@ -108,7 +108,7 @@ fn try_merge() {
     };
 
     let ours = Bucket {
-        version: 1,
+        version: Bucket::VERSION,
         entries: vec![Entry {
             status: "started".into(),
             desc: "new name".into(),
@@ -118,7 +118,7 @@ fn try_merge() {
     };
 
     let theirs = Bucket {
-        version: 1,
+        version: Bucket::VERSION,
         entries: vec![Entry {
             status: "completed".into(),
             desc: "old name".into(),

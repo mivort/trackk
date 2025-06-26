@@ -21,7 +21,8 @@ pub struct Bucket {
 }
 
 impl Bucket {
-    const VERSION: i64 = 1;
+    /// Bucket entry schema version.
+    pub const VERSION: i64 = 1;
 
     pub fn new() -> Self {
         Self {
