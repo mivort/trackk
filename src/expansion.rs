@@ -110,14 +110,10 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
                 Regex::new("^(rm|delete)$")?,
                 vec!["mod".into(), "--status=deleted".into()],
             ));
-            index[CmdContext::Root as usize].push((
-                Regex::new("^([0-9]+)$")?,
-                vec!["--id=$1".into()],
-            ));
-            index[CmdContext::Root as usize].push((
-                Regex::new("^([0-9a-f]{4,8}.*)")?,
-                vec!["--id=$1".into()],
-            ));
+            index[CmdContext::Root as usize]
+                .push((Regex::new("^([0-9]+)$")?, vec!["--id=$1".into()]));
+            index[CmdContext::Root as usize]
+                .push((Regex::new("^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
 
             index[CmdContext::Root as usize].push((
                 Regex::new("^\\+(.+)")?,

@@ -152,7 +152,7 @@ pub fn match_report<'a>(report: &str, config: &'a Config) -> Result<Cow<'a, Repo
         _ => config
             .reports
             .get(report)
-            .map(|r| Cow::Borrowed(r))
+            .map(Cow::Borrowed)
             .with_context(|| format!("Report '{}' not found", report)),
     }
 }

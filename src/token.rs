@@ -323,11 +323,15 @@ impl Token {
 
     /// Perform logical AND.
     pub fn and(self, rhs: Self) -> Result<Self> {
-        match (self, rhs) {
-            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs && rhs)),
-            (Self::Bool(lhs), rhs) => Ok(if lhs { rhs } else { Self::Bool(false) }),
-            (lhs, Self::Bool(rhs)) => Ok(if rhs { lhs } else { Self::Bool(false) }),
-            _ => bail!("At least one of 'and' ('&&') arguments should be a boolean"),
+        match (&self, &rhs) {
+            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(*lhs && *rhs)),
+            (Self::Bool(lhs), rhs) => Ok(if *lhs { rhs.clone() } else { Self::Bool(false) }),
+            (lhs, Self::Bool(rhs)) => Ok(if *rhs { lhs.clone() } else { Self::Bool(false) }),
+            _ => bail!(
+                "At least one of 'and' ('&&') arguments should be a boolean (got {} and {})",
+                self.ttype(),
+                rhs.ttype()
+            ),
         }
     }
 
