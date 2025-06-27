@@ -60,11 +60,18 @@ fn main() -> Result<()> {
     // TODO: P2: customize default error handling
 
     match args.command {
-        Some(Command::List(args)) => {
-            app.merge_filter_args(&args.filter_args)?;
-            let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
+        Some(Command::List(list)) => {
+            app.merge_filter_args(&list.filter_args)?;
 
-            let report = if let Some(report) = args.report {
+            let mut ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
+            ids.append_shorthands(list.filter_args.id, &app)?;
+
+            if let Some(format) = list.format {
+                display::show_format_override(&format, &ids, &app)?;
+                return Ok(());
+            }
+
+            let report = if let Some(report) = list.report {
                 templating::match_report(&report, &app.config)?
             } else {
                 Cow::Owned(app.config.report_next())

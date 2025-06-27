@@ -221,6 +221,10 @@ pub struct ListArgs {
     /// Report type to display.
     pub report: Option<Box<str>>,
 
+    /// Override output format with template string.
+    #[arg(long)]
+    pub format: Option<Box<str>>,
+
     /// Output in JSON format.
     #[arg(long)]
     pub json: bool,

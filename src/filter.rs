@@ -12,7 +12,7 @@ pub struct Filter<'a> {
     pub ids: &'a IdFilter,
 
     /// Filter by query expression.
-    pub query: &'a mut QueryFilter,
+    pub query: &'a QueryFilter,
 }
 
 /// List of filter rules.

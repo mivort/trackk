@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use serde_derive::Serialize;
 
-use crate::config::{ReportConfig, SectionConfig};
+use crate::config::{IndexType, ReportConfig, SectionConfig};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::templates::dates;
@@ -50,11 +50,10 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'
     templates.init(app.ts, &app.config)?;
 
     let query = &mut QueryFilter::default();
-    let mut filter = Filter { ids, query };
     let mut shown = 0;
 
     for section in &report.sections {
-        shown += show_section(&mut filter, section, app, &mut templates)?;
+        shown += show_section(ids, query, section, app, &mut templates)?;
     }
 
     if shown == 0 {
@@ -67,7 +66,8 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'
 /// Apply template and render single output section.
 /// Return the number of shown entries.
 fn show_section(
-    filters: &mut Filter,
+    ids: &IdFilter,
+    query: &mut QueryFilter,
     section: &SectionConfig,
     app: &App,
     templates: &mut Templates,
@@ -82,11 +82,10 @@ fn show_section(
         ..
     } = section;
 
-    filters
-        .query
+    query
         .replace(filter, app)
         .with_context(|| format!("Unable to parse filter predicate: '{filter}'"))?;
-    let mut entries = storage::fetch_entries(filters, *index, app)?;
+    let mut entries = storage::fetch_entries(&Filter { ids, query }, *index, app)?;
 
     if entries.is_empty() {
         return Ok(0);
@@ -174,6 +173,36 @@ pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Res
     template
         .render_to_write(context, &out)
         .with_context(|| format!("Unable to render entry template: {}", template_id))?;
+
+    Ok(())
+}
+
+/// Use one-shot format override.
+pub fn show_format_override<'a>(fmt: &str, ids: &IdFilter, app: &'a App<'a>) -> Result<()> {
+    let filter = Filter {
+        ids,
+        query: &app.filter,
+    };
+    let entries = storage::fetch_entries(&filter, IndexType::All, app)?;
+
+    let mut templates = app.templates.borrow_mut();
+    templates.init(app.ts, &app.config)?;
+
+    for (lineno, (entry, path)) in entries.iter().enumerate() {
+        let out = templates.j2.render_str(
+            fmt,
+            RowContext {
+                sid: entry.sid,
+                urgency: entry.urgency,
+                entry: Cow::Borrowed(entry),
+                path: Cow::Borrowed(path),
+                count: entries.len(),
+                limit: entries.len(),
+                lineno,
+            },
+        )?;
+        println!("{}", out);
+    }
 
     Ok(())
 }
