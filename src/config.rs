@@ -247,7 +247,7 @@ impl Config {
                     index: IndexType::All,
                     sorting: "end+".into(),
                     _grouping: "".into(),
-                    filter: "end >= today".into(),
+                    filter: "end >= today and status:complete".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
