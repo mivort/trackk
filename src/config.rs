@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use serde_derive::{Deserialize, Serialize};
@@ -29,11 +29,11 @@ pub struct Config {
 
     /// Editor used for entry input.
     #[serde(default)]
-    editor: Box<str>,
+    editor: Option<Box<str>>,
 
     /// Open editor when new entry is added.
     #[serde(default)]
-    pub editor_on_add: bool,
+    pub editor_on_add: Option<bool>,
 
     /// Color mode used during output.
     #[serde(default)]
@@ -151,11 +151,6 @@ impl Config {
 
     /// Fill the empty values with default ones.
     pub fn default_values(&mut self) {
-        if let Ok(path) = std::env::var("TRACKK_DATA") {
-            self.data_path = path.into();
-            self.data_prefix = PrefixType::None;
-        }
-
         if self.values.active_status.is_empty() {
             self.values.active_status = hash_set(&["pending", "started", "blocked"]);
         }
@@ -173,9 +168,7 @@ impl Config {
 
     /// Provide default editor value.
     pub fn editor(&self) -> Cow<str> {
-        if !self.editor.is_empty() {
-            return Cow::Borrowed(&*self.editor);
-        }
+        unwrap_none_or!(&self.editor, editor, { return Cow::Borrowed(editor) });
 
         const ENV_VAR: &str = concat!(env!("CARGO_PKG_NAME"), "_EDITOR");
         unwrap_err_or!(env::var(ENV_VAR), editor, { return editor.into() });
@@ -554,24 +547,59 @@ fn config_doc_is_sane() {
 ///
 /// If TRACKK_CONFIG env variable is defined, use it as the main config.
 pub fn read_config_chain() -> Result<Config> {
-    const ENV_VAR: &str = concat!(env!("CARGO_PKG_NAME"), "_CONFIG");
+    const ENV_CONFIG: &str = concat!(env!("CARGO_PKG_NAME"), "_CONFIG");
 
-    let path = &unwrap_ok_or!(env::var(ENV_VAR).map(PathBuf::from), _, {
+    let path = &unwrap_ok_or!(env::var(ENV_CONFIG).map(PathBuf::from), _, {
         let mut dir = dirs::config_dir().context("Unable to find config directory")?;
         dir.push(env!("CARGO_PKG_NAME"));
         dir.push(CONFIG_FILE);
         dir
     });
 
-    let mut config: Config = match fs::read_to_string(path) {
+    let mut local_config = read_config(&path)?;
+
+    const ENV_DATA: &str = concat!(env!("CARGO_PKG_NAME"), "_DATA");
+    let mut data_path = 'data_path: {
+        if let Ok(env_path) = std::env::var(ENV_DATA) {
+            break 'data_path PathBuf::from(env_path);
+        }
+        local_config.data_path()?
+    };
+    data_path.push(CONFIG_FILE);
+    if data_path == *path {
+        return Ok(local_config);
+    }
+
+    let data_config = read_config(&path)?;
+    merge_config(&mut local_config, data_config);
+
+    local_config.default_values();
+
+    Ok(local_config)
+}
+
+/// Read JSON5 config from file.
+fn read_config(path: &impl AsRef<Path>) -> Result<Config> {
+    Ok(match fs::read_to_string(path) {
         Ok(data) => json5::from_str(data.as_str())?,
         Err(e) => match e.kind() {
             io::ErrorKind::NotFound => Config::default(),
-            _ => bail!("Unable to read config: {}", path.to_string_lossy()),
+            _ => bail!("Unable to read config: {}", path.as_ref().to_string_lossy()),
         },
-    };
+    })
+}
 
-    config.default_values();
+/// Overwrite target option if it's 'none'.
+fn merge_option<T>(target: &mut Option<T>, source: Option<T>) {
+    if target.is_none() {
+        *target = source
+    }
+}
 
-    Ok(config)
+/// Stitch two configs together.
+/// NOTE: Data path/prefix are purposedely not taken from 'source',
+///       as it should be only defined in 'local' config.
+fn merge_config(target: &mut Config, source: Config) {
+    merge_option(&mut target.editor, source.editor);
+    merge_option(&mut target.editor_on_add, source.editor_on_add);
 }

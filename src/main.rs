@@ -113,7 +113,7 @@ fn main() -> Result<()> {
             let mut issue = entry::Entry::new(&a.entry, &app)?;
             issue.apply_description(&a.entry.description);
 
-            if a.edit || app.config.editor_on_add {
+            if a.edit || app.config.editor_on_add.unwrap_or_default() {
                 let status = editor::edit_entry(&mut issue, &app)?;
                 if !status.success() {
                     return Ok(());
