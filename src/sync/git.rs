@@ -173,7 +173,7 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
         .context("Unable to locate own executable to set as merge driver")?;
     let exe = exe
         .file_name()
-        .unwrap_or_else(|| OsStr::new(env!("CARGO_PKG_NAME")))
+        .unwrap_or_else(|| OsStr::new(env!("CARGO_BIN_NAME")))
         .to_string_lossy();
     info!("Setting current executable name ({}) as merge driver", exe);
 
