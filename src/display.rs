@@ -7,6 +7,7 @@ use crate::config::{ReportConfig, SectionConfig};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::templates::dates;
+use crate::templating::Templates;
 use crate::{app::App, prelude::*, sort, storage};
 
 #[derive(Serialize)]
@@ -53,7 +54,7 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'
     let mut shown = 0;
 
     for section in &report.sections {
-        shown += show_section(&mut filter, section, app)?;
+        shown += show_section(&mut filter, section, app, &mut templates)?;
     }
 
     if shown == 0 {
@@ -65,10 +66,11 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'
 
 /// Apply template and render single output section.
 /// Return the number of shown entries.
-fn show_section<'a>(
+fn show_section(
     filters: &mut Filter,
-    section: &'a SectionConfig,
-    app: &App<'a>,
+    section: &SectionConfig,
+    app: &App,
+    templates: &mut Templates,
 ) -> Result<usize> {
     let SectionConfig {
         header,
@@ -89,8 +91,6 @@ fn show_section<'a>(
     if entries.is_empty() {
         return Ok(0);
     }
-
-    let mut templates = app.templates.borrow_mut();
 
     if !header.is_empty() {
         templates
