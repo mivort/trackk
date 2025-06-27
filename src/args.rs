@@ -294,6 +294,7 @@ pub struct MergeArgs {
 #[derive(Parser)]
 pub struct InitArgs {
     /// Clone repository during init.
+    #[arg(long)]
     pub clone: Option<Box<str>>,
 
     /// User name to apply during setup.

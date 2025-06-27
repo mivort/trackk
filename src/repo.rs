@@ -24,7 +24,7 @@ pub fn init_repo(app: &App, args: &InitArgs) -> Result<()> {
     info!("Data directory: {}", data_path.to_string_lossy());
     info!("Entries directory: {}", entries_path.to_string_lossy());
 
-    fs::create_dir_all(&entries_path).with_context(|| {
+    fs::create_dir_all(&data_path).with_context(|| {
         format!(
             "Unable to create storage directory at '{}'",
             data_path.to_string_lossy()

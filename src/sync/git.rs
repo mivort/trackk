@@ -1,5 +1,5 @@
 use std::ffi::OsStr;
-use std::fs::{File, OpenOptions};
+use std::fs::{self, File, OpenOptions};
 use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
@@ -36,11 +36,19 @@ impl SyncDriver for Git {
             Ok(mut spawn) => spawn.wait()?,
         };
 
+        let entries_path = app.config.entries_path()?;
+        fs::create_dir_all(&entries_path).with_context(|| {
+            format!(
+                "Unable to create entries directory at '{}'",
+                entries_path.to_string_lossy()
+            )
+        })?;
+
         let mut ignorepath = PathBuf::from(&path);
         ignorepath.push(".gitignore");
         append_line(&ignorepath, ACTIVE_INDEX)?;
 
-        let mut attrpath = app.config.entries_path()?;
+        let mut attrpath = PathBuf::from(entries_path);
         attrpath.push(".gitattributes");
         append_line(&attrpath, GIT_ATTR)?;
 
