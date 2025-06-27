@@ -118,24 +118,33 @@ impl Entry {
         }
 
         let when = if let Some(when) = &args.when {
-            let res = parse_date(when, app, self)
-                .with_context(|| format!("Unable to parse the planned date: '{}'", when))?;
-            res
+            if when.is_empty() {
+                None
+            } else {
+                parse_date(when, app, self)
+                    .with_context(|| format!("Unable to parse the planned date: '{}'", when))?
+            }
         } else {
             self.when
         };
 
         let due = if let Some(due) = &args.due {
-            let res = parse_date(due, app, self)
-                .with_context(|| format!("Unable to parse the due date: '{}'", due))?;
-            res
+            if due.is_empty() {
+                None
+            } else {
+                parse_date(due, app, self)
+                    .with_context(|| format!("Unable to parse the due date: '{}'", due))?
+            }
         } else {
             self.due
         };
         let end = if let Some(end) = &args.end {
-            let res = parse_date(end, app, self)
-                .with_context(|| format!("Unable to parse the end date: '{}'", end))?;
-            res
+            if end.is_empty() {
+                None
+            } else {
+                parse_date(end, app, self)
+                    .with_context(|| format!("Unable to parse the end date: '{}'", end))?
+            }
         } else {
             self.end
         };

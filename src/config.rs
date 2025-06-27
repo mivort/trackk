@@ -220,7 +220,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "(when < 14d or (due >= now and due < 14d)) and !status:started".into(),
+                    filter: "(when < 3d or (due >= now and due < 3d)) and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
