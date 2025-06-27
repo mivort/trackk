@@ -270,8 +270,6 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
     let path = app.config.entries_path()?;
     let mut index = if force { app.index_empty_mut() } else { app.index_mut() }?;
 
-    let mut changes = false;
-
     for entry in WalkDir::new(&path).min_depth(2) {
         let entry = unwrap_ok_or!(entry, err, {
             match err.io_error() {
@@ -301,12 +299,10 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
         for issue in &bucket.entries {
             index.update_status(&app.config, &relpath.to_string_lossy(), issue);
         }
-        changes = true;
     }
 
-    if changes {
-        index.write()?;
-    }
+    index.write()?;
+    trace!("Active entry index rewritten");
 
     Ok(())
 }
