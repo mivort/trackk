@@ -1,39 +1,38 @@
 use minijinja as mj;
 use std::borrow::Cow;
-use std::cell::{Cell, RefCell};
 use unicode_width::UnicodeWidthStr;
 
 use crate::config::{Config, ReportConfig};
+use crate::prelude::*;
 use crate::templates::{colors, dates, layout, strings};
-use crate::{app::App, prelude::*};
 
 /// Rendering template lazy loader.
 pub struct Templates<'env> {
-    pub j2: RefCell<mj::Environment<'env>>,
+    pub j2: mj::Environment<'env>,
 
     /// Flag if initial lazy setup was done.
-    init: Cell<bool>,
+    init: bool,
 }
 
 impl<'env> Default for Templates<'env> {
     fn default() -> Self {
         Self {
-            j2: RefCell::new(mj::Environment::new()),
-            init: Cell::new(false),
+            j2: mj::Environment::new(),
+            init: false,
         }
     }
 }
 
 impl<'env> Templates<'env> {
     /// Initialize the templating environment.
-    pub fn init(&self, app: &App) -> Result<()> {
+    pub fn init(&mut self, ts: i64, config: &'env Config) -> Result<()> {
         use terminal_size::*;
 
-        if self.init.get() {
+        if self.init {
             return Ok(());
         }
 
-        let mut j2 = self.j2.borrow_mut();
+        let j2 = &mut self.j2;
         j2.set_keep_trailing_newline(true);
         j2.set_auto_escape_callback(|_| mj::AutoEscape::None);
 
@@ -41,16 +40,15 @@ impl<'env> Templates<'env> {
         j2.add_filter("firstline", strings::firstline);
         j2.add_filter("hasnote", strings::hasnote);
 
-        let now = app.ts;
         j2.add_filter("reldate", move |d: i64, p: Option<i32>| {
-            dates::reldate(d, now, p)
+            dates::reldate(d, ts, p)
         });
         j2.add_filter("longreldate", move |d: i64, p: Option<i32>| {
-            dates::longreldate(d, now, p)
+            dates::longreldate(d, ts, p)
         });
-        j2.add_global("now", now);
+        j2.add_global("now", ts);
 
-        let formats = dates::parse_formats(&app.config.date_formats)?;
+        let formats = dates::parse_formats(&config.date_formats)?;
         let offset = time::UtcOffset::current_local_offset()?;
         j2.add_filter("datefmt", move |ts: i64, fmt: Option<&str>| {
             dates::datefmt(ts, fmt, &formats, offset)
@@ -83,12 +81,14 @@ impl<'env> Templates<'env> {
         j2.add_global("lightcyan", anstyle::AnsiColor::BrightCyan as u8);
         j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
-        for (_key, value) in &app.config.colors {
-            let _color = colors::config_to_global(&value);
-            // TODO: P3: add colors to globals
+        for (key, value) in &config.colors {
+            let color = colors::config_to_global(&value);
+            j2.add_global(key, color);
+
+            // TODO: P3: add colors to globals with prefix
         }
 
-        if app.config.no_color() {
+        if config.no_color() {
             j2.add_function("fg", |_: u8| "");
             j2.add_function("bg", |_: u8| "");
         } else {
@@ -106,14 +106,14 @@ impl<'env> Templates<'env> {
         j2.add_function("min", |a: i32, b: i32| a.min(b));
         j2.add_function("max", |a: i32, b: i32| a.max(b));
 
-        self.init.set(true);
+        self.init = true;
 
         Ok(())
     }
 
     /// Check template ID existence, if template doesn't exist yet - load and parse it.
-    pub fn load_template(&self, template: &str) -> Result<()> {
-        let mut j2 = self.j2.borrow_mut();
+    pub fn load_template(&mut self, template: &str) -> Result<()> {
+        let j2 = &mut self.j2;
         let err = unwrap_err_or!(j2.get_template(template), _, { return Ok(()) });
 
         if !matches!(err.kind(), mj::ErrorKind::TemplateNotFound) {

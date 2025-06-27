@@ -39,7 +39,7 @@ pub fn add_entry(new_entry: Entry, app: &App) -> Result<()> {
 }
 
 /// Find entry using the filter and update its properties.
-pub fn modify_entries(ids: &IdFilter, args: &EntryArgs, app: &App) -> Result<()> {
+pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) -> Result<()> {
     let mut changes = 0;
 
     let filters = Filter {

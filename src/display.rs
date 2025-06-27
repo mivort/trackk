@@ -44,8 +44,9 @@ struct HeaderContext<'a> {
 }
 
 /// Render the list of filtered entries.
-pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &App<'a>) -> Result<()> {
-    app.templates.init(app)?;
+pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'a>) -> Result<()> {
+    let mut templates = app.templates.borrow_mut();
+    templates.init(app.ts, &app.config)?;
 
     let query = &mut QueryFilter::default();
     let mut filter = Filter { ids, query };
@@ -89,14 +90,16 @@ fn show_section<'a>(
         return Ok(0);
     }
 
+    let mut templates = app.templates.borrow_mut();
+
     if !header.is_empty() {
-        app.templates
+        templates
             .load_template(header)
             .with_context(|| format!("Unable to load header template: {header}"))?;
     }
 
     if !template.is_empty() {
-        app.templates
+        templates
             .load_template(template)
             .with_context(|| format!("Unable to load template: {template}"))?;
     }
@@ -104,7 +107,7 @@ fn show_section<'a>(
     let sort = if app.sort.is_empty() { &sort::parse_rules(sorting)? } else { &app.sort };
     sort::sort_entries(&mut entries, sort)?;
 
-    let j2 = app.templates.j2.borrow();
+    let j2 = &mut templates.j2;
     let out = std::io::stdout();
 
     if !header.is_empty() {
@@ -149,12 +152,13 @@ fn show_section<'a>(
 
 /// Render single entry.
 pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Result<()> {
-    app.templates.init(app)?;
+    let mut templates = app.templates.borrow_mut();
+    templates.init(app.ts, &app.config)?;
 
     let template_id = app.config.issue_view();
-    app.templates.load_template(template_id)?;
+    templates.load_template(template_id)?;
 
-    let j2 = app.templates.j2.borrow();
+    let j2 = &mut templates.j2;
     let template = j2.get_template(template_id)?;
     let out = std::io::stdout();
 

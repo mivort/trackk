@@ -25,7 +25,7 @@ pub struct App<'env> {
     pub limit: usize,
 
     /// Tera templates reference.
-    pub templates: templating::Templates<'env>,
+    pub templates: RefCell<templating::Templates<'env>>,
 
     /// Parsed entries cache.
     pub cache: RefCell<HashMap<String, Rc<bucket::Bucket>>>,

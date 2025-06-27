@@ -21,10 +21,10 @@ pub fn prompt(prompt: &str) -> Result<String> {
 }
 
 /// When several tasks match criteria, show the task picker.
-pub fn pick_prompt(
+pub fn pick_prompt<'a>(
     action: &str,
     mut entries: Vec<(Entry, Rc<str>)>,
-    app: &App,
+    app: &'a App<'a>,
 ) -> Result<Vec<(Entry, Rc<str>)>> {
     // TODO: P2: check terminal state/config/args to suppress the prompt
     // TODO: P2: check the limit of entries to show in prompt
@@ -35,8 +35,10 @@ pub fn pick_prompt(
 
     let template_id = app.config.templates.picker();
 
-    app.templates.init(app)?;
-    app.templates
+    let mut templates = app.templates.borrow_mut();
+
+    templates.init(app.ts, &app.config)?;
+    templates
         .load_template(app.config.templates.picker())
         .with_context(|| format!("Unable to load picker template: {template_id}"))?;
 
@@ -47,7 +49,7 @@ pub fn pick_prompt(
     let count = entries.len();
     let limit = count.min(9);
 
-    let j2 = app.templates.j2.borrow();
+    let j2 = &templates.j2;
     let template = j2.get_template(template_id)?;
     let out = std::io::stdout();
 
