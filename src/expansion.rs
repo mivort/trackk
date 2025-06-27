@@ -84,68 +84,60 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
     }
 
     match config.expansion_style {
-        ExpansionStyle::Taskwarrior => {
-            index[CmdContext::Root as usize].push((
-                Regex::new("^log$")?,
-                vec!["add".into(), "--status=completed".into()],
-            ));
-
-            index[CmdContext::Root as usize]
-                .push((Regex::new("^all$")?, vec!["list".into(), "all".into()]));
-            index[CmdContext::Root as usize].push((Regex::new("^ls$")?, vec!["list".into()]));
-            index[CmdContext::Root as usize].push((
-                Regex::new("^recent$")?,
-                vec!["list".into(), "recent".into()],
-            ));
-
-            index[CmdContext::Root as usize].push((
-                Regex::new("^done$")?,
-                vec!["mod".into(), "--status=completed".into()],
-            ));
-            index[CmdContext::Root as usize].push((
-                Regex::new("^start$")?,
-                vec!["mod".into(), "--status=started".into()],
-            ));
-            index[CmdContext::Root as usize].push((
-                Regex::new("^stop$")?,
-                vec!["mod".into(), "--status=pending".into()],
-            ));
-            index[CmdContext::Root as usize].push((
-                Regex::new("^(rm|delete)$")?,
-                vec!["mod".into(), "--status=deleted".into()],
-            ));
-            index[CmdContext::Root as usize]
-                .push((Regex::new("^([0-9]+)$")?, vec!["--id=$1".into()]));
-            index[CmdContext::Root as usize]
-                .push((Regex::new("^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
-
-            index[CmdContext::Root as usize].push((
-                Regex::new("^\\+(.+)")?,
-                vec!["--filter".into(), "tag:$1".into()],
-            ));
-            index[CmdContext::Root as usize].push((
-                Regex::new("^-([^-].+)")?,
-                vec!["--filter".into(), "!tag:$1".into()],
-            ));
-
-            index[CmdContext::Add as usize]
-                .push((Regex::new("^\\+(.+)")?, vec!["--tag".into(), "$1".into()]));
-
-            index[CmdContext::Mod as usize]
-                .push((Regex::new("^\\+(.+)")?, vec!["--tag".into(), "$1".into()]));
-            index[CmdContext::Mod as usize].push((
-                Regex::new("^-([^-].+)")?,
-                vec!["--tag".into(), "-$1".into()],
-            ));
-            index[CmdContext::Mod as usize].push((
-                Regex::new("^status:(.+)")?,
-                vec!["--status".into(), "$1".into()],
-            ));
-        }
+        ExpansionStyle::Taskwarrior => expansions_tw(&mut index)?,
         ExpansionStyle::None => {}
     }
 
     Ok(index)
+}
+
+/// Append Taskwarrior-style expansions.
+fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
+    let rg = Regex::new;
+
+    let root = CmdContext::Root as usize;
+    idx[root].push((
+        rg("^log$")?,
+        vec!["add".into(), "--status=completed".into()],
+    ));
+
+    idx[root].push((rg("^all$")?, vec!["list".into(), "all".into()]));
+    idx[root].push((rg("^ls$")?, vec!["list".into()]));
+    idx[root].push((rg("^recent$")?, vec!["list".into(), "recent".into()]));
+
+    idx[root].push((
+        rg("^done$")?,
+        vec!["mod".into(), "--status=completed".into()],
+    ));
+    idx[root].push((
+        rg("^start$")?,
+        vec!["mod".into(), "--status=started".into()],
+    ));
+    idx[root].push((rg("^stop$")?, vec!["mod".into(), "--status=pending".into()]));
+    idx[root].push((
+        rg("^(rm|delete)$")?,
+        vec!["mod".into(), "--status=deleted".into()],
+    ));
+
+    idx[root].push((rg(r"^([0-9]+)$")?, vec!["--id=$1".into()]));
+    idx[root].push((rg(r"^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
+
+    idx[root].push((rg(r"^\+(.+)")?, vec!["--filter".into(), "tag:$1".into()]));
+    idx[root].push((
+        rg(r"^-([^-].+)")?,
+        vec!["--filter".into(), "!tag:$1".into()],
+    ));
+
+    let add = CmdContext::Add as usize;
+    idx[add].push((rg(r"^\+(.+)")?, vec!["--tag".into(), "$1".into()]));
+    idx[add].push((rg(r"^(due|when|end|repeat|status):(.*)")?, vec!["--$1=$2".into()]));
+
+    let r#mod = CmdContext::Mod as usize;
+    idx[r#mod].push((rg(r"^\+(.+)")?, vec!["--tag".into(), "$1".into()]));
+    idx[r#mod].push((rg(r"^-([^-].+)")?, vec!["--tag".into(), "-$1".into()]));
+    idx[r#mod].push((rg(r"^(due|when|end|repeat|status):(.*)")?, vec!["--$1=$2".into()]));
+
+    Ok(())
 }
 
 /// Macro to create command context enum and corresponding matcher method.
