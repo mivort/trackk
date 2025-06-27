@@ -163,7 +163,7 @@ impl Config {
     }
 
     /// Fill the empty values with default ones.
-    pub fn default_values(&mut self) {
+    pub fn default_values(mut self) -> Self {
         if self.values.active_status.is_empty() {
             self.values.active_status = hash_set(&["pending", "started", "blocked"]);
         }
@@ -177,6 +177,8 @@ impl Config {
                 "deleted".into(),
             ];
         }
+
+        self
     }
 
     /// Provide default editor value.
@@ -590,15 +592,13 @@ pub fn read_config_chain() -> Result<Config> {
     };
     data_path.push(CONFIG_FILE);
     if data_path == *path {
-        return Ok(local_config);
+        return Ok(local_config.default_values());
     }
 
     let data_config = read_config(&path)?;
     merge_config(&mut local_config, data_config);
 
-    local_config.default_values();
-
-    Ok(local_config)
+    Ok(local_config.default_values())
 }
 
 /// Read JSON5 config from file.
