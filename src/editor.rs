@@ -11,6 +11,7 @@ use crate::config::IndexType;
 use crate::dateexp::parse_date;
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter};
+use crate::input;
 use crate::templates::dates;
 use crate::{app::App, display, prelude::*, storage};
 
@@ -43,13 +44,22 @@ pub fn edit_entry(issue: &mut Entry, app: &App) -> Result<ExitStatus> {
 }
 
 /// Iterate over matching entries and run editor for each.
-pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
+pub fn edit_entries<'a>(ids: &IdFilter, app: &'a App<'a>) -> Result<()> {
     let filters = Filter {
         ids,
         query: &mut Default::default(),
     };
+
+    // TODO: P1: move filter applying logic outside this method to share with 'mod'
     let entries = storage::fetch_entries(&filters, IndexType::All, app)?;
     let mut index = app.index_mut()?;
+
+    let entries = 'entries: {
+        if ids.index.len() < entries.len() {
+            break 'entries input::pick_prompt("Modify", entries, app)?;
+        }
+        entries
+    };
 
     let mut changes = 0;
     for (mut issue, path) in entries {

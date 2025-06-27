@@ -105,10 +105,7 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
     idx[root].push((rg("^ls$")?, vec!["list".into()]));
     idx[root].push((rg("^recent$")?, vec!["list".into(), "recent".into()]));
 
-    idx[root].push((
-        rg("^edit$")?,
-        vec!["mod".into(), "--edit".into()],
-    ));
+    idx[root].push((rg("^edit$")?, vec!["mod".into(), "--edit".into()]));
     idx[root].push((
         rg("^done$")?,
         vec!["mod".into(), "--status=completed".into()],
