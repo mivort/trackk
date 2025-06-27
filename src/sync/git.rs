@@ -66,6 +66,7 @@ impl SyncDriver for Git {
         Self::init_repo(args, app)
     }
 
+    /// Pull with rebase, then compare heads and push if needed.
     fn sync_repo(target: impl AsRef<Path>) -> Result<()> {
         Self::commit_repo(&target)?;
 
@@ -74,6 +75,19 @@ impl SyncDriver for Git {
         cmd.args(["pull", "--rebase"]);
         if !cmd.spawn()?.wait()?.success() {
             bail!("Unable to pull remote changes");
+        }
+
+        let mut cmd = git_command(&target);
+        cmd.args(["rev-parse", "HEAD"]);
+        let rev_head = cmd.output()?;
+
+        let mut cmd = git_command(&target);
+        cmd.args(["rev-parse", "@{u}"]);
+        let rev_upstream = cmd.output()?;
+
+        if rev_head == rev_upstream {
+            info!("No local changes");
+            return Ok(());
         }
 
         info!("Running 'git push'");
