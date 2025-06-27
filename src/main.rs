@@ -118,7 +118,7 @@ fn main() -> Result<()> {
                     return Ok(());
                 }
             }
-            issue.validate()?;
+            issue.validate(&app.config)?;
             storage::add_entry(issue, &app)?;
         }
 

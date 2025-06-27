@@ -166,15 +166,19 @@ pub struct EntryArgs {
     #[arg(long)]
     pub annotate: Vec<String>,
 
-    /// Set entry due date string.
+    /// Set entry planned completion date.
+    #[arg(long)]
+    pub when: Option<String>,
+
+    /// Set entry due date.
     #[arg(long, allow_hyphen_values = true)]
     pub due: Option<String>,
 
-    /// Set entry end date string.
+    /// Set entry end date.
     #[arg(long, allow_hyphen_values = true)]
     pub end: Option<String>,
 
-    /// Set entry status
+    /// Set entry status.
     #[arg(long)]
     pub status: Option<String>,
 

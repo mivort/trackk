@@ -57,7 +57,7 @@ pub fn edit_entries(ids: &IdFilter, app: &App) -> Result<()> {
             break;
         }
 
-        issue.validate()?;
+        issue.validate(&app.config)?;
 
         let mut bucket = Bucket::from_path(&*path, app)?;
         let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();

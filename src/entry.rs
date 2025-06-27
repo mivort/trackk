@@ -244,9 +244,13 @@ impl Entry {
 
     /// Check issue validity and produce error message in case if required data is missing.
     /// If possible, fix the status value.
-    pub fn validate(&self) -> Result<()> {
+    pub fn validate(&self, config: &Config) -> Result<()> {
         if self.desc.is_empty() {
             bail!("Entry title should not be empty");
+        }
+
+        if self.end.is_some() && !config.values.active_status.contains(&self.status) {
+            bail!("End date should be only set for complete/deleted/inactive entries");
         }
 
         // TODO: P2: in case if repeat is set, check if at least 'due' or 'when' is not empty.

@@ -60,7 +60,7 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         let mut bucket = Bucket::from_path(&**path, app)?;
         let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
         bucket_issue.apply_args(args, app)?;
-        bucket_issue.validate()?;
+        bucket_issue.validate(&app.config)?;
 
         if !issue.differs(bucket_issue) {
             continue;
