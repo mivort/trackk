@@ -103,6 +103,8 @@ impl SyncDriver for Git {
         let file = file.lines().next().unwrap_or("n/a");
         let file = format!("sync: {}", file);
 
+        // TODO: P1: apply user name/user email from config
+
         let mut cmd = git_command(&target);
         cmd.args(["commit", "-m"]);
         cmd.arg(file);
@@ -148,6 +150,32 @@ fn git_config(
 fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
     info!("Setting up 'git config'");
 
+    git_user_setup(&path, args)?;
+
+    let name = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name");
+    let driver = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.driver");
+
+    let exe = std::env::current_exe()
+        .context("Unable to locate own executable to set as merge driver")?;
+    let exe = exe
+        .file_name()
+        .unwrap_or_else(|| OsStr::new(env!("CARGO_BIN_NAME")))
+        .to_string_lossy();
+    info!("Setting current executable name ({}) as merge driver", exe);
+
+    let command = format!("{} merge %O %A %B", exe);
+
+    git_config(&path, name, true, || {
+        concat!("'", env!("CARGO_PKG_NAME"), " json bucket merge driver'").into()
+    })?;
+
+    git_config(&path, driver, true, || command)?;
+
+    Ok(())
+}
+
+/// Set git repository user name and e-mail.
+fn git_user_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
     git_config(&path, "user.name", false, || {
         if let Some(user) = &args.user {
             return user.to_string();
@@ -173,25 +201,6 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
         .unwrap_or_default();
         if email.is_empty() { String::from(concat!("@", env!("CARGO_PKG_NAME"))) } else { email }
     })?;
-
-    let name = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name");
-    let driver = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.driver");
-
-    let exe = std::env::current_exe()
-        .context("Unable to locate own executable to set as merge driver")?;
-    let exe = exe
-        .file_name()
-        .unwrap_or_else(|| OsStr::new(env!("CARGO_BIN_NAME")))
-        .to_string_lossy();
-    info!("Setting current executable name ({}) as merge driver", exe);
-
-    let command = format!("{} merge %O %A %B", exe);
-
-    git_config(&path, name, true, || {
-        concat!("'", env!("CARGO_PKG_NAME"), " json bucket merge driver'").into()
-    })?;
-
-    git_config(&path, driver, true, || command)?;
 
     Ok(())
 }
