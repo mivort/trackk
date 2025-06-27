@@ -1,12 +1,10 @@
-use std::env;
-
 use assert_cmd::Command;
 
 const BIN_NAME: &str = "trk";
 
 #[cfg(test)]
 fn cmd_base() -> Command {
-    let dir = env!("CARGO_TARGET_TMPDIR");
+    let dir = testdir::testdir!();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
     cmd.env("TRACKK_DATA", dir).env("TRACKK_CONFIG", "");
     cmd
@@ -20,6 +18,13 @@ fn init_storage() {
 
     let mut cmd = cmd_base();
     cmd.args(&["all"]);
+    cmd.assert().success();
 
+    let mut cmd = cmd_base();
+    cmd.args(&["add", "test entry"]);
+    cmd.assert().success();
+
+    let mut cmd = cmd_base();
+    cmd.args(&["1", "mod", "--status=deleted"]);
     cmd.assert().success();
 }
