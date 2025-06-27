@@ -299,11 +299,11 @@ fn parse_regex(input: &str) -> Result<(Rc<regex::Regex>, &str)> {
 
 #[test]
 fn full_exp_parsing() {
-    let (app, issue) = (&App::default(), &Entry::default());
-    assert_eq!(parse_date("1.5h+2h", app, issue).unwrap(), 12600);
+    let (app, entry) = (&App::default(), &Entry::default());
+    assert_eq!(parse_date("1.5h+2h", app, entry).unwrap(), Some(12600));
     assert_eq!(
-        parse_date("1s+2s*3", app, issue).unwrap(),
-        7,
+        parse_date("1s+2s*3", app, entry).unwrap(),
+        Some(7),
         "op precedence"
     );
 }
@@ -311,8 +311,8 @@ fn full_exp_parsing() {
 #[test]
 fn relative_dates() {
     let (app, issue) = (&App::default(), &Entry::default());
-    let monday = parse_date("monday", app, issue).unwrap();
-    let tuesday = parse_date("tuesday", app, issue).unwrap();
+    let monday = parse_date("monday", app, issue).unwrap().unwrap();
+    let tuesday = parse_date("tuesday", app, issue).unwrap().unwrap();
     assert_eq!(tuesday - monday, 86400);
 }
 
