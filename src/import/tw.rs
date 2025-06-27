@@ -30,6 +30,9 @@ struct TWData {
     modified: Box<str>,
 
     #[serde(default)]
+    scheduled: Option<Box<str>>,
+
+    #[serde(default)]
     due: Option<Box<str>>,
 
     #[serde(default)]
@@ -118,6 +121,7 @@ fn import_entries(entries: Vec<TWData>, app: &App) -> Result<()> {
             tags: e.tags.into_iter().map(|e| e.into_string()).collect(),
             created: try_parse(&e.entry)?,
             modified: try_parse(&e.modified)?,
+            when: e.scheduled.map_or(Ok(None), |v| try_parse(&v).map(Some))?,
             due: e.due.map_or(Ok(None), |v| try_parse(&v).map(Some))?,
             end: e.end.map_or(Ok(None), |v| try_parse(&v).map(Some))?,
             ..Default::default()

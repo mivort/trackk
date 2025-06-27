@@ -38,6 +38,7 @@ pub struct Entry {
     pub linked: Vec<Box<str>>,
 
     /// Repeat string which is applied to task copy upon completion.
+    /// Will be applied to both 'due' and 'when' dates if those are set.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(default)]
     pub repeat: Option<String>,
@@ -49,6 +50,10 @@ pub struct Entry {
     /// Last modify timestamp.
     #[serde(default)]
     pub modified: i64,
+
+    /// Date of planned completion.
+    #[serde(default)]
+    pub when: Option<i64>,
 
     /// Due date/time.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -243,6 +248,8 @@ impl Entry {
         if self.desc.is_empty() {
             bail!("Entry title should not be empty");
         }
+
+        // TODO: P2: in case if repeat is set, check if at least 'due' or 'when' is not empty.
 
         Ok(())
     }

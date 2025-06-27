@@ -41,13 +41,13 @@
 {{ entry.desc }}
 {{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
 {{ fg(lightblue) }} status:   {{ reset }}{{ entry.status }}
-{{ fg(lightblue) }} created:  {{ reset }}{{ entry_date(entry.created) }}
-{{ fg(lightblue) }} modified: {{ reset }}{{ entry_date(entry.modified) }}
 {{ fg(lightblue) }} due:      {{ reset }}{{ entry_date(entry.due) }}
 {{ fg(lightblue) }} end:      {{ reset }}{{ entry_date(entry.end) }}
 {{ fg(lightblue) }} repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
 {{ fg(lightblue) }} tags:     {{ reset }}{{ tags }}
 
+{{ fg(lightblue) }} created:  {{ reset }}{{ entry_date(entry.created) }}
+{{ fg(lightblue) }} modified: {{ reset }}{{ entry_date(entry.modified) }}
 {{ fg(lightblue) }} urgency:  {{ reset }}{{ urgency | numfmt('{:.3}') }}
 
 {% if sid -%}
