@@ -83,6 +83,10 @@ pub struct DefaultsConfig {
     #[serde(default)]
     status_initial: Box<str>,
 
+    /// Default time string to assign as 'when'.
+    #[serde(default)]
+    _when: Box<str>, // TODO: P2: support default when value
+
     /// Default time string to assign as 'due'.
     #[serde(default)]
     _due: Box<str>, // TODO: P2: support default due value
@@ -198,7 +202,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "(due or someday) >= 365d and !status:started".into(),
+                    filter: "((when or someday) >= 365d or (due or someday) >= 365d) and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
@@ -207,7 +211,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "due >= 14d and due < 365d and !status:started".into(),
+                    filter: "((when >= 14d and when < 365d) or (due >= 14d and due < 365d)) and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
@@ -216,7 +220,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "due >= now and due < today - 14d and !status:started".into(),
+                    filter: "(when < 14d or (due >= now and due < 14d)) and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },
@@ -329,6 +333,7 @@ impl ValuesConfig {
             return concat!(
                 "(",
                 "sig((now - (due or someday)) / 10mil) * 10",
+                " + sig((now - (when or someday)) / 10mil) * 2.5 * (has(due) and 0 or 1)",
                 " + sig((now - created) / 10mil) * 0.5",
                 ")",
                 " * (end:false and 1 or 0)", // Only apply due/created if end is not set

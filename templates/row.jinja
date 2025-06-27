@@ -25,15 +25,20 @@
   {%- endif -%}
   {{- reset -}}
 
-  {#- Due date -#}
-  {%- if entry.due and cols > 36 and not entry.end -%}
+  {#- When/due date -#}
+  {%- if cols > 36 and not entry.end -%}
     / {# -#}
-    {%- if entry.due >= now -%}
-      {{ fg(lightwhite) }}
-    {%- else -%}
-      {{ fg(lightred) }}
+    {%- if entry.due -%}
+      {%- if entry.due >= now -%}
+        {{ fg(lightwhite) }}
+      {%- else -%}
+        {{ fg(lightred) }}
+      {%- endif -%}
+      {{ entry.due | reldate }}
+    {%- elif entry.when -%}
+      {{ fg(lightblue) }}{{ entry.when | reldate }}
     {%- endif -%}
-    {{ entry.due | reldate }}{{ reset }} {# -#}
+    {{ reset }} {# -#}
   {%- endif -%}
 
   {#- End date -#}
