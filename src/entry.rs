@@ -278,6 +278,7 @@ pub enum FieldRef {
     Tag,
     Created,
     Modified,
+    When,
     Due,
     End,
 }
@@ -289,6 +290,7 @@ impl FieldRef {
         match self {
             Self::Created => Token::Date(issue.created),
             Self::Modified => Token::Date(issue.modified),
+            Self::When => issue.when.map(Token::Date).unwrap_or(Token::Bool(false)),
             Self::Due => issue.due.map(Token::Date).unwrap_or(Token::Bool(false)),
             Self::End => issue.end.map(Token::Date).unwrap_or(Token::Bool(false)),
             _ => Token::Reference(*self),
@@ -360,6 +362,7 @@ impl FieldRef {
             Self::Desc => !entry.desc.is_empty(),
             Self::Tag => !entry.tags.is_empty(),
             Self::Status => !entry.status.is_empty(),
+            Self::When => entry.when.is_some(),
             Self::Due => entry.due.is_some(),
             Self::End => entry.end.is_some(),
             _ => false,

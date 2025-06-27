@@ -170,6 +170,7 @@ pub enum Token {
     #[token("tag", |_| FieldRef::Tag)]
     #[token("created", |_| FieldRef::Created)]
     #[token("modified", |_| FieldRef::Modified)]
+    #[token("when", |_| FieldRef::When)]
     #[token("due", |_| FieldRef::Due)]
     #[regex("end", |_| FieldRef::End)]
     Reference(FieldRef),
