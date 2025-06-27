@@ -156,7 +156,8 @@ impl SortingRule {
 }
 
 /// Sorting expression tokens.
-#[derive(Clone, Copy, Debug, Logos)]
+#[derive(Clone, Copy, Logos)]
+#[cfg_attr(debug_assertions, derive(Debug))]
 #[logos(skip r"[ \t\n\f,]+")]
 enum SortToken {
     #[token("+")]

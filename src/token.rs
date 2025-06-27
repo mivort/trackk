@@ -21,7 +21,8 @@ pub const SOMEDAY: i64 = 253402300799 - 86400;
 /// * Unary conversion: [Token::to_unary].
 /// * Date exp lexing.
 /// * Date exp evaluation.
-#[derive(Clone, Debug, Logos)]
+#[derive(Clone, Logos)]
+#[cfg_attr(debug_assertions, derive(Debug))]
 #[logos(skip r"[ \t\n\f]+", extras = OffsetDateTime, error = LexerError)]
 pub enum Token {
     #[regex(r"\d+(\.\d+)?", parse_no_suffix_span)]
@@ -551,7 +552,8 @@ impl Token {
 }
 
 /// Custom lexing error type.
-#[derive(Clone, Default, Debug, PartialEq, Error)]
+#[derive(Clone, Default, PartialEq, Error)]
+#[cfg_attr(debug_assertions, derive(Debug))]
 pub enum LexerError {
     #[default]
     #[error("Unrecognized token")]

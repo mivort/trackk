@@ -310,6 +310,7 @@ pub struct InitArgs {
 }
 
 #[derive(ValueEnum, Default, Clone, Copy, Deserialize)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
 pub enum ColorMode {
     #[default]
     Auto,

@@ -14,18 +14,10 @@ use crate::{expansion, prelude::*};
 pub const CONFIG_FILE: &str = "config.json5";
 
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub struct Config {
-    /// Data directory.
-    #[serde(default)]
-    data_path: Box<str>,
-
-    /// Data directory base path.
-    #[serde(default)]
-    data_prefix: PrefixType,
-
-    /// Use sub-directory in provided data path/repo.
-    #[serde(default)]
-    _storage_prefix: Box<str>,
+    #[serde(flatten)]
+    local: ConfigLocal,
 
     /// Editor used for entry input.
     #[serde(default)]
@@ -81,7 +73,25 @@ pub struct Config {
     pub expansions: Vec<ExpansionConfig>,
 }
 
+/// Config entries which should not be taken from data storage config.
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+pub struct ConfigLocal {
+    /// Data directory.
+    #[serde(default)]
+    data_path: Box<str>,
+
+    /// Data directory base path.
+    #[serde(default)]
+    data_prefix: PrefixType,
+
+    /// Use sub-directory in provided data path/repo.
+    #[serde(default)]
+    _storage_prefix: Box<str>,
+}
+
+#[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub struct DefaultsConfig {
     /// Default status to assign upon creation.
     #[serde(default)]
@@ -97,6 +107,7 @@ pub struct DefaultsConfig {
 }
 
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ValuesConfig {
     /// List of statuses which are considered as 'active'.
     #[serde(default)]
@@ -116,6 +127,7 @@ pub struct ValuesConfig {
 }
 
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub struct TemplatesConfig {
     /// Template name for single entry view.
     #[serde(default)]
@@ -131,6 +143,7 @@ pub struct TemplatesConfig {
 }
 
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub struct SyncConfig {
     /// Select one of the supported sync drivers.
     pub driver: SyncDriverMode, // TODO: P1: support multiple vcs drivers
@@ -285,7 +298,7 @@ impl Config {
 
     /// Produce data path prefix.
     pub fn data_path_base(&self) -> Result<PathBuf> {
-        let prefix = match self.data_prefix {
+        let prefix = match self.local.data_prefix {
             PrefixType::DataDir => dirs::data_dir(),
             PrefixType::DataLocalDir => dirs::data_local_dir(),
             PrefixType::ConfigDir => dirs::config_dir(),
@@ -314,7 +327,11 @@ impl Config {
 
     /// Data path default value.
     fn data_path_fallback(&self) -> &str {
-        if self.data_path.is_empty() { env!("CARGO_PKG_NAME") } else { &self.data_path }
+        if self.local.data_path.is_empty() {
+            env!("CARGO_PKG_NAME")
+        } else {
+            &self.local.data_path
+        }
     }
 }
 
@@ -362,12 +379,14 @@ impl TemplatesConfig {
 
 /// Report configuration which contains array of report sections.
 #[derive(Deserialize, Default, Clone)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
 pub struct ReportConfig {
     pub sections: Vec<SectionConfig>,
 }
 
 /// Report section defined by filter and template.
 #[derive(Deserialize, Default, Clone)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
 pub struct SectionConfig {
     /// Section header template.
     #[serde(default)]
@@ -400,6 +419,7 @@ pub struct SectionConfig {
 
 /// Custom field type.
 #[derive(Hash, PartialEq, Eq, Deserialize)]
+#[cfg_attr(debug_assertions, derive(Debug, Clone))]
 pub enum FieldType {
     String,
     Number,
@@ -407,6 +427,7 @@ pub enum FieldType {
 }
 
 #[derive(Deserialize, Default, Clone, Copy)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
 pub enum IndexType {
     #[default]
     #[serde(rename = "active")]
@@ -418,6 +439,7 @@ pub enum IndexType {
 }
 
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub enum SyncDriverMode {
     #[default]
     #[serde(rename = "git")]
@@ -428,6 +450,7 @@ pub enum SyncDriverMode {
 }
 
 #[derive(Serialize, Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub enum PrefixType {
     #[default]
     #[serde(rename = "data_dir")]
@@ -446,6 +469,7 @@ pub enum PrefixType {
 
 /// Expansion config entry.
 #[derive(Deserialize)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone, Default))]
 pub struct ExpansionConfig {
     /// Regular expression to match on argument.
     pub expr: Box<str>,
@@ -464,12 +488,14 @@ pub struct ExpansionConfig {
 #[derive(Deserialize)]
 #[serde(untagged)]
 #[allow(unused)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub enum ColorConfig {
     Options(ColorOptions),
     Custom(Box<str>),
 }
 
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ColorOptions {
     pub fg: Option<u8>,
     pub bg: Option<u8>,
@@ -479,6 +505,7 @@ pub struct ColorOptions {
 }
 
 #[derive(Deserialize, Default)]
+#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
 pub enum ExpansionStyle {
     #[default]
     #[serde(rename = "taskwarrior")]
@@ -504,7 +531,7 @@ fn format_config(config: &Config) -> Result<String> {
         c = color,
         cl = clear,
         data_path = config.data_path_fallback(),
-        data_path_prefix = json5::to_string(&config.data_prefix)?,
+        data_path_prefix = json5::to_string(&config.local.data_prefix)?,
         editor = &config.editor(),
         date_formats = json5::to_string(&config.date_formats)?,
         active_status = json5::to_string(&config.values.active_status)?,
@@ -540,7 +567,8 @@ fn config_doc_is_sane() {
 ///
 /// If TRACKK_CONFIG env variable is defined, use it as the main config.
 pub fn read_config_chain() -> Result<Config> {
-    const ENV_CONFIG: &str = concat!(env!("CARGO_PKG_NAME"), "_CONFIG");
+    const ENV_CONFIG: &str = "TRACKK_CONFIG";
+    const ENV_DATA: &str = "TRACKK_DATA";
 
     let path = &unwrap_ok_or!(env::var(ENV_CONFIG).map(PathBuf::from), _, {
         let mut dir = dirs::config_dir().context("Unable to find config directory")?;
@@ -551,7 +579,6 @@ pub fn read_config_chain() -> Result<Config> {
 
     let mut local_config = read_config(&path)?;
 
-    const ENV_DATA: &str = concat!(env!("CARGO_PKG_NAME"), "_DATA");
     let mut data_path = 'data_path: {
         if let Ok(env_path) = std::env::var(ENV_DATA) {
             break 'data_path PathBuf::from(env_path);
@@ -582,18 +609,65 @@ fn read_config(path: &impl AsRef<Path>) -> Result<Config> {
     })
 }
 
-/// Overwrite target option if it's 'none'.
-fn merge_option<T>(target: &mut Option<T>, source: Option<T>) {
-    if target.is_none() {
-        *target = source
-    }
-}
-
 /// Stitch two configs together.
 /// NOTE: Data path/prefix are purposedely not taken from 'source',
 ///       as it should be only defined in 'local' config.
 fn merge_config(target: &mut Config, source: Config) {
+    /// Overwrite target option if it's 'none'.
+    fn merge_option<T>(target: &mut Option<T>, source: Option<T>) {
+        if target.is_none() {
+            *target = source
+        }
+    }
+
+    /// Check if value is non-default and update otherwise.
+    fn merge_non_default<T>(target: &mut T, source: T)
+    where
+        T: Default + Eq,
+    {
+        if *target == T::default() {
+            *target = source
+        }
+    }
+
+    /// Check vecs avoiding allocation if target is empty.
+    fn merge_vecs<T>(target: &mut Vec<T>, mut source: Vec<T>) {
+        if target.is_empty() {
+            *target = source;
+            return;
+        }
+        target.append(&mut source);
+    }
+
     merge_option(&mut target.editor, source.editor);
     merge_option(&mut target.editor_on_add, source.editor_on_add);
     merge_option(&mut target.expansion_style, source.expansion_style);
+    merge_non_default(&mut target.color_mode, source.color_mode);
+
+    merge_vecs(&mut target.expansions, source.expansions);
+}
+
+/// Ensure all fields which require merging are merged.
+#[test]
+fn ensure_all_merged() {
+    let mut a = Config::default();
+    let b = Config {
+        local: Default::default(),
+        editor: Some("".into()),
+        editor_on_add: Some(true),
+        expansion_style: Some(ExpansionStyle::None),
+        color_mode: ColorMode::Always,
+        _fields: Default::default(),
+        colors: Default::default(),
+        date_formats: Default::default(),
+        defaults: Default::default(),
+        expansions: vec![ExpansionConfig::default()],
+        reports: Default::default(),
+        sync: Default::default(),
+        templates: Default::default(),
+        values: Default::default(),
+    };
+
+    merge_config(&mut a, b.clone());
+    assert_eq!(a, b);
 }
