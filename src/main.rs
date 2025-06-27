@@ -129,6 +129,7 @@ fn main() -> Result<()> {
                     .next()
                     .context("Entry to copy from is not selected")?;
                 entry.copy(&app);
+                entry.apply_args(&a.entry, &app)?;
                 entry
             } else {
                 entry::Entry::new(&a.entry, &app)?
