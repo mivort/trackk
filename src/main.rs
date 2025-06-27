@@ -103,14 +103,10 @@ fn main() -> Result<()> {
                 display::show_entry(entry, &app)?;
             }
         }
-        Some(Command::Edit(args)) => {
-            let ids = filter::IdFilter::from_shorthands(args.ids, &app)?;
-            editor::edit_entries(&ids, &app)?;
-        }
 
         Some(Command::Add(a)) => {
             let mut issue = entry::Entry::new(&a.entry, &app)?;
-            issue.apply_description(&a.description);
+            issue.apply_description(&a.entry.description);
 
             if a.edit || app.config.editor_on_add {
                 let status = editor::edit_entry(&mut issue, &app)?;
@@ -132,9 +128,13 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Mod(e)) => {
-            let mut ids = filter::IdFilter::from_shorthands(e.ids, &app)?;
-            ids.append_shorthands(args.filter_args.id, &app)?;
-            storage::modify_entries(&ids, &e.entry, &app)?;
+            let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
+            if e.edit {
+                // TODO: P3: apply mod args
+                editor::edit_entries(&ids, &app)?;
+            } else {
+                storage::modify_entries(&ids, &e.entry, &app)?;
+            }
         }
 
         Some(Command::Config) => {

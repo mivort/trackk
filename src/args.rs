@@ -66,9 +66,6 @@ pub enum Command {
     /// Show info about specified entry
     Info(InfoArgs),
 
-    /// Edit using default editor program.
-    Edit(ModArgs),
-
     /// Show one of the built-in or config-defined report templates.
     #[command(subcommand)]
     Template(TemplateCommand),
@@ -154,9 +151,8 @@ pub struct FilterArgs {
 /// Args to apply changes to the selected entries.
 #[derive(Parser, Default)]
 pub struct EntryArgs {
-    /// Set entry title message and description.
-    #[arg(long)]
-    pub desc: Vec<String>,
+    /// Entry title message and description.
+    pub description: Vec<Box<str>>,
 
     /// Add text to the entry title.
     #[arg(long)]
@@ -194,9 +190,6 @@ pub struct EntryArgs {
 /// Args specific for entry creation.
 #[derive(Parser, Default)]
 pub struct AddArgs {
-    /// Entry title message and description.
-    pub description: Vec<Box<str>>,
-
     /// Open editor when entry is created.
     #[arg(long)]
     pub edit: bool,
@@ -248,11 +241,12 @@ pub struct CalcArgs {
 
 #[derive(Parser, Default)]
 pub struct ModArgs {
-    /// List of IDs to apply changes to.
-    pub ids: Vec<Box<str>>,
-
     #[command(flatten)]
     pub entry: EntryArgs,
+
+    /// Use editor to apply changes to the entry.
+    #[arg(long)]
+    pub edit: bool,
 }
 
 #[derive(Subcommand)]

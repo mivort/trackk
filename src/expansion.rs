@@ -106,6 +106,10 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
     idx[root].push((rg("^recent$")?, vec!["list".into(), "recent".into()]));
 
     idx[root].push((
+        rg("^edit$")?,
+        vec!["mod".into(), "--edit".into()],
+    ));
+    idx[root].push((
         rg("^done$")?,
         vec!["mod".into(), "--status=completed".into()],
     ));
@@ -130,12 +134,18 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
 
     let add = CmdContext::Add as usize;
     idx[add].push((rg(r"^\+(.+)")?, vec!["--tag".into(), "$1".into()]));
-    idx[add].push((rg(r"^(due|when|end|repeat|status):(.*)")?, vec!["--$1=$2".into()]));
+    idx[add].push((
+        rg(r"^(due|when|end|repeat|status):(.*)")?,
+        vec!["--$1=$2".into()],
+    ));
 
     let r#mod = CmdContext::Mod as usize;
     idx[r#mod].push((rg(r"^\+(.+)")?, vec!["--tag".into(), "$1".into()]));
     idx[r#mod].push((rg(r"^-([^-].+)")?, vec!["--tag".into(), "-$1".into()]));
-    idx[r#mod].push((rg(r"^(due|when|end|repeat|status):(.*)")?, vec!["--$1=$2".into()]));
+    idx[r#mod].push((
+        rg(r"^(due|when|end|repeat|status):(.*)")?,
+        vec!["--$1=$2".into()],
+    ));
 
     Ok(())
 }
@@ -178,7 +188,6 @@ cmd_context! {
     Add: "add";
     Mod: "mod";
     List: "list";
-    Edit: "edit";
     Count: "count";
     Info: "info";
     Config: "config";

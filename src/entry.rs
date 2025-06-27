@@ -103,9 +103,10 @@ impl Entry {
     /// Take values from provided arguments and apply to the issue. Also,
     /// update the modified timestamp.
     pub fn apply_args(&mut self, args: &EntryArgs, app: &App) -> Result<()> {
-        if !args.desc.is_empty() {
-            self.desc = args.desc.join(" ");
+        if !args.description.is_empty() {
+            self.desc = args.description.join(" ");
         }
+
         for arg in &args.append {
             // TODO: P2: append to the first line
             self.desc.push(' ');
