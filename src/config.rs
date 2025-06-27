@@ -23,9 +23,9 @@ pub struct Config {
     #[serde(default)]
     data_prefix: PrefixType,
 
-    /// Entries sub-directory.
+    /// Use sub-directory in provided data path/repo.
     #[serde(default)]
-    issues_path: Box<str>,
+    _storage_prefix: Box<str>,
 
     /// Editor used for entry input.
     #[serde(default)]
@@ -71,14 +71,14 @@ pub struct Config {
     #[serde(default)]
     pub date_formats: HashMap<String, String>,
 
+    /// Built-in expansion style.
+    #[serde(default)]
+    pub expansion_style: Option<ExpansionStyle>,
+
     /// Aliases which provide regex-based input argument expansion rules.
     #[serde(default)]
     #[allow(unused)]
     pub expansions: Vec<ExpansionConfig>,
-
-    /// Built-in expansion style.
-    #[serde(default)]
-    pub expansion_style: ExpansionStyle,
 }
 
 #[derive(Deserialize, Default)]
@@ -307,20 +307,14 @@ impl Config {
 
     /// Produce full path to issues storage.
     pub fn entries_path(&self) -> Result<PathBuf> {
-        let issues_path = self.issues_path_fallback();
         let mut path = self.data_path()?;
-        path.push(issues_path);
+        path.push("entries");
         Ok(path)
     }
 
     /// Data path default value.
     fn data_path_fallback(&self) -> &str {
         if self.data_path.is_empty() { env!("CARGO_PKG_NAME") } else { &self.data_path }
-    }
-
-    /// Entries path default value.
-    fn issues_path_fallback(&self) -> &str {
-        if self.issues_path.is_empty() { "entries" } else { &self.issues_path }
     }
 }
 
@@ -513,7 +507,6 @@ fn format_config(config: &Config) -> Result<String> {
         data_path_prefix = json5::to_string(&config.data_prefix)?,
         editor = &config.editor(),
         date_formats = json5::to_string(&config.date_formats)?,
-        issues_path = config.issues_path_fallback(),
         active_status = json5::to_string(&config.values.active_status)?,
         permit_status = json5::to_string(&config.values.permit_status)?,
         urgency_formula = config.values.urgency_formula(),
@@ -602,4 +595,5 @@ fn merge_option<T>(target: &mut Option<T>, source: Option<T>) {
 fn merge_config(target: &mut Config, source: Config) {
     merge_option(&mut target.editor, source.editor);
     merge_option(&mut target.editor_on_add, source.editor_on_add);
+    merge_option(&mut target.expansion_style, source.expansion_style);
 }

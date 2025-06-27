@@ -9,10 +9,6 @@
   // Default: data_dir{cl}
   data_path_prefix: {data_path_prefix},
 
-  {c}// Sub-path to entries files in data directory.
-  // Default: entries{cl}
-  entries_path: "{issues_path}",
-
   {c}// Editor command used for entry editing. If not defined, value will be taken
   // from the EDITOR environment variable.{cl}
   editor: "{editor}",

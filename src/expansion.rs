@@ -83,7 +83,11 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
         index[rule.context as usize].push((regex, rule.replace.clone()));
     }
 
-    match config.expansion_style {
+    match config
+        .expansion_style
+        .as_ref()
+        .unwrap_or(&Default::default())
+    {
         ExpansionStyle::Taskwarrior => expansions_tw(&mut index)?,
         ExpansionStyle::None => {}
     }
