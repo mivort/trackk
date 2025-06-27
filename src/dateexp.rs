@@ -9,7 +9,7 @@ use crate::{app::App, prelude::*, token::Token};
 
 /// Parse date expression and produce the timestamp.
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
-pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<i64> {
+pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<Option<i64>> {
     let local = app.local_time()?;
 
     let mut exp = Vec::<Token>::new();
@@ -19,9 +19,10 @@ pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<i64> {
     let res = eval(&exp, local, &mut arg_stack, issue)?;
 
     match res {
-        Token::Date(date) => Ok(date),
-        Token::Duration(rel) => Ok(app.ts + rel as i64),
-        Token::Bool(val) => bail!("Date expression returned boolean ({val})"),
+        Token::Date(date) => Ok(Some(date)),
+        Token::Duration(rel) => Ok(Some(app.ts + rel as i64)),
+        Token::Bool(false) => Ok(None),
+        Token::Bool(true) => bail!("Date expression returned 'true'"),
         Token::Regex(_) => bail!("Date expression returned regular expression"),
         _ => panic!(),
     }

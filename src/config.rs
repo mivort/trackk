@@ -202,7 +202,7 @@ impl Config {
                     index: IndexType::Active,
                     sorting: "urgency+".into(),
                     _grouping: "".into(),
-                    filter: "((when or someday) >= 365d or (due or someday) >= 365d) and !status:started".into(),
+                    filter: "(when or someday) >= 365d and (due or someday) >= 365d and !status:started".into(),
                     header: "header".into(),
                     template: "next".into(),
                 },

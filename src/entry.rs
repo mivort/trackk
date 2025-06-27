@@ -120,7 +120,7 @@ impl Entry {
         let when = if let Some(when) = &args.when {
             let res = parse_date(when, app, self)
                 .with_context(|| format!("Unable to parse the planned date: '{}'", when))?;
-            Some(res)
+            res
         } else {
             self.when
         };
@@ -128,14 +128,14 @@ impl Entry {
         let due = if let Some(due) = &args.due {
             let res = parse_date(due, app, self)
                 .with_context(|| format!("Unable to parse the due date: '{}'", due))?;
-            Some(res)
+            res
         } else {
             self.due
         };
         let end = if let Some(end) = &args.end {
             let res = parse_date(end, app, self)
                 .with_context(|| format!("Unable to parse the end date: '{}'", end))?;
-            Some(res)
+            res
         } else {
             self.end
         };
