@@ -1,13 +1,17 @@
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
-use std::env;
+use std::io;
 use std::path::PathBuf;
+use std::{env, fs};
 
 use serde_derive::{Deserialize, Serialize};
 
 use crate::args::{Args, ColorMode};
 use crate::templates::colors;
 use crate::{expansion, prelude::*};
+
+/// Configuration file name to look in config directories.
+pub const CONFIG_FILE: &str = "config.json5";
 
 #[derive(Deserialize, Default)]
 pub struct Config {
@@ -173,7 +177,8 @@ impl Config {
             return Cow::Borrowed(&*self.editor);
         }
 
-        unwrap_err_or!(env::var("TRACKK_EDITOR"), editor, { return editor.into() });
+        const ENV_VAR: &str = concat!(env!("CARGO_PKG_NAME"), "_EDITOR");
+        unwrap_err_or!(env::var(ENV_VAR), editor, { return editor.into() });
         unwrap_err_or!(env::var("EDITOR"), editor, { return editor.into() });
 
         "nano".into()
@@ -542,4 +547,31 @@ fn config_doc_is_sane() {
 
     let format = format_config(&config).unwrap();
     json5::from_str::<'_, Config>(format.as_str()).unwrap();
+}
+
+/// Read config from storage directory (if there's any) and merge it with config
+/// from config directory (so the config directory takes precedence).
+///
+/// If TRACKK_CONFIG env variable is defined, use it as the main config.
+pub fn read_config_chain() -> Result<Config> {
+    const ENV_VAR: &str = concat!(env!("CARGO_PKG_NAME"), "_CONFIG");
+
+    let path = &unwrap_ok_or!(env::var(ENV_VAR).map(PathBuf::from), _, {
+        let mut dir = dirs::config_dir().context("Unable to find config directory")?;
+        dir.push(env!("CARGO_PKG_NAME"));
+        dir.push(CONFIG_FILE);
+        dir
+    });
+
+    let mut config: Config = match fs::read_to_string(path) {
+        Ok(data) => json5::from_str(data.as_str())?,
+        Err(e) => match e.kind() {
+            io::ErrorKind::NotFound => Config::default(),
+            _ => bail!("Unable to read config: {}", path.to_string_lossy()),
+        },
+    };
+
+    config.default_values();
+
+    Ok(config)
 }

@@ -33,19 +33,17 @@ mod import {
 }
 
 use std::borrow::Cow;
-use std::path::PathBuf;
-use std::{env, fs, io};
+use std::{env, io};
 
 use args::{Args, Command, ImportMode};
 use clap::{CommandFactory, Parser};
 use clap_complete::{Generator, generate};
-use config::Config;
 use config::IndexType;
 use log::Level;
 use prelude::*;
 
 fn main() -> Result<()> {
-    let mut config = read_config()?;
+    let mut config = config::read_config_chain()?;
     let exp_args = expansion::pre_process_args(&config)?;
 
     let args = Args::parse_from(&exp_args);
@@ -232,31 +230,6 @@ fn main() -> Result<()> {
     }
 
     Ok(())
-}
-
-/// Read config from storage directory (if there's any) and merge it with config
-/// from config directory (so the config directory takes precedence).
-///
-/// If TRACKK_CONFIG env variable is defined, use it as the main config.
-fn read_config() -> Result<Config> {
-    let path = &unwrap_ok_or!(env::var("TRACKK_CONFIG").map(PathBuf::from), _, {
-        let mut dir = dirs::config_dir().context("Unable to find config directory")?;
-        dir.push(env!("CARGO_PKG_NAME"));
-        dir.push("config.json5");
-        dir
-    });
-
-    let mut config: Config = match fs::read_to_string(path) {
-        Ok(data) => json5::from_str(data.as_str())?,
-        Err(e) => match e.kind() {
-            io::ErrorKind::NotFound => Config::default(),
-            _ => bail!("Unable to read config: {}", path.to_string_lossy()),
-        },
-    };
-
-    config.default_values();
-
-    Ok(config)
 }
 
 /// Use Fern to setup colored logging output.
