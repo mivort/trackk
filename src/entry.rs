@@ -117,6 +117,14 @@ impl Entry {
             self.update_end(&app.config);
         }
 
+        let when = if let Some(when) = &args.when {
+            let res = parse_date(when, app, self)
+                .with_context(|| format!("Unable to parse the planned date: '{}'", when))?;
+            Some(res)
+        } else {
+            self.when
+        };
+
         let due = if let Some(due) = &args.due {
             let res = parse_date(due, app, self)
                 .with_context(|| format!("Unable to parse the due date: '{}'", due))?;
@@ -144,6 +152,7 @@ impl Entry {
             self.repeat = if repeat.is_empty() { None } else { Some(repeat.clone()) };
         }
 
+        self.when = when;
         self.due = due;
         self.end = end;
 
@@ -221,7 +230,7 @@ impl Entry {
         if self.desc != other.desc {
             return true;
         }
-        if self.due != other.due {
+        if self.when != other.when || self.due != other.due {
             return true;
         }
         if self.end != other.end {
@@ -249,7 +258,7 @@ impl Entry {
             bail!("Entry title should not be empty");
         }
 
-        if self.end.is_some() && !config.values.active_status.contains(&self.status) {
+        if self.end.is_some() && config.values.active_status.contains(&self.status) {
             bail!("End date should be only set for complete/deleted/inactive entries");
         }
 

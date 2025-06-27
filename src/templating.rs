@@ -82,7 +82,7 @@ impl<'env> Templates<'env> {
         j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
         for (key, value) in &config.colors {
-            let color = colors::config_to_global(&value);
+            let color = colors::config_to_global(value);
             j2.add_global(key, color);
 
             // TODO: P3: add colors to globals with prefix

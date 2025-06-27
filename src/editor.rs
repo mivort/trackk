@@ -105,6 +105,11 @@ fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
 
     let offset = UtcOffset::current_local_offset()?;
 
+    let when = match issue.when {
+        Some(when) => format_date(when, offset)?,
+        None => String::new(),
+    };
+
     let due = match issue.due {
         Some(due) => format_date(due, offset)?,
         None => String::new(),
@@ -133,6 +138,7 @@ fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
             "--------------------------------------------------------------------------------\n",
             "* __status__  : {status}\n",
             "* __tags__    : {tags}\n",
+            "* __when__    : {when}\n",
             "* __due__     : {due}\n",
             "* __end__     : {end}\n",
             "* __repeat__  : {repeat}\n",
@@ -143,6 +149,7 @@ fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
         ),
         title = issue.desc,
         status = issue.status,
+        when = when,
         due = due,
         end = end,
         tags = tags.join(" "),
@@ -187,6 +194,7 @@ fn parse_markdown(issue: &mut Entry, file: &mut File, app: &App) -> Result<()> {
     for (_, [key, val]) in meta_re.captures_iter(meta).map(|c| c.extract()) {
         let key = key.to_lowercase();
 
+        let mut when = issue.when;
         let mut due = issue.due;
         let mut end = issue.end;
 
@@ -197,6 +205,10 @@ fn parse_markdown(issue: &mut Entry, file: &mut File, app: &App) -> Result<()> {
             "tags" => {
                 let tags = val.split_whitespace().filter(|s| !s.is_empty());
                 issue.tags = tags.map(|s| s.to_string()).collect();
+            }
+            "when" => {
+                let val = val.trim();
+                when = if val.is_empty() { None } else { Some(parse_date(val, app, issue)?) };
             }
             "due" => {
                 let val = val.trim();
@@ -214,9 +226,12 @@ fn parse_markdown(issue: &mut Entry, file: &mut File, app: &App) -> Result<()> {
                     issue.repeat = Some(val.to_owned());
                 }
             }
-            _ => {}
+            _ => {
+                // TODO: P2: set custom field value
+            }
         }
 
+        issue.when = when;
         issue.due = due;
         issue.end = end;
     }

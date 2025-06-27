@@ -222,20 +222,29 @@ pub fn show_diff(before: &Entry, after: &Entry, app: &App) {
         info!(" repeat: {before} -> {after}");
     }
 
-    if before.due != after.due {
-        let before = before.due.map(|d| dates::reldate(d, app.ts, Some(1)));
+    if before.when != after.when {
+        let before = before.when.map(|d| dates::reldate(d, app.ts, None));
         let before = before.as_deref().unwrap_or("..");
 
-        let after = after.due.map(|d| dates::reldate(d, app.ts, Some(1)));
+        let after = after.when.map(|d| dates::reldate(d, app.ts, None));
+        let after = after.as_deref().unwrap_or("..");
+
+        info!("   when: {before} -> {after}");
+    }
+    if before.due != after.due {
+        let before = before.due.map(|d| dates::reldate(d, app.ts, None));
+        let before = before.as_deref().unwrap_or("..");
+
+        let after = after.due.map(|d| dates::reldate(d, app.ts, None));
         let after = after.as_deref().unwrap_or("..");
 
         info!("    due: {before} -> {after}");
     }
     if before.end != after.end {
-        let before = before.end.map(|d| dates::reldate(d, app.ts, Some(1)));
+        let before = before.end.map(|d| dates::reldate(d, app.ts, None));
         let before = before.as_deref().unwrap_or("..");
 
-        let after = after.end.map(|d| dates::reldate(d, app.ts, Some(1)));
+        let after = after.end.map(|d| dates::reldate(d, app.ts, None));
         let after = after.as_deref().unwrap_or("..");
 
         info!("    end: {before} -> {after}");
