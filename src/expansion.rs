@@ -159,7 +159,7 @@ macro_rules! cmd_context {
     ($($id:ident: $str:literal;)*) => {
         /// Command context enum values.
         #[derive(Clone, Copy, Deserialize, PartialEq, Eq, Hash)]
-        #[cfg_attr(debug_assertions, derive(Debug))]
+        #[cfg_attr(test, derive(Debug))]
         #[repr(u8)]
         pub enum CmdContext {
             $(

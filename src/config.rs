@@ -14,7 +14,7 @@ use crate::{expansion, prelude::*};
 pub const CONFIG_FILE: &str = "config.json5";
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct Config {
     #[serde(flatten)]
     local: ConfigLocal,
@@ -75,7 +75,7 @@ pub struct Config {
 
 /// Config entries which should not be taken from data storage config.
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ConfigLocal {
     /// Data directory.
     #[serde(default)]
@@ -91,7 +91,7 @@ pub struct ConfigLocal {
 }
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct DefaultsConfig {
     /// Default status to assign upon creation.
     #[serde(default)]
@@ -107,7 +107,7 @@ pub struct DefaultsConfig {
 }
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ValuesConfig {
     /// List of statuses which are considered as 'active'.
     #[serde(default)]
@@ -127,7 +127,7 @@ pub struct ValuesConfig {
 }
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct TemplatesConfig {
     /// Template name for single entry view.
     #[serde(default)]
@@ -143,7 +143,7 @@ pub struct TemplatesConfig {
 }
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct SyncConfig {
     /// Select one of the supported sync drivers.
     pub driver: SyncDriverMode, // TODO: P1: support multiple vcs drivers
@@ -379,14 +379,14 @@ impl TemplatesConfig {
 
 /// Report configuration which contains array of report sections.
 #[derive(Deserialize, Default, Clone)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ReportConfig {
     pub sections: Vec<SectionConfig>,
 }
 
 /// Report section defined by filter and template.
 #[derive(Deserialize, Default, Clone)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct SectionConfig {
     /// Section header template.
     #[serde(default)]
@@ -419,7 +419,7 @@ pub struct SectionConfig {
 
 /// Custom field type.
 #[derive(Hash, PartialEq, Eq, Deserialize)]
-#[cfg_attr(debug_assertions, derive(Debug, Clone))]
+#[cfg_attr(test, derive(Debug, Clone))]
 pub enum FieldType {
     String,
     Number,
@@ -427,7 +427,7 @@ pub enum FieldType {
 }
 
 #[derive(Deserialize, Default, Clone, Copy)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum IndexType {
     #[default]
     #[serde(rename = "active")]
@@ -439,7 +439,7 @@ pub enum IndexType {
 }
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub enum SyncDriverMode {
     #[default]
     #[serde(rename = "git")]
@@ -450,7 +450,7 @@ pub enum SyncDriverMode {
 }
 
 #[derive(Serialize, Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub enum PrefixType {
     #[default]
     #[serde(rename = "data_dir")]
@@ -469,7 +469,7 @@ pub enum PrefixType {
 
 /// Expansion config entry.
 #[derive(Deserialize)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone, Default))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone, Default))]
 pub struct ExpansionConfig {
     /// Regular expression to match on argument.
     pub expr: Box<str>,
@@ -488,14 +488,14 @@ pub struct ExpansionConfig {
 #[derive(Deserialize)]
 #[serde(untagged)]
 #[allow(unused)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub enum ColorConfig {
     Options(ColorOptions),
     Custom(Box<str>),
 }
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ColorOptions {
     pub fg: Option<u8>,
     pub bg: Option<u8>,
@@ -505,7 +505,7 @@ pub struct ColorOptions {
 }
 
 #[derive(Deserialize, Default)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq, Clone))]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub enum ExpansionStyle {
     #[default]
     #[serde(rename = "taskwarrior")]

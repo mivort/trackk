@@ -309,8 +309,8 @@ pub struct InitArgs {
     pub no_sync: bool,
 }
 
-#[derive(ValueEnum, Default, Clone, Copy, Deserialize)]
-#[cfg_attr(debug_assertions, derive(Debug, PartialEq, Eq))]
+#[derive(ValueEnum, Default, Clone, Copy, Deserialize, PartialEq, Eq)]
+#[cfg_attr(test, derive(Debug))]
 pub enum ColorMode {
     #[default]
     Auto,
