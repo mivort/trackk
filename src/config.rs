@@ -581,7 +581,10 @@ pub fn read_config_chain() -> Result<Config> {
 
     let mut data_path = 'data_path: {
         if let Ok(env_path) = std::env::var(ENV_DATA) {
-            break 'data_path PathBuf::from(env_path);
+            let path = PathBuf::from(&env_path);
+            local_config.local.data_path = env_path.into();
+            local_config.local.data_prefix = PrefixType::None;
+            break 'data_path path;
         }
         local_config.data_path()?
     };
