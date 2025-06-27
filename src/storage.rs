@@ -7,7 +7,7 @@ use crate::input;
 use crate::{app::App, display, prelude::*};
 
 use std::fs::{self, File};
-use std::io::{BufWriter, Write};
+use std::io::{BufWriter, ErrorKind, Write};
 use std::path::Path;
 use std::rc::Rc;
 use time::{Date, UtcDateTime};
@@ -156,7 +156,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<str>
         bail!(
             "Path {} doesn't exist. Run '{} init' to initiate task repository.",
             path.to_string_lossy(),
-            env!("CARGO_PKG_NAME")
+            env!("CARGO_BIN_NAME")
         );
     }
 
@@ -220,8 +220,17 @@ fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<s
             continue;
         });
 
-        let bucket = Bucket::from_cache(bucket_path, cache, app)
-            .with_context(|| format!("Unable to open index reference: {bucket_path}. Run 'refresh --force' to rebuild the index."))?;
+        let bucket = Bucket::from_cache(bucket_path, cache, app).with_context(|| {
+            format!(
+                concat!(
+                    "Unable to open index reference: {}. ",
+                    "Run '",
+                    env!("CARGO_BIN_NAME"),
+                    " refresh --force' to rebuild the index."
+                ),
+                bucket_path
+            )
+        })?;
 
         let issue = bucket.find_by_id(id);
         if let Some(issue) = issue {
@@ -245,7 +254,10 @@ fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<s
 
             result.push((issue_owned, Rc::from(bucket_path)));
         } else {
-            warn!("Index ID is missing: {id}. Run 'refresh --force' to rebuild the index.");
+            warn!(
+                "Index ID is missing: {id}. Run '{} refresh --force' to rebuild the index.",
+                env!("CARGO_BIN_NAME")
+            );
         }
     }
 
@@ -261,7 +273,18 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
     let mut changes = false;
 
     for entry in WalkDir::new(&path).min_depth(2) {
-        let entry = entry?;
+        let entry = unwrap_ok_or!(entry, err, {
+            match err.io_error() {
+                Some(ioerr) if ioerr.kind() == ErrorKind::NotFound => {
+                    return Err(anyhow!(err).context(concat!(
+                        "Entry directory not found. You may need to run '",
+                        env!("CARGO_BIN_NAME"),
+                        " init'."
+                    )));
+                }
+                _ => return Err(anyhow!(err).context("Unable to refresh the index")),
+            }
+        });
 
         if entry.file_type().is_dir() {
             continue;
