@@ -92,13 +92,12 @@ impl Entry {
         Ok(new)
     }
 
-    /// Apply list of description arguments, merging them into a single line
-    /// if list is not empty.
-    pub fn apply_description(&mut self, description: &[Box<str>]) {
-        if description.is_empty() {
-            return;
-        }
-        self.desc = description.join(" ");
+    /// Convert entry into a copy with new UUID.
+    pub fn copy(&mut self, app: &App) {
+        let new_uuid = Uuid::new_v4().to_string();
+
+        self.id = new_uuid.into();
+        self.created = app.ts;
     }
 
     /// Take values from provided arguments and apply to the issue. Also,

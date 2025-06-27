@@ -194,6 +194,10 @@ pub struct AddArgs {
     #[arg(long)]
     pub edit: bool,
 
+    /// Copy task from the filter.
+    #[arg(long)]
+    pub copy: bool,
+
     #[command(flatten)]
     pub entry: EntryArgs,
 }

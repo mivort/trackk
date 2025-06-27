@@ -110,8 +110,29 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Add(a)) => {
-            let mut issue = entry::Entry::new(&a.entry, &app)?;
-            issue.apply_description(&a.entry.description);
+            let mut issue = if a.copy {
+                let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
+                let filters = filter::Filter {
+                    ids: &ids,
+                    query: &mut Default::default(),
+                };
+                let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
+                let entries = if entries.len() > ids.index.len() {
+                    // TODO: P3: check for partial uuid matches
+                    input::pick_prompt("Show", entries, &app)?
+                } else {
+                    entries
+                };
+
+                let (mut entry, _) = entries
+                    .into_iter()
+                    .next()
+                    .context("Entry to copy from is not selected")?;
+                entry.copy(&app);
+                entry
+            } else {
+                entry::Entry::new(&a.entry, &app)?
+            };
 
             if a.edit || app.config.editor_on_add.unwrap_or_default() {
                 let status = editor::edit_entry(&mut issue, &app)?;

@@ -44,13 +44,13 @@ impl SyncDriver for Git {
             )
         })?;
 
-        let mut ignorepath = PathBuf::from(&path);
-        ignorepath.push(".gitignore");
-        append_line(&ignorepath, ACTIVE_INDEX)?;
+        let mut ignore_path = PathBuf::from(&path);
+        ignore_path.push(".gitignore");
+        append_line(&ignore_path, ACTIVE_INDEX)?;
 
-        let mut attrpath = PathBuf::from(entries_path);
-        attrpath.push(".gitattributes");
-        append_line(&attrpath, GIT_ATTR)?;
+        let mut attr_path = entries_path;
+        attr_path.push(".gitattributes");
+        append_line(&attr_path, GIT_ATTR)?;
 
         git_config_setup(&path, args)
     }
