@@ -114,7 +114,7 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
         rg("^start$")?,
         vec!["mod".into(), "--status=started".into()],
     ));
-    idx[root].push((rg("^stop$")?, vec!["mod".into(), "--status=pending".into()]));
+    idx[root].push((rg("^(stop|reset|undelete)$")?, vec!["mod".into(), "--status=pending".into()]));
     idx[root].push((
         rg("^(rm|delete)$")?,
         vec!["mod".into(), "--status=deleted".into()],
