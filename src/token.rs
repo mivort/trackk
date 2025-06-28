@@ -51,6 +51,7 @@ pub enum Token {
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}", parse_date_time_sec)]
     #[regex(r"(?i)now", |lex| lex.extras.unix_timestamp())]
+    #[regex(r"(?i)epoch", |_| 0)]
     #[regex(r"(?i)someday", |_| SOMEDAY)]
     #[regex(r"(?i)(sod|today)", |lex| lex.extras.replace_time(Time::MIDNIGHT).unix_timestamp())]
     #[regex(r"(?i)tomorrow", |lex| relative_sod(lex, 1))]
