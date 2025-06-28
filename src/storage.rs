@@ -301,6 +301,10 @@ pub fn refresh_index(app: &App, force: bool) -> Result<()> {
         }
     }
 
+    if force {
+        index.sort();
+    }
+
     index.write()?;
     trace!("Active entry index rewritten");
 

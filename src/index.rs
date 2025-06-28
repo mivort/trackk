@@ -85,6 +85,12 @@ impl Index {
         }
     }
 
+    /// Sort index alphabetically. Note that it may change shorthand IDs.
+    #[inline]
+    pub fn sort(&mut self) {
+        self.active.sort();
+    }
+
     /// Write index back to storage.
     pub fn write(&self) -> Result<()> {
         let file = File::create(&self.path)?;
