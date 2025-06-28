@@ -60,21 +60,21 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
 
     // TODO: P1: use cache to reduce amount of re-parsing/writes?
 
-    for (issue, path) in &entries {
+    for (entry, path) in &entries {
         let mut bucket = Bucket::from_path(&**path, app)?;
-        let bucket_issue = bucket.find_by_id_mut(&issue.id).unwrap();
-        bucket_issue.apply_args(args, app)?;
-        bucket_issue.validate(&app.config)?;
+        let bucket_entry = bucket.find_by_id_mut(&entry.id).unwrap();
+        bucket_entry.apply_args(args, app)?;
+        bucket_entry.validate(&app.config)?;
 
-        if !issue.differs(bucket_issue) {
+        if !entry.differs(bucket_entry) {
             continue;
         }
 
-        display::show_diff(issue, bucket_issue, app);
+        display::show_diff(entry, bucket_entry, app);
 
-        if issue.status != bucket_issue.status {
-            bucket_issue.update_end(&app.config);
-            index.update_status(&app.config, path, bucket_issue);
+        if entry.status != bucket_entry.status {
+            bucket_entry.update_end(&app.config);
+            index.update_status(&app.config, path, bucket_entry);
         }
 
         write_bucket(&bucket, &**path, app)?;

@@ -62,28 +62,28 @@ pub fn edit_entries<'a>(ids: &IdFilter, app: &'a App<'a>) -> Result<()> {
     };
 
     let mut changes = 0;
-    for (mut issue, path) in entries {
-        if !edit_entry(&mut issue, app)?.success() {
+    for (mut entry, path) in entries {
+        if !edit_entry(&mut entry, app)?.success() {
             break;
         }
 
-        issue.validate(&app.config)?;
+        entry.validate(&app.config)?;
 
         let mut bucket = Bucket::from_path(&*path, app)?;
-        let prev_issue = bucket.find_by_id_mut(&issue.id).unwrap();
+        let prev_entry = bucket.find_by_id_mut(&entry.id).unwrap();
 
-        if !prev_issue.differs(&issue) {
+        if !prev_entry.differs(&entry) {
             continue;
         }
 
-        display::show_diff(prev_issue, &issue, app);
+        display::show_diff(prev_entry, &entry, app);
 
-        if prev_issue.status != issue.status {
-            issue.update_end(&app.config);
-            index.update_status(&app.config, &path, &issue);
+        if prev_entry.status != entry.status {
+            entry.update_end(&app.config);
+            index.update_status(&app.config, &path, &entry);
         }
 
-        *prev_issue = issue;
+        *prev_entry = entry;
 
         storage::write_bucket(&bucket, &*path, app)?;
         changes += 1;
