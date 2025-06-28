@@ -13,8 +13,8 @@ pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
     let index = rule_index(config)?;
     output.push(args.next().unwrap());
 
-    'arg: for arg in args {
-        if let Some(new_context) = match_context(&arg) {
+    'next_arg: for arg in args {
+        if let (CmdContext::Root, Some(new_context)) = (context, match_context(&arg)) {
             context = new_context;
             output.push(arg);
             continue;
@@ -22,12 +22,16 @@ pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
 
         let rules = &index[context as usize];
 
-        for (regex, replace) in rules {
-            let captures = unwrap_some_or!(regex.captures(&arg), { continue });
+        'next_rule: for (regex, replace) in rules {
+            let captures = unwrap_some_or!(regex.captures(&arg), { continue 'next_rule });
 
             let before = output.len();
             for rep in replace {
                 output.push(apply_captures(rep, &captures));
+            }
+
+            if context != CmdContext::Root {
+                continue 'next_arg;
             }
 
             for new in &output[before..output.len()] {
@@ -36,7 +40,7 @@ pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
                 }
             }
 
-            continue 'arg;
+            continue 'next_arg;
         }
         output.push(arg);
     }
