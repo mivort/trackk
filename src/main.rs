@@ -49,7 +49,7 @@ fn main() -> Result<()> {
     let args = Args::parse_from(&exp_args);
     config.override_from_args(&args);
 
-    setup_logging(config.no_color(), args.verbose)?;
+    setup_logging(config.no_color(), &args)?;
     trace!("Command expanded to: {:?}", exp_args);
 
     let mut app = app::App::new(config);
@@ -255,8 +255,12 @@ fn main() -> Result<()> {
 }
 
 /// Use Fern to setup colored logging output.
-fn setup_logging(no_color: bool, verbose: bool) -> Result<(), log::SetLoggerError> {
+fn setup_logging(no_color: bool, args: &Args) -> Result<(), log::SetLoggerError> {
     use log::LevelFilter::*;
+
+    if args.quiet {
+        return Ok(());
+    }
 
     fern::Dispatch::new()
         .format(move |out, message, record| {
@@ -276,7 +280,7 @@ fn setup_logging(no_color: bool, verbose: bool) -> Result<(), log::SetLoggerErro
                 out.finish(format_args!("{color}●{reset} {message}",))
             }
         })
-        .level(if verbose { Trace } else { Info })
+        .level(if args.verbose { Trace } else { Info })
         .chain(std::io::stdout())
         .apply()
 }

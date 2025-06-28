@@ -28,6 +28,10 @@ pub struct Args {
     #[arg(long, short, global = true)]
     pub verbose: bool,
 
+    /// Disable all logging messages.
+    #[arg(long, short, global = true)]
+    pub quiet: bool,
+
     /// Set color mode.
     #[arg(long, global = true, default_value_t = ColorMode::Auto)]
     pub color: ColorMode,
