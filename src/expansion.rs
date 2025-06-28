@@ -100,6 +100,10 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
     let rg = Regex::new;
 
     let root = CmdContext::Root as usize;
+    let list = CmdContext::List as usize;
+    let add = CmdContext::Add as usize;
+    let r#mod = CmdContext::Mod as usize;
+
     idx[root].push((
         rg("^log$")?,
         vec!["add".into(), "--status=completed".into()],
@@ -129,29 +133,33 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
         vec!["mod".into(), "--status=deleted".into()],
     ));
 
-    idx[root].push((rg(r"^([0-9]+)$")?, vec!["--id=$1".into()]));
-    idx[root].push((rg(r"^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
+    let mut filter_rules = |ctx: usize| -> Result<_, regex::Error> {
+        idx[ctx].push((rg(r"^([0-9]+)$")?, vec!["--id=$1".into()]));
+        idx[ctx].push((rg(r"^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
 
-    idx[root].push((rg(r"^\+(.+)")?, vec!["--filter".into(), "tag:$1".into()]));
-    idx[root].push((
-        rg(r"^-([^-].+)")?,
-        vec!["--filter".into(), "!tag:$1".into()],
-    ));
+        idx[ctx].push((rg(r"^\+(.+)")?, vec!["--filter".into(), "tag:$1".into()]));
+        idx[ctx].push((
+            rg(r"^-([^-].+)")?,
+            vec!["--filter".into(), "!tag:$1".into()],
+        ));
+        Ok(())
+    };
 
-    let add = CmdContext::Add as usize;
-    idx[add].push((rg(r"^\+(.+)")?, vec!["--tag".into(), "$1".into()]));
-    idx[add].push((
-        rg(r"^(due|when|end|repeat|status):(.*)")?,
-        vec!["--$1=$2".into()],
-    ));
+    filter_rules(root)?;
+    filter_rules(list)?;
 
-    let r#mod = CmdContext::Mod as usize;
-    idx[r#mod].push((rg(r"^\+(.+)")?, vec!["--tag".into(), "$1".into()]));
-    idx[r#mod].push((rg(r"^-([^-].+)")?, vec!["--tag".into(), "-$1".into()]));
-    idx[r#mod].push((
-        rg(r"^(due|when|end|repeat|status):(.*)")?,
-        vec!["--$1=$2".into()],
-    ));
+    let mut mod_rules = |ctx: usize| -> Result<_, regex::Error> {
+        idx[ctx].push((rg(r"^-([^-].+)")?, vec!["--tag".into(), "-$1".into()]));
+        idx[ctx].push((rg(r"^\+(.+)")?, vec!["--tag".into(), "$1".into()]));
+        idx[ctx].push((
+            rg(r"^(due|when|end|repeat|status):(.*)")?,
+            vec!["--$1=$2".into()],
+        ));
+        Ok(())
+    };
+
+    mod_rules(add)?;
+    mod_rules(r#mod)?;
 
     Ok(())
 }

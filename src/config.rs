@@ -484,7 +484,7 @@ pub struct ExpansionConfig {
     /// Command context to use the expansion in.
     /// If not specified, it will be used in root context.
     #[serde(default)]
-    pub context: expansion::CmdContext,
+    pub context: expansion::CmdContext, // TODO: P2: allow to apply rule to multiple contexts
 }
 
 #[derive(Deserialize)]
