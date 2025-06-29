@@ -59,10 +59,10 @@
     {{ fg(lightblue) }} >>
   {%- endif -%}
   {%- if entry.repeat -%}
-    {{ fg(cyan) }} /r
+    {{ fg(cyan) }} &
   {%- endif -%}
   {%- if cols > 64 and entry.desc | hasnote -%}
-    {{ fg(cyan) }} /n
+    {{ fg(cyan) }} #
   {%- endif -%}
 {%- endset -%}
 {%- set statusw = status | width -%}
