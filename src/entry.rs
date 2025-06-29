@@ -7,6 +7,7 @@ use uuid::Uuid;
 use crate::args::EntryArgs;
 use crate::config::Config;
 use crate::dateexp::{eval, parse_date};
+use crate::templates::dates;
 use crate::token::Token;
 use crate::{app::App, prelude::*};
 
@@ -231,6 +232,45 @@ impl Entry {
         let mut new = self.clone();
         new.sid = Some(short);
         new
+    }
+
+    /// Check if entry status change should cause a repetition.
+    /// If so, produce new entry with applied date shift.
+    pub fn check_repeat(&self, app: &App) -> Result<Option<Self>> {
+        let repeat = unwrap_some_or!(&self.repeat, { return Ok(None) });
+        if repeat.is_empty() {
+            return Ok(None);
+        }
+
+        let config = &app.config.values;
+        if !config.repeat_status().iter().any(|s| **s == *self.status) {
+            return Ok(None);
+        }
+
+        let date = parse_date(&repeat, app, self)
+            .with_context(|| format!("Unable to parse repeat date: '{}'", repeat))?;
+        let date = unwrap_some_or!(date, { return Ok(None) });
+
+        let mut new_entry = self.clone();
+        new_entry.copy(app);
+        new_entry.status = app.config.defaults.status_initial().to_owned();
+        new_entry.end = None;
+
+        info!(
+            "Task is set to repeat in {}",
+            dates::longreldate(date, app.ts, None)
+        );
+
+        if let Some(due) = new_entry.due {
+            new_entry.due = Some(date);
+            if let Some(when) = new_entry.when {
+                new_entry.when = Some(date + when - due);
+            }
+        } else if new_entry.when.is_some() {
+            new_entry.when = Some(date);
+        }
+
+        Ok(Some(new_entry))
     }
 
     /// Determine if modified entry has any differences.

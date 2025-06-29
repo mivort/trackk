@@ -57,6 +57,7 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
     };
 
     let mut index = app.index_mut()?;
+    let mut repeats = Vec::new();
 
     // TODO: P1: use cache to reduce amount of re-parsing/writes?
 
@@ -69,6 +70,7 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
             break;
         }
 
+        // TODO: P2: allow to re-run editor in case if validation fails
         bucket_entry.validate(&app.config)?;
 
         if !entry.differs(bucket_entry) {
@@ -80,7 +82,11 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         if entry.status != bucket_entry.status {
             bucket_entry.update_end(&app.config);
             index.update_status(&app.config, path, bucket_entry);
-        }
+
+            if let Some(repeat) = bucket_entry.check_repeat(app)? {
+                repeats.push(repeat);
+            }
+        };
 
         write_bucket(&bucket, &**path, app)?;
         changes += 1;
@@ -91,6 +97,11 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         info!("Updated {changes} entry(es)");
     } else {
         info!("No changes");
+    }
+
+    drop(index);
+    for repeat in repeats {
+        add_entry(repeat, app)?;
     }
 
     Ok(())

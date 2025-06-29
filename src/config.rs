@@ -113,6 +113,10 @@ pub struct ValuesConfig {
     #[serde(default)]
     pub active_status: HashSet<String>,
 
+    /// When task is marked this status, check if it should be repeated.
+    #[serde(default)]
+    pub repeat_status: Vec<Box<str>>,
+
     /// Only allow to assign tags from this list. Allow any tag if empty.
     #[serde(default)]
     pub _permit_tags: HashSet<String>, // TODO: P1: support list of permitted tags
@@ -356,6 +360,15 @@ impl ValuesConfig {
             );
         }
         &self.urgency_formula
+    }
+
+    /// Produce list of statuses which will trigger the repeat property to produce a copy.
+    pub fn repeat_status(&self) -> Cow<Vec<Box<str>>> {
+        if self.repeat_status.is_empty() {
+            Cow::Owned(vec!["completed".into()])
+        } else {
+            Cow::Borrowed(&self.repeat_status)
+        }
     }
 }
 

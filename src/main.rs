@@ -109,7 +109,7 @@ fn main() -> Result<()> {
             }
         }
 
-        Some(Command::Add(mut a)) => {
+        Some(Command::Add(a)) => {
             let mut entry = if a.copy {
                 let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
                 let filters = filter::Filter {
@@ -129,19 +129,18 @@ fn main() -> Result<()> {
                     .next()
                     .context("Entry to copy from is not selected")?;
                 entry.copy(&app);
-                entry.apply_args(&a.entry, &app)?;
                 entry
             } else {
                 entry::Entry::new(&a.entry, &app)?
             };
 
-            if app.config.editor_on_add.unwrap_or_default() {
-                a.entry.edit = true;
-            }
+            entry.apply_args(&a.entry, &app)?;
 
-            let status = editor::edit_entry(&mut entry, &app)?;
-            if !status.success() {
-                return Ok(());
+            if a.entry.edit || app.config.editor_on_add.unwrap_or_default() {
+                let status = editor::edit_entry(&mut entry, &app)?;
+                if !status.success() {
+                    return Ok(());
+                }
             }
 
             entry.validate(&app.config)?;
