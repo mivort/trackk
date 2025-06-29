@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::rc::Rc;
 
 use serde_derive::Serialize;
@@ -12,13 +11,6 @@ use crate::{app::App, prelude::*, sort, storage};
 
 #[derive(Serialize)]
 pub struct RowContext<'a> {
-    /// Shorthand entry reference.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sid: Option<usize>,
-
-    /// Calculated entry urgency.
-    pub urgency: f64,
-
     /// Flag if current row is odd or even.
     pub lineno: usize,
 
@@ -28,11 +20,25 @@ pub struct RowContext<'a> {
     /// Limit number of shown entries.
     pub limit: usize,
 
-    /// Reference to the issue data.
-    pub entry: Cow<'a, Entry>,
+    /// Entry reference.
+    pub entry: &'a EntryContext<'a>,
+}
+
+#[derive(Serialize)]
+pub struct EntryContext<'a> {
+    /// Shorthand entry reference.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sid: Option<usize>,
+
+    /// Calculated entry urgency.
+    pub urgency: f64,
 
     /// Path to storage file which contains the entry.
-    pub path: Cow<'a, str>,
+    pub path: &'a str,
+
+    /// Reference to the issue data.
+    #[serde(flatten)]
+    pub entry: &'a Entry,
 }
 
 #[derive(Serialize)]
@@ -133,10 +139,12 @@ fn show_section(
     let template = j2.get_template(&section.template)?;
     for (lineno, (entry, path)) in entries[(count - limit)..].iter().enumerate() {
         let context = RowContext {
-            sid: entry.sid,
-            urgency: entry.urgency,
-            entry: Cow::Borrowed(entry),
-            path: Cow::Borrowed(path),
+            entry: &EntryContext {
+                sid: entry.sid,
+                urgency: entry.urgency,
+                entry: &entry,
+                path: &path,
+            },
             lineno,
             count,
             limit,
@@ -162,10 +170,12 @@ pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Res
     let out = std::io::stdout();
 
     let context = RowContext {
-        sid: entry.sid,
-        urgency: entry.urgency,
-        entry: Cow::Borrowed(entry),
-        path: Cow::Borrowed(path),
+        entry: &EntryContext {
+            sid: entry.sid,
+            urgency: entry.urgency,
+            entry: &entry,
+            path: &path,
+        },
         lineno: 0,
         count: 1,
         limit: 1,
@@ -192,10 +202,12 @@ pub fn show_format_override<'a>(fmt: &str, ids: &IdFilter, app: &'a App<'a>) -> 
         let out = templates.j2.render_str(
             fmt,
             RowContext {
-                sid: entry.sid,
-                urgency: entry.urgency,
-                entry: Cow::Borrowed(entry),
-                path: Cow::Borrowed(path),
+                entry: &EntryContext {
+                    sid: entry.sid,
+                    urgency: entry.urgency,
+                    entry: &entry,
+                    path: &path,
+                },
                 count: entries.len(),
                 limit: entries.len(),
                 lineno,

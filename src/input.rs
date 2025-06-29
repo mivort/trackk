@@ -1,9 +1,8 @@
-use std::borrow::Cow;
 use std::io::{Write, stdin, stdout};
 use std::rc::Rc;
 
 use crate::app::App;
-use crate::display::RowContext;
+use crate::display::{EntryContext, RowContext};
 use crate::entry::Entry;
 use crate::{prelude::*, sort};
 
@@ -57,10 +56,12 @@ pub fn pick_prompt<'a>(
 
     for (lineno, (entry, path)) in subset.iter().enumerate() {
         let context = RowContext {
-            sid: Some(limit - lineno),
-            urgency: entry.urgency,
-            entry: Cow::Borrowed(entry),
-            path: Cow::Borrowed(path),
+            entry: &EntryContext {
+                sid: Some(limit - lineno),
+                urgency: entry.urgency,
+                entry: &entry,
+                path: &path,
+            },
             lineno,
             count,
             limit,

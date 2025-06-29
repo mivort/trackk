@@ -44,11 +44,11 @@
 
 {{ fg(lightblue) }} created:  {{ reset }}{{ entry_date(entry.created) }}
 {{ fg(lightblue) }} modified: {{ reset }}{{ entry_date(entry.modified) }}
-{{ fg(lightblue) }} urgency:  {{ reset }}{{ urgency | numfmt('{:.3}') }}
+{{ fg(lightblue) }} urgency:  {{ reset }}{{ entry.urgency | numfmt('{:.3}') }}
 
-{% if sid -%}
-  {{ fg(lightblue) }} sid:      {{ reset }}{{ sid }}
+{% if entry.sid -%}
+  {{ fg(lightblue) }} sid:      {{ reset }}{{ entry.sid }}
 {% endif -%}
 {{ fg(lightblue) }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 11, '…') }}
-{{ fg(lightblue) }} path:     {{ reset }}{{ path }}
+{{ fg(lightblue) }} path:     {{ reset }}{{ entry.path }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}

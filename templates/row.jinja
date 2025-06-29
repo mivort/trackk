@@ -46,7 +46,7 @@
 
   {#- Urgency -#}
   {%- if cols > 48 and not entry.end -%}
-    / {{ fg(green) }}{{ urgency | numfmt('{:.1}') }}{{ reset }} {# -#}
+    / {{ fg(green) }}{{ entry.urgency | numfmt('{:.1}') }}{{ reset }} {# -#}
   {%- endif -%}
 {%- endset -%}
 {%- set metaw = meta | width -%}
@@ -88,8 +88,8 @@
   If no shorthand is available, trimmed version of UUID is shown.
 -#}
 {%- set number -%}
-  {%- if sid -%}
-    {{ sid | numfmt('{:3}. ') }}
+  {%- if entry.sid -%}
+    {{ entry.sid | numfmt('{:3}. ') }}
   {%- else -%}
     {{ entry.id[0:4] }} {# -#}
   {%- endif -%}
@@ -104,7 +104,7 @@
     {{ fg(lightblack) }}
   {%- elif entry.status == 'completed' -%}
     {{ fg(lightgreen) }}
-  {%- elif sid -%}
+  {%- elif entry.sid -%}
     {{ fg(lightblue) }}
   {%- else -%}
     {{ fg(blue) }}
