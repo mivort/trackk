@@ -146,6 +146,9 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
             rg(r"^-([^-].+)")?,
             vec!["--filter".into(), "!tag:$1".into()],
         ));
+
+        idx[ctx].push((rg(r"^=(.*)")?, vec!["--filter=$1".into()]));
+
         Ok(())
     };
 
