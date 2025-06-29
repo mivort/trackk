@@ -7,7 +7,7 @@
   Limit amount of visible tags based on terminal width.
   Defines a breakpoint which compacts the tag display.
 -#}
-{%- set taglimit = 2 if cols > 56 else 1 -%}
+{%- set taglimit = 2 if cols > 64 else 1 -%}
 
 {#-
   Entry details section.
@@ -58,8 +58,11 @@
   {%- elif entry.status == 'started' -%}
     {{ fg(lightblue) }} >>
   {%- endif -%}
-  {%- if entry.desc | hasnote -%}
-    {{ fg(cyan) }} *
+  {%- if entry.repeat -%}
+    {{ fg(cyan) }} /r
+  {%- endif -%}
+  {%- if cols > 64 and entry.desc | hasnote -%}
+    {{ fg(cyan) }} /n
   {%- endif -%}
 {%- endset -%}
 {%- set statusw = status | width -%}
