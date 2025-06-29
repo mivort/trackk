@@ -136,11 +136,9 @@ impl SyncDriver for Git {
         if memmem::find(&output, b"[ahead ").is_some() {
             return Ok(false);
         }
-        if output.iter().filter(|c| **c == '\n' as u8).nth(1).is_some() {
-            return Ok(false);
-        }
 
-        Ok(true)
+        let new_lines = output.iter().filter(|c| **c == b'\n' as u8).nth(1);
+        return Ok(new_lines.is_none());
     }
 }
 

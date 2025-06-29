@@ -153,8 +153,8 @@ fn show_section(
             entry: &EntryContext {
                 sid: entry.sid,
                 urgency: entry.urgency,
-                entry: &entry,
-                path: &path,
+                entry,
+                path,
             },
             lineno,
             count,
@@ -184,8 +184,8 @@ pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Res
         entry: &EntryContext {
             sid: entry.sid,
             urgency: entry.urgency,
-            entry: &entry,
-            path: &path,
+            entry,
+            path,
         },
         lineno: 0,
         count: 1,
@@ -216,8 +216,8 @@ pub fn show_format_override<'a>(fmt: &str, ids: &IdFilter, app: &'a App<'a>) -> 
                 entry: &EntryContext {
                     sid: entry.sid,
                     urgency: entry.urgency,
-                    entry: &entry,
-                    path: &path,
+                    entry,
+                    path,
                 },
                 count: entries.len(),
                 limit: entries.len(),

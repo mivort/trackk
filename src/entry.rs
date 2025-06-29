@@ -247,7 +247,7 @@ impl Entry {
             return Ok(None);
         }
 
-        let date = parse_date(&repeat, app, self)
+        let date = parse_date(repeat, app, self)
             .with_context(|| format!("Unable to parse repeat date: '{}'", repeat))?;
         let date = unwrap_some_or!(date, { return Ok(None) });
 

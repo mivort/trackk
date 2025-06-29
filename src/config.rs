@@ -363,7 +363,7 @@ impl ValuesConfig {
     }
 
     /// Produce list of statuses which will trigger the repeat property to produce a copy.
-    pub fn repeat_status(&self) -> Cow<Vec<Box<str>>> {
+    pub fn repeat_status(&self) -> Cow<[Box<str>]> {
         if self.repeat_status.is_empty() {
             Cow::Owned(vec!["completed".into()])
         } else {

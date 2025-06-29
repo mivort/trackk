@@ -59,8 +59,8 @@ pub fn pick_prompt<'a>(
             entry: &EntryContext {
                 sid: Some(limit - lineno),
                 urgency: entry.urgency,
-                entry: &entry,
-                path: &path,
+                entry,
+                path,
             },
             lineno,
             count,
