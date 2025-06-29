@@ -28,11 +28,6 @@
   {{ reset }}
 {%- endset -%}
 
-{#- Line break -#}
-{%- set break -%}
-  {% if cols < 44 %}{{ "\n " }}{% endif %}
-{%- endset -%}
-
 {#- Max width -#}
 {%- set maxw = min(cols, 96) -%}
 
@@ -54,6 +49,6 @@
 {% if sid -%}
   {{ fg(lightblue) }} sid:      {{ reset }}{{ sid }}
 {% endif -%}
-{{ fg(lightblue) }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 1, '…') }}
+{{ fg(lightblue) }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 11, '…') }}
 {{ fg(lightblue) }} path:     {{ reset }}{{ path }}
 {{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
