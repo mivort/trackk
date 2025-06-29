@@ -143,7 +143,7 @@ pub struct TemplatesConfig {
 
     /// Template used to display entry changes.
     #[serde(default)]
-    _diff: Box<str>,
+    diff: Box<str>,
 }
 
 #[derive(Deserialize, Default)]
@@ -194,15 +194,6 @@ impl Config {
         unwrap_err_or!(env::var("EDITOR"), editor, { return editor.into() });
 
         "nano".into()
-    }
-
-    /// Single issue view template.
-    pub fn issue_view(&self) -> &str {
-        if !self.templates.entry.is_empty() {
-            return &self.templates.entry;
-        }
-
-        "issue"
     }
 
     /// Check if output should be colorized.
@@ -390,6 +381,11 @@ impl TemplatesConfig {
     pub fn picker(&self) -> &str {
         if self.picker.is_empty() { "picker" } else { &self.picker }
     }
+
+    /// Single entry template with default value.
+    pub fn entry(&self) -> &str {
+        if self.entry.is_empty() { "issue" } else { &self.entry }
+    }
 }
 
 /// Report configuration which contains array of report sections.
@@ -554,7 +550,7 @@ fn format_config(config: &Config) -> Result<String> {
         urgency_formula = config.values.urgency_formula(),
         status_initial = config.defaults.status_initial(),
         picker = config.templates.picker(),
-        entry = config.issue_view(),
+        entry = config.templates.entry(),
     ))
 }
 
@@ -655,12 +651,37 @@ fn merge_config(target: &mut Config, source: Config) {
         target.append(&mut source);
     }
 
+    /// Merge two hash maps.
+    fn merge_maps<K, V>(target: &mut HashMap<K, V>, source: HashMap<K, V>)
+    where
+        K: Eq + std::hash::Hash,
+    {
+        if target.is_empty() {
+            *target = source;
+            return;
+        }
+        for (key, value) in source {
+            target.entry(key).or_insert(value);
+        }
+    }
+
     merge_option(&mut target.editor, source.editor);
     merge_option(&mut target.editor_on_add, source.editor_on_add);
     merge_option(&mut target.macros_style, source.macros_style);
     merge_non_default(&mut target.color_mode, source.color_mode);
 
     merge_vecs(&mut target.macros, source.macros);
+    merge_maps(&mut target.date_formats, source.date_formats);
+    merge_maps(&mut target.reports, source.reports);
+
+    merge_non_default(
+        &mut target.values.urgency_formula,
+        source.values.urgency_formula,
+    );
+
+    merge_non_default(&mut target.templates.entry, source.templates.entry);
+    merge_non_default(&mut target.templates.picker, source.templates.picker);
+    merge_non_default(&mut target.templates.diff, source.templates.diff);
 }
 
 /// Ensure all fields which require merging are merged.
@@ -680,7 +701,11 @@ fn ensure_all_merged() {
         macros: vec![ExpansionConfig::default()],
         reports: Default::default(),
         sync: Default::default(),
-        templates: Default::default(),
+        templates: TemplatesConfig {
+            entry: "test".into(),
+            picker: "test".into(),
+            diff: "test".into(),
+        },
         values: Default::default(),
     };
 

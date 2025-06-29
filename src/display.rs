@@ -173,7 +173,7 @@ pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Res
     let mut templates = app.templates.borrow_mut();
     templates.init(app.ts, &app.config)?;
 
-    let template_id = app.config.issue_view();
+    let template_id = app.config.templates.entry();
     templates.load_template(template_id)?;
 
     let j2 = &mut templates.j2;
