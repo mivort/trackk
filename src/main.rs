@@ -135,7 +135,7 @@ fn main() -> Result<()> {
                 entry::Entry::new(&a.entry, &app)?
             };
 
-            if a.edit || app.config.editor_on_add.unwrap_or_default() {
+            if a.entry.edit || app.config.editor_on_add.unwrap_or_default() {
                 let status = editor::edit_entry(&mut issue, &app)?;
                 if !status.success() {
                     return Ok(());
@@ -156,7 +156,7 @@ fn main() -> Result<()> {
 
         Some(Command::Mod(e)) => {
             let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
-            if e.edit {
+            if e.entry.edit {
                 // TODO: P3: apply mod args
                 editor::edit_entries(&ids, &app)?;
             } else {

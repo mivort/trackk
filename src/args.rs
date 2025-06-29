@@ -155,6 +155,10 @@ pub struct FilterArgs {
 /// Args to apply changes to the selected entries.
 #[derive(Parser, Default)]
 pub struct EntryArgs {
+    /// Run editor to apply changes to the entry.
+    #[arg(long)]
+    pub edit: bool,
+
     /// Entry title message and description.
     pub description: Vec<Box<str>>,
 
@@ -194,10 +198,6 @@ pub struct EntryArgs {
 /// Args specific for entry creation.
 #[derive(Parser, Default)]
 pub struct AddArgs {
-    /// Open editor when entry is created.
-    #[arg(long)]
-    pub edit: bool,
-
     /// Copy task from the filter.
     #[arg(long)]
     pub copy: bool,
@@ -255,10 +255,6 @@ pub struct CalcArgs {
 pub struct ModArgs {
     #[command(flatten)]
     pub entry: EntryArgs,
-
-    /// Use editor to apply changes to the entry.
-    #[arg(long)]
-    pub edit: bool,
 }
 
 #[derive(Subcommand)]
