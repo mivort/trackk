@@ -65,12 +65,12 @@ pub struct Config {
 
     /// Built-in expansion style.
     #[serde(default)]
-    pub expansion_style: Option<ExpansionStyle>,
+    pub macros_style: Option<ExpansionStyle>,
 
     /// Aliases which provide regex-based input argument expansion rules.
     #[serde(default)]
     #[allow(unused)]
-    pub expansions: Vec<ExpansionConfig>,
+    pub macros: Vec<ExpansionConfig>,
 }
 
 /// Config entries which should not be taken from data storage config.
@@ -592,7 +592,7 @@ pub fn read_config_chain() -> Result<Config> {
         dir
     });
 
-    let mut local_config = read_config(&path)?;
+    let mut local_config = read_config(&path).context("Unable to parse main config")?;
 
     let mut data_path = 'data_path: {
         if let Ok(env_path) = std::env::var(ENV_DATA) {
@@ -608,7 +608,7 @@ pub fn read_config_chain() -> Result<Config> {
         return Ok(local_config.default_values());
     }
 
-    let data_config = read_config(&path)?;
+    let data_config = read_config(&path).context("Unable to parse data directory config")?;
     merge_config(&mut local_config, data_config);
 
     Ok(local_config.default_values())
@@ -657,10 +657,10 @@ fn merge_config(target: &mut Config, source: Config) {
 
     merge_option(&mut target.editor, source.editor);
     merge_option(&mut target.editor_on_add, source.editor_on_add);
-    merge_option(&mut target.expansion_style, source.expansion_style);
+    merge_option(&mut target.macros_style, source.macros_style);
     merge_non_default(&mut target.color_mode, source.color_mode);
 
-    merge_vecs(&mut target.expansions, source.expansions);
+    merge_vecs(&mut target.macros, source.macros);
 }
 
 /// Ensure all fields which require merging are merged.
@@ -671,13 +671,13 @@ fn ensure_all_merged() {
         local: Default::default(),
         editor: Some("".into()),
         editor_on_add: Some(true),
-        expansion_style: Some(ExpansionStyle::None),
+        macros_style: Some(ExpansionStyle::None),
         color_mode: ColorMode::Always,
         _fields: Default::default(),
         colors: Default::default(),
         date_formats: Default::default(),
         defaults: Default::default(),
-        expansions: vec![ExpansionConfig::default()],
+        macros: vec![ExpansionConfig::default()],
         reports: Default::default(),
         sync: Default::default(),
         templates: Default::default(),

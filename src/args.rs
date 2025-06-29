@@ -248,7 +248,7 @@ pub struct CalcArgs {
 
     /// Entry ID used as expression context.
     #[arg(long)]
-    pub context: Option<Box<str>>,
+    pub context: Option<Box<str>>, // TODO: P2: allow to specify several contexts
 }
 
 #[derive(Parser, Default)]

@@ -137,8 +137,8 @@ impl SyncDriver for Git {
             return Ok(false);
         }
 
-        let new_lines = output.iter().filter(|c| **c == b'\n' as u8).nth(1);
-        return Ok(new_lines.is_none());
+        let new_lines = output.iter().filter(|c| **c == b'\n').nth(1);
+        Ok(new_lines.is_none())
     }
 }
 

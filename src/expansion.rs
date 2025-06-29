@@ -82,18 +82,15 @@ fn apply_captures(value: &str, captures: &regex::Captures) -> String {
 fn rule_index(config: &Config) -> Result<RuleIndex> {
     let mut index: RuleIndex = [const { Vec::new() }; cmd_contexts()];
 
-    for rule in &config.expansions {
+    for rule in &config.macros {
         let regex = Regex::new(&rule.expr)?;
         index[rule.context as usize].push((regex, rule.replace.clone()));
     }
 
-    match config
-        .expansion_style
-        .as_ref()
-        .unwrap_or(&Default::default())
-    {
-        ExpansionStyle::Taskwarrior => expansions_tw(&mut index)?,
-        ExpansionStyle::None => {}
+    let style = config.macros_style.as_ref();
+    match style {
+        Some(ExpansionStyle::Taskwarrior) | None => expansions_tw(&mut index)?,
+        Some(ExpansionStyle::None) => {}
     }
 
     Ok(index)
