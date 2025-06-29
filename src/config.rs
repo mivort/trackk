@@ -608,7 +608,7 @@ pub fn read_config_chain() -> Result<Config> {
         return Ok(local_config.default_values());
     }
 
-    let data_config = read_config(&path).context("Unable to parse data directory config")?;
+    let data_config = read_config(&data_path).context("Unable to parse data directory config")?;
     merge_config(&mut local_config, data_config);
 
     Ok(local_config.default_values())
