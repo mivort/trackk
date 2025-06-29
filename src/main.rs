@@ -109,8 +109,8 @@ fn main() -> Result<()> {
             }
         }
 
-        Some(Command::Add(a)) => {
-            let mut issue = if a.copy {
+        Some(Command::Add(mut a)) => {
+            let mut entry = if a.copy {
                 let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
                 let filters = filter::Filter {
                     ids: &ids,
@@ -135,14 +135,17 @@ fn main() -> Result<()> {
                 entry::Entry::new(&a.entry, &app)?
             };
 
-            if a.entry.edit || app.config.editor_on_add.unwrap_or_default() {
-                let status = editor::edit_entry(&mut issue, &app)?;
-                if !status.success() {
-                    return Ok(());
-                }
+            if app.config.editor_on_add.unwrap_or_default() {
+                a.entry.edit = true;
             }
-            issue.validate(&app.config)?;
-            storage::add_entry(issue, &app)?;
+
+            let status = editor::edit_entry(&mut entry, &app)?;
+            if !status.success() {
+                return Ok(());
+            }
+
+            entry.validate(&app.config)?;
+            storage::add_entry(entry, &app)?;
         }
 
         Some(Command::_Dup) => {
@@ -156,12 +159,7 @@ fn main() -> Result<()> {
 
         Some(Command::Mod(e)) => {
             let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
-            if e.entry.edit {
-                // TODO: P3: apply mod args
-                editor::edit_entries(&ids, &app)?;
-            } else {
-                storage::modify_entries(&ids, &e.entry, &app)?;
-            }
+            storage::modify_entries(&ids, &e.entry, &app)?;
         }
 
         Some(Command::Config) => {

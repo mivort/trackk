@@ -6,14 +6,10 @@ use regex::RegexBuilder;
 use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
-use crate::bucket::Bucket;
-use crate::config::IndexType;
 use crate::dateexp::parse_date;
 use crate::entry::Entry;
-use crate::filter::{Filter, IdFilter};
-use crate::input;
 use crate::templates::dates;
-use crate::{app::App, display, prelude::*, storage};
+use crate::{app::App, prelude::*};
 
 /// Run editor, apply changes and return the exit status.
 pub fn edit_entry(issue: &mut Entry, app: &App) -> Result<ExitStatus> {
@@ -41,62 +37,6 @@ pub fn edit_entry(issue: &mut Entry, app: &App) -> Result<ExitStatus> {
     issue.update_ts();
 
     Ok(status)
-}
-
-/// Iterate over matching entries and run editor for each.
-pub fn edit_entries<'a>(ids: &IdFilter, app: &'a App<'a>) -> Result<()> {
-    let filters = Filter {
-        ids,
-        query: &mut Default::default(),
-    };
-
-    // TODO: P1: move filter applying logic outside this method to share with 'mod'
-    let entries = storage::fetch_entries(&filters, IndexType::All, app)?;
-    let mut index = app.index_mut()?;
-
-    let entries = 'entries: {
-        if ids.index.len() < entries.len() {
-            break 'entries input::pick_prompt("Modify", entries, app)?;
-        }
-        entries
-    };
-
-    let mut changes = 0;
-    for (mut entry, path) in entries {
-        if !edit_entry(&mut entry, app)?.success() {
-            break;
-        }
-
-        entry.validate(&app.config)?;
-
-        let mut bucket = Bucket::from_path(&*path, app)?;
-        let prev_entry = bucket.find_by_id_mut(&entry.id).unwrap();
-
-        if !prev_entry.differs(&entry) {
-            continue;
-        }
-
-        display::show_diff(prev_entry, &entry, app);
-
-        if prev_entry.status != entry.status {
-            entry.update_end(&app.config);
-            index.update_status(&app.config, &path, &entry);
-        }
-
-        *prev_entry = entry;
-
-        storage::write_bucket(&bucket, &*path, app)?;
-        changes += 1;
-    }
-
-    if changes > 0 {
-        index.write()?;
-        info!("Edited {changes} entry(es)");
-    } else {
-        info!("No changes");
-    }
-
-    Ok(())
 }
 
 /// Output entry in editor-friendly format.

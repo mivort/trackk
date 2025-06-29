@@ -3,8 +3,8 @@ use crate::bucket::Bucket;
 use crate::config::{Config, IndexType};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter};
-use crate::input;
 use crate::{app::App, display, prelude::*};
+use crate::{editor, input};
 
 use std::fs::{self, File};
 use std::io::{BufWriter, ErrorKind, Write};
@@ -64,6 +64,11 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         let mut bucket = Bucket::from_path(&**path, app)?;
         let bucket_entry = bucket.find_by_id_mut(&entry.id).unwrap();
         bucket_entry.apply_args(args, app)?;
+
+        if args.edit && !editor::edit_entry(bucket_entry, app)?.success() {
+            break;
+        }
+
         bucket_entry.validate(&app.config)?;
 
         if !entry.differs(bucket_entry) {
