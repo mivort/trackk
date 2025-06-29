@@ -171,6 +171,11 @@ impl IdFilter {
                 self.only_active = false;
                 continue;
             });
+            if shorthand > 9999 {
+                self.index.push(id);
+                self.only_active = false;
+                continue;
+            }
             let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
                 self.index.push(id);
                 self.only_active = false;

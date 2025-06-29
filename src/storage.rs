@@ -48,6 +48,10 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
     };
     let entries = filter_all_entries(&filters, app)?;
 
+    if entries.is_empty() {
+        bail!("No entries match the criteria");
+    }
+
     // TODO: P3: show picker in case if id query contains partial matches
     let entries = 'entries: {
         if ids.index.len() < entries.len() {
