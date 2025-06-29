@@ -17,4 +17,7 @@ pub trait SyncDriver {
 
     /// Download changes from the remote and upload local changes.
     fn sync_repo(target: impl AsRef<Path>) -> Result<()>;
+
+    /// Check if there's local changes.
+    fn sync_status(target: impl AsRef<Path>, app: &App) -> Result<bool>;
 }

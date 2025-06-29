@@ -19,6 +19,7 @@ formatx = "0.2.4"
 json5 = "0.4.1"
 log = "0.4.27"
 logos = "0.15.0"
+memchr = "2.7.5"
 minijinja = "2.10.2"
 once_cell = { version = "1.21.3", default-features = false }
 regex = "1.11.1"

@@ -5,6 +5,7 @@ use serde_derive::Serialize;
 use crate::config::{IndexType, ReportConfig, SectionConfig};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
+use crate::repo;
 use crate::templates::dates;
 use crate::templating::Templates;
 use crate::{app::App, prelude::*, sort, storage};
@@ -62,8 +63,18 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'
         shown += show_section(ids, query, section, app, &mut templates)?;
     }
 
-    if shown == 0 {
-        info!("No results");
+    let sync = repo::check_status(app)?;
+    let sync_msg = if sync { "" } else { ". There are local changes." };
+
+    if shown > 0 {
+        info!(
+            "{} entr{}{}",
+            shown,
+            if shown > 1 { "ies" } else { "y" },
+            sync_msg
+        );
+    } else {
+        info!("No results{}", sync_msg);
     }
 
     Ok(())

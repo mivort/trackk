@@ -77,3 +77,12 @@ pub fn sync_repo(app: &App) -> Result<()> {
 
     storage::refresh_index(app, false)
 }
+
+/// Check repo sync status.
+pub fn check_status(app: &App) -> Result<bool> {
+    let path = app.config.data_path()?;
+    match app.config.sync.driver {
+        SyncDriverMode::Git => Git::sync_status(path, app),
+        SyncDriverMode::Custom => todo!(),
+    }
+}

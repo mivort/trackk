@@ -978,6 +978,7 @@ dependencies = [
  "json5",
  "log",
  "logos",
+ "memchr",
  "minijinja",
  "once_cell",
  "regex",

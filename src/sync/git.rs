@@ -1,3 +1,4 @@
+use memchr::memmem;
 use std::ffi::OsStr;
 use std::fs::{self, File, OpenOptions};
 use std::io::{BufRead, BufReader, ErrorKind, Write};
@@ -125,6 +126,21 @@ impl SyncDriver for Git {
         cmd.spawn()?.wait()?;
 
         Ok(())
+    }
+
+    /// Check if threre's unpushed changes.
+    fn sync_status(target: impl AsRef<Path>, _app: &App) -> Result<bool> {
+        let mut cmd = git_command(target);
+        cmd.args(["status", "-b", "--porcelain=v1"]);
+        let output = cmd.output()?.stdout;
+        if memmem::find(&output, b"[ahead ").is_some() {
+            return Ok(false);
+        }
+        if output.iter().filter(|c| **c == '\n' as u8).nth(1).is_some() {
+            return Ok(false);
+        }
+
+        Ok(true)
     }
 }
 
