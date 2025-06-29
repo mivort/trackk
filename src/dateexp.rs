@@ -4,7 +4,7 @@ use std::rc::Rc;
 use logos::Logos as _;
 use time::OffsetDateTime;
 
-use crate::entry::Entry;
+use crate::entry::{Entry, FieldRef};
 use crate::{app::App, prelude::*, token::Token};
 
 /// Parse date expression and produce the timestamp.
@@ -23,12 +23,35 @@ pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<Option<i64>> 
         Token::Duration(rel) => Ok(Some(app.ts + rel as i64)),
         Token::Bool(false) => Ok(None),
         Token::Bool(true) => bail!("Date expression returned 'true'"),
-        Token::Regex(_) => bail!("Date expression returned regular expression"),
-        _ => panic!(),
+        _ => bail!(
+            "Date expression should return date, duration or 'false' (got {})",
+            res.ttype()
+        ),
     }
 }
 
 /// Parse and append to filter expression, return number of token added.
+///
+/// If only one token was found in expression, check if it's string or regex,
+/// and add comparison to the title.
+pub fn parse_filter(input: &str, app: &App, output: &mut Vec<Token>) -> Result<()> {
+    let before = output.len();
+    let res = parse_local_exp(input, app, output);
+
+    if output.len() - before == 1 {
+        match output.last() {
+            Some(Token::String(_)) | Some(Token::Regex(_)) => {
+                output.insert(output.len() - 1, Token::Reference(FieldRef::Title));
+                output.push(Token::FuzzyEq);
+            }
+            _ => {}
+        }
+    }
+
+    res
+}
+
+/// Pass app local timestamp and parse the expresion.
 pub fn parse_local_exp(input: &str, app: &App, output: &mut Vec<Token>) -> Result<()> {
     let local = app.local_time()?;
     parse_exp(input, local, output)

@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use crate::args::FilterArgs;
-use crate::dateexp::{eval, parse_local_exp};
+use crate::dateexp::{eval, parse_filter};
 use crate::entry::{Entry, FieldRef};
 use crate::token::Token;
 use crate::{app::App, prelude::*};
@@ -45,7 +45,7 @@ impl QueryFilter {
     /// Replace filter query re-using the vec.
     pub fn replace(&mut self, expr: &str, app: &App) -> Result<()> {
         self.expression.clear();
-        parse_local_exp(expr, app, &mut self.expression)
+        parse_filter(expr, app, &mut self.expression)
     }
 
     /// Append '&&' condition on top of the query.
@@ -66,7 +66,7 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
 
     for expr in &args.filter {
         let append = !expression.is_empty();
-        parse_local_exp(expr, app, expression)?;
+        parse_filter(expr, app, expression)?;
 
         if append {
             expression.push(Token::And)
@@ -213,7 +213,7 @@ fn match_issue() {
 
     let match_filter = |input: &str| {
         let mut exp = Vec::new();
-        parse_local_exp(input, &app, &mut exp).unwrap();
+        parse_filter(input, &app, &mut exp).unwrap();
 
         QueryFilter {
             expression: exp,
