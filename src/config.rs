@@ -337,14 +337,18 @@ impl ValuesConfig {
     pub fn urgency_formula(&self) -> &str {
         if self.urgency_formula.is_empty() {
             return concat!(
-                "(",
-                "sig((now - (due or someday)) / 10mil) * 10",
-                " + sig((now - (when or someday)) / 10mil) * 2.5 * (has(due) and 0 or 1)",
-                " + sig((now - created) / 10mil) * 0.5",
-                ")",
-                " * (end:false and 1 or 0)", // Only apply due/created if end is not set
-                "",
-                " - (end:false and 0 or (sig((now - (end or now)) / 10mil) - 0.25) * 2)",
+                concat!(
+                    "(",
+                    stringify!(sig((now - (due or when or someday)) / 10mil) * (has(due) and 10 or 5)),
+                    concat!(" + ", stringify!(sig((now - created) / 10mil) * 0.5)),
+                    ")",
+                    " * ",
+                    stringify!((end:false and 1 or 0)), // Only apply due/created if end is not set
+                ),
+                concat!(
+                    " - ",
+                    stringify!((end:false and 0 or (sig((now - (end or now)) / 10mil) - 0.25) * 2))
+                ),
                 " + (status == started and 1 or 0)",
                 " + (status == blocked and -1 or 0)",
                 " + (status == deleted and -20 or 0)",
