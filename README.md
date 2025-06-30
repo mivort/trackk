@@ -7,14 +7,17 @@ Inspired by [Taskwarrior][1] and [dstask][2].
 
 ## Features
 
-* VCS-friendly storage format and multi-device synchronization capabilities.
-  Data is stored as JSON files and by default synchronized using Git. Custom
-  JSON merge driver prevents conflicts on synchronization.
-* Dates input and filtering query [DSL](docs/EXPRESSIONS.md) which allows to
-  enter dates using relative expressions (`tomorrow at 14:00`), or perform
-  context filtering on tasks (`tag:home and status:started`).
-* Customizable command-line syntax: regex-based user-defined macros to make
-  task creation as effortless as possible.
+* **Git-friendly storage format.** Full versioning and multi-device
+  synchronization capabilities. Data is stored as JSON, while custom JSON 3-way
+  merge driver auto-resolves conflicts on synchronization.
+* **Powerful input and filtering DSL.** [Built-in expression
+  syntax](docs/EXPRESSIONS.md) allows to enter dates using natural wording
+  (`tomorrow at 14:00`), or perform context filtering on tasks (`tag:home and
+  status:started`).
+* **Define named queries:** in addition to IDs and filters, access task by
+  convenient shortcuts (`recent~1`, `overdue^^` etc.).
+* **CLI argument macros:** regex-based user-defined argument expansion rules to
+  customize the input syntax.
 * Recurrent tasks which use same date input syntax, allowing to use flexible
   re-occurrence rules (`monday at 7:00am`) and enabling the usage as habit
   tracker.

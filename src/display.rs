@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use serde_derive::Serialize;
 
-use crate::config::{IndexType, ReportConfig, SectionConfig};
+use crate::config::{ReportConfig, SectionConfig, query::IndexType};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::repo;
@@ -90,19 +90,22 @@ fn show_section(
     templates: &mut Templates,
 ) -> Result<usize> {
     let SectionConfig {
+        query: query_id,
         header,
         template,
-        index,
-        sorting,
-        filter,
         title,
         ..
     } = section;
 
+    let query_data = app.config.query(&query_id);
+    let filter = query_data.filter;
+    let sorting = query_data.sorting;
+    let index = query_data.index;
+
     query
         .replace(filter, app)
         .with_context(|| format!("Unable to parse filter predicate: '{filter}'"))?;
-    let mut entries = storage::fetch_entries(&Filter { ids, query }, *index, app)?;
+    let mut entries = storage::fetch_entries(&Filter { ids, query }, index, app)?;
 
     if entries.is_empty() {
         return Ok(0);

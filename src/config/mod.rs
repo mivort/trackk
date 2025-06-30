@@ -1,3 +1,5 @@
+pub mod query;
+
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::io;
@@ -9,6 +11,8 @@ use serde_derive::{Deserialize, Serialize};
 use crate::args::{Args, ColorMode};
 use crate::templates::colors;
 use crate::{expansion, prelude::*};
+
+use query::QueryConfig;
 
 /// Configuration file name to look in config directories.
 pub const CONFIG_FILE: &str = "config.json5";
@@ -57,7 +61,7 @@ pub struct Config {
 
     /// Named queries which can be used in reports and for filtering.
     #[serde(default)]
-    pub queries: HashMap<String, String>, // TODO: P2: support named queries
+    pub queries: HashMap<String, QueryConfig>, // TODO: P2: support named queries
 
     /// Index of available reports.
     #[serde(default)]
@@ -210,58 +214,46 @@ impl Config {
         ReportConfig {
             sections: vec![
                 SectionConfig {
+                    query: "backlog".into(),
                     title: "Backlog".into(),
-                    index: IndexType::Active,
-                    sorting: "urgency+".into(),
-                    _grouping: "".into(),
-                    filter: "(when or someday) >= 365d and (due or someday) >= 365d and status != started".into(),
                     header: "header".into(),
                     template: "next".into(),
+                    _grouping: "".into(),
                 },
                 SectionConfig {
+                    query: "upcoming".into(),
                     title: "Upcoming".into(),
-                    index: IndexType::Active,
-                    sorting: "urgency+".into(),
-                    _grouping: "".into(),
-                    filter: "((when >= 3d and when < 365d and due:false) or (due >= 3d and due < 365d)) and status != started".into(),
                     header: "header".into(),
                     template: "next".into(),
+                    _grouping: "".into(),
                 },
                 SectionConfig {
+                    query: "current".into(),
                     title: "Current".into(),
-                    index: IndexType::Active,
-                    sorting: "urgency+".into(),
-                    _grouping: "".into(),
-                    filter: "((when < 3d and due:false) or (due >= now and due < 3d)) and status != started".into(),
                     header: "header".into(),
                     template: "next".into(),
+                    _grouping: "".into(),
                 },
                 SectionConfig {
+                    query: "overdue".into(),
                     title: "Overdue".into(),
-                    index: IndexType::Active,
-                    sorting: "urgency+".into(),
-                    _grouping: "".into(),
-                    filter: "due < now and status != started".into(),
                     header: "header".into(),
                     template: "next".into(),
+                    _grouping: "".into(),
                 },
                 SectionConfig {
+                    query: "started".into(),
                     title: "Started".into(),
-                    index: IndexType::Active,
-                    sorting: "urgency+".into(),
-                    _grouping: "".into(),
-                    filter: "status == started".into(),
                     header: "header".into(),
                     template: "next".into(),
+                    _grouping: "".into(),
                 },
                 SectionConfig {
+                    query: "done_today".into(),
                     title: "Done today".into(),
-                    index: IndexType::All,
-                    sorting: "end+".into(),
-                    _grouping: "".into(),
-                    filter: "end >= today and status == completed".into(),
                     header: "header".into(),
                     template: "next".into(),
+                    _grouping: "".into(),
                 },
             ],
         }
@@ -271,13 +263,11 @@ impl Config {
     pub fn report_all(&self) -> ReportConfig {
         ReportConfig {
             sections: vec![SectionConfig {
+                query: "all".into(),
                 title: "All entries".into(),
-                index: IndexType::All,
-                sorting: "end+ created+".into(),
-                _grouping: "".into(),
-                filter: "".into(),
                 header: "header".into(),
                 template: "all".into(),
+                _grouping: "".into(),
             }],
         }
     }
@@ -286,13 +276,11 @@ impl Config {
     pub fn report_recent(&self) -> ReportConfig {
         ReportConfig {
             sections: vec![SectionConfig {
-                title: "All entries".into(),
-                index: IndexType::All,
-                sorting: "modified+".into(),
-                _grouping: "".into(),
-                filter: "modified > -14d".into(),
+                query: "recent".into(),
+                title: "Recent entries".into(),
                 header: "header".into(),
                 template: "all".into(),
+                _grouping: "".into(),
             }],
         }
     }
@@ -415,17 +403,9 @@ pub struct SectionConfig {
     #[serde(default)]
     pub template: Box<str>,
 
-    /// Index to use when report is produced.
+    /// Query to use for report section.
     #[serde(default)]
-    pub index: IndexType,
-
-    /// Sorting direction.
-    #[serde(default)]
-    pub sorting: Box<str>,
-
-    /// Section filter parameters.
-    #[serde(default)]
-    pub filter: Box<str>,
+    pub query: Box<str>,
 
     /// Section title.
     #[serde(default)]
@@ -443,18 +423,6 @@ pub enum FieldType {
     String,
     Number,
     Date,
-}
-
-#[derive(Deserialize, Default, Clone, Copy)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
-pub enum IndexType {
-    #[default]
-    #[serde(rename = "active")]
-    Active,
-    #[serde(rename = "recent")]
-    Recent,
-    #[serde(rename = "all")]
-    All,
 }
 
 #[derive(Deserialize, Default)]
@@ -545,7 +513,7 @@ fn format_config(config: &Config) -> Result<String> {
     let clear = if config.no_color() { "" } else { colors::RESET };
 
     Ok(format!(
-        include_str!("config/example.txt"),
+        include_str!("./example.txt"),
         pkg = env!("CARGO_PKG_NAME"),
         c = color,
         cl = clear,
@@ -709,7 +677,7 @@ fn ensure_all_merged() {
         date_formats: Default::default(),
         defaults: Default::default(),
         macros: vec![ExpansionConfig::default()],
-        queries: HashMap::from([("test".into(), "test".into())]),
+        queries: HashMap::from([("test".into(), QueryConfig::default())]),
         reports: Default::default(),
         sync: Default::default(),
         templates: TemplatesConfig {

@@ -38,7 +38,7 @@ use std::{env, io};
 use args::{Args, Command, ImportMode};
 use clap::{CommandFactory, Parser};
 use clap_complete::{Generator, generate};
-use config::IndexType;
+use config::query::IndexType;
 use log::Level;
 use prelude::*;
 

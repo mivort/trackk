@@ -1,6 +1,6 @@
 use crate::args::EntryArgs;
 use crate::bucket::Bucket;
-use crate::config::{Config, IndexType};
+use crate::config::{Config, query::IndexType};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter};
 use crate::{app::App, display, prelude::*};
