@@ -171,7 +171,7 @@ impl IdFilter {
                 self.only_active = false;
                 continue;
             });
-            if shorthand > 9999 {
+            if shorthand > 999 {
                 self.index.push(id);
                 self.only_active = false;
                 continue;
