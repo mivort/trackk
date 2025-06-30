@@ -1,3 +1,29 @@
+scopes = [
+  "app",
+  "args",
+  "bucket",
+  "config",
+  "dateexp",
+  "display",
+  "editor",
+  "entry",
+  "expansion",
+  "filter",
+  "functions",
+  "import ",
+  "index",
+  "input",
+  "merge",
+  "prelude",
+  "repo",
+  "sort",
+  "storage",
+  "sync",
+  "templates",
+  "templating",
+  "token",
+]
+
 [git_hooks.commit-msg]
 script = """#!/bin/sh
 set -e
