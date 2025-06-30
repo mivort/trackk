@@ -9,6 +9,9 @@ mod entry;
 mod expansion;
 mod filter;
 mod functions;
+mod import {
+    pub(crate) mod tw;
+}
 mod index;
 mod input;
 mod merge;
@@ -16,6 +19,10 @@ mod prelude;
 mod repo;
 mod sort;
 mod storage;
+mod sync {
+    pub(crate) mod driver;
+    pub(crate) mod git;
+}
 mod templates {
     pub(crate) mod colors;
     pub(crate) mod dates;
@@ -24,13 +31,6 @@ mod templates {
 }
 mod templating;
 mod token;
-mod sync {
-    pub(crate) mod driver;
-    pub(crate) mod git;
-}
-mod import {
-    pub(crate) mod tw;
-}
 
 use std::borrow::Cow;
 use std::{env, io};
