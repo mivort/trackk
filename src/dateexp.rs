@@ -353,28 +353,44 @@ fn unexpected_tokens() {
     assert_eq!(parse_date("4 ( 5 )", app, issue).is_err(), true);
 }
 
-#[test]
-fn functions() {
+#[cfg(test)]
+fn eval_test(expr: &str) -> Result<Token> {
     let (app, issue) = (&App::default(), &Entry::default());
 
-    let test_eval = |expr: &str| {
-        let mut output = Vec::new();
-        let mut op_stack = Vec::new();
-        let local = app.local_time().unwrap();
-        parse_exp(expr, local, &mut output).unwrap();
+    let mut output = Vec::new();
+    let mut op_stack = Vec::new();
+    let local = app.local_time().unwrap();
+    parse_exp(expr, local, &mut output).unwrap();
 
-        eval(&output, local, &mut op_stack, &issue)
-    };
+    eval(&output, local, &mut op_stack, &issue)
+}
 
-    let res = test_eval("sqrt(4)");
+#[test]
+fn functions() {
+    let res = eval_test("sqrt(4)");
     assert!(matches!(res, Ok(Token::Duration(2.))));
 
-    let res = test_eval("len(tag)");
+    let res = eval_test("len(tag)");
     assert!(matches!(res, Ok(Token::Duration(0.))));
 
-    let res = test_eval("len(tag) == 0");
+    let res = eval_test("len(tag) == 0");
     assert!(matches!(res, Ok(Token::Bool(true))));
 
-    let res = test_eval("+2-sqrt(4)*15");
+    let res = eval_test("+2-sqrt(4)*15");
     assert!(matches!(res, Ok(Token::Duration(-28.))));
+}
+
+#[test]
+fn date_comparisons() {
+    let res = eval_test("(today+10h):(today+12h)");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("(today+10h):(today+25h)");
+    assert!(matches!(res, Ok(Token::Bool(false))));
+
+    let res = eval_test("1h:2h");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("1h:25h");
+    assert!(matches!(res, Ok(Token::Bool(false))));
 }
