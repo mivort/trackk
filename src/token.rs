@@ -387,8 +387,12 @@ impl Token {
     }
 
     /// Peform loose comparison.
-    pub fn fuzzy_eq(&self, rhs: &Self, issue: &Entry) -> Result<Self> {
+    pub fn fuzzy_eq(&self, rhs: &Self, issue: &Entry, ts: OffsetDateTime) -> Result<Self> {
         match (self, rhs) {
+            (Self::Date(lhs), Self::Date(rhs)) => {
+                Ok(Self::Bool(date_to_sod(ts, *lhs) == date_to_sod(ts, *rhs)))
+            }
+            (Self::Bool(_), Self::Date(_) | Self::Duration(_)) => Ok(Self::Bool(false)),
             // TODO: P3: support comparison of dates - check if within same day
             // TODO: P3: support comparison of numbers - convert to dates
             (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(*lhs == *rhs)),
@@ -754,4 +758,10 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
 #[inline]
 fn duration_to_date(duration: f64, ts: OffsetDateTime) -> i64 {
     duration as i64 + ts.unix_timestamp()
+}
+
+/// Convert date to start of the date within current time zone.
+#[inline]
+fn date_to_sod(ts: OffsetDateTime, date: i64) -> i64 {
+    date - (date + ts.offset().whole_seconds() as i64) % 86400
 }

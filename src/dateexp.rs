@@ -295,7 +295,7 @@ pub fn eval(
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
             FuzzyEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(&rhs, issue)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(&rhs, issue, ts)?),
                 _ => bail!("':' operator haven't got enough arguments"),
             },
             LParen | RParen => {
