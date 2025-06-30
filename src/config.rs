@@ -546,11 +546,11 @@ fn format_config(config: &Config) -> Result<String> {
         c = color,
         cl = clear,
         data_path = config.data_path_fallback(),
-        data_path_prefix = json5::to_string(&config.local.data_prefix)?,
+        data_path_prefix = serde_json5::to_string(&config.local.data_prefix)?,
         editor = &config.editor(),
-        date_formats = json5::to_string(&config.date_formats)?,
-        active_status = json5::to_string(&config.values.active_status)?,
-        permit_status = json5::to_string(&config.values.permit_status)?,
+        date_formats = serde_json5::to_string(&config.date_formats)?,
+        active_status = serde_json5::to_string(&config.values.active_status)?,
+        permit_status = serde_json5::to_string(&config.values.permit_status)?,
         urgency_formula = config.values.urgency_formula(),
         status_initial = config.defaults.status_initial(),
         picker = config.templates.picker(),
@@ -574,7 +574,7 @@ fn config_doc_is_sane() {
     config.color_mode = crate::config::ColorMode::Never;
 
     let format = format_config(&config).unwrap();
-    json5::from_str::<'_, Config>(format.as_str()).unwrap();
+    serde_json5::from_str::<'_, Config>(format.as_str()).unwrap();
 }
 
 /// Read config from storage directory (if there's any) and merge it with config
@@ -617,7 +617,7 @@ pub fn read_config_chain() -> Result<Config> {
 /// Read JSON5 config from file.
 fn read_config(path: &impl AsRef<Path>) -> Result<Config> {
     Ok(match fs::read_to_string(path) {
-        Ok(data) => json5::from_str(data.as_str())?,
+        Ok(data) => serde_json5::from_str(data.as_str())?,
         Err(e) => match e.kind() {
             io::ErrorKind::NotFound => Config::default(),
             _ => bail!("Unable to read config: {}", path.as_ref().to_string_lossy()),
