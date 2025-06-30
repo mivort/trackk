@@ -187,6 +187,8 @@ impl Token {
     pub fn prec_and_assoc(&self) -> (u8, bool) {
         use Token::*;
 
+        // TODO: P2: support correct precedence in expression: 'when:-1d'
+
         match self {
             FuzzyEq => (9, true),
             Not => (8, false),
@@ -388,17 +390,25 @@ impl Token {
 
     /// Peform loose comparison.
     pub fn fuzzy_eq(&self, rhs: &Self, issue: &Entry, ts: OffsetDateTime) -> Result<Self> {
+        use Token::*;
+
         match (self, rhs) {
-            (Self::Date(lhs), Self::Date(rhs)) => {
-                Ok(Self::Bool(date_to_sod(ts, *lhs) == date_to_sod(ts, *rhs)))
-            }
-            (Self::Bool(_), Self::Date(_) | Self::Duration(_)) => Ok(Self::Bool(false)),
-            // TODO: P3: support comparison of dates - check if within same day
-            // TODO: P3: support comparison of numbers - convert to dates
-            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(*lhs == *rhs)),
-            (Self::Date(_lhs), Self::Bool(rhs)) => Ok(Self::Bool(*rhs)),
-            (Self::String(lhs), Self::String(rhs)) => Ok(Self::Bool(lhs.contains(&**rhs))),
-            (Self::Reference(lhs), token) => Ok(Self::Bool(lhs.fuzzy_eq(token, issue)?)),
+            (Date(lhs), Date(rhs)) => Ok(Bool(date_to_sod(ts, *lhs) == date_to_sod(ts, *rhs))),
+            (Date(lhs), Duration(rhs)) => Ok(Bool(
+                date_to_sod(ts, *lhs) == date_to_sod(ts, duration_to_date(*rhs, ts)),
+            )),
+            (Duration(lhs), Date(rhs)) => Ok(Bool(
+                date_to_sod(ts, duration_to_date(*lhs, ts)) == date_to_sod(ts, *rhs),
+            )),
+            (Duration(lhs), Duration(rhs)) => Ok(Bool(
+                date_to_sod(ts, duration_to_date(*lhs, ts))
+                    == date_to_sod(ts, duration_to_date(*rhs, ts)),
+            )),
+            (Bool(_), Date(_) | Duration(_)) => Ok(Bool(false)),
+            (Bool(lhs), Bool(rhs)) => Ok(Bool(*lhs == *rhs)),
+            (Date(_lhs), Bool(rhs)) => Ok(Bool(*rhs)),
+            (String(lhs), String(rhs)) => Ok(Bool(lhs.contains(&**rhs))),
+            (Reference(lhs), token) => Ok(Bool(lhs.fuzzy_eq(token, issue)?)),
             _ => bail!(
                 "':' was used on incompatible values ({} and {})",
                 self.ttype(),
