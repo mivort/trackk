@@ -142,6 +142,10 @@ pub struct FilterArgs {
     #[arg(long)]
     pub query: Option<Box<str>>,
 
+    /// Select entry by number if filter produces multiple results.
+    // TODO: P1: support ranges
+    pub select: Option<usize>,
+
     /// Sort by provided sorting rule, overriding report sorting.
     #[arg(long)]
     pub sort: Option<Box<str>>,

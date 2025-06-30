@@ -54,6 +54,7 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
 
     // TODO: P3: show picker in case if id query contains partial matches
     let entries = 'entries: {
+        // TODO: P3: check 'select' value and limit entries to the range
         if ids.index.len() < entries.len() {
             break 'entries input::pick_prompt("Modify", entries, app)?;
         }
