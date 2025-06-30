@@ -83,8 +83,14 @@ fn rule_index(config: &Config) -> Result<RuleIndex> {
     let mut index: RuleIndex = [const { Vec::new() }; cmd_contexts()];
 
     for rule in &config.macros {
-        let regex = Regex::new(&rule.expr)?;
-        index[rule.context as usize].push((regex, rule.replace.clone()));
+        let regex = Regex::new(&rule.find)?;
+        if rule.contexts.is_empty() {
+            index[CmdContext::Root as usize].push((regex, rule.replace.clone()));
+            continue;
+        }
+        for ctx in &rule.contexts {
+            index[*ctx as usize].push((regex.clone(), rule.replace.clone()));
+        }
     }
 
     let style = config.macros_style.as_ref();

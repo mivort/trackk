@@ -487,7 +487,7 @@ pub enum PrefixType {
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone, Default))]
 pub struct ExpansionConfig {
     /// Regular expression to match on argument.
-    pub expr: Box<str>,
+    pub find: Box<str>,
 
     /// Replace command argument with one or more values.
     /// Capture groups can be accessed with '$1', '$2' etc.,
@@ -497,7 +497,7 @@ pub struct ExpansionConfig {
     /// Command context to use the expansion in.
     /// If not specified, it will be used in root context.
     #[serde(default)]
-    pub context: expansion::CmdContext, // TODO: P2: allow to apply rule to multiple contexts
+    pub contexts: Vec<expansion::CmdContext>,
 }
 
 #[derive(Deserialize)]
