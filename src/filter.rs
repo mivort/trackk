@@ -73,6 +73,19 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         }
     }
 
+    if let Some(query) = &args.query {
+        let append = !expression.is_empty();
+        let filter = app.config.query(query);
+        let filter = filter
+            .with_context(|| format!("Query '{query}' not defined"))?
+            .filter;
+        parse_filter(filter, app, expression)?;
+
+        if append {
+            expression.push(Token::And)
+        }
+    }
+
     for title in &args.title {
         let token = if title.starts_with('/') && title.ends_with('/') && title.len() > 1 {
             let slice = &title[1..(title.len() - 1)];

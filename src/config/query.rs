@@ -39,16 +39,16 @@ pub enum IndexType {
 }
 
 impl Config {
-    pub fn query(&self, query_id: &str) -> QueryData {
+    pub fn query(&self, query_id: &str) -> Option<QueryData> {
         unwrap_none_or!(self.queries.get(query_id), q, {
-            return QueryData {
+            return Some(QueryData {
                 sorting: &q.sorting,
                 filter: &q.filter,
                 index: q.index,
-            };
+            });
         });
 
-        match query_id {
+        Some(match query_id {
             "backlog" => self.query_backlog(),
             "upcoming" => self.query_upcoming(),
             "current" => self.query_current(),
@@ -56,8 +56,9 @@ impl Config {
             "started" => self.query_started(),
             "done_today" => self.query_done_today(),
             "recent" => self.query_recent(),
-            "all" | _ => self.query_all(),
-        }
+            "all" => self.query_all(),
+            _ => return None,
+        })
     }
 }
 
@@ -72,7 +73,7 @@ impl Config {
 
     fn query_recent(&self) -> QueryData {
         QueryData {
-            sorting: "modified+".into(),
+            sorting: "modified+",
             filter: "modified > -14d",
             index: IndexType::All,
         }
