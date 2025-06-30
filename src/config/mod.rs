@@ -1,4 +1,5 @@
 pub mod query;
+pub mod reports;
 pub mod values;
 
 use std::borrow::Cow;
@@ -14,6 +15,7 @@ use crate::templates::colors;
 use crate::{expansion, prelude::*};
 
 use query::QueryConfig;
+use reports::ReportConfig;
 use values::ValuesConfig;
 
 /// Configuration file name to look in config directories.
@@ -121,7 +123,7 @@ pub struct DefaultsConfig {
 pub struct TemplatesConfig {
     /// Template name for single entry view.
     #[serde(default)]
-    entry: Box<str>,
+    entry: Box<str>, // TODO: P2: remove this option in favor of 'info' report
 
     /// Template used to display entry changes.
     #[serde(default)]
@@ -187,82 +189,6 @@ impl Config {
         matches!(self.color_mode, ColorMode::Never)
     }
 
-    /// Default report format.
-    pub fn report_next(&self) -> ReportConfig {
-        ReportConfig {
-            sections: vec![
-                SectionConfig {
-                    query: "backlog".into(),
-                    title: "Backlog".into(),
-                    header: "header".into(),
-                    template: "next".into(),
-                    _grouping: "".into(),
-                },
-                SectionConfig {
-                    query: "upcoming".into(),
-                    title: "Upcoming".into(),
-                    header: "header".into(),
-                    template: "next".into(),
-                    _grouping: "".into(),
-                },
-                SectionConfig {
-                    query: "current".into(),
-                    title: "Current".into(),
-                    header: "header".into(),
-                    template: "next".into(),
-                    _grouping: "".into(),
-                },
-                SectionConfig {
-                    query: "overdue".into(),
-                    title: "Overdue".into(),
-                    header: "header".into(),
-                    template: "next".into(),
-                    _grouping: "".into(),
-                },
-                SectionConfig {
-                    query: "started".into(),
-                    title: "Started".into(),
-                    header: "header".into(),
-                    template: "next".into(),
-                    _grouping: "".into(),
-                },
-                SectionConfig {
-                    query: "done_today".into(),
-                    title: "Done today".into(),
-                    header: "header".into(),
-                    template: "next".into(),
-                    _grouping: "".into(),
-                },
-            ],
-        }
-    }
-
-    /// Report which displays all entries.
-    pub fn report_all(&self) -> ReportConfig {
-        ReportConfig {
-            sections: vec![SectionConfig {
-                query: "all".into(),
-                title: "All entries".into(),
-                header: "header".into(),
-                template: "all".into(),
-                _grouping: "".into(),
-            }],
-        }
-    }
-
-    /// Report which displays all entries.
-    pub fn report_recent(&self) -> ReportConfig {
-        ReportConfig {
-            sections: vec![SectionConfig {
-                query: "recent".into(),
-                title: "Recent entries".into(),
-                header: "header".into(),
-                template: "all".into(),
-                _grouping: "".into(),
-            }],
-        }
-    }
-
     /// Produce data path prefix.
     pub fn data_path_base(&self) -> Result<PathBuf> {
         let prefix = match self.local.data_prefix {
@@ -325,38 +251,6 @@ impl TemplatesConfig {
     pub fn entry(&self) -> &str {
         if self.entry.is_empty() { "issue" } else { &self.entry }
     }
-}
-
-/// Report configuration which contains array of report sections.
-#[derive(Deserialize, Default, Clone)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
-pub struct ReportConfig {
-    pub sections: Vec<SectionConfig>,
-}
-
-/// Report section defined by filter and template.
-#[derive(Deserialize, Default, Clone)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
-pub struct SectionConfig {
-    /// Section header template.
-    #[serde(default)]
-    pub header: Box<str>,
-
-    /// Name of tera template file used for section output.
-    #[serde(default)]
-    pub template: Box<str>,
-
-    /// Query to use for report section.
-    #[serde(default)]
-    pub query: Box<str>,
-
-    /// Section title.
-    #[serde(default)]
-    pub title: Box<str>,
-
-    /// Grouping field.
-    #[serde(default)]
-    _grouping: Box<str>,
 }
 
 /// Custom field type.

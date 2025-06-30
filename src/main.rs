@@ -70,7 +70,7 @@ fn main() -> Result<()> {
             }
 
             let report = if let Some(report) = list.report {
-                templating::match_report(&report, &app.config)?
+                app.config.report(&report)?
             } else {
                 Cow::Owned(app.config.report_next())
             };
@@ -88,7 +88,8 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Info(info)) => {
-            ids.append_shorthands(info.ids, &app)?; // TODO: P2: switch info to filter args
+            // TODO: P2: deprecate this command in favor of info report
+            ids.append_shorthands(info.ids, &app)?;
 
             let filters = filter::Filter {
                 ids: &ids,

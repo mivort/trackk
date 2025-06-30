@@ -2,7 +2,10 @@ use std::rc::Rc;
 
 use serde_derive::Serialize;
 
-use crate::config::{ReportConfig, SectionConfig, query::IndexType};
+use crate::config::{
+    query::IndexType,
+    reports::{ReportConfig, SectionConfig},
+};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::repo;
