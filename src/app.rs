@@ -59,6 +59,11 @@ impl<'env> App<'env> {
 
         self.filter = filter;
 
+        if let Some(query) = &args.query {
+            let sort = self.config.query(query).unwrap().sorting; // TODO: P3: replace this unwrap
+            self.sort = sort::parse_rules(sort)?;
+        }
+
         if let Some(sort) = &args.sort {
             self.sort = sort::parse_rules(sort)?;
         }
@@ -119,5 +124,10 @@ impl<'env> App<'env> {
                 .with_context(|| format!("Unable to parse urgency formula: '{}'", formula))?;
             Ok(urgency)
         })
+    }
+
+    /// Check if filter output was defined.
+    pub fn has_range(&self) -> bool {
+        self.skip > 0 || self.limit < usize::MAX
     }
 }

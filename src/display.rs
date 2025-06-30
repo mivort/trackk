@@ -111,6 +111,17 @@ fn show_section(
         .with_context(|| format!("Unable to parse filter predicate: '{filter}'"))?;
     let mut entries = storage::fetch_entries(&Filter { ids, query }, index, app)?;
 
+    let count = entries.len();
+    let limit = app.limit.min(count); // TODO: P2: support report-defined limit
+
+    let sort = if app.sort.is_empty() { &sort::parse_rules(sorting)? } else { &app.sort };
+    sort::sort_entries(&mut entries, sort)?;
+
+    if app.has_range() {
+        entries.truncate(entries.len().saturating_sub(app.skip));
+        entries.drain(..(entries.len().saturating_sub(app.limit)));
+    }
+
     if entries.is_empty() {
         return Ok(0);
     }
@@ -127,18 +138,12 @@ fn show_section(
             .with_context(|| format!("Unable to load template: {template}"))?;
     }
 
-    let sort = if app.sort.is_empty() { &sort::parse_rules(sorting)? } else { &app.sort };
-    sort::sort_entries(&mut entries, sort)?;
-
     let j2 = &mut templates.j2;
     let out = std::io::stdout();
 
     if !header.is_empty() {
         let header = j2.get_template(&section.header)?;
-        let context = HeaderContext {
-            title,
-            count: entries.len(),
-        };
+        let context = HeaderContext { title, count };
         header.render_to_write(context, &out).with_context(|| {
             format!(
                 "Unable to render report header template: {}",
@@ -151,11 +156,8 @@ fn show_section(
         return Ok(0);
     }
 
-    let count = entries.len();
-    let limit = app.limit.min(entries.len()); // TODO: P2: support report-defined limit
-
     let template = j2.get_template(&section.template)?;
-    for (lineno, (entry, path)) in entries[(count - limit)..].iter().enumerate() {
+    for (lineno, (entry, path)) in entries.iter().enumerate() {
         let context = RowContext {
             entry: &EntryContext {
                 sid: entry.sid,

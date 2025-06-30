@@ -4,7 +4,7 @@ use crate::config::{Config, query::IndexType};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter};
 use crate::{app::App, display, prelude::*};
-use crate::{editor, input};
+use crate::{editor, input, sort};
 
 use std::fs::{self, File};
 use std::io::{BufWriter, ErrorKind, Write};
@@ -46,7 +46,7 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         ids,
         query: &mut Default::default(),
     };
-    let entries = filter_all_entries(&filters, app)?;
+    let mut entries = filter_all_entries(&filters, app)?;
 
     if entries.is_empty() {
         bail!("No entries match the criteria");
@@ -54,8 +54,15 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
 
     // TODO: P3: show picker in case if id query contains partial matches
     let entries = 'entries: {
-        // TODO: P3: check 'select' value and limit entries to the range
-        if ids.index.len() < entries.len() {
+        let show_picker = ids.index.len() < entries.len();
+        if show_picker || app.has_range() {
+            sort::sort_entries(&mut entries, &app.sort)?;
+
+            entries.truncate(entries.len().saturating_sub(app.skip));
+            entries.drain(..(entries.len().saturating_sub(app.limit)));
+        }
+
+        if show_picker {
             break 'entries input::pick_prompt("Modify", entries, app)?;
         }
         entries

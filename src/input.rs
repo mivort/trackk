@@ -4,7 +4,7 @@ use std::rc::Rc;
 use crate::app::App;
 use crate::display::{EntryContext, RowContext};
 use crate::entry::Entry;
-use crate::{prelude::*, sort};
+use crate::prelude::*;
 
 /// Read user input from stdin.
 pub fn prompt(prompt: &str) -> Result<String> {
@@ -25,9 +25,6 @@ pub fn pick_prompt<'a>(
     mut entries: Vec<(Entry, Rc<str>)>,
     app: &'a App<'a>,
 ) -> Result<Vec<(Entry, Rc<str>)>> {
-    // TODO: P2: check terminal state/config/args to suppress the prompt
-    // TODO: P2: check the limit of entries to show in prompt
-
     if entries.len() < 2 {
         return Ok(entries);
     }
@@ -40,10 +37,6 @@ pub fn pick_prompt<'a>(
     templates
         .load_template(app.config.templates.picker())
         .with_context(|| format!("Unable to load picker template: {template_id}"))?;
-
-    // TODO: P2: apply configurable sorting to picker results
-    let sort = &sort::parse_rules("urgency+")?;
-    sort::sort_entries(&mut entries, sort)?;
 
     let count = entries.len();
     let limit = count.min(9);
