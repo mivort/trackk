@@ -55,13 +55,13 @@ fn main() -> Result<()> {
     let mut app = app::App::new(config);
     app.merge_filter_args(&args.filter_args)?;
 
+    let mut ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
+
     // TODO: P2: customize default error handling
 
     match args.command {
         Some(Command::List(list)) => {
             app.merge_filter_args(&list.filter_args)?;
-
-            let mut ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
             ids.append_shorthands(list.filter_args.id, &app)?;
 
             if let Some(format) = list.format {
@@ -87,9 +87,8 @@ fn main() -> Result<()> {
             println!("{}", entries.len());
         }
 
-        Some(Command::Info(info_args)) => {
-            let mut ids = filter::IdFilter::from_shorthands(info_args.ids, &app)?;
-            ids.append_shorthands(args.filter_args.id, &app)?;
+        Some(Command::Info(info)) => {
+            ids.append_shorthands(info.ids, &app)?; // TODO: P2: switch info to filter args
 
             let filters = filter::Filter {
                 ids: &ids,
@@ -111,7 +110,6 @@ fn main() -> Result<()> {
 
         Some(Command::Add(a)) => {
             let mut entry = if a.copy {
-                let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
                 let filters = filter::Filter {
                     ids: &ids,
                     query: &mut Default::default(),
@@ -153,7 +151,6 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Mod(e)) => {
-            let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
             storage::modify_entries(&ids, &e.entry, &app)?;
         }
 
@@ -219,7 +216,6 @@ fn main() -> Result<()> {
             }
         },
         None => {
-            let ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
             if ids.enabled {
                 let filters = filter::Filter {
                     ids: &ids,
