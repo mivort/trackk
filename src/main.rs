@@ -147,10 +147,6 @@ fn main() -> Result<()> {
             storage::add_entry(entry, &app)?;
         }
 
-        Some(Command::_Dup) => {
-            todo!()
-            // TODO: P2: implement duplicate command
-        }
         Some(Command::_Copy) => {
             todo!()
             // TODO: P2: implement context copy command

@@ -42,11 +42,6 @@ pub enum Command {
     /// Create new entry.
     Add(AddArgs),
 
-    /// Duplicate entire entry.
-    // TODO: P2: implement duplicate command
-    #[command(skip)]
-    _Dup,
-
     /// Copy task context from one entry to another.
     // TODO: P2: implement copy command
     #[command(skip)]
