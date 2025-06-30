@@ -48,6 +48,7 @@ impl<'env> App<'env> {
         Self {
             config,
             ts: time::UtcDateTime::now().unix_timestamp(),
+            limit: usize::MAX,
             ..Default::default()
         }
     }
@@ -68,8 +69,8 @@ impl<'env> App<'env> {
             self.sort = sort::parse_rules(sort)?;
         }
 
-        self.limit = args.limit;
-        self.skip = args.skip;
+        self.limit = args.limit.min(self.limit);
+        self.skip = args.skip.max(self.skip);
 
         Ok(())
     }
