@@ -55,6 +55,10 @@ pub struct Config {
     #[serde(default)]
     pub sync: SyncConfig,
 
+    /// Named queries which can be used in reports and for filtering.
+    #[serde(default)]
+    pub queries: HashMap<String, String>, // TODO: P2: support named queries
+
     /// Index of available reports.
     #[serde(default)]
     pub reports: HashMap<String, ReportConfig>, // TODO: P2: handle custom reports
@@ -676,6 +680,8 @@ fn merge_config(target: &mut Config, source: Config) {
 
     merge_vecs(&mut target.macros, source.macros);
     merge_maps(&mut target.date_formats, source.date_formats);
+
+    merge_maps(&mut target.queries, source.queries);
     merge_maps(&mut target.reports, source.reports);
 
     merge_non_default(
@@ -703,6 +709,7 @@ fn ensure_all_merged() {
         date_formats: Default::default(),
         defaults: Default::default(),
         macros: vec![ExpansionConfig::default()],
+        queries: HashMap::from([("test".into(), "test".into())]),
         reports: Default::default(),
         sync: Default::default(),
         templates: TemplatesConfig {
