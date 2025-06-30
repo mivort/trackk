@@ -177,7 +177,7 @@ pub enum Token {
     Reference(FieldRef),
 
     /// String value token.
-    #[regex(r"[A-Za-z]\w*", |l| Rc::from(l.slice()))]
+    #[regex(r"[^\d\W]\w*", |l| Rc::from(l.slice()))]
     #[regex(r#"'[^']*'"#, parse_quoted_string)]
     String(Rc<str>),
 }

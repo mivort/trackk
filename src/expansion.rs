@@ -141,16 +141,16 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
     ));
 
     let mut filter_rules = |ctx: usize| -> Result<_, regex::Error> {
-        idx[ctx].push((rg(r"^([0-9]+)$")?, vec!["--id=$1".into()]));
-        idx[ctx].push((rg(r"^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
-
-        idx[ctx].push((rg(r"^\+(.+)")?, vec!["--filter".into(), "tag:$1".into()]));
+        idx[ctx].push((rg(r"^\+(\w+)")?, vec!["--filter".into(), "tag:$1".into()]));
         idx[ctx].push((
-            rg(r"^-([^-].+)")?,
+            rg(r"^-(\w{2,})")?,
             vec!["--filter".into(), "!tag:$1".into()],
         ));
 
         idx[ctx].push((rg(r"^=(.*)")?, vec!["--filter=$1".into()]));
+
+        idx[ctx].push((rg(r"^([0-9]+)$")?, vec!["--id=$1".into()]));
+        idx[ctx].push((rg(r"^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
 
         Ok(())
     };
