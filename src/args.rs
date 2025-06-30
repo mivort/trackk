@@ -142,17 +142,17 @@ pub struct FilterArgs {
     #[arg(long)]
     pub query: Option<Box<str>>,
 
-    /// Select entry by number if filter produces multiple results.
-    // TODO: P1: support ranges
-    pub select: Option<usize>,
-
     /// Sort by provided sorting rule, overriding report sorting.
     #[arg(long)]
     pub sort: Option<Box<str>>,
 
     /// Limit the output by the provided value.
-    #[arg(long)]
-    pub limit: Option<usize>,
+    #[arg(long, default_value_t = usize::MAX)]
+    pub limit: usize,
+
+    /// Skip provided number of topmost filter results.
+    #[arg(long, default_value_t = 0)]
+    pub skip: usize,
 }
 
 /// Args to apply changes to the selected entries.

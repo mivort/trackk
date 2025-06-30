@@ -24,6 +24,9 @@ pub struct App<'env> {
     /// Global entry count limit.
     pub limit: usize,
 
+    /// Skip provided number of topmost filtered results.
+    pub skip: usize,
+
     /// Tera templates reference.
     pub templates: RefCell<templating::Templates<'env>>,
 
@@ -60,7 +63,8 @@ impl<'env> App<'env> {
             self.sort = sort::parse_rules(sort)?;
         }
 
-        self.limit = args.limit.unwrap_or(usize::MAX);
+        self.limit = args.limit;
+        self.skip = args.skip;
 
         Ok(())
     }
