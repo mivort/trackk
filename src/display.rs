@@ -100,8 +100,7 @@ fn show_section(
         ..
     } = section;
 
-    let query_data = app.config.query(query_id);
-    let query_data = query_data.with_context(|| format!("Query '{query_id}' not defined"))?;
+    let query_data = app.config.query(query_id)?;
     let filter = query_data.filter;
     let sorting = query_data.sorting;
     let index = query_data.index;

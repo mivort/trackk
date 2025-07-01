@@ -39,16 +39,16 @@ pub enum IndexType {
 }
 
 impl Config {
-    pub fn query(&self, query_id: &str) -> Option<QueryData> {
+    pub fn query(&self, query_id: &str) -> Result<QueryData> {
         unwrap_none_or!(self.queries.get(query_id), q, {
-            return Some(QueryData {
+            return Ok(QueryData {
                 sorting: &q.sorting,
                 filter: &q.filter,
                 index: q.index,
             });
         });
 
-        Some(match query_id {
+        Ok(match query_id {
             "backlog" => self.query_backlog(),
             "upcoming" => self.query_upcoming(),
             "current" => self.query_current(),
@@ -57,7 +57,7 @@ impl Config {
             "done_today" => self.query_done_today(),
             "recent" => self.query_recent(),
             "all" => self.query_all(),
-            _ => return None,
+            _ => bail!("Query '{query_id}' not defined"),
         })
     }
 }

@@ -62,7 +62,7 @@ impl<'env> App<'env> {
         self.filter = filter;
 
         if let Some(query) = &args.query {
-            let sort = self.config.query(query).unwrap().sorting; // TODO: P3: replace this unwrap
+            let sort = self.config.query(query)?.sorting;
             self.sort = sort::parse_rules(sort)?;
         }
 

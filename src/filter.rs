@@ -84,8 +84,7 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
 
     if let Some(query) = &args.query {
         let append = !expression.is_empty();
-        let query_data = app.config.query(query);
-        let query_data = query_data.with_context(|| format!("Query '{query}' not defined"))?;
+        let query_data = app.config.query(query)?;
         filter.index = query_data.index;
         parse_filter(query_data.filter, app, expression)?;
 
