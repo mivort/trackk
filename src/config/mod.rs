@@ -100,6 +100,9 @@ pub struct ConfigLocal {
     /// Use sub-directory in provided data path/repo.
     #[serde(default)]
     _storage_prefix: Box<str>,
+
+    #[serde(skip)]
+    config_path: PathBuf,
 }
 
 #[derive(Deserialize, Default)]
@@ -171,6 +174,11 @@ impl Config {
         }
 
         self
+    }
+
+    /// Current config path.
+    pub fn config_path(&self) -> &PathBuf {
+        &self.local.config_path
     }
 
     /// Provide default editor value.
@@ -402,6 +410,7 @@ pub fn read_config_chain() -> Result<Config> {
     });
 
     let mut local_config = read_config(&path).context("Unable to parse main config")?;
+    local_config.local.config_path = path.parent().map(ToOwned::to_owned).unwrap_or_default();
 
     let mut data_path = 'data_path: {
         if let Ok(env_path) = std::env::var(ENV_DATA) {

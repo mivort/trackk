@@ -1,5 +1,6 @@
 use minijinja as mj;
 use std::fs;
+use std::io::ErrorKind;
 use unicode_width::UnicodeWidthStr;
 
 use crate::app::App;
@@ -123,17 +124,27 @@ impl<'env> Templates<'env> {
 
         if let Some((id, content)) = builtin_template(template) {
             j2.add_template(id, content)?;
-        } else {
-            // TODO: P3: handle templates in config directory
-
-            let mut template_path = app.config.data_path().with_context(|| {
-                format!("Unable to find template in data directory: {template}")
-            })?;
-            template_path.push(template);
-
-            let template_data = fs::read_to_string(&template_path)?;
-            j2.add_template(template.to_owned().leak(), template_data.leak())?;
+            return Ok(());
         }
+
+        let mut template_path = app.config.config_path().clone();
+        template_path.push(template);
+        match fs::read_to_string(&template_path) {
+            Ok(template_data) => {
+                j2.add_template(template.to_owned().leak(), template_data.leak())?;
+                return Ok(());
+            }
+            Err(err) if err.kind() == ErrorKind::NotFound => {}
+            Err(err) => return Err(anyhow!(err)),
+        }
+
+        let mut template_path = app.config.data_path().with_context(|| {
+            format!("Unable to read template in config or data directory: {template}")
+        })?;
+        template_path.push(template);
+
+        let template_data = fs::read_to_string(&template_path)?;
+        j2.add_template(template.to_owned().leak(), template_data.leak())?;
 
         Ok(())
     }
