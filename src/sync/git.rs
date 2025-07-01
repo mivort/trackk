@@ -102,8 +102,6 @@ impl SyncDriver for Git {
     }
 
     fn commit_repo(target: impl AsRef<Path>) -> Result<()> {
-        info!("Creating new commit");
-
         let mut cmd = git_command(&target);
         cmd.args(["add", "--all"]);
         if !cmd.spawn()?.wait()?.success() {
@@ -123,7 +121,11 @@ impl SyncDriver for Git {
         let mut cmd = git_command(&target);
         cmd.args(["commit", "-m"]);
         cmd.arg(file);
-        cmd.spawn()?.wait()?;
+        let cmd = cmd.spawn()?.wait()?;
+
+        if cmd.success() {
+            info!("New commit created");
+        }
 
         Ok(())
     }
