@@ -57,6 +57,11 @@ fn main() -> Result<()> {
 
     let mut ids = filter::IdFilter::from_shorthands(args.filter_args.id, &app)?;
 
+    if args.sync {
+        // TODO: P1: add sync before/after options
+        repo::sync_repo(&app)?;
+    }
+
     // TODO: P2: customize default error handling
 
     match args.command {
@@ -185,7 +190,9 @@ fn main() -> Result<()> {
             repo::commit_repo(&app.config)?;
         }
         Some(Command::Sync) => {
-            repo::sync_repo(&app)?;
+            if !args.sync {
+                repo::sync_repo(&app)?;
+            }
         }
         Some(Command::Merge(merge)) => {
             merge::merge_driver(&merge)?;

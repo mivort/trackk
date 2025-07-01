@@ -35,6 +35,10 @@ pub struct Args {
     /// Set color mode.
     #[arg(long, global = true, default_value_t = ColorMode::Auto)]
     pub color: ColorMode,
+
+    /// Sync local repository with remote.
+    #[arg(long, global = true)]
+    pub sync: bool,
 }
 
 #[derive(Subcommand)]
@@ -81,7 +85,7 @@ pub enum Command {
     /// Produce commit in data repository using selected VCS, but don't sync.
     Commit,
 
-    /// Sync repository with remote repo.
+    /// Sync local repository with remote.
     Sync,
 
     /// Provide shell completions.
