@@ -215,8 +215,8 @@ pub struct AddArgs {
 
 #[derive(Parser, Default)]
 pub struct InfoArgs {
-    /// List of IDs to display.
-    pub ids: Vec<Box<str>>,
+    #[command(flatten)]
+    pub filter_args: FilterArgs,
 }
 
 #[derive(Parser)]

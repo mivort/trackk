@@ -6,7 +6,7 @@ use crate::entry::Entry;
 use crate::prelude::*;
 
 /// Parse sorting expression and sort entries in the provided array.
-pub fn sort_entries(entries: &mut [(Entry, Rc<str>)], rules: &[SortingRule]) -> Result<()> {
+pub fn sort_entries(entries: &mut [(Entry, Rc<str>)], rules: &[SortingRule]) {
     entries.sort_by(|(a, _), (b, _)| {
         let mut cmp = Ordering::Equal;
         for r in rules {
@@ -17,8 +17,6 @@ pub fn sort_entries(entries: &mut [(Entry, Rc<str>)], rules: &[SortingRule]) -> 
         }
         cmp
     });
-
-    Ok(())
 }
 
 /// Iterate over rule directives and produce array of rules.

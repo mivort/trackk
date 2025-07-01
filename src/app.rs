@@ -6,6 +6,7 @@ use once_cell::unsync::OnceCell;
 
 use crate::args::FilterArgs;
 use crate::dateexp::parse_local_exp;
+use crate::entry::Entry;
 use crate::prelude::*;
 use crate::{bucket, config, filter, index, sort, templating, token};
 
@@ -130,5 +131,11 @@ impl<'env> App<'env> {
     /// Check if filter output was defined.
     pub fn has_range(&self) -> bool {
         self.skip > 0 || self.limit < usize::MAX
+    }
+
+    /// Apply app-level sorting and range trim.
+    pub fn apply_range(&self, entries: &mut Vec<(Entry, Rc<str>)>) {
+        entries.truncate(entries.len().saturating_sub(self.skip));
+        entries.drain(..(entries.len().saturating_sub(self.limit)));
     }
 }

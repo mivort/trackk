@@ -115,11 +115,10 @@ fn show_section(
     let limit = app.limit.min(count); // TODO: P2: support report-defined limit
 
     let sort = if app.sort.is_empty() { &sort::parse_rules(sorting)? } else { &app.sort };
-    sort::sort_entries(&mut entries, sort)?;
+    sort::sort_entries(&mut entries, sort);
 
     if app.has_range() {
-        entries.truncate(entries.len().saturating_sub(app.skip));
-        entries.drain(..(entries.len().saturating_sub(app.limit)));
+        app.apply_range(&mut entries);
     }
 
     if entries.is_empty() {

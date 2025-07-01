@@ -93,8 +93,9 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Info(info)) => {
-            // TODO: P2: deprecate this command in favor of info report
-            ids.append_shorthands(info.ids, &app)?;
+            // TODO: P2: deprecate this command in favor of info report?
+            app.merge_filter_args(&info.filter_args)?;
+            ids.append_shorthands(info.filter_args.id, &app)?;
 
             let filters = filter::Filter {
                 ids: &ids,
