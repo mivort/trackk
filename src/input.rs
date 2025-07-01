@@ -1,9 +1,10 @@
 use std::io::{Write, stdin, stdout};
-use std::rc::Rc;
+
+use minijinja::Template;
 
 use crate::app::App;
 use crate::display::{EntryContext, RowContext};
-use crate::entry::Entry;
+use crate::entry::EntryPath;
 use crate::prelude::*;
 
 /// Read user input from stdin.
@@ -22,9 +23,9 @@ pub fn prompt(prompt: &str) -> Result<String> {
 /// When several tasks match criteria, show the task picker.
 pub fn pick_prompt<'a>(
     action: &str,
-    mut entries: Vec<(Entry, Rc<str>)>,
+    mut entries: Vec<EntryPath>,
     app: &'a App<'a>,
-) -> Result<Vec<(Entry, Rc<str>)>> {
+) -> Result<Vec<EntryPath>> {
     if entries.len() < 2 {
         return Ok(entries);
     }
@@ -38,15 +39,57 @@ pub fn pick_prompt<'a>(
         .load_template(app.config.templates.picker())
         .with_context(|| format!("Unable to load picker template: {template_id}"))?;
 
-    let count = entries.len();
-    let limit = count.min(9);
-
     let j2 = &templates.j2;
     let template = j2.get_template(template_id)?;
+
+    'prompt: loop {
+        let count = entries.len();
+        let limit = count.min(9);
+        let subset = &entries[(count - limit)..];
+
+        let input = render_entries(action, &template, template_id, subset, count, limit)?;
+
+        let mut selected = vec![];
+        let mut filter = vec![];
+
+        for tok in input.split(" ").filter(|s| !s.is_empty()) {
+            match tok {
+                "A" | "a" => break 'prompt,
+                "Q" | "q" => return Ok(vec![]),
+                _ => {}
+            }
+
+            if let Ok(numeric) = tok.parse::<usize>() {
+                if numeric > limit {
+                    bail!("Enter number from 1 to {}", limit);
+                }
+                selected.push(numeric);
+                continue;
+            }
+
+            filter.push(tok);
+        }
+
+        retain_ids(&mut entries, count, limit, &selected, &filter);
+
+        if entries.len() <= 1 || !selected.is_empty() {
+            break;
+        }
+    }
+
+    Ok(entries)
+}
+
+/// Render list of entries to pick from and prompt line.
+fn render_entries(
+    action: &str,
+    template: &Template,
+    template_id: &str,
+    subset: &[EntryPath],
+    count: usize,
+    limit: usize,
+) -> Result<String> {
     let out = std::io::stdout();
-
-    let subset = &entries[(count - limit)..];
-
     for (lineno, (entry, path)) in subset.iter().enumerate() {
         let context = RowContext {
             entry: &EntryContext {
@@ -64,39 +107,26 @@ pub fn pick_prompt<'a>(
             .with_context(|| format!("Unable to render picker template: {}", template_id))?;
     }
 
-    let input = prompt(&format!(
-        "{action}: a: all ({count}) / 1..{limit}: select / q: cancel: [1] "
-    ))?;
+    prompt(&format!(
+        "[{count}] {action}: a: all / 1..{limit}: select / text: filter / q: cancel: "
+    ))
+}
 
-    let mut selected = vec![];
-
-    for tok in input.split(" ").filter(|s| !s.is_empty()) {
-        match tok {
-            "A" | "a" => return Ok(entries),
-            "Q" | "q" => return Ok(vec![]),
-            _ => {}
-        }
-
-        let pick = tok
-            .parse::<usize>()
-            .context("Non-numeric input in picker")?;
-        if pick > limit {
-            bail!("Enter number from 1 to {}", limit);
-        }
-        selected.push(pick);
-    }
-
+/// Keep only entries with matching indices.
+fn retain_ids(
+    entries: &mut Vec<EntryPath>,
+    count: usize,
+    limit: usize,
+    selected: &[usize],
+    filter: &[&str],
+) {
     let mut retain_idx: usize = 0;
-    entries.retain(|_| {
+    entries.retain(|(e, _)| {
         let rev_idx = count - retain_idx;
-        if rev_idx <= limit && selected.contains(&rev_idx) {
-            retain_idx += 1;
-            true
-        } else {
-            retain_idx += 1;
-            false
-        }
-    });
+        let selected = selected.is_empty() || rev_idx <= limit && selected.contains(&rev_idx);
+        let matches = filter.is_empty() || filter.iter().any(|f| e.title().contains(*f));
 
-    Ok(entries)
+        retain_idx += 1;
+        matches && selected
+    });
 }

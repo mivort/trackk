@@ -1,6 +1,7 @@
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::{BTreeSet, HashMap};
+use std::rc::Rc;
 use time::{OffsetDateTime, UtcDateTime};
 use uuid::Uuid;
 
@@ -10,6 +11,9 @@ use crate::dateexp::{eval, parse_date};
 use crate::templates::dates;
 use crate::token::Token;
 use crate::{app::App, prelude::*};
+
+/// Tuple containing entry and path to its bucket.
+pub type EntryPath = (Entry, Rc<str>);
 
 /// Base entry storage with ID, title text and date properties.
 #[derive(Serialize, Deserialize, Default, Clone)]
@@ -315,6 +319,11 @@ impl Entry {
         // TODO: P2: in case if repeat is set, check if at least 'due' or 'when' is not empty.
 
         Ok(())
+    }
+
+    /// Return first line of the description.
+    pub fn title(&self) -> &str {
+        self.desc.lines().next().unwrap_or_default()
     }
 }
 
