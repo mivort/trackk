@@ -9,7 +9,9 @@ const BIN_NAME: &str = "trk";
 fn cmd_base() -> Command {
     let dir = testdir!();
     let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
-    cmd.env("TRACKK_DATA", dir).env("TRACKK_CONFIG", "");
+    cmd.env("TRACKK_DATA", dir)
+        .env("TRACKK_CONFIG", "")
+        .env("RUST_BACKTRACE", "1");
     cmd
 }
 

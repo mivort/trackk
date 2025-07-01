@@ -184,12 +184,10 @@ impl IdFilter {
                 self.only_active = false;
                 continue;
             });
-            if shorthand > 999 {
-                self.index.push(id);
-                self.only_active = false;
-                continue;
-            }
             let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
+                if shorthand <= 999 {
+                    bail!("Entry with shorthand {shorthand} not found in index");
+                }
                 self.index.push(id);
                 self.only_active = false;
                 continue;
