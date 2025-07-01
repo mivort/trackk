@@ -46,7 +46,7 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         ids,
         query: &mut Default::default(),
     };
-    let mut entries = filter_all_entries(&filters, app)?;
+    let mut entries = fetch_entries(&filters, app.filter.index(), app)?;
 
     if entries.is_empty() {
         bail!("No entries match the criteria");

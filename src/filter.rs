@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use crate::args::FilterArgs;
+use crate::config::query::IndexType;
 use crate::dateexp::{eval, parse_filter};
 use crate::entry::{Entry, FieldRef};
 use crate::token::Token;
@@ -20,6 +21,9 @@ pub struct Filter<'a> {
 pub struct QueryFilter {
     /// Match expression to eval on entries.
     expression: Vec<Token>,
+
+    /// Index type expected to use with expression.
+    index: IndexType,
 }
 
 impl QueryFilter {
@@ -58,6 +62,11 @@ impl QueryFilter {
             self.expression.push(Token::And);
         }
     }
+
+    /// Return current query index type.
+    pub fn index(&self) -> IndexType {
+        self.index
+    }
 }
 
 /// Parse filter expressions and combine these with 'and' operator.
@@ -75,11 +84,10 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
 
     if let Some(query) = &args.query {
         let append = !expression.is_empty();
-        let filter = app.config.query(query);
-        let filter = filter
-            .with_context(|| format!("Query '{query}' not defined"))?
-            .filter;
-        parse_filter(filter, app, expression)?;
+        let query_data = app.config.query(query);
+        let query_data = query_data.with_context(|| format!("Query '{query}' not defined"))?;
+        filter.index = query_data.index;
+        parse_filter(query_data.filter, app, expression)?;
 
         if append {
             expression.push(Token::And)
