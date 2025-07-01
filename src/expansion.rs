@@ -158,6 +158,7 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
         idx[ctx].push((rg(r"^([0-9]+)$")?, vec!["--id=$1".into()]));
         idx[ctx].push((rg(r"^([0-9a-f]{4,8}.*)")?, vec!["--id=$1".into()]));
 
+        idx[ctx].push((rg(r"^(\w+)~$")?, vec!["--query=$1".into()]));
         idx[ctx].push((
             rg(r"^(\w+)~(\d+)$")?,
             vec!["--query=$1".into(), "--skip=$2".into(), "--limit=1".into()],
