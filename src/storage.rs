@@ -118,17 +118,26 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
 }
 
 /// Produce the list of entries to display or modify.
+///
+/// If any specific ID was provided, index type (usually provided by query)
+/// is overriden based on how shorthand resolution went.
 pub fn fetch_entries(
     filters: &Filter,
     index: IndexType,
     app: &App,
 ) -> Result<Vec<(Entry, Rc<str>)>> {
-    if filters.ids.empty_set() {
+    let ids = filters.ids;
+
+    if ids.empty_set() {
         return Ok(Vec::new());
     }
 
-    if filters.ids.only_active {
-        return filter_active_entries(filters, app);
+    if ids.enabled {
+        return if ids.only_active {
+            filter_active_entries(filters, app)
+        } else {
+            filter_all_entries(filters, app)
+        };
     }
 
     match index {
