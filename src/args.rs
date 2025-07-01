@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::path::PathBuf;
 
+use clap::ArgAction;
 use clap_derive::{Parser, Subcommand, ValueEnum};
 use serde_derive::Deserialize;
 
@@ -25,8 +26,8 @@ pub struct Args {
     pub filter_args: FilterArgs,
 
     /// Enable verbose output.
-    #[arg(long, short, global = true)]
-    pub verbose: bool,
+    #[arg(long, short, global = true, action = ArgAction::Count)]
+    pub verbose: u8,
 
     /// Disable all logging messages.
     #[arg(long, short, global = true)]

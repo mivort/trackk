@@ -141,7 +141,13 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
     ));
 
     let mut filter_rules = |ctx: usize| -> Result<_, regex::Error> {
+        // Ignore verbosity flags
+        idx[ctx].push((rg(r"^(-v+)")?, vec!["$1".into()]));
+
+        // Tags with '+'
         idx[ctx].push((rg(r"^\+(\w+)")?, vec!["--filter".into(), "tag:$1".into()]));
+
+        // Tags with '-' - potential conflict with short options
         idx[ctx].push((
             rg(r"^-(\w{2,})")?,
             vec!["--filter".into(), "!tag:$1".into()],

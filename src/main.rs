@@ -50,7 +50,7 @@ fn main() -> Result<()> {
     config.override_from_args(&args);
 
     setup_logging(config.no_color(), &args)?;
-    trace!("Command expanded to: {:?}", exp_args);
+    debug!("Command expanded to: {:?}", exp_args);
 
     let mut app = app::App::new(config);
     app.merge_filter_args(&args.filter_args)?;
@@ -270,15 +270,19 @@ fn setup_logging(no_color: bool, args: &Args) -> Result<(), log::SetLoggerError>
                 let reset = RESET;
                 let color = match record.level() {
                     Level::Info => fg(11),
+                    Level::Debug => fg(13),
                     Level::Warn => fg(10),
                     Level::Error => fg(9),
                     Level::Trace => fg(12),
-                    _ => "",
                 };
                 out.finish(format_args!("{color}●{reset} {message}",))
             }
         })
-        .level(if args.verbose { Trace } else { Info })
+        .level(match args.verbose {
+            0 => Info,
+            1 => Debug,
+            _ => Trace,
+        })
         .chain(std::io::stdout())
         .apply()
 }
