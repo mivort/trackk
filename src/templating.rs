@@ -1,6 +1,8 @@
 use minijinja as mj;
+use std::fs;
 use unicode_width::UnicodeWidthStr;
 
+use crate::app::App;
 use crate::config::Config;
 use crate::prelude::*;
 use crate::templates::{colors, dates, layout, strings};
@@ -111,7 +113,7 @@ impl<'env> Templates<'env> {
     }
 
     /// Check template ID existence, if template doesn't exist yet - load and parse it.
-    pub fn load_template(&mut self, template: &str) -> Result<()> {
+    pub fn load_template(&mut self, template: &str, app: &App) -> Result<()> {
         let j2 = &mut self.j2;
         let err = unwrap_err_or!(j2.get_template(template), _, { return Ok(()) });
 
@@ -122,8 +124,15 @@ impl<'env> Templates<'env> {
         if let Some((id, content)) = builtin_template(template) {
             j2.add_template(id, content)?;
         } else {
-            // TODO: P3: resolve external templates
-            todo!()
+            // TODO: P3: handle templates in config directory
+
+            let mut template_path = app.config.data_path().with_context(|| {
+                format!("Unable to find template in data directory: {template}")
+            })?;
+            template_path.push(template);
+
+            let template_data = fs::read_to_string(&template_path)?;
+            j2.add_template(template.to_owned().leak(), template_data.leak())?;
         }
 
         Ok(())

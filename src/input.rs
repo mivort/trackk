@@ -36,7 +36,7 @@ pub fn pick_prompt<'a>(
 
     templates.init(app.ts, &app.config)?;
     templates
-        .load_template(app.config.templates.picker())
+        .load_template(app.config.templates.picker(), app)
         .with_context(|| format!("Unable to load picker template: {template_id}"))?;
 
     let j2 = &templates.j2;

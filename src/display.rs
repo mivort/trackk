@@ -127,13 +127,13 @@ fn show_section(
 
     if !header.is_empty() {
         templates
-            .load_template(header)
+            .load_template(header, app)
             .with_context(|| format!("Unable to load header template: {header}"))?;
     }
 
     if !template.is_empty() {
         templates
-            .load_template(template)
+            .load_template(template, app)
             .with_context(|| format!("Unable to load template: {template}"))?;
     }
 
@@ -182,7 +182,7 @@ pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Res
     templates.init(app.ts, &app.config)?;
 
     let template_id = app.config.templates.entry();
-    templates.load_template(template_id)?;
+    templates.load_template(template_id, app)?;
 
     let j2 = &mut templates.j2;
     let template = j2.get_template(template_id)?;
