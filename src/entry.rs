@@ -113,9 +113,11 @@ impl Entry {
         }
 
         for arg in &args.append {
-            // TODO: P2: append to the first line
-            self.desc.push(' ');
-            self.desc.push_str(arg);
+            append_title(&mut self.desc, arg);
+        }
+
+        for arg in &args.annotate {
+            annotate_desc(&mut self.desc, arg);
         }
 
         if let Some(status) = &args.status {
@@ -427,4 +429,19 @@ impl FieldRef {
             _ => false,
         }
     }
+}
+
+/// Insert space and string to entry's first line.
+fn append_title(title: &mut String, append: &str) {
+    let newline_pos = title.lines().next().unwrap_or_default().len();
+    if !append.starts_with(' ') {
+        title.insert(newline_pos, ' ');
+    }
+    title.insert_str(newline_pos + 1, append);
+}
+
+/// Append to entry description adding a new line.
+fn annotate_desc(desc: &mut String, annotate: &str) {
+    desc.push('\n');
+    desc.push_str(annotate);
 }
