@@ -196,11 +196,12 @@ impl Token {
         // TODO: P2: support correct precedence in expression: 'when:-1d'
 
         match self {
+            Add(true) | Sub(true) => (10, false),
             FuzzyEq => (9, true),
             Not => (8, false),
             At => (7, true),
             Mul | Div | Mod => (6, true),
-            Add(_) | Sub(_) => (5, true),
+            Add(false) | Sub(false) => (5, true),
             Less | LessEq | Greater | GreaterEq => (4, true),
             Eq | NotEq => (3, true),
             And => (2, true),
@@ -212,14 +213,14 @@ impl Token {
     }
 
     /// If operator can be used in unary form, return it with mode flag and new assoc flag.
-    pub fn to_unary(&self) -> (Self, bool) {
+    pub fn to_unary(&self, prec: u8) -> (Self, bool, u8) {
         use Token::*;
 
         match self {
-            Add(_) => (Add(true), false),
-            Sub(_) => (Sub(true), false),
-            Not => (Not, false),
-            _ => (self.clone(), true),
+            Add(_) => (Add(true), false, 10),
+            Sub(_) => (Sub(true), false, 10),
+            Not => (Not, false, prec),
+            _ => (self.clone(), true, prec),
         }
     }
 
@@ -332,20 +333,6 @@ impl Token {
         }
     }
 
-    /// Perform logical AND.
-    pub fn and(self, rhs: Self) -> Result<Self> {
-        match (&self, &rhs) {
-            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(*lhs && *rhs)),
-            (Self::Bool(lhs), rhs) => Ok(if *lhs { rhs.clone() } else { Self::Bool(false) }),
-            (lhs, Self::Bool(rhs)) => Ok(if *rhs { lhs.clone() } else { Self::Bool(false) }),
-            _ => bail!(
-                "At least one of 'and' ('&&') arguments should be a boolean (got {} and {})",
-                self.ttype(),
-                rhs.ttype()
-            ),
-        }
-    }
-
     /// Check if expression is boolean 'true' - otherwise produce 'else' value.
     /// Other operators may interpret 'else' as 'false', but 'else' used on itself
     /// always selects the right branch.
@@ -364,16 +351,19 @@ impl Token {
         }
     }
 
+    /// Perform logical AND.
+    pub fn and(self, rhs: Self) -> Self {
+        match (&self, &rhs) {
+            (Self::Bool(false) | Self::Else, _) => self,
+            _ => rhs,
+        }
+    }
+
     /// Perform logical OR.
-    ///
-    /// NOTE: All non-boolean values are intentionally resolved to 'true' to
-    /// prevent ternary operator-like usage caveat (`x < 0 and false or true`)
-    /// and enable 'coalesce'-like usage (`possibly_empty or value`).
-    pub fn or(self, rhs: Self) -> Result<Self> {
-        match (self, rhs) {
-            (Self::Bool(lhs), Self::Bool(rhs)) => Ok(Self::Bool(lhs || rhs)),
-            (Self::Bool(lhs), rhs) => Ok(if lhs { Self::Bool(true) } else { rhs }),
-            (lhs, _) => Ok(lhs),
+    pub fn or(self, rhs: Self) -> Self {
+        match (&self, &rhs) {
+            (Self::Bool(false) | Self::Else, _) => rhs,
+            _ => self,
         }
     }
 

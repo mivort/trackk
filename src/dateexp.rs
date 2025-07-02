@@ -98,7 +98,7 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                 Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
                 | GreaterEq | NotEq | And | Or | Not | If | Else => {
                     let (prec, left_assoc) = tok.prec_and_assoc();
-                    let (tok, left_assoc) = if mode.expects_arg() {
+                    let (prec, tok, left_assoc) = if mode.expects_arg() {
                         if let Div = tok {
                             let (regex, remainder) = parse_regex(&input[end..])?;
                             output.push(Regex(regex));
@@ -107,7 +107,7 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                             continue 'outer;
                         }
 
-                        let (tok, left_assoc) = tok.to_unary();
+                        let (tok, left_assoc, prec) = tok.to_unary(prec);
                         if left_assoc {
                             bail!(
                                 "Expected {}, got operator '{}' at position {}",
@@ -116,9 +116,9 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                                 start
                             );
                         }
-                        (tok, left_assoc)
+                        (prec, tok, left_assoc)
                     } else {
-                        (tok, left_assoc)
+                        (prec, tok, left_assoc)
                     };
 
                     while let Some(top) = op_stack.pop_if(|top| {
@@ -264,11 +264,11 @@ pub fn eval(
                 _ => bail!("'@' operator haven't got enough arguments"),
             },
             And => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.and(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.and(rhs)),
                 _ => bail!("'and' ('&&') operator haven't got enough arguments"),
             },
             Or => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.or(rhs)?),
+                (Some(rhs), Some(lhs)) => stack.push(lhs.or(rhs)),
                 _ => bail!("'or' ('||') operator haven't got enough arguments"),
             },
             Eq => match (stack.pop(), stack.pop()) {

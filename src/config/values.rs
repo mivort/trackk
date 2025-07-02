@@ -54,15 +54,15 @@ impl ValuesConfig {
                     concat!(" + ", stringify!(sig((now - created) / 10mil) * 0.5)),
                     ")",
                     " * ",
-                    stringify!((end:false and 1 or 0)), // Only apply due/created if end is not set
+                    stringify!((0 if end else 1)), // Only apply due/created if end is not set
                 ),
                 concat!(
                     " - ",
                     stringify!((end:false and 0 or (sig((now - (end or now)) / 10mil) - 0.25) * 2))
                 ),
-                " + (status == started and 1 or 0)",
-                " + (status == blocked and -1 or 0)",
-                " + (status == deleted and -20 or 0)",
+                " + (1 if status == started else 0)",
+                " + (-1 if status == blocked else 0)",
+                " + (-20 if status == deleted else 0)",
             );
         }
         &self.urgency_formula
