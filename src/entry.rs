@@ -255,7 +255,10 @@ impl Entry {
 
         let date = parse_date(repeat, app, self)
             .with_context(|| format!("Unable to parse repeat date: '{}'", repeat))?;
-        let date = unwrap_some_or!(date, { return Ok(None) });
+        let date = unwrap_some_or!(date, {
+            info!("Task is not repeated: condition is not met");
+            return Ok(None);
+        });
 
         let mut new_entry = self.clone();
         new_entry.copy(app);
