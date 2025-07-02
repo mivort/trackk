@@ -6,6 +6,10 @@ use serde_derive::Deserialize;
 #[derive(Deserialize, Default)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ValuesConfig {
+    /// Default status to assign upon creation.
+    #[serde(default)]
+    initial_status: Box<str>,
+
     /// List of statuses which are considered as 'active'.
     #[serde(default)]
     pub active_status: HashSet<String>,
@@ -25,6 +29,18 @@ pub struct ValuesConfig {
     /// Urgency formula to use on entries.
     #[serde(default)]
     pub urgency_formula: Box<str>,
+
+    /// Perform validation query when entry is created or modified.
+    #[serde(default)]
+    _validation_query: Box<str>, // TODO: P1: support validaton queries.
+
+    /// Default time string to assign as 'when'.
+    #[serde(default)]
+    _assign_when: Box<str>, // TODO: P2: support default when value
+
+    /// Default time string to assign as 'due'.
+    #[serde(default)]
+    _assign_due: Box<str>, // TODO: P2: support default due value
 }
 
 impl ValuesConfig {
@@ -59,5 +75,10 @@ impl ValuesConfig {
         } else {
             Cow::Borrowed(&self.repeat_status)
         }
+    }
+
+    /// Status which is assigned by default when entry is created.
+    pub fn initial_status(&self) -> &str {
+        if self.initial_status.is_empty() { "pending" } else { &self.initial_status }
     }
 }

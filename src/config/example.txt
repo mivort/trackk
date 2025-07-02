@@ -20,6 +20,8 @@
 
   {c}// Entry value options.{cl}
   values: {{
+    initial_status: "{initial_status}", {c}// Status assigned upon entry creation.{cl}
+
     {c}// List of statuses which are considered as 'active' (and tracked in 'active'
     // index for quick access).{cl}
     active_status: {active_status},
@@ -34,7 +36,6 @@
 
   {c}// Entry values assigned by default.{cl}
   defaults: {{
-    status_initial: "{status_initial}", {c}// Status assigned upon entry creation.{cl}
     due: "", {c}// Default due date (none if empty).{cl}
   }},
 

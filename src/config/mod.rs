@@ -47,10 +47,6 @@ pub struct Config {
     #[serde(default)]
     pub colors: HashMap<String, ColorConfig>,
 
-    /// New issue default values.
-    #[serde(default)]
-    pub defaults: DefaultsConfig,
-
     /// Entry values config.
     #[serde(default)]
     pub values: ValuesConfig,
@@ -103,22 +99,6 @@ pub struct ConfigLocal {
 
     #[serde(skip)]
     config_path: PathBuf,
-}
-
-#[derive(Deserialize, Default)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
-pub struct DefaultsConfig {
-    /// Default status to assign upon creation.
-    #[serde(default)]
-    status_initial: Box<str>,
-
-    /// Default time string to assign as 'when'.
-    #[serde(default)]
-    _when: Box<str>, // TODO: P2: support default when value
-
-    /// Default time string to assign as 'due'.
-    #[serde(default)]
-    _due: Box<str>, // TODO: P2: support default due value
 }
 
 #[derive(Deserialize, Default)]
@@ -233,19 +213,6 @@ impl Config {
         } else {
             &self.local.data_path
         }
-    }
-}
-
-impl DefaultsConfig {
-    /// Status which is assigned by default when entry is created.
-    pub fn status_initial(&self) -> &str {
-        if self.status_initial.is_empty() { "pending" } else { &self.status_initial }
-    }
-
-    /// Default due date expression.
-    pub fn _due(&self) -> &str {
-        // TODO: P2: assign default due date on creation
-        &self._due
     }
 }
 
@@ -369,7 +336,7 @@ fn format_config(config: &Config) -> Result<String> {
         active_status = serde_json5::to_string(&config.values.active_status)?,
         permit_status = serde_json5::to_string(&config.values.permit_status)?,
         urgency_formula = config.values.urgency_formula(),
-        status_initial = config.defaults.status_initial(),
+        initial_status = config.values.initial_status(),
         picker = config.templates.picker(),
         entry = config.templates.entry(),
     ))
@@ -521,7 +488,6 @@ fn ensure_all_merged() {
         _fields: Default::default(),
         colors: Default::default(),
         date_formats: Default::default(),
-        defaults: Default::default(),
         macros: vec![ExpansionConfig::default()],
         queries: HashMap::from([("test".into(), QueryConfig::default())]),
         reports: Default::default(),

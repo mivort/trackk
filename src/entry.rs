@@ -89,7 +89,7 @@ impl Entry {
         let mut new = Self {
             id: new_uuid.into(),
             created: app.ts,
-            status: app.config.defaults.status_initial().to_string(),
+            status: app.config.values.initial_status().to_string(),
             ..Default::default()
         };
 
@@ -259,7 +259,7 @@ impl Entry {
 
         let mut new_entry = self.clone();
         new_entry.copy(app);
-        new_entry.status = app.config.defaults.status_initial().to_owned();
+        new_entry.status = app.config.values.initial_status().to_owned();
         new_entry.end = None;
 
         info!(
