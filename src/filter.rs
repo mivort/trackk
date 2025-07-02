@@ -75,7 +75,8 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
 
     for expr in &args.filter {
         let append = !expression.is_empty();
-        parse_filter(expr, app, expression)?;
+        parse_filter(expr, app, expression)
+            .with_context(|| format!("Unable to parse filter: '{expr}'"))?;
 
         if append {
             expression.push(Token::And)
@@ -86,7 +87,8 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         let append = !expression.is_empty();
         let query_data = app.config.query(query)?;
         filter.index = query_data.index;
-        parse_filter(query_data.filter, app, expression)?;
+        parse_filter(query_data.filter, app, expression)
+            .with_context(|| format!("Unable to parse query filter: '{}'", query_data.filter))?;
 
         if append {
             expression.push(Token::And)
@@ -96,7 +98,9 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
     for title in &args.title {
         let token = if title.starts_with('/') && title.ends_with('/') && title.len() > 1 {
             let slice = &title[1..(title.len() - 1)];
-            Token::Regex(Rc::from(regex::Regex::new(slice)?))
+            Token::Regex(Rc::from(
+                regex::Regex::new(slice).context("Unable to parse regex filter")?,
+            ))
         } else {
             Token::String(Rc::from(title.as_str()))
         };
