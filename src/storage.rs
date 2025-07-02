@@ -80,8 +80,8 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
             break;
         }
 
-        // TODO: P2: allow to re-run editor in case if validation fails
-        bucket_entry.validate(&app.config)?;
+        // TODO: P3: allow to re-run editor in case if validation fails
+        bucket_entry.validate(app)?;
 
         if !entry.differs(bucket_entry) {
             continue;

@@ -149,7 +149,7 @@ fn main() -> Result<()> {
                 }
             }
 
-            entry.validate(&app.config)?;
+            entry.validate(&app)?;
             storage::add_entry(entry, &app)?;
         }
 

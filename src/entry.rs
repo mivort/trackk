@@ -312,16 +312,24 @@ impl Entry {
 
     /// Check issue validity and produce error message in case if required data is missing.
     /// If possible, fix the status value.
-    pub fn validate(&self, config: &Config) -> Result<()> {
+    pub fn validate(&self, app: &App) -> Result<()> {
         if self.desc.is_empty() {
             bail!("Entry title should not be empty");
         }
 
-        if self.end.is_some() && config.values.active_status.contains(&self.status) {
+        if self.end.is_some() && app.config.values.active_status.contains(&self.status) {
             bail!("End date should be only set for complete/deleted/inactive entries");
         }
 
-        // TODO: P2: in case if repeat is set, check if at least 'due' or 'when' is not empty.
+        if let Some(repeat) = &self.repeat {
+            let date = parse_date(repeat, app, self)
+                .with_context(|| format!("Unable to parse repeat date: '{}'", repeat))?;
+            if date.is_none() {
+                warn!(
+                    "Task is set to repeat, but it WON'T be repeated due to non-matching condition"
+                );
+            }
+        }
 
         Ok(())
     }
