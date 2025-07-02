@@ -104,6 +104,12 @@ pub enum Token {
     #[token("at")]
     At,
 
+    #[token("if")]
+    If,
+
+    #[token("else")]
+    Else,
+
     // TODO: P2: add 'functions': 'min', 'max', 'clamp', 'pow'
     // TODO: P2: add 'until' operator which compares the value vs. max
     //           and returns either value itself or 'false'
@@ -199,6 +205,7 @@ impl Token {
             Eq | NotEq => (3, true),
             And => (2, true),
             Or => (1, true),
+            If | Else => (0, true),
             String(_) | Reference(_) | LParen | RParen | Bool(_) | Regex(_) | Duration(_)
             | Date(_) | Func(_) => panic!("Token {:?} is not operator", self),
         }
@@ -336,6 +343,24 @@ impl Token {
                 self.ttype(),
                 rhs.ttype()
             ),
+        }
+    }
+
+    /// Check if expression is boolean 'true' - otherwise produce 'else' value.
+    /// Other operators may interpret 'else' as 'false', but 'else' used on itself
+    /// always selects the right branch.
+    pub fn r#if(self, rhs: Self) -> Self {
+        match rhs {
+            Self::Bool(true) => self,
+            _ => Self::Else,
+        }
+    }
+
+    /// Check if expression is 'else' produced by 'if' - otherwise return right argument.
+    pub fn r#else(self, rhs: Self) -> Self {
+        match self {
+            Self::Else => rhs,
+            _ => self,
         }
     }
 

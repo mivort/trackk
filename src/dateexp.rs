@@ -21,7 +21,7 @@ pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<Option<i64>> 
     match res {
         Token::Date(date) => Ok(Some(date)),
         Token::Duration(rel) => Ok(Some(app.ts + rel as i64)),
-        Token::Bool(false) => Ok(None),
+        Token::Bool(false) | Token::Else => Ok(None),
         Token::Bool(true) => bail!("Date expression returned 'true'"),
         _ => bail!(
             "Date expression should return date, duration or 'false' (got {})",
@@ -96,7 +96,7 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                     mode = Mode::FnParen;
                 }
                 Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-                | GreaterEq | NotEq | And | Or | Not => {
+                | GreaterEq | NotEq | And | Or | Not | If | Else => {
                     let (prec, left_assoc) = tok.prec_and_assoc();
                     let (tok, left_assoc) = if mode.expects_arg() {
                         if let Div = tok {
@@ -306,6 +306,14 @@ pub fn eval(
             FuzzyEq => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(&rhs, issue, ts)?),
                 _ => bail!("':' operator haven't got enough arguments"),
+            },
+            If => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.r#if(rhs)),
+                _ => bail!("'if' operator haven't got enough arguments"),
+            },
+            Else => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => stack.push(lhs.r#else(rhs)),
+                _ => bail!("'else' operator haven't got enough arguments"),
             },
             LParen | RParen => {
                 panic!()

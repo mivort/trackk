@@ -229,6 +229,7 @@ cmd_context! {
     Info: "info";
     Config: "config";
     Sync: "sync";
+    Calc: "calc";
 }
 
 impl Default for CmdContext {
