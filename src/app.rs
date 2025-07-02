@@ -70,7 +70,7 @@ impl<'env> App<'env> {
             self.sort = sort::parse_rules(sort)?;
         }
 
-        self.limit = args.limit.min(self.limit);
+        self.limit = args.limit.unwrap_or(usize::MAX).min(self.limit);
         self.skip = args.skip.max(self.skip);
 
         Ok(())

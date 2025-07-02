@@ -152,8 +152,8 @@ pub struct FilterArgs {
     pub sort: Option<Box<str>>,
 
     /// Limit the output by the provided value.
-    #[arg(long, default_value_t = usize::MAX)]
-    pub limit: usize,
+    #[arg(long)]
+    pub limit: Option<usize>,
 
     /// Skip provided number of topmost filter results.
     #[arg(long, default_value_t = 0)]
