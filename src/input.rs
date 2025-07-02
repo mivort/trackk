@@ -70,6 +70,11 @@ pub fn pick_prompt<'a>(
             filter.push(tok);
         }
 
+        if selected.is_empty() && filter.is_empty() {
+            entries.drain(..entries.len() - 1);
+            break;
+        }
+
         retain_ids(&mut entries, count, limit, &selected, &filter);
 
         if entries.len() <= 1 || !selected.is_empty() {
@@ -108,7 +113,7 @@ fn render_entries(
     }
 
     prompt(&format!(
-        "[{count}] {action}: a: all / 1..{limit}: select / text: filter / q: cancel: "
+        "[{count}] {action}: a: all / 1..{limit}: select / text: filter / q: cancel [1]: "
     ))
 }
 
