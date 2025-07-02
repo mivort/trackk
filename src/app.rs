@@ -8,6 +8,7 @@ use crate::args::FilterArgs;
 use crate::dateexp::parse_local_exp;
 use crate::entry::Entry;
 use crate::prelude::*;
+use crate::sort::SortingRule;
 use crate::{bucket, config, filter, index, sort, templating, token};
 
 /// App context which provides on-demand loading of data.
@@ -126,6 +127,11 @@ impl<'env> App<'env> {
                 .with_context(|| format!("Unable to parse urgency formula: '{}'", formula))?;
             Ok(urgency)
         })
+    }
+
+    /// Acess sorter or fallback to default one (urgency).
+    pub fn sort_or_default(&self) -> &[SortingRule] {
+        if self.sort.is_empty() { &[SortingRule::UrgencyAsc] } else { &self.sort }
     }
 
     /// Check if filter output was defined.

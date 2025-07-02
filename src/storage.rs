@@ -56,7 +56,7 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
     let entries = 'entries: {
         let show_picker = ids.index.len() < entries.len();
         if show_picker || app.has_range() {
-            sort::sort_entries(&mut entries, &app.sort);
+            sort::sort_entries(&mut entries, app.sort_or_default());
             app.apply_range(&mut entries);
         }
 
