@@ -30,15 +30,19 @@ pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<Option<i64>> 
     }
 }
 
-/// Parse and append to filter expression, return number of token added.
+/// Parse and append to filter expression. If experssion wasn't empty,
+/// add new conditions behind '&&' operator.
 ///
 /// If only one token was found in expression, check if it's string or regex,
 /// and add comparison to the title.
 pub fn parse_filter(input: &str, app: &App, output: &mut Vec<Token>) -> Result<()> {
     let before = output.len();
     let res = parse_local_exp(input, app, output);
+    let delta = output.len() - before;
 
-    if output.len() - before == 1 {
+    if delta == 0 {
+        return res;
+    } else if delta == 1 {
         match output.last() {
             Some(Token::String(_)) | Some(Token::Regex(_)) => {
                 output.insert(output.len() - 1, Token::Reference(FieldRef::Title));
@@ -46,6 +50,10 @@ pub fn parse_filter(input: &str, app: &App, output: &mut Vec<Token>) -> Result<(
             }
             _ => {}
         }
+    }
+
+    if before != 0 {
+        output.push(Token::And);
     }
 
     res
@@ -61,6 +69,7 @@ pub fn parse_local_exp(input: &str, app: &App, output: &mut Vec<Token>) -> Resul
 pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -> Result<()> {
     use Token::*;
 
+    let initial = output.len();
     let mut op_stack = Vec::<Token>::new();
     let mut mode = Mode::Arg;
 
@@ -157,7 +166,7 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
         bail!("Mismatched opening bracket");
     }
 
-    if !output.is_empty() && !mode.expects_op() {
+    if output.len() != initial && !mode.expects_op() {
         bail!("Dangling operator at the end of expression");
     }
 

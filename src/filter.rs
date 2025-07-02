@@ -74,25 +74,15 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
     let expression = &mut filter.expression;
 
     for expr in &args.filter {
-        let append = !expression.is_empty();
         parse_filter(expr, app, expression)
             .with_context(|| format!("Unable to parse filter: '{expr}'"))?;
-
-        if append {
-            expression.push(Token::And)
-        }
     }
 
     if let Some(query) = &args.query {
-        let append = !expression.is_empty();
         let query_data = app.config.query(query)?;
         filter.index = query_data.index;
         parse_filter(query_data.filter, app, expression)
             .with_context(|| format!("Unable to parse query filter: '{}'", query_data.filter))?;
-
-        if append {
-            expression.push(Token::And)
-        }
     }
 
     for title in &args.title {
