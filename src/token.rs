@@ -360,6 +360,9 @@ impl Token {
     }
 
     /// Perform logical OR.
+    ///
+    /// Only 'false' booleans are treated as 'false' - that allows to use
+    /// 'or' as coalesce operator for possibly missing values.
     pub fn or(self, rhs: Self) -> Self {
         match (&self, &rhs) {
             (Self::Bool(false) | Self::Else, _) => rhs,

@@ -382,6 +382,64 @@ fn eval_test(expr: &str) -> Result<Token> {
     eval(&output, local, &mut op_stack, &issue)
 }
 
+/// Check ':' op precedence over unary '-'
+#[test]
+fn op_precedence() {
+    let res = eval_test("1d:-1d");
+    assert!(matches!(res, Ok(Token::Bool(false))));
+
+    let res = eval_test("1d:+1d");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("-1d:-1d");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+}
+
+/// Freeze some operations behaviour.
+///
+/// Logical operators behaviour is similar to Ruby - only 'false'
+/// is considered to be 'false', non-boolean values are treated as 'true'.
+#[test]
+fn op_behaviour() {
+    let res = eval_test("0 and true");
+    assert!(
+        matches!(res, Ok(Token::Bool(true))),
+        "Zero numeric values are interpreted as 'true'"
+    );
+
+    let res = eval_test("'' and true");
+    assert!(
+        matches!(res, Ok(Token::Bool(true))),
+        "String values are interpreted as 'true'"
+    );
+
+    let res = eval_test("due and true");
+    assert!(
+        matches!(res, Ok(Token::Bool(false))),
+        "Null values are interpreted as 'false'"
+    );
+
+    // TODO: P2: add test for referenced fields
+
+    let res = eval_test("'' and false or true");
+    assert!(
+        matches!(res, Ok(Token::Bool(true))),
+        "And/or doesn't always work as ternary operator"
+    );
+
+    let res = eval_test("false if true else true");
+    assert!(
+        matches!(res, Ok(Token::Bool(false))),
+        "If/else works as ternary operator"
+    );
+
+    let res = eval_test("(100 if false) and true");
+    assert!(
+        matches!(res, Ok(Token::Else)),
+        "'If' operator result is treated as 'false' (and propagated next)"
+    );
+}
+
 #[test]
 fn functions() {
     let res = eval_test("sqrt(4)");
