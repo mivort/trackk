@@ -9,8 +9,8 @@ use crate::config::{
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::repo;
+use crate::templates::Templates;
 use crate::templates::dates;
-use crate::templating::Templates;
 use crate::{app::App, prelude::*, sort, storage};
 
 #[derive(Serialize)]

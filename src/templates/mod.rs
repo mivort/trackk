@@ -1,3 +1,8 @@
+pub mod colors;
+pub mod dates;
+pub mod layout;
+pub mod strings;
+
 use minijinja as mj;
 use std::fs;
 use std::io::ErrorKind;
@@ -6,7 +11,6 @@ use unicode_width::UnicodeWidthStr;
 use crate::app::App;
 use crate::config::Config;
 use crate::prelude::*;
-use crate::templates::{colors, dates, layout, strings};
 
 /// Rendering template lazy loader.
 pub struct Templates<'env> {
@@ -152,9 +156,9 @@ impl<'env> Templates<'env> {
 
 /// Return one of the built-in templates.
 pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> {
-    const ROW: &str = include_str!("../templates/row.jinja");
-    const ISSUE: &str = include_str!("../templates/issue.jinja");
-    const HEADER: &str = include_str!("../templates/header.jinja");
+    const ROW: &str = include_str!("../../templates/row.jinja");
+    const ISSUE: &str = include_str!("../../templates/issue.jinja");
+    const HEADER: &str = include_str!("../../templates/header.jinja");
 
     match template {
         "header" => Some(("header", HEADER)),

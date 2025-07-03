@@ -24,13 +24,7 @@ mod sync {
     pub(crate) mod driver;
     pub(crate) mod git;
 }
-mod templates {
-    pub(crate) mod colors;
-    pub(crate) mod dates;
-    pub(crate) mod layout;
-    pub(crate) mod strings;
-}
-mod templating;
+mod templates;
 mod token;
 
 use std::borrow::Cow;
@@ -203,7 +197,7 @@ fn main() -> Result<()> {
         Some(Command::Template(args)) => {
             let template = match args {
                 args::TemplateCommand::List => {
-                    templating::print_builtin_templates();
+                    templates::print_builtin_templates();
                     return Ok(());
                 }
                 args::TemplateCommand::Show(template) => template,
@@ -212,7 +206,7 @@ fn main() -> Result<()> {
             use templates::colors::{RESET, fg};
             let (color, reset) = if app.config.no_color() { ("", "") } else { (fg(10), RESET) };
 
-            if let Some((id, content)) = &templating::builtin_template(&template.template) {
+            if let Some((id, content)) = &templates::builtin_template(&template.template) {
                 println!("{color}{{#- TEMPLATE: {} -#}}{reset}", id);
                 print!("{}", content);
                 println!("{color}{{#- END OF TEMPLATE -#}}{reset}");

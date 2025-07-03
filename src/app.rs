@@ -9,7 +9,7 @@ use crate::dateexp::parse_local_exp;
 use crate::entry::Entry;
 use crate::prelude::*;
 use crate::sort::SortingRule;
-use crate::{bucket, config, filter, index, sort, templating, token};
+use crate::{bucket, config, filter, index, sort, templates, token};
 
 /// App context which provides on-demand loading of data.
 #[derive(Default)]
@@ -30,7 +30,7 @@ pub struct App<'env> {
     pub skip: usize,
 
     /// Tera templates reference.
-    pub templates: RefCell<templating::Templates<'env>>,
+    pub templates: RefCell<templates::Templates<'env>>,
 
     /// Parsed entries cache.
     pub cache: RefCell<HashMap<String, Rc<bucket::Bucket>>>,
