@@ -1,4 +1,4 @@
-# Date calc: built-in date calculator
+# Date calc: built-in date offset calculator
 
 Most of date inputs in **trackk** are done in simple single-expression language
 with support for math and values relative to the current date/time, similar to
@@ -16,9 +16,8 @@ date input (so, there's a lot of built-in literals such as `today`, `tomorrow`,
 (`YYYY-MM-DD`) without need to add quotes).
 
 Recurrent tasks store the expression as parameter, and when the recurring task
-is complete, it gets copied with the expression re-evaluated. That way it's
-possible to define more complex repeating patterns. (TODO: add link to separate
-task recurrence article).
+is complete, it gets copied with the expression re-evaluated. Date calculator
+syntax allows to define complex repeat patterns. [More on recurrence][2].
 
 Same expression syntax is used for entry filtering. In case of filters, the
 expression must produce either `true` or `false` to include/exclude the entry
@@ -109,3 +108,4 @@ Precedence and associativity for supported operators:
 
 ---
 [1]: https://taskwarrior.org/docs/dates/
+[2]: RECURRENCE.md
