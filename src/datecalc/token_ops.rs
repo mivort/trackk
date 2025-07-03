@@ -3,6 +3,7 @@ use crate::datecalc::{date_to_sod, duration_to_date};
 use crate::entry::Entry;
 use crate::prelude::*;
 
+use std::cmp::PartialOrd;
 use time::ext::NumericalDuration;
 use time::macros::format_description;
 use time::{OffsetDateTime, Time, UtcDateTime, UtcOffset};
@@ -270,87 +271,23 @@ impl Token {
     }
 
     /// Perform greater comparison.
-    pub fn greater(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        use Token::*;
-
-        match (&self, &rhs) {
-            (Date(lhs), Date(rhs)) => Ok(Bool(lhs > rhs)),
-            (Duration(lhs), Duration(rhs)) => Ok(Bool(lhs > rhs)),
-            (Date(lhs), Duration(rhs)) => Ok(Bool(*lhs > duration_to_date(*rhs, ts))),
-            (Duration(lhs), Date(rhs)) => Ok(Bool(duration_to_date(*lhs, ts) > *rhs)),
-
-            (Bool(false) | Else, Duration(_) | Date(_)) => Ok(Bool(false)),
-            (Duration(_) | Date(_), Bool(false) | Else) => Ok(Bool(false)),
-
-            _ => bail!(
-                "'>' operator got incompatibe arguments ({} and {})",
-                self.ttype(),
-                rhs.ttype()
-            ),
-        }
-    }
-
-    /// Perform greater comparison.
-    pub fn greater_eq(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        use Token::*;
-
-        match (&self, &rhs) {
-            (Date(lhs), Date(rhs)) => Ok(Bool(lhs >= rhs)),
-            (Duration(lhs), Duration(rhs)) => Ok(Bool(lhs >= rhs)),
-            (Date(lhs), Duration(rhs)) => Ok(Bool(*lhs >= duration_to_date(*rhs, ts))),
-            (Duration(lhs), Date(rhs)) => Ok(Bool(duration_to_date(*lhs, ts) >= *rhs)),
-
-            (Bool(false) | Else, Duration(_) | Date(_)) => Ok(Bool(false)),
-            (Duration(_) | Date(_), Bool(false) | Else) => Ok(Bool(false)),
-
-            _ => bail!(
-                "'>=' operator got incompatibe arguments ({} and {})",
-                self.ttype(),
-                rhs.ttype()
-            ),
-        }
-    }
-
-    /// Perform greater comparison.
     pub fn less(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        use Token::*;
-
-        match (&self, &rhs) {
-            (Date(lhs), Date(rhs)) => Ok(Bool(lhs < rhs)),
-            (Duration(lhs), Duration(rhs)) => Ok(Bool(lhs < rhs)),
-            (Date(lhs), Duration(rhs)) => Ok(Bool(*lhs < duration_to_date(*rhs, ts))),
-            (Duration(lhs), Date(rhs)) => Ok(Bool(duration_to_date(*lhs, ts) < *rhs)),
-
-            (Bool(false) | Else, Duration(_) | Date(_)) => Ok(Bool(false)),
-            (Duration(_) | Date(_), Bool(false) | Else) => Ok(Bool(false)),
-
-            _ => bail!(
-                "'<' operator got incompatibe arguments ({} and {})",
-                self.ttype(),
-                rhs.ttype()
-            ),
-        }
+        self.cmp::<Less>(rhs, ts)
     }
 
     /// Perform greater comparison.
     pub fn less_eq(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        use Token::*;
+        self.cmp::<LessEq>(rhs, ts)
+    }
 
-        match (&self, &rhs) {
-            (Date(lhs), Date(rhs)) => Ok(Bool(lhs <= rhs)),
-            (Duration(lhs), Duration(rhs)) => Ok(Bool(lhs <= rhs)),
-            (Date(lhs), Duration(rhs)) => Ok(Bool(*lhs <= duration_to_date(*rhs, ts))),
-            (Duration(lhs), Date(rhs)) => Ok(Bool(duration_to_date(*lhs, ts) <= *rhs)),
+    /// Perform greater comparison.
+    pub fn greater(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
+        self.cmp::<Greater>(rhs, ts)
+    }
 
-            (Bool(false) | Else, Duration(_) | Date(_)) => Ok(Bool(false)),
-            (Duration(_) | Date(_), Bool(false) | Else) => Ok(Bool(false)),
-
-            _ => bail!(
-                "'<=' operator got incompatibe arguments ({} and {})",
-                self.ttype(),
-                rhs.ttype()
-            ),
-        }
+    /// Perform greater comparison.
+    pub fn greater_eq(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
+        self.cmp::<GreaterEq>(rhs, ts)
     }
 
     /// Produce type name of the token.
@@ -383,4 +320,75 @@ impl Token {
             _ => format!("{:?}", self),
         })
     }
+}
+
+impl Token {
+    /// Perform generic comparison.
+    fn cmp<T: Compare>(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
+        use Token::*;
+
+        match (&self, &rhs) {
+            (Date(lhs), Date(rhs)) => Ok(Bool(lhs > rhs)),
+            (Duration(lhs), Duration(rhs)) => Ok(Bool(T::cmp(*lhs, *rhs))),
+            (Date(lhs), Duration(rhs)) => Ok(Bool(T::cmp(*lhs, duration_to_date(*rhs, ts)))),
+            (Duration(lhs), Date(rhs)) => Ok(Bool(T::cmp(duration_to_date(*lhs, ts), *rhs))),
+
+            (Bool(false) | Else, Duration(_) | Date(_)) => Ok(Bool(false)),
+            (Duration(_) | Date(_), Bool(false) | Else) => Ok(Bool(false)),
+
+            _ => bail!(
+                "'{}' operator got incompatibe arguments ({} and {})",
+                T::DISPLAY,
+                self.ttype(),
+                rhs.ttype()
+            ),
+        }
+    }
+}
+
+/// Trait for generic value comparison logic.
+trait Compare {
+    fn cmp<T: PartialOrd>(_: T, _: T) -> bool;
+
+    const DISPLAY: &str;
+}
+
+struct Less;
+struct LessEq;
+struct Greater;
+struct GreaterEq;
+
+impl Compare for Less {
+    #[inline(always)]
+    fn cmp<T: PartialOrd>(lhs: T, rhs: T) -> bool {
+        lhs < rhs
+    }
+
+    const DISPLAY: &str = "<";
+}
+
+impl Compare for LessEq {
+    #[inline(always)]
+    fn cmp<T: PartialOrd>(lhs: T, rhs: T) -> bool {
+        lhs <= rhs
+    }
+
+    const DISPLAY: &str = "<=";
+}
+impl Compare for Greater {
+    #[inline(always)]
+    fn cmp<T: PartialOrd>(lhs: T, rhs: T) -> bool {
+        lhs > rhs
+    }
+
+    const DISPLAY: &str = ">";
+}
+
+impl Compare for GreaterEq {
+    #[inline(always)]
+    fn cmp<T: PartialOrd>(lhs: T, rhs: T) -> bool {
+        lhs >= rhs
+    }
+
+    const DISPLAY: &str = ">=";
 }
