@@ -2,7 +2,7 @@ mod app;
 mod args;
 mod bucket;
 mod config;
-mod dateexp;
+mod datecalc;
 mod display;
 mod editor;
 mod entry;
@@ -25,7 +25,6 @@ mod sync {
     pub(crate) mod git;
 }
 mod templates;
-mod token;
 
 use std::borrow::Cow;
 use std::{env, io};
@@ -171,8 +170,9 @@ fn main() -> Result<()> {
             let mut op_stack = Vec::new();
             let local = app.local_time()?;
 
-            dateexp::parse_exp(&expr, local, &mut output)?;
-            let res = dateexp::eval(&output, local, &mut op_stack, &entry::Entry::default())?;
+            datecalc::parse::parse_exp(&expr, local, &mut output)?;
+            let res =
+                datecalc::eval::eval(&output, local, &mut op_stack, &entry::Entry::default())?;
 
             println!("{}", res.to_string()?);
         }

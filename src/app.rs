@@ -5,11 +5,12 @@ use std::rc::Rc;
 use once_cell::unsync::OnceCell;
 
 use crate::args::FilterArgs;
-use crate::dateexp::parse_local_exp;
+use crate::datecalc::parse::parse_local_exp;
+use crate::datecalc::token;
 use crate::entry::Entry;
 use crate::prelude::*;
 use crate::sort::SortingRule;
-use crate::{bucket, config, filter, index, sort, templates, token};
+use crate::{bucket, config, filter, index, sort, templates};
 
 /// App context which provides on-demand loading of data.
 #[derive(Default)]

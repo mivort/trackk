@@ -6,7 +6,7 @@ use regex::RegexBuilder;
 use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
-use crate::dateexp::parse_date;
+use crate::datecalc::parse::parse_date;
 use crate::entry::Entry;
 use crate::templates::dates;
 use crate::{app::App, prelude::*};

@@ -1,6 +1,6 @@
+use crate::datecalc::token::{SOMEDAY, Token};
 use crate::entry::{Entry, FieldRef};
 use crate::prelude::*;
-use crate::token::{SOMEDAY, Token};
 
 /// Supported built-in functions.
 #[derive(Debug, Clone)]

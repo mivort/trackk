@@ -7,9 +7,9 @@ use uuid::Uuid;
 
 use crate::args::EntryArgs;
 use crate::config::Config;
-use crate::dateexp::{eval, parse_date};
+use crate::datecalc::token::Token;
+use crate::datecalc::{eval::eval, parse::parse_date};
 use crate::templates::dates;
-use crate::token::Token;
 use crate::{app::App, prelude::*};
 
 /// Tuple containing entry and path to its bucket.
