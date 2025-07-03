@@ -365,6 +365,7 @@ impl FieldRef {
             Self::When => issue.when.map(Token::Date).unwrap_or(Token::Bool(false)),
             Self::Due => issue.due.map(Token::Date).unwrap_or(Token::Bool(false)),
             Self::End => issue.end.map(Token::Date).unwrap_or(Token::Bool(false)),
+            Self::Tag if issue.tags.is_empty() => Token::Bool(false),
             _ => Token::Reference(*self),
         }
     }

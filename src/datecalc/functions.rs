@@ -75,6 +75,7 @@ fn length(tok: Option<Token>, entry: &Entry) -> Result<Token> {
     match tok {
         String(val) => Ok(Duration(val.len() as f64)),
         Reference(field) => Ok(Duration(field.length(entry))),
+        Bool(false) | Else => Ok(Duration(0.)),
         _ => bail!("'len' function got incompatible argument ({})", tok.ttype()),
     }
 }

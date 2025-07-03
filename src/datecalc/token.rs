@@ -182,7 +182,7 @@ pub enum Token {
     #[token("title", |_| FieldRef::Title)]
     #[token("desc", |_| FieldRef::Desc)]
     #[token("status", |_| FieldRef::Status)]
-    #[token("tag", |_| FieldRef::Tag)]
+    #[regex("tags?", |_| FieldRef::Tag)]
     #[token("created", |_| FieldRef::Created)]
     #[token("modified", |_| FieldRef::Modified)]
     #[token("when", |_| FieldRef::When)]

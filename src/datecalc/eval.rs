@@ -246,6 +246,30 @@ fn op_behaviour() {
         matches!(res, Ok(Token::Else)),
         "'If' operator result is treated as 'false' (and propagated next)"
     );
+
+    let res = eval_test("not now");
+    assert!(
+        matches!(res, Ok(Token::Bool(false))),
+        "'!' converts date into 'false'"
+    );
+
+    let res = eval_test("not 0");
+    assert!(
+        matches!(res, Ok(Token::Bool(false))),
+        "'!' converts number into 'false'"
+    );
+
+    let res = eval_test("not 'value'");
+    assert!(
+        matches!(res, Ok(Token::Bool(false))),
+        "'!' converts string into 'false'"
+    );
+
+    let res = eval_test("not tag");
+    assert!(
+        matches!(res, Ok(Token::Bool(true))),
+        "'!' converts empty tag list into 'true'"
+    );
 }
 
 #[test]
