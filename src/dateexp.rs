@@ -95,8 +95,8 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                     op_stack.push(tok);
                     mode = Mode::FnParen;
                 }
-                Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less | LessEq | Greater
-                | GreaterEq | NotEq | And | Or | Not | If | Else => {
+                Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less(_) | LessEq(_)
+                | Greater(_) | GreaterEq(_) | NotEq | And | Or | Not | If | Else => {
                     let (prec, left_assoc) = tok.prec_and_assoc();
                     let (prec, tok, left_assoc) = if mode.expects_arg() {
                         if let Div = tok {
@@ -287,22 +287,25 @@ pub fn eval(
                 let out = funcref.exec(stack, issue)?;
                 stack.push(out);
             }
-            Greater => match (stack.pop(), stack.pop()) {
+            Greater(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs, ts)?),
                 _ => bail!("'>' operator haven't got enough arguments"),
             },
-            GreaterEq => match (stack.pop(), stack.pop()) {
+            GreaterEq(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.greater_eq(rhs, ts)?),
                 _ => bail!("'>=' operator haven't got enough arguments"),
             },
-            Less => match (stack.pop(), stack.pop()) {
+            Less(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.less(rhs, ts)?),
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
-            LessEq => match (stack.pop(), stack.pop()) {
+            LessEq(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.less_eq(rhs, ts)?),
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
+            Greater(true) | GreaterEq(true) | Less(true) | LessEq(true) => {
+                todo!() // TODO: P2: provide unary comparison mode support
+            }
             FuzzyEq => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(&rhs, issue, ts)?),
                 _ => bail!("':' operator haven't got enough arguments"),

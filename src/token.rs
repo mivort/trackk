@@ -124,21 +124,21 @@ pub enum Token {
     #[token("~=")]
     NotEq,
 
-    #[token("<")]
-    #[token("before")]
-    Less,
+    #[token("<", |_| false)]
+    #[token("before", |_| false)]
+    Less(bool),
 
-    #[token("<=")]
-    #[token("before-eq")]
-    LessEq,
+    #[token("<=", |_| false)]
+    #[token("before-eq", |_| false)]
+    LessEq(bool),
 
-    #[token(">")]
-    #[token("after")]
-    Greater,
+    #[token(">", |_| false)]
+    #[token("after", |_| false)]
+    Greater(bool),
 
-    #[token(">=")]
-    #[token("after-eq")]
-    GreaterEq,
+    #[token(">=", |_| false)]
+    #[token("after-eq", |_| false)]
+    GreaterEq(bool),
 
     #[token("&&")]
     #[token("and")]
@@ -193,8 +193,6 @@ impl Token {
     pub fn prec_and_assoc(&self) -> (u8, bool) {
         use Token::*;
 
-        // TODO: P2: support correct precedence in expression: 'when:-1d'
-
         match self {
             Add(true) | Sub(true) => (10, false),
             FuzzyEq => (9, true),
@@ -202,7 +200,8 @@ impl Token {
             At => (7, true),
             Mul | Div | Mod => (6, true),
             Add(false) | Sub(false) => (5, true),
-            Less | LessEq | Greater | GreaterEq => (4, true),
+            Less(false) | LessEq(false) | Greater(false) | GreaterEq(false) => (4, true),
+            Less(true) | LessEq(true) | Greater(true) | GreaterEq(true) => (4, false),
             Eq | NotEq => (3, true),
             And => (2, true),
             Or => (1, true),
@@ -220,6 +219,10 @@ impl Token {
             Add(_) => (Add(true), false, 10),
             Sub(_) => (Sub(true), false, 10),
             Not => (Not, false, prec),
+            Less(_) => (Less(true), false, prec),
+            LessEq(_) => (LessEq(true), false, prec),
+            Greater(_) => (Greater(true), false, prec),
+            GreaterEq(_) => (GreaterEq(true), false, prec),
             _ => (self.clone(), true, prec),
         }
     }
