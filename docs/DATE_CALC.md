@@ -84,6 +84,25 @@ Exact or relative date can be specified as one of the supported formats:
   * `len`: string value length in bytes, number of issue tags.
     Example: `len(tag) > 2`.
 
+When writing experssions, operator precedence needs to be considered. Higher
+precedence means that it gets evaluated earlier. For instance, in `a + b * c`
+expression, `*` operator will be processed before `+`. To process sum operation
+first, use braces: `(a + b) * c`.
+
+Precedence and associativity for supported operators:
+
+| Operator                  | Precedence | Associativity |
+|---------------------------|------------|---------------|
+| `+`, `-` (unary)          | 8          | right         |
+| `not`, `at`               | 7          | right         |
+| `*`, `/`, `%`             | 6          | left          |
+| `+`, `-`, (binary)        | 5          | left          |
+| `<`, `<=`, `>`, `>=`      | 4          | left          |
+| `==`, `!=`                | 3          | left          |
+| `and`                     | 2          | left          |
+| `or`                      | 1          | left          |
+| `if`, `else`              | 0          | left          |
+
 ## Absolute date input
 
 ## Relative inputs and aliases
