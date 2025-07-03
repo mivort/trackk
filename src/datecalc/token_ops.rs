@@ -259,14 +259,10 @@ impl Token {
     }
 
     /// Perform logical NOT.
-    pub fn not(self) -> Result<Self> {
+    pub fn not(self) -> Self {
         match self {
-            Self::Bool(val) => Ok(Self::Bool(!val)),
-            Self::Date(_) => Ok(Self::Bool(false)),
-            _ => bail!(
-                "'not' ('!') got incompatible argument ({}), can only be applied to boolean",
-                self.ttype()
-            ),
+            Self::Bool(false) | Self::Else => Self::Bool(true),
+            _ => Self::Bool(false),
         }
     }
 

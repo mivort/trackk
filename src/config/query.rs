@@ -82,7 +82,7 @@ impl Config {
     fn query_backlog(&self) -> QueryData {
         QueryData {
             sorting: "urgency+",
-            filter: "(when or someday) >= 365d and (due or someday) >= 365d and status != started",
+            filter: "(when or someday) >= 365d and (due or someday) >= 365d and status != 'started'",
             index: IndexType::Active,
         }
     }
@@ -90,7 +90,7 @@ impl Config {
     fn query_upcoming(&self) -> QueryData {
         QueryData {
             sorting: "urgency+",
-            filter: "((when >= 3d and when < 365d and due:false) or (due >= 3d and due < 365d)) and status != started",
+            filter: "((when >= 3d and when < 365d and not due) or (due >= 3d and due < 365d)) and status != 'started'",
             index: IndexType::Active,
         }
     }
@@ -98,7 +98,7 @@ impl Config {
     fn query_current(&self) -> QueryData {
         QueryData {
             sorting: "urgency+",
-            filter: "((when < 3d and due:false) or (due >= now and due < 3d)) and status != started",
+            filter: "((when < 3d and not due) or (due >= now and due < 3d)) and status != 'started'",
             index: IndexType::Active,
         }
     }
@@ -106,7 +106,7 @@ impl Config {
     fn query_overdue(&self) -> QueryData {
         QueryData {
             sorting: "urgency+",
-            filter: "due < now and status != started",
+            filter: "after due and status != 'started'",
             index: IndexType::Active,
         }
     }
@@ -114,7 +114,7 @@ impl Config {
     fn query_started(&self) -> QueryData {
         QueryData {
             sorting: "urgency+",
-            filter: "status == started",
+            filter: "status == 'started'",
             index: IndexType::Active,
         }
     }
@@ -122,7 +122,7 @@ impl Config {
     fn query_done_today(&self) -> QueryData {
         QueryData {
             sorting: "end+",
-            filter: "end >= today and status == completed",
+            filter: "end >= today and status == 'completed'",
             index: IndexType::All,
         }
     }

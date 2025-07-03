@@ -82,7 +82,7 @@ pub fn eval(
             },
 
             Not => match stack.pop() {
-                Some(val) => val.not()?,
+                Some(val) => val.not(),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
             },
 

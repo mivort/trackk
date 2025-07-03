@@ -137,7 +137,7 @@ pub enum Token {
     Less(bool),
 
     #[token("<=", |_| false)]
-    #[token("before-eq", |_| false)]
+    #[token("before_eq", |_| false)]
     LessEq(bool),
 
     #[token(">", |_| false)]
@@ -145,7 +145,7 @@ pub enum Token {
     Greater(bool),
 
     #[token(">=", |_| false)]
-    #[token("after-eq", |_| false)]
+    #[token("after_eq", |_| false)]
     GreaterEq(bool),
 
     #[token("&&")]
