@@ -77,8 +77,9 @@ pub enum Token {
     #[regex(r"(?i)dec(ember)?", |lex| relative_month(lex, Month::December))]
     Date(i64),
 
-    #[token("true", |_| true)]
-    #[token("false", |_| false)]
+    #[regex("[Tt]rue", |_| true)]
+    #[regex("[Ff]alse", |_| false)]
+    #[regex("[Nn]one", |_| false)]
     Bool(bool),
 
     Regex(Rc<regex::Regex>),
@@ -94,9 +95,15 @@ pub enum Token {
     #[token("*")]
     Mul,
 
+    // TODO: P2: implement Python-like pow
+    // `#[token("**")]`
+    // `Pow,`
     #[token("/")]
     Div,
 
+    // TODO: P2: implement Python-like integer div
+    // `#[token("//")]`
+    // `DivInt,`
     #[token("%")]
     Mod,
 
@@ -113,6 +120,7 @@ pub enum Token {
     // TODO: P2: add 'functions': 'min', 'max', 'clamp', 'pow'
     // TODO: P2: add 'until' operator which compares the value vs. max
     //           and returns either value itself or 'false'
+    // TODO: P2: replace fuzzy eq with 'in'?
     #[token(":")]
     FuzzyEq,
 

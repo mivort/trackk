@@ -242,4 +242,8 @@ fn match_issue() {
 
     assert_eq!(match_filter("true"), true);
     assert_eq!(match_filter("false"), false);
+
+    assert_eq!(match_filter("when == false"), true);
+    assert_eq!(match_filter("due == false"), true);
+    assert_eq!(match_filter("created != false"), true);
 }
