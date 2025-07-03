@@ -31,7 +31,8 @@ impl Token {
         }
     }
 
-    /// If operator can be used in unary form, return it with mode flag and new assoc flag.
+    /// If operator can be used in unary form, return it with mode flag and new associativity flag.
+    /// Operator precedence can also change (for '+' and '-' operators).
     pub fn to_unary(&self, prec: u8) -> (Self, bool, u8) {
         use Token::*;
 
@@ -74,7 +75,6 @@ impl Token {
             (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs - rhs)),
             (Date(lhs), Duration(rhs)) => Ok(Date(lhs - *rhs as i64)),
             (Date(lhs), Date(rhs)) => Ok(Duration((lhs - rhs) as f64)),
-            (Duration(_), Date(_)) => bail!("Unable substract date from span"),
             _ => bail!(
                 "Unsupported '-' operator arguments ({} and {})",
                 self.ttype(),
@@ -320,6 +320,26 @@ impl Token {
             _ => format!("{:?}", self),
         })
     }
+
+    /// Perform unary less.
+    pub fn unary_less(stack: &mut Vec<Self>, ts: OffsetDateTime) -> Result<Self> {
+        Self::unary_cmp::<Less>(stack.pop(), ts)
+    }
+
+    /// Perform unary less-eq.
+    pub fn unary_less_eq(stack: &mut Vec<Self>, ts: OffsetDateTime) -> Result<Self> {
+        Self::unary_cmp::<LessEq>(stack.pop(), ts)
+    }
+
+    /// Perform unary greater.
+    pub fn unary_greater(stack: &mut Vec<Self>, ts: OffsetDateTime) -> Result<Self> {
+        Self::unary_cmp::<Greater>(stack.pop(), ts)
+    }
+
+    /// Perform unary greater.
+    pub fn unary_greater_eq(stack: &mut Vec<Self>, ts: OffsetDateTime) -> Result<Self> {
+        Self::unary_cmp::<Greater>(stack.pop(), ts)
+    }
 }
 
 impl Token {
@@ -328,7 +348,7 @@ impl Token {
         use Token::*;
 
         match (&self, &rhs) {
-            (Date(lhs), Date(rhs)) => Ok(Bool(lhs > rhs)),
+            (Date(lhs), Date(rhs)) => Ok(Bool(T::cmp(lhs, rhs))),
             (Duration(lhs), Duration(rhs)) => Ok(Bool(T::cmp(*lhs, *rhs))),
             (Date(lhs), Duration(rhs)) => Ok(Bool(T::cmp(*lhs, duration_to_date(*rhs, ts)))),
             (Duration(lhs), Date(rhs)) => Ok(Bool(T::cmp(duration_to_date(*lhs, ts), *rhs))),
@@ -341,6 +361,28 @@ impl Token {
                 T::DISPLAY,
                 self.ttype(),
                 rhs.ttype()
+            ),
+        }
+    }
+
+    /// Unary comparison when used on date produces 'true' or 'false' as result
+    /// of comparison with the current date.
+    fn unary_cmp<T: Compare>(arg: Option<Self>, ts: OffsetDateTime) -> Result<Self> {
+        use Token::*;
+
+        let arg = unwrap_some_or!(arg, {
+            bail!("'{}' operator haven't got the argument", T::DISPLAY);
+        });
+
+        let now = ts.unix_timestamp();
+
+        match arg {
+            Date(date) => Ok(Bool(T::cmp(now, date))),
+            Bool(false) => Ok(Bool(false)),
+            _ => bail!(
+                "Unary '{}' operator got incompatibe argument ({})",
+                T::DISPLAY,
+                arg.ttype()
             ),
         }
     }

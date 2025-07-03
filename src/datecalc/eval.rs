@@ -20,100 +20,103 @@ pub fn eval(
     use Token::*;
 
     for tok in queue {
-        match tok {
-            Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) => stack.push(tok.clone()),
-            Reference(field) => stack.push(field.as_token(issue)),
+        let res = match tok {
+            Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) => tok.clone(),
+            Reference(field) => field.as_token(issue),
             Add(false) => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.sum(rhs)?),
+                (Some(rhs), Some(lhs)) => lhs.sum(rhs)?,
                 _ => bail!("'+' operator haven't got enough arguments"),
             },
             Add(true) => match stack.pop() {
-                Some(rhs) => stack.push(rhs),
+                Some(rhs) => rhs,
                 _ => bail!("Unary '+' operator haven't got enough arguments"),
             },
             Sub(false) => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.sub(rhs)?),
+                (Some(rhs), Some(lhs)) => lhs.sub(rhs)?,
                 _ => bail!("'-' operator haven't got enough arguments"),
             },
             Sub(true) => match stack.pop() {
-                Some(rhs) => stack.push(rhs.neg()?),
+                Some(rhs) => rhs.neg()?,
                 _ => bail!("Unary '-' operator haven't got enough arguments"),
             },
             Mul => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.mul(rhs)?),
+                (Some(rhs), Some(lhs)) => lhs.mul(rhs)?,
                 _ => bail!("'*' operator haven't got enough arguments"),
             },
             Div => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.div(rhs)?),
+                (Some(rhs), Some(lhs)) => lhs.div(rhs)?,
                 _ => bail!("'/' operator haven't got enough arguments"),
             },
             Mod => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.modulo(rhs)?),
+                (Some(rhs), Some(lhs)) => lhs.modulo(rhs)?,
                 _ => bail!("'%' operator haven't got enough arguments"),
             },
             At => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.at(rhs, ts)?),
+                (Some(rhs), Some(lhs)) => lhs.at(rhs, ts)?,
                 _ => bail!("'@' operator haven't got enough arguments"),
             },
             And => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.and(rhs)),
+                (Some(rhs), Some(lhs)) => lhs.and(rhs),
                 _ => bail!("'and' ('&&') operator haven't got enough arguments"),
             },
             Or => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.or(rhs)),
+                (Some(rhs), Some(lhs)) => lhs.or(rhs),
                 _ => bail!("'or' ('||') operator haven't got enough arguments"),
             },
-            Eq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.eq(rhs, issue)?),
-                _ => bail!("'eq' ('==') operator haven't got enough arguments"),
-            },
-            NotEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.not_eq(rhs, issue)?),
-                _ => bail!("'eq' ('!=') operator haven't got enough arguments"),
-            },
-            Not => match stack.pop() {
-                Some(val) => stack.push(val.not()?),
-                _ => bail!("'not' ('!') operator haven't got the argument"),
-            },
-            Func(funcref) => {
-                let out = funcref.exec(stack, issue)?;
-                stack.push(out);
-            }
+            Func(funcref) => funcref.exec(stack, issue)?,
             Greater(false) => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.greater(rhs, ts)?),
+                (Some(rhs), Some(lhs)) => lhs.greater(rhs, ts)?,
                 _ => bail!("'>' operator haven't got enough arguments"),
             },
             GreaterEq(false) => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.greater_eq(rhs, ts)?),
+                (Some(rhs), Some(lhs)) => lhs.greater_eq(rhs, ts)?,
                 _ => bail!("'>=' operator haven't got enough arguments"),
             },
             Less(false) => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.less(rhs, ts)?),
+                (Some(rhs), Some(lhs)) => lhs.less(rhs, ts)?,
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
             LessEq(false) => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.less_eq(rhs, ts)?),
+                (Some(rhs), Some(lhs)) => lhs.less_eq(rhs, ts)?,
                 _ => bail!("'<' operator haven't got enough arguments"),
             },
-            Greater(true) | GreaterEq(true) | Less(true) | LessEq(true) => {
-                todo!() // TODO: P2: provide unary comparison mode support
-            }
+
+            Not => match stack.pop() {
+                Some(val) => val.not()?,
+                _ => bail!("'not' ('!') operator haven't got the argument"),
+            },
+
+            Less(true) => Token::unary_less(stack, ts)?,
+            LessEq(true) => Token::unary_less_eq(stack, ts)?,
+            Greater(true) => Token::unary_greater(stack, ts)?,
+            GreaterEq(true) => Token::unary_greater_eq(stack, ts)?,
+
+            Eq => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => lhs.eq(rhs, issue)?,
+                _ => bail!("'eq' ('==') operator haven't got enough arguments"),
+            },
+            NotEq => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => lhs.not_eq(rhs, issue)?,
+                _ => bail!("'eq' ('!=') operator haven't got enough arguments"),
+            },
             FuzzyEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.fuzzy_eq(&rhs, issue, ts)?),
+                (Some(rhs), Some(lhs)) => lhs.fuzzy_eq(&rhs, issue, ts)?,
                 _ => bail!("':' operator haven't got enough arguments"),
             },
+
             If => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.r#if(rhs)),
+                (Some(rhs), Some(lhs)) => lhs.r#if(rhs),
                 _ => bail!("'if' operator haven't got enough arguments"),
             },
             Else => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => stack.push(lhs.r#else(rhs)),
+                (Some(rhs), Some(lhs)) => lhs.r#else(rhs),
                 _ => bail!("'else' operator haven't got enough arguments"),
             },
             LParen | RParen => {
                 panic!()
             }
-        }
+        };
+        stack.push(res);
     }
 
     let last = stack.last();
@@ -164,6 +167,27 @@ fn eval_test(expr: &str) -> Result<Token> {
     parse_exp(expr, local, &mut output).unwrap();
 
     eval(&output, local, &mut op_stack, &issue)
+}
+
+#[test]
+fn comparisons() {
+    let res = eval_test("1d < 2d");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("today < tomorrow");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("tomorrow < 2d");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("2d < tomorrow");
+    assert!(matches!(res, Ok(Token::Bool(false))));
+
+    let res = eval_test("2d > 1d");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("tomorrow > today");
+    assert!(matches!(res, Ok(Token::Bool(true))));
 }
 
 /// Check ':' op precedence over unary '-'
