@@ -8,7 +8,6 @@ mod editor;
 mod entry;
 mod expansion;
 mod filter;
-mod functions;
 mod hooks;
 mod import {
     pub(crate) mod tw;

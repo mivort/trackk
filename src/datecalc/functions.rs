@@ -1,4 +1,4 @@
-use crate::datecalc::token::{SOMEDAY, Token};
+use super::token::{SOMEDAY, Token};
 use crate::entry::{Entry, FieldRef};
 use crate::prelude::*;
 

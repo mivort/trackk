@@ -1,4 +1,5 @@
 pub mod eval;
+pub mod functions;
 pub mod parse;
 pub mod token;
 pub mod token_ops;
