@@ -182,20 +182,25 @@ fn as_bool(tok: Result<Token>) -> bool {
 }
 
 #[cfg(test)]
-fn as_i64(tok: Result<Token>) -> i64 {
+fn as_date(tok: Result<Token>) -> i64 {
     match tok.as_ref().unwrap() {
         Token::Date(v) => *v,
         _ => panic!("Not date: {tok:?}"),
     }
 }
 
+#[cfg(test)]
+fn as_f64(tok: Result<Token>) -> f64 {
+    match tok.as_ref().unwrap() {
+        Token::Duration(v) => *v,
+        _ => panic!("Not f64: {tok:?}"),
+    }
+}
+
 #[test]
 fn comparisons() {
-    let res = eval_test("1d < 2d");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("today < tomorrow");
-    assert!(matches!(res, Ok(Token::Bool(true))));
+    assert_eq!(as_bool(eval_test("1d < 2d")), true);
+    assert_eq!(as_bool(eval_test("today < tomorrow")), true);
 
     let res = eval_test("tomorrow < 2d");
     assert!(matches!(res, Ok(Token::Bool(true))));
@@ -294,30 +299,21 @@ fn op_behaviour() {
 
 #[test]
 fn functions() {
-    let res = eval_test("sqrt(4)");
-    assert!(matches!(res, Ok(Token::Duration(2.))));
-
-    let res = eval_test("len(tag)");
-    assert!(matches!(res, Ok(Token::Duration(0.))));
-
-    let res = eval_test("len(tag) == 0");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("empty(tag)");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("empty('')");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("+2-sqrt(4)*15");
-    assert!(matches!(res, Ok(Token::Duration(-28.))));
+    assert_eq!(as_f64(eval_test("abs(-3)")), 3.);
+    assert_eq!(as_f64(eval_test("sqrt(4)")), 2.);
+    assert_eq!(as_f64(eval_test("lines('test')")), 1.);
+    assert_eq!(as_f64(eval_test("len(tag)")), 0.);
+    assert_eq!(as_bool(eval_test("len(tag) == 0")), true);
+    assert_eq!(as_bool(eval_test("empty(tag)")), true);
+    assert_eq!(as_bool(eval_test("empty('')")), true);
+    assert_eq!(as_f64(eval_test("+2-sqrt(4)*15")), -28.);
 }
 
 #[test]
 fn date_comparisons() {
     assert_eq!(
-        as_i64(eval_test("today")),
-        as_i64(eval_test("tomorrow-24h"))
+        as_date(eval_test("today")),
+        as_date(eval_test("tomorrow-24h"))
     );
 
     assert_eq!(as_bool(eval_test("(today+10h):(today+0.5h)")), true);
@@ -325,12 +321,7 @@ fn date_comparisons() {
     assert_eq!(as_bool(eval_test("(today+10h):(today+25h)")), false);
     assert_eq!(as_bool(eval_test("(today+0.5h):(today-0.5h)")), false);
 
-    let res = eval_test("(today+10h):(today-0.5h)");
-    assert!(matches!(res, Ok(Token::Bool(false))));
-
-    let res = eval_test("1h:2h");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("1h:25h");
-    assert!(matches!(res, Ok(Token::Bool(false))));
+    assert_eq!(as_bool(eval_test("(today+10h):(today-0.5h)")), false);
+    assert!(matches!(eval_test("1h:2h"), Ok(Token::Bool(true))));
+    assert!(matches!(eval_test("1h:25h"), Ok(Token::Bool(false))));
 }
