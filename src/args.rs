@@ -128,23 +128,23 @@ pub struct FilterArgs {
     pub tag: Vec<String>,
 
     /// Filter entries by planned date.
-    #[arg(long)]
+    #[arg(long, allow_hyphen_values = true)]
     pub when: Vec<String>,
 
     /// Filter entries by due date.
-    #[arg(long)]
+    #[arg(long, allow_hyphen_values = true)]
     pub due: Vec<String>,
 
     /// Filter entries by end date.
-    #[arg(long)]
+    #[arg(long, allow_hyphen_values = true)]
     pub end: Vec<String>,
 
     /// Filter entries by created date.
-    #[arg(long)]
+    #[arg(long, allow_hyphen_values = true)]
     pub created: Vec<String>,
 
     /// Filter entries by modified date.
-    #[arg(long)]
+    #[arg(long, allow_hyphen_values = true)]
     pub modified: Vec<String>,
 
     /// Filter query to apply to the results.
@@ -187,7 +187,7 @@ pub struct EntryArgs {
     pub annotate: Vec<String>,
 
     /// Set entry planned completion date.
-    #[arg(long)]
+    #[arg(long, allow_hyphen_values = true)]
     pub when: Option<String>,
 
     /// Set entry due date.
