@@ -4,7 +4,7 @@ pub mod values;
 
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
-use std::io;
+use std::io::{self, IsTerminal, stdout};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
 
@@ -125,7 +125,10 @@ pub struct SyncConfig {
 }
 
 impl Config {
-    /// Override values from arguments.
+    /// Override values from arguments and environment variables.
+    ///
+    /// Also, check if stdout if terminal and in case if color is 'auto',
+    /// disable it.
     pub fn override_from_args(&mut self, args: &Args) {
         if !matches!(args.color, ColorMode::Auto) {
             self.color_mode = args.color;
@@ -134,6 +137,10 @@ impl Config {
             if no_color == "1" {
                 self.color_mode = ColorMode::Never;
             }
+        }
+
+        if matches!(self.color_mode, ColorMode::Auto) && !stdout().is_terminal() {
+            self.color_mode = ColorMode::Never;
         }
     }
 
