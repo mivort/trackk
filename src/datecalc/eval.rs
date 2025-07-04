@@ -266,33 +266,25 @@ fn op_behaviour() {
         "If/else works as ternary operator"
     );
 
-    let res = eval_test("(100 if false) and true");
     assert!(
-        matches!(res, Ok(Token::Else)),
+        matches!(eval_test("(100 if false) and true"), Ok(Token::Else)),
         "'If' operator result is treated as 'false' (and propagated next)"
     );
 
-    let res = eval_test("not now");
     assert!(
-        matches!(res, Ok(Token::Bool(false))),
+        !as_bool(eval_test("not now")),
         "'!' converts date into 'false'"
     );
-
-    let res = eval_test("not 0");
     assert!(
-        matches!(res, Ok(Token::Bool(false))),
+        !as_bool(eval_test("not 0")),
         "'!' converts number into 'false'"
     );
-
-    let res = eval_test("not 'value'");
     assert!(
-        matches!(res, Ok(Token::Bool(false))),
+        !as_bool(eval_test("not 'value'")),
         "'!' converts string into 'false'"
     );
-
-    let res = eval_test("not tag");
     assert!(
-        matches!(res, Ok(Token::Bool(true))),
+        as_bool(eval_test("not tag")),
         "'!' converts empty tag list into 'true'"
     );
 }
