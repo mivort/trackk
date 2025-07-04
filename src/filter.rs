@@ -4,7 +4,7 @@ use crate::args::FilterArgs;
 use crate::config::query::IndexType;
 use crate::datecalc::token::Token;
 use crate::datecalc::{eval::eval, parse::parse_filter};
-use crate::entry::{Entry, FieldRef};
+use crate::entry::{Entry, EntryPath, FieldRef};
 use crate::{app::App, prelude::*};
 
 /// Set of ID and query based filters.
@@ -213,6 +213,28 @@ impl IdFilter {
     pub fn empty_set(&self) -> bool {
         self.index.is_empty() && self.enabled
     }
+
+    /// Iterate over entries and check if there's any which matches at least two of provided IDs.
+    pub fn check_ambiguity(&self, entries: &[EntryPath]) -> bool {
+        if entries.len() < 2 {
+            return false;
+        }
+        if !self.enabled {
+            return true;
+        }
+        if self.only_active {
+            return false;
+        }
+
+        for filter in &self.index {
+            let mut lookup = entries.iter().filter(|(e, _)| e.id.starts_with(&**filter));
+            if lookup.nth(1).is_some() {
+                return true;
+            }
+        }
+
+        false
+    }
 }
 
 #[test]
@@ -246,4 +268,26 @@ fn match_issue() {
     assert_eq!(match_filter("when == false"), true);
     assert_eq!(match_filter("due == false"), true);
     assert_eq!(match_filter("created != false"), true);
+}
+
+#[test]
+fn check_ambiguity() {
+    let ids = |ids: &[&str]| IdFilter {
+        index: ids.iter().map(|id| Into::<Box<str>>::into(*id)).collect(),
+        only_active: false,
+        enabled: true,
+    };
+
+    let entry = |id: &str| {
+        (
+            Entry {
+                id: id.into(),
+                ..Default::default()
+            },
+            Rc::from("test"),
+        )
+    };
+
+    assert!(ids(&["abc", "cde"]).check_ambiguity(&[entry("abcd"), entry("abce")]));
+    assert!(!ids(&["abc", "cde"]).check_ambiguity(&[entry("abcd"), entry("cdef")]));
 }

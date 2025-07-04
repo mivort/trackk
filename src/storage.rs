@@ -52,9 +52,8 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         bail!("No entries match the criteria");
     }
 
-    // TODO: P3: show picker in case if id query contains partial matches
     let entries = 'entries: {
-        let show_picker = ids.index.len() < entries.len();
+        let show_picker = ids.check_ambiguity(&entries);
         if show_picker || app.has_range() {
             sort::sort_entries(&mut entries, app.sort_or_default());
             app.apply_range(&mut entries);

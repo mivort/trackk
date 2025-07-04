@@ -30,6 +30,9 @@ pub fn pick_prompt<'a>(
         return Ok(entries);
     }
 
+    // TODO: P3: check if terminal, if not - exit
+    // TODO: P3: support 'auto-select all' option
+
     let template_id = app.config.templates.picker();
 
     let mut templates = app.templates.borrow_mut();

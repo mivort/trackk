@@ -96,8 +96,7 @@ fn main() -> Result<()> {
             };
             let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
 
-            let entries = if entries.len() > ids.index.len() {
-                // TODO: P3: check for partial uuid matches
+            let entries = if ids.check_ambiguity(&entries) {
                 input::pick_prompt("Show", entries, &app)?
             } else {
                 entries
@@ -115,9 +114,8 @@ fn main() -> Result<()> {
                     query: &mut Default::default(),
                 };
                 let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
-                let entries = if entries.len() > ids.index.len() {
-                    // TODO: P3: check for partial uuid matches
-                    input::pick_prompt("Show", entries, &app)?
+                let entries = if ids.check_ambiguity(&entries) {
+                    input::pick_prompt("Copy from", entries, &app)?
                 } else {
                     entries
                 };
@@ -226,8 +224,7 @@ fn main() -> Result<()> {
                 };
                 let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
 
-                let entries = if entries.len() > ids.index.len() {
-                    // TODO: P3: check for partial uuid matches
+                let entries = if ids.check_ambiguity(&entries) {
                     input::pick_prompt("Show", entries, &app)?
                 } else {
                     entries
