@@ -1,4 +1,4 @@
-use std::io::{Write, stdin, stdout};
+use std::io::{IsTerminal, Write, stdin, stdout};
 
 use minijinja::Template;
 
@@ -30,7 +30,13 @@ pub fn pick_prompt<'a>(
         return Ok(entries);
     }
 
-    // TODO: P3: check if terminal, if not - exit
+    if !stdout().is_terminal() {
+        bail!(
+            "Matching entries: {}. Not a terminal: abort.",
+            entries.len()
+        );
+    }
+
     // TODO: P3: support 'auto-select all' option
 
     let template_id = app.config.templates.picker();
