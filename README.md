@@ -1,62 +1,97 @@
 # Trackk
 
-Command-line task and issue tracker which provides the synchronization and
-versioning of its DB using Git capabilities.
+Command-line task, notes, event and project tracker which provides Git-based
+conflict-free synchronization and versioning of its plain-text storage.
 
 Inspired by [Taskwarrior][1] and [dstask][2].
 
 ## Features
 
 * **Git-friendly storage format.** Full versioning and multi-device
-  synchronization capabilities. Data is stored as JSON, while custom JSON 3-way
-  merge driver auto-resolves conflicts on synchronization.
-* **Powerful input and filtering DSL.** [Built-in expression
-  syntax](docs/EXPRESSIONS.md) allows to enter dates using natural wording
-  (`tomorrow at 14:00`), or perform context filtering on tasks (`tag:home and
-  status:started`).
-* **Define named queries:** in addition to IDs and filters, access task by
-  convenient shortcuts (`recent~1`, `overdue^^` etc.).
+  synchronization capabilities. Data is stored as set of JSON files, while
+  custom JSON 3-way merge driver auto-resolves conflicts on synchronization.
+* **Date calculator DSL for natural input and filtering.** [Built-in expression
+  syntax][6] allows to enter dates using natural wording (`tomorrow at
+  10:00am`), resolve math expressions (``) or perform context filtering on
+  tasks (`tag:home and status:started`).
+* **Named queries:** in addition to IDs and custom filters, it's possible to
+  access task entries using built-in and user-defined named queries
+  (`recent~1`, `overdue~0..3` etc.).
 * **CLI argument macros:** regex-based user-defined argument expansion rules to
   customize the input syntax.
-* Recurrent tasks which use same date input syntax, allowing to use flexible
-  re-occurrence rules (`monday at 7:00am`) and enabling the usage as habit
-  tracker.
-* Highly-customizable reporting using [Minijinja][3] [template
-  syntax](docs/FORMATTING.md) with helper methods for screen-size dependent
-  output, similar to PS1 customization in shells.
-* Ability to perform multiple queries in customizable reports, with adjustable
-  headers and grouping.
-* User-defined formula for task urgency with option to override urgency.
+* **Flexible recurrent tasks** which also use date calculator syntax, allowing
+  to set complex re-occurrence rules (`monday at 7:00am`) and enabling the
+  usage as habit tracker.
+* **Highly-customizable reporting** using [Minijinja][3]-based [template syntax][5]
+  with helper methods for screen-size dependent output, quite similar to `PS1`
+  customization in shells.
+* **Reports can perform multiple queries**, with adjustable headers and grouping.
+* **User-defined formula for task urgency** which provides multi-factor task
+  prioritization.
+* Respects [NO_COLOR][4].
 
 ## Usage
 
-TODO
+Initialize new entry repository:
+``` bash
+trk init
+```
+Create new entry (scheduled to be done in 30 minutes and tagged as `mytag`):
+``` bash
+trk add Create example task +mytag when:30min
+```
+List available entries (`next` is the default report type):
+``` bash
+trk next
+```
+Modify first entry parameters - add tag `tagtwo` and remove `mytag`:
+``` bash
+trk 1 mod +tagtwo -mytag
+```
+Edit first entry with default editor:
+``` bash
+trk 1 edit
+```
+Mark entry as complete:
+``` bash
+trk 1 done
+```
 
 ## How it works
 
-Trackk stores the data as a series of JSON files (grouped by creation date).
-Upon pushing and pulling it uses the custom merge driver which combines the
-data with priority for entries with higher time stamp value.
+Trackk stores the data as a series of JSON files (grouped by creation date). By
+default, Git repository is created in directory where entries are stored to
+provide change history preservation.
 
-To provide the fast querying of active entries the index is calculated based on
-entry status.
+When `sync` command is used, the custom merge driver is called which combines
+the data using 3-way merge prioritizing changes with higher time stamp value.
+There's no ambiguity in merging, it always gets auto-resolved.
+
+To provide the fast querying of active entries the index file is created based
+on entry status.
 
 ## Requirements
 
-* Git *(optional)* - for task synchronization between devices/users.
+* Git *(optional)* - provides change history preservation and task
+  synchronization between devices/users.
 
 ## Alternatives
 
-* [Taskwarrior](https://github.com/GothenburgBitFactory/taskwarrior): the main
-  inspiration. Before version 3.0, Taskwarrior stored its date as plain text
-  files, and after that it switched to SQLite. Trackk stores its data as set of
-  JSON files and provides means to preserve the change history with Git.
-* [dstask](https://github.com/naggie/dstask): the inspiration for Git repo
-  storage philosophy. Trackk similarly stores tasks as set of JSON files, but
-  several tasks are grouped together in buckets, and custom Git merge driver
-  prevents merge conflicts.
+* [Taskwarrior][1]: the main inspiration. Before version 3.0, Taskwarrior
+  stored its date as plain text files and used custom solution for sync. With
+  3.0+, TW switched to SQLite with custom sync as well. Trackk stores its data
+  as set of pretty-printed JSON files and provides means to fully preserve the
+  change history with Git.
+* [dstask][2]: the inspiration for Git repo storage philosophy. Trackk
+  similarly stores tasks as set of JSON files, but several tasks are grouped
+  together in buckets reducing burden on the filesystem with large amount of
+  entries (100k+), and custom Git merge driver auto-resolves any merge
+  conflicts.
 
 ---
 [1]: https://github.com/GothenburgBitFactory/taskwarrior
 [2]: https://github.com/naggie/dstask
 [3]: https://docs.rs/minijinja/2.10.2/
+[4]: https://no-color.org/
+[5]: docs/FORMATTING.md
+[6]: docs/DATE_CALC.md
