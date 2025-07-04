@@ -287,6 +287,12 @@ fn functions() {
     let res = eval_test("len(tag) == 0");
     assert!(matches!(res, Ok(Token::Bool(true))));
 
+    let res = eval_test("empty(tag)");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
+    let res = eval_test("empty('')");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
     let res = eval_test("+2-sqrt(4)*15");
     assert!(matches!(res, Ok(Token::Duration(-28.))));
 }

@@ -169,7 +169,7 @@ pub enum Token {
     Not,
 
     #[token("abs", |_| FuncRef::Abs)]
-    #[token("_has", |_| FuncRef::Has)] // TODO: P3: update this function handling
+    #[token("empty", |_| FuncRef::Empty)]
     #[token("len", |_| FuncRef::Len)]
     #[token("lines", |_| FuncRef::Lines)]
     #[token("ln", |_| FuncRef::Ln)]

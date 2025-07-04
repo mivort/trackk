@@ -1,4 +1,4 @@
-use super::token::{SOMEDAY, Token};
+use super::token::Token;
 use crate::entry::{Entry, FieldRef};
 use crate::prelude::*;
 
@@ -7,7 +7,7 @@ use crate::prelude::*;
 #[allow(unused)]
 pub enum FuncRef {
     Abs,
-    Has,
+    Empty,
     Len,
     Lines,
     Ln,
@@ -26,7 +26,7 @@ impl FuncRef {
             Sig => unary_func(stack.pop(), sigmoid),
             Sqrt => unary_func(stack.pop(), f64::sqrt),
 
-            Has => has(stack.pop(), entry),
+            Empty => empty(stack.pop(), entry),
             Len => length(stack.pop(), entry),
             Lines => lines(stack.pop(), entry),
         }
@@ -50,33 +50,32 @@ fn sigmoid(input: f64) -> f64 {
     1_f64 / (1_f64 + E.powf(-input))
 }
 
-/// Convert various values to boolean. Strings and arrays are 'true' if not
-/// empty, dates if less than 'someday'.
-fn has(tok: Option<Token>, entry: &Entry) -> Result<Token> {
-    use Token::*;
+/// Convert various values to boolean. Strings become 'false' if empty,
+/// dates - if equal to 'now'.
+fn empty(tok: Option<Token>, entry: &Entry) -> Result<Token> {
+    let tok = unwrap_some_or!(tok, { bail!("'empty' requires argument") });
 
-    let tok = unwrap_some_or!(tok, { bail!("'has' requires argument") });
-
-    match tok {
-        String(val) => Ok(Bool(!val.is_empty())),
-        Bool(val) => Ok(Bool(val)),
-        Date(val) => Ok(Bool(val <= SOMEDAY)),
-        Reference(field) => Ok(Bool(field.has(entry))),
-        _ => bail!("'has' function got incompatible argument ({})", tok.ttype()),
-    }
+    Ok(Token::Bool(token_length(tok, entry)? == 0))
 }
 
 /// Produce length of the token value.
 fn length(tok: Option<Token>, entry: &Entry) -> Result<Token> {
+    let tok = unwrap_some_or!(tok, { bail!("'len' requires argument") });
+
+    Ok(Token::Duration(token_length(tok, entry)? as f64))
+}
+
+fn token_length(tok: Token, entry: &Entry) -> Result<usize> {
     use Token::*;
 
-    let tok = unwrap_some_or!(tok, { bail!("'has' requires argument") });
-
     match tok {
-        String(val) => Ok(Duration(val.len() as f64)),
-        Reference(field) => Ok(Duration(field.length(entry))),
-        Bool(false) | Else => Ok(Duration(0.)),
-        _ => bail!("'len' function got incompatible argument ({})", tok.ttype()),
+        String(val) => Ok(val.len()),
+        Reference(field) => Ok(field.length(entry)),
+        Bool(false) => Ok(0),
+        _ => bail!(
+            "Value type ({}) doesn't have length to check with 'len' or 'empty'",
+            tok.ttype()
+        ),
     }
 }
 

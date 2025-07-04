@@ -420,25 +420,12 @@ impl FieldRef {
     }
 
     /// Calculate the length of referenced value.
-    pub fn length(&self, entry: &Entry) -> f64 {
+    pub fn length(&self, entry: &Entry) -> usize {
         match self {
-            Self::Desc => entry.desc.len() as f64,
-            Self::Tag => entry.tags.len() as f64,
-            Self::Status => entry.status.len() as f64,
-            _ => 0.,
-        }
-    }
-
-    /// Check if referenced value is 'not empty'
-    pub fn has(&self, entry: &Entry) -> bool {
-        match self {
-            Self::Desc => !entry.desc.is_empty(),
-            Self::Tag => !entry.tags.is_empty(),
-            Self::Status => !entry.status.is_empty(),
-            Self::When => entry.when.is_some(),
-            Self::Due => entry.due.is_some(),
-            Self::End => entry.end.is_some(),
-            _ => false,
+            Self::Desc => entry.desc.len(),
+            Self::Tag => entry.tags.len(),
+            Self::Status => entry.status.len(),
+            _ => 0,
         }
     }
 }
