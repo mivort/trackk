@@ -97,8 +97,8 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                     op_stack.push(tok);
                     mode = Mode::FnParen;
                 }
-                Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | Contains | Less(_) | LessEq(_)
-                | Greater(_) | GreaterEq(_) | NotEq | And | Or | Not | If | Else => {
+                Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | Contains | In | Less(_)
+                | LessEq(_) | Greater(_) | GreaterEq(_) | NotEq | And | Or | Not | If | Else => {
                     let (prec, left_assoc) = tok.prec_and_assoc();
                     let (prec, tok, left_assoc) = if mode.expects_arg() {
                         if let Div = tok {

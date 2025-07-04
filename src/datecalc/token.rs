@@ -117,12 +117,18 @@ pub enum Token {
     #[token("else")]
     Else,
 
+    /// Check if left argument is included in the right.
+    #[token("in")]
+    In,
+
     // TODO: P2: add 'functions': 'min', 'max', 'clamp', 'pow'
     // TODO: P2: add 'until' operator which compares the value vs. max
     //           and returns either value itself or 'false'
     // TODO: P2: replace fuzzy eq with 'in'?
+    //
+    /// Works as reversed 'in' operator: check if right argument is included in left.
     #[token(":")]
-    #[token("contains")]
+    #[token("has")]
     Contains,
 
     #[token("=")]
@@ -163,7 +169,7 @@ pub enum Token {
     Not,
 
     #[token("abs", |_| FuncRef::Abs)]
-    #[token("has", |_| FuncRef::Has)]
+    #[token("_has", |_| FuncRef::Has)] // TODO: P3: update this function handling
     #[token("len", |_| FuncRef::Len)]
     #[token("lines", |_| FuncRef::Lines)]
     #[token("ln", |_| FuncRef::Ln)]

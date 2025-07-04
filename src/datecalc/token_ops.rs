@@ -15,14 +15,13 @@ impl Token {
 
         match self {
             Add(true) | Sub(true) => (10, false),
-            Contains => (9, true), // TODO: P3: change precedence
             Not => (8, false),
             At => (7, true),
             Mul | Div | Mod => (6, true),
             Add(false) | Sub(false) => (5, true),
             Less(false) | LessEq(false) | Greater(false) | GreaterEq(false) => (4, true),
             Less(true) | LessEq(true) | Greater(true) | GreaterEq(true) => (4, false),
-            Eq | NotEq => (3, true),
+            Eq | NotEq | Contains | In => (3, true),
             And => (2, true),
             Or => (1, true),
             If | Else => (0, true),
@@ -245,7 +244,7 @@ impl Token {
                 date_to_sod(ts, duration_to_date(*lhs, ts))
                     == date_to_sod(ts, duration_to_date(*rhs, ts)),
             )),
-            (Bool(_), Date(_) | Duration(_)) => Ok(Bool(false)),
+            (Bool(_), Date(_) | Duration(_) | String(_)) => Ok(Bool(false)),
             (Bool(lhs), Bool(rhs)) => Ok(Bool(*lhs == *rhs)),
             (Date(_lhs), Bool(rhs)) => Ok(Bool(*rhs)),
             (String(lhs), String(rhs)) => Ok(Bool(lhs.contains(&**rhs))),

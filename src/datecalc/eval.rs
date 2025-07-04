@@ -103,6 +103,10 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => lhs.contains(&rhs, issue, ts)?,
                 _ => bail!("'has' (':') operator haven't got enough arguments"),
             },
+            In => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => rhs.contains(&lhs, issue, ts)?,
+                _ => bail!("'in' operator haven't got enough arguments"),
+            },
 
             If => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => lhs.r#if(rhs),
