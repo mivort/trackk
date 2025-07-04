@@ -148,7 +148,7 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
         idx[ctx].push((rg(r"^\+(\w+)")?, vec!["--tag=$1".into()]));
 
         // Tags with '-' - potential conflict with short options
-        idx[ctx].push((rg(r"^-(\w{2,})")?, vec!["--tag=-$1".into()]));
+        idx[ctx].push((rg(r"^-([^\d\W]\w+)")?, vec!["--tag=-$1".into()]));
 
         idx[ctx].push((rg(r"^==(.*)")?, vec!["--filter=$1".into()]));
         idx[ctx].push((rg(r"^=(.*)")?, vec!["--title=$1".into()]));
