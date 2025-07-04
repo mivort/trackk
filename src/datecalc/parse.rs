@@ -85,8 +85,9 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                 Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
                     if !mode.expects_arg() {
                         bail!(
-                            "Expected {}, got argument at position {}",
+                            "Expected {}, got argument '{}' at position {}",
                             mode.expected(),
+                            &input[start..end],
                             start
                         );
                     }
