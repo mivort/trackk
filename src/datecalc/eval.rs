@@ -99,9 +99,9 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => lhs.not_eq(rhs, issue)?,
                 _ => bail!("'eq' ('!=') operator haven't got enough arguments"),
             },
-            FuzzyEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => lhs.fuzzy_eq(&rhs, issue, ts)?,
-                _ => bail!("':' operator haven't got enough arguments"),
+            Contains => match (stack.pop(), stack.pop()) {
+                (Some(rhs), Some(lhs)) => lhs.contains(&rhs, issue, ts)?,
+                _ => bail!("'has' (':') operator haven't got enough arguments"),
             },
 
             If => match (stack.pop(), stack.pop()) {

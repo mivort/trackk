@@ -15,7 +15,7 @@ impl Token {
 
         match self {
             Add(true) | Sub(true) => (10, false),
-            FuzzyEq => (9, true),
+            Contains => (9, true), // TODO: P3: change precedence
             Not => (8, false),
             At => (7, true),
             Mul | Div | Mod => (6, true),
@@ -230,7 +230,7 @@ impl Token {
     }
 
     /// Peform loose comparison.
-    pub fn fuzzy_eq(&self, rhs: &Self, issue: &Entry, ts: OffsetDateTime) -> Result<Self> {
+    pub fn contains(&self, rhs: &Self, issue: &Entry, ts: OffsetDateTime) -> Result<Self> {
         use Token::*;
 
         match (self, rhs) {
@@ -249,7 +249,7 @@ impl Token {
             (Bool(lhs), Bool(rhs)) => Ok(Bool(*lhs == *rhs)),
             (Date(_lhs), Bool(rhs)) => Ok(Bool(*rhs)),
             (String(lhs), String(rhs)) => Ok(Bool(lhs.contains(&**rhs))),
-            (Reference(lhs), token) => Ok(Bool(lhs.fuzzy_eq(token, issue)?)),
+            (Reference(lhs), token) => Ok(Bool(lhs.contains(token, issue)?)),
             _ => bail!(
                 "':' was used on incompatible values ({} and {})",
                 self.ttype(),

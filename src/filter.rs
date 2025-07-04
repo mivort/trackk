@@ -98,7 +98,7 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Title));
             e.push(token);
-            e.push(Token::FuzzyEq);
+            e.push(Token::Contains);
         });
     }
 
@@ -113,7 +113,7 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Desc));
             e.push(token);
-            e.push(Token::FuzzyEq);
+            e.push(Token::Contains);
         });
     }
 
@@ -121,7 +121,7 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         filter.merge(|e| {
             e.push(Token::Reference(FieldRef::Status));
             e.push(Token::String(Rc::from(status.as_ref())));
-            e.push(Token::FuzzyEq);
+            e.push(Token::Contains);
         });
     }
 
@@ -130,14 +130,14 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
             filter.merge(|e| {
                 e.push(Token::Reference(FieldRef::Tag));
                 e.push(Token::String(Rc::from(tag)));
-                e.push(Token::FuzzyEq);
+                e.push(Token::Contains);
                 e.push(Token::Not);
             });
         } else {
             filter.merge(|e| {
                 e.push(Token::Reference(FieldRef::Tag));
                 e.push(Token::String(Rc::from(tag.as_str())));
-                e.push(Token::FuzzyEq);
+                e.push(Token::Contains);
             });
         }
     }

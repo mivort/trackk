@@ -122,7 +122,8 @@ pub enum Token {
     //           and returns either value itself or 'false'
     // TODO: P2: replace fuzzy eq with 'in'?
     #[token(":")]
-    FuzzyEq,
+    #[token("contains")]
+    Contains,
 
     #[token("=")]
     #[token("==")]

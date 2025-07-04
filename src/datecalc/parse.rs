@@ -48,7 +48,7 @@ pub fn parse_filter(input: &str, app: &App, output: &mut Vec<Token>) -> Result<(
         match output.last() {
             Some(Token::String(_)) | Some(Token::Regex(_)) => {
                 output.insert(output.len() - 1, Token::Reference(FieldRef::Title));
-                output.push(Token::FuzzyEq);
+                output.push(Token::Contains);
             }
             _ => {}
         }
@@ -97,7 +97,7 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                     op_stack.push(tok);
                     mode = Mode::FnParen;
                 }
-                Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | FuzzyEq | Less(_) | LessEq(_)
+                Add(_) | Sub(_) | Mul | Div | Mod | At | Eq | Contains | Less(_) | LessEq(_)
                 | Greater(_) | GreaterEq(_) | NotEq | And | Or | Not | If | Else => {
                     let (prec, left_assoc) = tok.prec_and_assoc();
                     let (prec, tok, left_assoc) = if mode.expects_arg() {

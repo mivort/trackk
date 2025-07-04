@@ -389,8 +389,8 @@ impl FieldRef {
         }
     }
 
-    /// Compare referenced value to provided token.
-    pub fn fuzzy_eq(&self, token: &Token, issue: &Entry) -> Result<bool> {
+    /// Check if provided value is contained in the field.
+    pub fn contains(&self, token: &Token, issue: &Entry) -> Result<bool> {
         use Token::*;
 
         match (self, token) {
