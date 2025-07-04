@@ -176,14 +176,14 @@ fn git_config(
     Ok(())
 }
 
+const MERGE_DRIVER: &str = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.driver");
+const MERGE_DRIVER_NAME: &str = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name");
+
 /// Perform setup common for new repos and clones.
 fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
     info!("Setting up 'git config'");
 
     git_user_setup(&path, args)?;
-
-    let name = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.name");
-    let driver = concat!("merge.", env!("CARGO_PKG_NAME"), "-bucket.driver");
 
     let exe = std::env::current_exe()
         .context("Unable to locate own executable to set as merge driver")?;
@@ -195,11 +195,11 @@ fn git_config_setup(path: impl AsRef<Path>, args: &InitArgs) -> Result<()> {
 
     let command = format!("{} merge %O %A %B", exe);
 
-    git_config(&path, name, true, || {
+    git_config(&path, MERGE_DRIVER_NAME, true, || {
         concat!("'", env!("CARGO_PKG_NAME"), " json bucket merge driver'").into()
     })?;
 
-    git_config(&path, driver, true, || command)?;
+    git_config(&path, MERGE_DRIVER, true, || command)?;
 
     Ok(())
 }
