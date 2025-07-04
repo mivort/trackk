@@ -8,14 +8,33 @@ use time::{UtcDateTime, UtcOffset};
 
 use crate::datecalc::parse::parse_date;
 use crate::entry::Entry;
+use crate::input;
 use crate::templates::dates;
 use crate::{app::App, prelude::*};
 
-/// Run editor, apply changes and return the exit status.
-pub fn edit_entry(issue: &mut Entry, app: &App) -> Result<ExitStatus> {
+/// Run editor in loop until it's not fully valid.
+///
+/// Return either true of false depending on if editing should continue or not.
+pub fn edit_entry(entry: &mut Entry, app: &App) -> Result<bool> {
+    loop {
+        match run_edit_entry(entry, app) {
+            Ok(status) => return Ok(status.success()),
+            Err(err) => {
+                error!("Editing error: {err:?}");
+                let reply = input::prompt("Keep editing? [Y]/n ")?;
+                if reply == "n" {
+                    return Ok(false);
+                }
+            }
+        }
+    }
+}
+
+/// Run editor once, apply changes and return the exit status.
+fn run_edit_entry(entry: &mut Entry, app: &App) -> Result<ExitStatus> {
     let mut tempfile =
         tempfile::NamedTempFile::with_suffix(concat!(".", env!("CARGO_PKG_NAME"), ".md"))?;
-    format_markdown(issue, tempfile.as_file_mut())?;
+    format_markdown(entry, tempfile.as_file_mut())?;
 
     let editor = &*app.config.editor();
     let status = Command::new(editor)
@@ -33,8 +52,9 @@ pub fn edit_entry(issue: &mut Entry, app: &App) -> Result<ExitStatus> {
     }
 
     let mut edited = File::open(tempfile.path())?;
-    parse_markdown(issue, &mut edited, app)?;
-    issue.update_ts();
+    parse_markdown(entry, &mut edited, app)?;
+    entry.update_ts();
+    entry.validate(app)?;
 
     Ok(status)
 }

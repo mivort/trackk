@@ -136,7 +136,7 @@ fn main() -> Result<()> {
 
             if a.entry.edit || app.config.editor_on_add.unwrap_or_default() {
                 let status = editor::edit_entry(&mut entry, &app)?;
-                if !status.success() {
+                if !status {
                     return Ok(());
                 }
             }

@@ -76,12 +76,11 @@ pub fn modify_entries<'a>(ids: &IdFilter, args: &EntryArgs, app: &'a App<'a>) ->
         let bucket_entry = bucket.find_by_id_mut(&entry.id).unwrap();
         bucket_entry.apply_args(args, app)?;
 
-        if args.edit && !editor::edit_entry(bucket_entry, app)?.success() {
+        if !args.edit {
+            bucket_entry.validate(app)?;
+        } else if !editor::edit_entry(bucket_entry, app)? {
             break;
         }
-
-        // TODO: P3: allow to re-run editor in case if validation fails
-        bucket_entry.validate(app)?;
 
         if !entry.differs(bucket_entry) {
             continue;
