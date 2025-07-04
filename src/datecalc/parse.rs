@@ -33,11 +33,16 @@ pub fn parse_date(input: &str, app: &App, issue: &Entry) -> Result<Option<i64>> 
 }
 
 /// Parse and append to filter expression. If experssion wasn't empty,
-/// add new conditions behind '&&' operator.
+/// call the merger method to add glue operations.
 ///
 /// If only one token was found in expression, check if it's string or regex,
 /// and add comparison to the title.
-pub fn parse_filter(input: &str, app: &App, output: &mut Vec<Token>) -> Result<()> {
+pub fn parse_filter(
+    input: &str,
+    app: &App,
+    output: &mut Vec<Token>,
+    merger: impl Fn(&mut Vec<Token>, bool),
+) -> Result<()> {
     let before = output.len();
     let res = parse_local_exp(input, app, output);
     let delta = output.len() - before;
@@ -54,9 +59,7 @@ pub fn parse_filter(input: &str, app: &App, output: &mut Vec<Token>) -> Result<(
         }
     }
 
-    if before != 0 {
-        output.push(Token::And);
-    }
+    merger(output, before != 0);
 
     res
 }

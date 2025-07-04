@@ -127,6 +127,10 @@ pub struct FilterArgs {
     #[arg(long)]
     pub tag: Vec<String>,
 
+    /// Filter entries by planned date.
+    #[arg(long)]
+    pub when: Vec<String>,
+
     /// Filter entries by due date.
     #[arg(long)]
     pub due: Vec<String>,
@@ -138,6 +142,10 @@ pub struct FilterArgs {
     /// Filter entries by created date.
     #[arg(long)]
     pub created: Vec<String>,
+
+    /// Filter entries by modified date.
+    #[arg(long)]
+    pub modified: Vec<String>,
 
     /// Filter query to apply to the results.
     #[arg(long)]

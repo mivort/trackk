@@ -49,7 +49,7 @@ impl QueryFilter {
     /// Replace filter query re-using the vec.
     pub fn replace(&mut self, expr: &str, app: &App) -> Result<()> {
         self.expression.clear();
-        parse_filter(expr, app, &mut self.expression)
+        parse_filter(expr, app, &mut self.expression, |_, _| {})
     }
 
     /// Append '&&' condition on top of the query.
@@ -73,17 +73,62 @@ impl QueryFilter {
 pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App) -> Result<()> {
     let expression = &mut filter.expression;
 
+    let and_merge = |o: &mut Vec<_>, merge| {
+        if merge {
+            o.push(Token::And)
+        }
+    };
+
+    let in_merge = |o: &mut Vec<_>, merge, field| {
+        o.push(Token::Reference(field));
+        o.push(Token::In);
+        if merge {
+            o.push(Token::And);
+        }
+    };
+
     for expr in &args.filter {
-        parse_filter(expr, app, expression)
+        parse_filter(expr, app, expression, and_merge)
             .with_context(|| format!("Unable to parse filter: '{expr}'"))?;
     }
 
     if let Some(query) = &args.query {
         let query_data = app.config.query(query)?;
         filter.index = query_data.index;
-        parse_filter(query_data.filter, app, expression)
+        parse_filter(query_data.filter, app, expression, and_merge)
             .with_context(|| format!("Unable to parse query filter: '{}'", query_data.filter))?;
     }
+
+    for when in &args.when {
+        parse_filter(when, app, expression, |o, m| in_merge(o, m, FieldRef::When))
+            .with_context(|| format!("Unable to parse planned date: '{when}'"))?;
+    }
+
+    for due in &args.due {
+        parse_filter(due, app, expression, |o, m| in_merge(o, m, FieldRef::Due))
+            .with_context(|| format!("Unable to parse due date: '{due}'"))?;
+    }
+
+    for end in &args.end {
+        parse_filter(end, app, expression, |o, m| in_merge(o, m, FieldRef::End))
+            .with_context(|| format!("Unable to parse end date: '{end}'"))?;
+    }
+
+    for created in &args.created {
+        parse_filter(created, app, expression, |o, m| {
+            in_merge(o, m, FieldRef::Created)
+        })
+        .with_context(|| format!("Unable to parse created date: '{created}'"))?;
+    }
+
+    for modified in &args.modified {
+        parse_filter(modified, app, expression, |o, m| {
+            in_merge(o, m, FieldRef::Modified)
+        })
+        .with_context(|| format!("Unable to parse modified date: '{modified}'"))?;
+    }
+
+    // TODO: P3: add created and modified filters
 
     for title in &args.title {
         let token = if title.starts_with('/') && title.ends_with('/') && title.len() > 1 {
@@ -141,8 +186,6 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
             });
         }
     }
-
-    // TODO: P3: add due, end, created and modified filters
 
     Ok(())
 }
@@ -252,7 +295,7 @@ fn match_issue() {
 
     let match_filter = |input: &str| {
         let mut exp = Vec::new();
-        parse_filter(input, &app, &mut exp).unwrap();
+        parse_filter(input, &app, &mut exp, |_, _| {}).unwrap();
 
         QueryFilter {
             expression: exp,

@@ -299,10 +299,19 @@ fn functions() {
 
 #[test]
 fn date_comparisons() {
+    let res = eval_test("(today+10h):(today+0.5h)");
+    assert!(matches!(res, Ok(Token::Bool(true))));
+
     let res = eval_test("(today+10h):(today+12h)");
     assert!(matches!(res, Ok(Token::Bool(true))));
 
     let res = eval_test("(today+10h):(today+25h)");
+    assert!(matches!(res, Ok(Token::Bool(false))));
+
+    let res = eval_test("(today+0.5h):(today-0.5h)");
+    assert!(matches!(res, Ok(Token::Bool(false))));
+
+    let res = eval_test("(today+10h):(today-0.5h)");
     assert!(matches!(res, Ok(Token::Bool(false))));
 
     let res = eval_test("1h:2h");
