@@ -173,6 +173,22 @@ fn eval_test(expr: &str) -> Result<Token> {
     eval(&output, local, &mut op_stack, &issue)
 }
 
+#[cfg(test)]
+fn as_bool(tok: Result<Token>) -> bool {
+    match tok.as_ref().unwrap() {
+        Token::Bool(v) => *v,
+        _ => panic!("Not boolean: {tok:?}"),
+    }
+}
+
+#[cfg(test)]
+fn as_i64(tok: Result<Token>) -> i64 {
+    match tok.as_ref().unwrap() {
+        Token::Date(v) => *v,
+        _ => panic!("Not date: {tok:?}"),
+    }
+}
+
 #[test]
 fn comparisons() {
     let res = eval_test("1d < 2d");
@@ -299,17 +315,15 @@ fn functions() {
 
 #[test]
 fn date_comparisons() {
-    let res = eval_test("(today+10h):(today+0.5h)");
-    assert!(matches!(res, Ok(Token::Bool(true))));
+    assert_eq!(
+        as_i64(eval_test("today")),
+        as_i64(eval_test("tomorrow-24h"))
+    );
 
-    let res = eval_test("(today+10h):(today+12h)");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("(today+10h):(today+25h)");
-    assert!(matches!(res, Ok(Token::Bool(false))));
-
-    let res = eval_test("(today+0.5h):(today-0.5h)");
-    assert!(matches!(res, Ok(Token::Bool(false))));
+    assert_eq!(as_bool(eval_test("(today+10h):(today+0.5h)")), true);
+    assert_eq!(as_bool(eval_test("(today+10h):(today+12h)")), true);
+    assert_eq!(as_bool(eval_test("(today+10h):(today+25h)")), false);
+    assert_eq!(as_bool(eval_test("(today+0.5h):(today-0.5h)")), false);
 
     let res = eval_test("(today+10h):(today-0.5h)");
     assert!(matches!(res, Ok(Token::Bool(false))));
