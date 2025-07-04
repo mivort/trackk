@@ -44,6 +44,9 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum Command {
+    /// Init the storage and VCS repo.
+    Init(InitArgs),
+
     /// Create new entry.
     Add(AddArgs),
 
@@ -58,45 +61,42 @@ pub enum Command {
     /// List active entries using set of filters.
     List(ListArgs),
 
-    /// Print current configuration values and comments about possible options.
-    Config,
-
-    /// Evaluate provided expression and print the result.
-    Calc(CalcArgs),
+    /// Show info about specified entry
+    Info(InfoArgs),
 
     /// Show count of tasks with filter applied.
     Count,
 
-    /// Show info about specified entry
-    Info(InfoArgs),
-
-    /// Show one of the built-in or config-defined report templates.
-    #[command(subcommand)]
-    Template(TemplateCommand),
+    /// Evaluate provided expression and print the result.
+    Calc(CalcArgs),
 
     /// Import data from one of the supported formats.
     Import(ImportArgs),
 
-    /// Merge two JSON storage buckets.
-    Merge(MergeArgs),
-
-    /// Init the storage and VCS repo.
-    Init(InitArgs),
+    /// Sync local repository with remote.
+    Sync,
 
     /// Produce commit in data repository using selected VCS, but don't sync.
     Commit,
 
-    /// Sync local repository with remote.
-    Sync,
-
-    /// Provide shell completions.
-    Completions(CompletionsArgs),
+    /// Merge two JSON storage buckets.
+    Merge(MergeArgs),
 
     /// Refresh the active entries index (in case if storage was edited manually).
     Refresh(RefreshArgs),
 
     /// Check data repository and VCS status.
-    Check,
+    Check, // TODO: P2: provide init --dry-run instead?
+
+    /// Provide shell completions.
+    Completions(CompletionsArgs),
+
+    /// Print current configuration values and comments about possible options.
+    Config,
+
+    /// Show one of the built-in or config-defined report templates.
+    #[command(subcommand)]
+    Template(TemplateCommand),
 }
 
 impl Default for Command {
