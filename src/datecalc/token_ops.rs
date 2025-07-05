@@ -1,7 +1,7 @@
 use super::token::Token;
 use crate::datecalc::{date_to_sod, duration_to_date};
 use crate::entry::Entry;
-use crate::prelude::*;
+use crate::{prelude::*, templates};
 
 use std::cmp::PartialOrd;
 use time::ext::NumericalDuration;
@@ -307,7 +307,8 @@ impl Token {
         use Token::*;
         Ok(match self {
             Date(d) => {
-                let utc = UtcDateTime::from_unix_timestamp(*d)?;
+                let d = templates::dates::safe_clamp(*d);
+                let utc = UtcDateTime::from_unix_timestamp(d)?;
                 let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
                 utc.to_offset(UtcOffset::current_local_offset()?);
                 utc.format(format)?

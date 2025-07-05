@@ -5,14 +5,14 @@ use logos::{Lexer, Logos};
 use thiserror::Error;
 use time::ext::NumericalDuration;
 use time::macros::format_description;
-use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, Weekday};
+use time::{Date, Month, OffsetDateTime, PrimitiveDateTime, Time, UtcDateTime, Weekday};
 
 use super::functions::FuncRef;
 use crate::entry::FieldRef;
 use crate::prelude::*;
 
 /// Max date value supported by time-rs.
-pub const SOMEDAY: i64 = 253402300799 - 86400;
+pub const SOMEDAY: i64 = UtcDateTime::MAX.unix_timestamp();
 
 /// Parsed token types.
 ///

@@ -87,6 +87,7 @@ pub fn datefmt(
     use well_known::iso8601::{Config, FormattedComponents, Iso8601, TimePrecision};
     let fmt = fmt.unwrap_or("default");
 
+    let ts = safe_clamp(ts);
     let date = UtcDateTime::from_unix_timestamp(ts)
         .unwrap_or_else(|_| panic!("Timestamp value is outside of the valid range: {}", ts))
         .to_offset(offset);
@@ -123,4 +124,12 @@ pub fn parse_formats(
     }
 
     Ok(output)
+}
+
+/// Limit date range to fit into safe range with all possible offsets.
+pub fn safe_clamp(ts: i64) -> i64 {
+    ts.clamp(
+        UtcDateTime::MIN.unix_timestamp() + 86400,
+        UtcDateTime::MAX.unix_timestamp() - 86400,
+    )
 }
