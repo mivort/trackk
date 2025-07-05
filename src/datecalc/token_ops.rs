@@ -244,7 +244,10 @@ impl Token {
                 date_to_sod(ts, duration_to_date(*lhs, ts))
                     == date_to_sod(ts, duration_to_date(*rhs, ts)),
             )),
-            (Bool(_), Date(_) | Duration(_) | String(_)) => Ok(Bool(false)),
+
+            (Bool(false), Date(_) | Duration(_) | String(_)) => Ok(Bool(false)),
+            (Date(_) | Duration(_) | String(_), Bool(false)) => Ok(Bool(false)),
+
             (Bool(lhs), Bool(rhs)) => Ok(Bool(*lhs == *rhs)),
             (Date(_lhs), Bool(rhs)) => Ok(Bool(*rhs)),
             (String(lhs), String(rhs)) => Ok(Bool(lhs.contains(&**rhs))),

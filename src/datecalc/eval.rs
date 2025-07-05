@@ -308,3 +308,18 @@ fn date_comparisons() {
     assert!(matches!(eval_test("1h:2h"), Ok(Token::Bool(true))));
     assert!(matches!(eval_test("1h:25h"), Ok(Token::Bool(false))));
 }
+
+#[test]
+fn contains_op() {
+    assert!(as_bool(eval_test("'abc' in 'abcd'")));
+    assert!(!as_bool(eval_test("'abc' in 'abd'")));
+
+    assert!(as_bool(eval_test("'abcd' has 'abc'")));
+    assert!(!as_bool(eval_test("'abd' has 'abc'")));
+
+    assert!(!as_bool(eval_test("'abc' in false")));
+    assert!(!as_bool(eval_test("false in 'abc'")));
+
+    assert!(as_bool(eval_test("false in false")));
+    assert!(as_bool(eval_test("true in true")));
+}
