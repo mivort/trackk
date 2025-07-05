@@ -134,6 +134,7 @@ fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
 
 /// Apply ISO8601 format to UNIX timestamps.
 fn format_date(date: i64, offset: UtcOffset) -> Result<String> {
+    let date = crate::templates::dates::safe_clamp(date);
     let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
     let time = UtcDateTime::from_unix_timestamp(date)?.to_offset(offset);
     Ok(time.format(&format)?)
