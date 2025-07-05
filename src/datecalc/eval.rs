@@ -202,30 +202,21 @@ fn comparisons() {
     assert_eq!(as_bool(eval_test("1d < 2d")), true);
     assert_eq!(as_bool(eval_test("today < tomorrow")), true);
 
-    let res = eval_test("tomorrow < 2d");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("2d < tomorrow");
-    assert!(matches!(res, Ok(Token::Bool(false))));
-
-    let res = eval_test("2d > 1d");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("tomorrow > today");
-    assert!(matches!(res, Ok(Token::Bool(true))));
+    assert!(as_bool(eval_test("tomorrow < 2d")));
+    assert!(!as_bool(eval_test("2d < tomorrow")));
+    assert!(as_bool(eval_test("2d > 1d")));
+    assert!(as_bool(eval_test("tomorrow > today")));
 }
 
 /// Check ':' op precedence over unary '-'
 #[test]
 fn op_precedence() {
-    let res = eval_test("1d:-1d");
-    assert!(matches!(res, Ok(Token::Bool(false))));
+    assert_eq!(as_f64(eval_test("2 + 4 * 7")), 30.);
+    assert_eq!(as_f64(eval_test("(2 + 4) * 7")), 42.);
 
-    let res = eval_test("1d:+1d");
-    assert!(matches!(res, Ok(Token::Bool(true))));
-
-    let res = eval_test("-1d:-1d");
-    assert!(matches!(res, Ok(Token::Bool(true))));
+    assert!(!as_bool(eval_test("1d:-1d")));
+    assert!(as_bool(eval_test("1d:+1d")));
+    assert!(as_bool(eval_test("-1d:-1d")));
 }
 
 /// Freeze some operations behaviour.
