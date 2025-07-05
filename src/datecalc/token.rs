@@ -175,6 +175,7 @@ pub enum Token {
     #[token("ln", |_| FuncRef::Ln)]
     #[token("sig", |_| FuncRef::Sig)]
     #[token("sqrt", |_| FuncRef::Sqrt)]
+    #[token("weekday", |_| FuncRef::Weekday)]
     Func(FuncRef),
 
     #[token("(")]

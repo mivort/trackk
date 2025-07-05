@@ -1,3 +1,5 @@
+use time::OffsetDateTime;
+
 use super::token::Token;
 use crate::entry::{Entry, FieldRef};
 use crate::prelude::*;
@@ -13,11 +15,12 @@ pub enum FuncRef {
     Ln,
     Sig,
     Sqrt,
+    Weekday,
 }
 
 impl FuncRef {
     /// Take arguments from the stack and produce the result.
-    pub fn exec(&self, stack: &mut Vec<Token>, entry: &Entry) -> Result<Token> {
+    pub fn exec(&self, stack: &mut Vec<Token>, entry: &Entry, ts: OffsetDateTime) -> Result<Token> {
         use FuncRef::*;
 
         match self {
@@ -29,6 +32,8 @@ impl FuncRef {
             Empty => empty(stack.pop(), entry),
             Len => length(stack.pop(), entry),
             Lines => lines(stack.pop(), entry),
+
+            Weekday => weekday(stack.pop(), ts),
         }
     }
 }
@@ -65,6 +70,7 @@ fn length(tok: Option<Token>, entry: &Entry) -> Result<Token> {
     Ok(Token::Duration(token_length(tok, entry)? as f64))
 }
 
+/// Produce length value for supported token types.
 fn token_length(tok: Token, entry: &Entry) -> Result<usize> {
     use Token::*;
 
@@ -95,4 +101,23 @@ fn lines(tok: Option<Token>, entry: &Entry) -> Result<Token> {
             tok.ttype()
         ),
     }
+}
+
+/// Find day of week for provided date or duration (0 is Monday, 6 is Sunday).
+fn weekday(tok: Option<Token>, ts: OffsetDateTime) -> Result<Token> {
+    let tok = unwrap_some_or!(tok, { bail!("'weekday' requires argument") });
+    let date = match tok {
+        Token::Date(d) => d,
+        Token::Duration(d) => super::duration_to_date(d, ts),
+        _ => bail!(
+            "'weekday' takes number or date as argument (got {})",
+            tok.ttype()
+        ),
+    };
+
+    const NEG: i64 = 86400 * 365 * 1000;
+    let utc = date + ts.offset().whole_seconds() as i64 + NEG;
+    let weekday = (utc % (86400 * 7) / 86400 + 4) % 7;
+
+    Ok(Token::Duration(weekday as f64))
 }

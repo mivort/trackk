@@ -63,7 +63,7 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => lhs.or(rhs),
                 _ => bail!("'or' ('||') operator haven't got enough arguments"),
             },
-            Func(funcref) => funcref.exec(stack, issue)?,
+            Func(funcref) => funcref.exec(stack, issue, ts)?,
             Greater(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => lhs.greater(rhs, ts)?,
                 _ => bail!("'>' operator haven't got enough arguments"),
@@ -322,4 +322,13 @@ fn contains_op() {
 
     assert!(as_bool(eval_test("false in false")));
     assert!(as_bool(eval_test("true in true")));
+}
+
+#[test]
+fn weekday() {
+    assert_eq!(as_f64(eval_test("weekday(2025-07-05)")), 5.);
+    assert_eq!(as_f64(eval_test("weekday(2025-07-05-1s)")), 4.);
+    assert_eq!(as_f64(eval_test("weekday(2025-07-05+23.5h)")), 5.);
+    assert_eq!(as_f64(eval_test("weekday(2025-07-05+24h)")), 6.);
+    assert_eq!(as_f64(eval_test("weekday(2025-07-05+2d)")), 0.);
 }

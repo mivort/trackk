@@ -15,5 +15,6 @@ pub fn duration_to_date(duration: f64, ts: OffsetDateTime) -> i64 {
 /// Convert date to start of the date within current time zone.
 #[inline]
 pub fn date_to_sod(ts: OffsetDateTime, date: i64) -> i64 {
-    date - (date + ts.offset().whole_seconds() as i64 + 86400) % 86400
+    const NEG: i64 = 86400 * 365 * 1000;
+    date - (date + ts.offset().whole_seconds() as i64 + NEG) % 86400
 }
