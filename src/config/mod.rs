@@ -1,3 +1,4 @@
+pub mod colors;
 pub mod query;
 pub mod reports;
 pub mod values;
@@ -11,9 +12,10 @@ use std::{env, fs};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::args::{Args, ColorMode};
-use crate::templates::colors;
+use crate::templates::colors::{RESET, fg};
 use crate::{expansion, prelude::*};
 
+use colors::ColorConfig;
 use query::QueryConfig;
 use reports::ReportConfig;
 use values::ValuesConfig;
@@ -42,10 +44,6 @@ pub struct Config {
     /// User-defined fields.
     #[serde(default)]
     pub _fields: HashMap<String, FieldType>, // TODO: P2: perform custom fields resolution
-
-    /// Color highlight values.
-    #[serde(default)]
-    pub colors: HashMap<String, ColorConfig>,
 
     /// Entry values config.
     #[serde(default)]
@@ -115,6 +113,11 @@ pub struct TemplatesConfig {
     /// Template used to display entry changes.
     #[serde(default)]
     diff: Box<str>,
+
+    /// Color highlight values. When colors are disabled, those values are ignored.
+    #[serde(default)]
+    pub colors: HashMap<String, ColorConfig>,
+    // TODO: P2: add template variables
 }
 
 #[derive(Deserialize, Default)]
@@ -291,25 +294,6 @@ pub struct ExpansionConfig {
     pub contexts: Vec<expansion::CmdContext>,
 }
 
-#[derive(Deserialize)]
-#[serde(untagged)]
-#[allow(unused)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
-pub enum ColorConfig {
-    Options(ColorOptions),
-    Custom(Box<str>),
-}
-
-#[derive(Deserialize, Default)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
-pub struct ColorOptions {
-    pub fg: Option<u8>,
-    pub bg: Option<u8>,
-    _bold: bool,
-    _italic: bool,
-    _underscore: bool,
-}
-
 #[derive(Deserialize, Default)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub enum ExpansionStyle {
@@ -328,8 +312,8 @@ pub fn print_config(config: &Config) -> Result<()> {
 
 /// Produce example config with current values.
 fn format_config(config: &Config) -> Result<String> {
-    let color = if config.no_color() { "" } else { colors::fg(11) };
-    let clear = if config.no_color() { "" } else { colors::RESET };
+    let color = if config.no_color() { "" } else { fg(11) };
+    let clear = if config.no_color() { "" } else { RESET };
 
     Ok(format!(
         include_str!("./example.txt"),
@@ -480,6 +464,7 @@ fn merge_config(target: &mut Config, source: Config) {
     merge_non_default(&mut target.templates.entry, source.templates.entry);
     merge_non_default(&mut target.templates.picker, source.templates.picker);
     merge_non_default(&mut target.templates.diff, source.templates.diff);
+    merge_maps(&mut target.templates.colors, source.templates.colors);
 }
 
 /// Ensure all fields which require merging are merged.
@@ -493,7 +478,6 @@ fn ensure_all_merged() {
         macros_style: Some(ExpansionStyle::None),
         color_mode: ColorMode::Always,
         _fields: Default::default(),
-        colors: Default::default(),
         date_formats: Default::default(),
         macros: vec![ExpansionConfig::default()],
         queries: HashMap::from([("test".into(), QueryConfig::default())]),
@@ -503,6 +487,7 @@ fn ensure_all_merged() {
             entry: "test".into(),
             picker: "test".into(),
             diff: "test".into(),
+            colors: [("a".into(), ColorConfig::Custom("b".into()))].into(),
         },
         values: Default::default(),
     };

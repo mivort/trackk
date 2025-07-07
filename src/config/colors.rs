@@ -1,0 +1,54 @@
+use crate::templates::colors::{bg, fg};
+use serde_derive::Deserialize;
+
+use super::Config;
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+#[allow(unused)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
+pub enum ColorConfig {
+    Options(ColorOptions),
+    Custom(Box<str>),
+}
+
+#[derive(Deserialize, Default)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
+pub struct ColorOptions {
+    pub fg: Option<u8>,
+    pub bg: Option<u8>,
+    _bold: bool,
+    _italic: bool,
+    _underscore: bool,
+}
+
+impl ColorConfig {
+    /// Convert color config entry to escape sequence.
+    pub fn format(&self) -> String {
+        match self {
+            ColorConfig::Options(options) => {
+                let mut res = String::new();
+                if let Some(color) = options.fg {
+                    res.push_str(fg(color));
+                }
+                if let Some(color) = options.bg {
+                    res.push_str(bg(color));
+                }
+                res
+            }
+            ColorConfig::Custom(_) => Default::default(),
+        }
+    }
+}
+
+impl Config {
+    /// Provide key-value list of default colors.
+    pub const fn default_colors(&self) -> &[(&str, &str)] {
+        const HEADER: &str = fg(11);
+        const DIVIDER: &str = fg(12);
+
+        &[("header", HEADER), ("divider", DIVIDER)]
+
+        // TODO: P3: add default colors here and to templates
+    }
+}

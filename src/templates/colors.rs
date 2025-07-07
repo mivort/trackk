@@ -1,22 +1,3 @@
-use crate::config::ColorConfig;
-
-/// Convert color config entry to escape sequence.
-pub fn config_to_global(config: &ColorConfig) -> String {
-    match config {
-        ColorConfig::Options(options) => {
-            let mut res = String::new();
-            if let Some(color) = options.fg {
-                res.push_str(fg(color));
-            }
-            if let Some(color) = options.bg {
-                res.push_str(bg(color));
-            }
-            res
-        }
-        ColorConfig::Custom(_) => Default::default(),
-    }
-}
-
 /// Macro which adds ANSI escape codes based on provided category.
 macro_rules! escape {
     (a16: $code:literal) => {

@@ -87,13 +87,6 @@ impl<'env> Templates<'env> {
         j2.add_global("lightcyan", anstyle::AnsiColor::BrightCyan as u8);
         j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
-        for (key, value) in &config.colors {
-            let color = colors::config_to_global(value);
-            j2.add_global(key, color);
-
-            // TODO: P3: add colors to globals with prefix
-        }
-
         if config.no_color() {
             j2.add_function("fg", |_: u8| "");
             j2.add_function("bg", |_: u8| "");
@@ -107,6 +100,14 @@ impl<'env> Templates<'env> {
             j2.add_global("underline", colors::UNDERLINE);
             j2.add_global("inverse", colors::INVERSE);
             j2.add_global("crossedout", colors::CROSSEDOUT);
+
+            for (key, value) in config.default_colors() {
+                j2.add_global(*key, *value);
+            }
+
+            for (key, value) in &config.templates.colors {
+                j2.add_global(key, value.format());
+            }
         }
 
         j2.add_function("min", |a: i32, b: i32| a.min(b));
