@@ -46,7 +46,7 @@
 
   {#- Urgency -#}
   {%- if cols > 48 and not entry.end -%}
-    / {{ fg(green) }}{{ entry.urgency | numfmt('{:.1}') }}{{ reset }} {# -#}
+    / {{ c.urgency }}{{ entry.urgency | numfmt('{:.1}') }}{{ reset }} {# -#}
   {%- endif -%}
 {%- endset -%}
 {%- set metaw = meta | width -%}

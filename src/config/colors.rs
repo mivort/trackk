@@ -43,11 +43,16 @@ impl ColorConfig {
 
 impl Config {
     /// Provide key-value list of default colors.
-    pub const fn default_colors(&self) -> &[(&str, &str)] {
-        const HEADER: &str = fg(11);
-        const DIVIDER: &str = fg(12);
+    pub const fn default_colors(&self) -> &[(&'static str, &'static str)] {
+        const DIVIDER: &str = fg(4);
+        const HEADER: &str = fg(15);
+        const URGENCY: &str = fg(2);
 
-        &[("header", HEADER), ("divider", DIVIDER)]
+        &[
+            ("divider", DIVIDER),
+            ("header", HEADER),
+            ("urgency", URGENCY),
+        ]
 
         // TODO: P3: add default colors here and to templates
     }

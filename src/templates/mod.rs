@@ -4,6 +4,7 @@ pub mod layout;
 pub mod strings;
 
 use minijinja as mj;
+use std::collections::HashMap;
 use std::fs;
 use std::io::ErrorKind;
 use unicode_width::UnicodeWidthStr;
@@ -87,9 +88,11 @@ impl<'env> Templates<'env> {
         j2.add_global("lightcyan", anstyle::AnsiColor::BrightCyan as u8);
         j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
+        let mut colors = HashMap::<&'static str, &'static str>::new();
         if config.no_color() {
             j2.add_function("fg", |_: u8| "");
             j2.add_function("bg", |_: u8| "");
+            j2.add_global("c", colors);
         } else {
             j2.add_function("fg", colors::fg);
             j2.add_function("bg", colors::bg);
@@ -101,13 +104,15 @@ impl<'env> Templates<'env> {
             j2.add_global("inverse", colors::INVERSE);
             j2.add_global("crossedout", colors::CROSSEDOUT);
 
-            for (key, value) in config.default_colors() {
-                j2.add_global(*key, *value);
-            }
-
             for (key, value) in &config.templates.colors {
-                j2.add_global(key, value.format());
+                let key = key.clone().leak();
+                let val = value.format().leak();
+                colors.insert(key, val);
             }
+            for (key, value) in config.default_colors() {
+                colors.entry(key).or_insert(*value);
+            }
+            j2.add_global("c", colors);
         }
 
         j2.add_function("min", |a: i32, b: i32| a.min(b));

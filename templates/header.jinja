@@ -1,6 +1,6 @@
 {#- Header caption -#}
 {%- set caption -%}
-  {{ fg(blue) }}---- {{ fg(lightwhite) }}{{ underline }}{{ title }} [{{ count }}]{{ reset }} {# -#}
+  {{ c.divider }}---- {{ c.header }}{{ underline }}{{ title }} [{{ count }}]{{ reset }} {# -#}
 {%- endset -%}
 {%- set capw = caption | width -%}
 
