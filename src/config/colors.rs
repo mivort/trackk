@@ -20,6 +20,8 @@ pub struct ColorOptions {
     _bold: bool,
     _italic: bool,
     _underscore: bool,
+    _inversed: bool,
+    _crossed_out: bool,
 }
 
 #[derive(Deserialize)]
@@ -75,21 +77,27 @@ impl Default for ColorValue {
 impl Config {
     /// Provide key-value list of default colors.
     pub const fn default_colors(&self) -> &[(&'static str, &'static str)] {
+        const BLOCKED: &str = fg(1);
         const DIVIDER: &str = fg(4);
         const DUE: &str = fg(15);
+        const END: &str = fg(6);
         const HEADER: &str = fg(15);
         const OVERDUE: &str = fg(9);
+        const SPACER: &str = fg(8);
+        const STARTED: &str = fg(12);
         const TAG: &str = fg(13);
         const URGENCY: &str = fg(2);
         const WHEN: &str = fg(12);
-        const SPACER: &str = fg(8);
 
         &[
+            ("blocked", BLOCKED),
             ("divider", DIVIDER),
             ("due", DUE),
+            ("end", END),
             ("header", HEADER),
             ("overdue", OVERDUE),
             ("spacer", SPACER),
+            ("started", STARTED),
             ("tag", TAG),
             ("urgency", URGENCY),
             ("when", WHEN),

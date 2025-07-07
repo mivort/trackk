@@ -41,7 +41,7 @@
 
   {#- End date -#}
   {%- if entry.end and cols > 36 -%}
-    / {{ fg(cyan) }}{{ (2 * now - entry.end) | reldate }}{{ reset }} {# -#}
+    / {{ c.end }}{{ (2 * now - entry.end) | reldate }}{{ reset }} {# -#}
   {%- endif -%}
 
   {#- Urgency -#}
@@ -54,9 +54,9 @@
 {#- Entry status -#}
 {%- set status -%}
   {%- if entry.status == 'blocked' -%}
-    {{ fg(red) }} ||
+    {{ c.blocked }} ||
   {%- elif entry.status == 'started' -%}
-    {{ fg(lightblue) }} >>
+    {{ c.started }} >>
   {%- endif -%}
   {%- if entry.repeat -%}
     {{ fg(cyan) }} &
