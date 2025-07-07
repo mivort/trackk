@@ -20,7 +20,7 @@
 {%- set tags -%}
   {%- if entry.tags | length > 0 -%}
     {%- for tag in entry.tags -%}
-      {{ fg(lightmagenta) }}+{{ tag }} {# -#}
+      {{ tc[tag] | default(c.tag) }}+{{ tag }} {# -#}
     {%- endfor -%}
   {%- else -%}
     {{ fg(lightblack) }}--
@@ -32,9 +32,9 @@
 {%- set maxw = min(cols, 96) -%}
 
 {#- Field output -#}
-{{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
+{{ c.divider }}{{ fill('-', maxw) }}{{ reset }}
 {{ entry.desc }}
-{{ fg(blue) }}{{ fill('-', maxw) }}{{ reset }}
+{{ c.divider }}{{ fill('-', maxw) }}{{ reset }}
 {{ fg(lightblue) }} status:   {{ reset }}{{ entry.status }}
 {{ fg(lightblue) }} when:     {{ reset }}{{ entry_date(entry.when) }}
 {{ fg(lightblue) }} due:      {{ reset }}{{ entry_date(entry.due) }}
@@ -51,4 +51,4 @@
 {% endif -%}
 {{ fg(lightblue) }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 11, '…') }}
 {{ fg(lightblue) }} path:     {{ reset }}{{ entry.path }}
-{{ fg(blue) }}{{ fill('-', min(cols, 96)) }}{{ reset }}
+{{ c.divider }}{{ fill('-', min(cols, 96)) }}{{ reset }}
