@@ -158,15 +158,15 @@ impl<'env> Templates<'env> {
 /// Return one of the built-in templates.
 pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> {
     const ROW: &str = include_str!("../../templates/row.jinja");
-    const ISSUE: &str = include_str!("../../templates/issue.jinja");
+    const ENTRY: &str = include_str!("../../templates/entry.jinja");
     const HEADER: &str = include_str!("../../templates/header.jinja");
 
     match template {
         "header" => Some(("header", HEADER)),
         "next" => Some(("next", ROW)),
         "all" => Some(("all", ROW)),
-        "issue" => Some(("issue", ISSUE)),
-        "entry" => Some(("entry", ISSUE)),
+        "issue" => Some(("issue", ENTRY)),
+        "entry" => Some(("entry", ENTRY)),
         "picker" => Some(("picker", ROW)),
         "none" => Some(("none", "")),
         _ => None,
