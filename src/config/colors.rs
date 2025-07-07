@@ -15,11 +15,20 @@ pub enum ColorConfig {
 #[derive(Deserialize, Default)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ColorOptions {
-    pub fg: Option<u8>,
-    pub bg: Option<u8>,
+    pub fg: ColorValue,
+    pub bg: ColorValue,
     _bold: bool,
     _italic: bool,
     _underscore: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+#[allow(unused)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
+pub enum ColorValue {
+    Indexed(Option<u8>),
+    Rgb(Box<str>),
 }
 
 impl ColorConfig {
@@ -28,16 +37,38 @@ impl ColorConfig {
         match self {
             ColorConfig::Options(options) => {
                 let mut res = String::new();
-                if let Some(color) = options.fg {
-                    res.push_str(fg(color));
-                }
-                if let Some(color) = options.bg {
-                    res.push_str(bg(color));
-                }
+                options.fg.format_fg(&mut res);
+                options.bg.format_bg(&mut res);
                 res
             }
             ColorConfig::Custom(_) => Default::default(),
         }
+    }
+}
+
+impl ColorValue {
+    /// Copy format value to output string.
+    pub fn format_fg(&self, out: &mut String) {
+        match self {
+            ColorValue::Indexed(Some(v)) => out.push_str(fg(*v)),
+            ColorValue::Rgb(_) => todo!(),
+            _ => {}
+        }
+    }
+
+    /// Copy format value to output string.
+    pub fn format_bg(&self, out: &mut String) {
+        match self {
+            ColorValue::Indexed(Some(v)) => out.push_str(bg(*v)),
+            ColorValue::Rgb(_) => todo!(),
+            _ => {}
+        }
+    }
+}
+
+impl Default for ColorValue {
+    fn default() -> Self {
+        Self::Indexed(None)
     }
 }
 
