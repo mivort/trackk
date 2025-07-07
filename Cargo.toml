@@ -1,7 +1,9 @@
 [package]
 name = "trackk"
-version = "0.4.10"
+authors = ["mivort"]
 edition = "2024"
+license = "GPL-2.0-only"
+version = "0.4.10"
 
 [[bin]]
 name = "trk"
