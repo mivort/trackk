@@ -17,10 +17,10 @@
   {#- Tag list -#}
   {%- if cols > 32 -%}
     {%- for tag in entry.tags | batch(taglimit) | first -%}
-      {{ fg(lightmagenta) }}+{{ tag }} {# -#}
+      {{ c.tag }}+{{ tag }} {# -#}
     {%- endfor -%}
     {% if entry.tags | length > taglimit -%}
-      {{ fg(magenta) }}+{{ entry.tags | length - taglimit }} {# -#}
+      {{ c.tag }}+{{ entry.tags | length - taglimit }} {# -#}
     {% endif -%}
   {%- endif -%}
   {{- reset -}}
@@ -29,13 +29,13 @@
   {%- if cols > 36 and not entry.end -%}
     {%- if entry.due -%}
       {%- if entry.due >= now -%}
-        / {{ fg(lightwhite) }}
+        / {{ c.due }}
       {%- else -%}
-        / {{ fg(lightred) }}
+        / {{ c.overdue }}
       {%- endif -%}
       {{ entry.due | reldate }} {{ reset }}
     {%- elif entry.when -%}
-      / {{ fg(lightblue) }}{{ entry.when | reldate }} {{ reset }}
+      / {{ c.when }}{{ entry.when | reldate }} {{ reset }}
     {%- endif -%}
   {%- endif -%}
 
@@ -119,7 +119,7 @@
 -#}
 {{- numbercolor -}}{{- number -}}
 {{- title -}}{{ reset }}{{ status -}}
-{{- fg(lightblack) }}{{ fill('.', maxw - statusw - titlew - metaw - numberw - 1) }} {# -#}
+{{- c.spacer }}{{ fill('.', maxw - statusw - titlew - metaw - numberw - 1) }} {# -#}
 {{- meta -}}
 
 {#-

@@ -45,13 +45,23 @@ impl Config {
     /// Provide key-value list of default colors.
     pub const fn default_colors(&self) -> &[(&'static str, &'static str)] {
         const DIVIDER: &str = fg(4);
+        const DUE: &str = fg(15);
         const HEADER: &str = fg(15);
+        const OVERDUE: &str = fg(9);
+        const TAG: &str = fg(13);
         const URGENCY: &str = fg(2);
+        const WHEN: &str = fg(12);
+        const SPACER: &str = fg(8);
 
         &[
             ("divider", DIVIDER),
+            ("due", DUE),
             ("header", HEADER),
+            ("overdue", OVERDUE),
+            ("spacer", SPACER),
+            ("tag", TAG),
             ("urgency", URGENCY),
+            ("when", WHEN),
         ]
 
         // TODO: P3: add default colors here and to templates
