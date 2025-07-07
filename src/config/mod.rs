@@ -117,7 +117,11 @@ pub struct TemplatesConfig {
     /// Color highlight values. When colors are disabled, those values are ignored.
     #[serde(default)]
     pub colors: HashMap<String, ColorConfig>,
-    // TODO: P2: add template variables
+
+    /// Color highlight values. When colors are disabled, those values are ignored.
+    #[serde(default)]
+    pub tags: HashMap<String, ColorConfig>, // TODO: P2: add tags coloring
+                                            // TODO: P2: add template variables
 }
 
 #[derive(Deserialize, Default)]
@@ -465,6 +469,7 @@ fn merge_config(target: &mut Config, source: Config) {
     merge_non_default(&mut target.templates.picker, source.templates.picker);
     merge_non_default(&mut target.templates.diff, source.templates.diff);
     merge_maps(&mut target.templates.colors, source.templates.colors);
+    merge_maps(&mut target.templates.tags, source.templates.tags);
 }
 
 /// Ensure all fields which require merging are merged.
@@ -488,6 +493,7 @@ fn ensure_all_merged() {
             picker: "test".into(),
             diff: "test".into(),
             colors: [("a".into(), ColorConfig::Custom("b".into()))].into(),
+            tags: [("t1".into(), ColorConfig::Custom("t2".into()))].into(),
         },
         values: Default::default(),
     };

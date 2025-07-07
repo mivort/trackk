@@ -89,10 +89,11 @@ impl<'env> Templates<'env> {
         j2.add_global("lightwhite", anstyle::AnsiColor::BrightWhite as u8);
 
         let mut colors = HashMap::<&'static str, &'static str>::new();
+        let mut tags = HashMap::<&'static str, &'static str>::new();
+
         if config.no_color() {
             j2.add_function("fg", |_: u8| "");
             j2.add_function("bg", |_: u8| "");
-            j2.add_global("c", colors);
         } else {
             j2.add_function("fg", colors::fg);
             j2.add_function("bg", colors::bg);
@@ -112,8 +113,15 @@ impl<'env> Templates<'env> {
             for (key, value) in config.default_colors() {
                 colors.entry(key).or_insert(*value);
             }
-            j2.add_global("c", colors);
+            for (key, value) in &config.templates.tags {
+                let key = key.clone().leak();
+                let val = value.format().leak();
+                tags.insert(key, val);
+            }
         }
+
+        j2.add_global("c", colors);
+        j2.add_global("tc", tags);
 
         j2.add_function("min", |a: i32, b: i32| a.min(b));
         j2.add_function("max", |a: i32, b: i32| a.max(b));

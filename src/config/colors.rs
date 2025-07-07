@@ -15,12 +15,19 @@ pub enum ColorConfig {
 #[derive(Deserialize, Default)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ColorOptions {
+    #[serde(default)]
     pub fg: ColorValue,
+    #[serde(default)]
     pub bg: ColorValue,
+    #[serde(default)]
     _bold: bool,
+    #[serde(default)]
     _italic: bool,
+    #[serde(default)]
     _underscore: bool,
+    #[serde(default)]
     _inversed: bool,
+    #[serde(default)]
     _crossed_out: bool,
 }
 
@@ -87,7 +94,7 @@ impl Config {
         const OVERDUE: &str = fg(9);
         const SPACER: &str = fg(8);
         const STARTED: &str = fg(12);
-        const TAG: &str = fg(13);
+        const TAG: &str = fg(5);
         const URGENCY: &str = fg(2);
         const WHEN: &str = fg(12);
         const PENDING: &str = RESET;

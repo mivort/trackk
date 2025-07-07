@@ -17,7 +17,7 @@
   {#- Tag list -#}
   {%- if cols > 32 -%}
     {%- for tag in entry.tags | batch(taglimit) | first -%}
-      {{ c.tag }}+{{ tag }} {# -#}
+      {{ tc[tag] | default(c.tag) }}+{{ tag }} {# -#}
     {%- endfor -%}
     {% if entry.tags | length > taglimit -%}
       {{ c.tag }}+{{ entry.tags | length - taglimit }} {# -#}
