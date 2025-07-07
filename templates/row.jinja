@@ -73,11 +73,11 @@
 -#}
 {%- set title | trunc(maxw - statusw - metaw - 6, '…') -%}
   {%- if entry.status == 'deleted' -%}
-    {{ fg(lightblack) }}
+    {{ c.deleted }}
   {%- elif entry.status == 'completed' -%}
-    {{ fg(green) }}
+    {{ c.completed }}
   {%- else -%}
-    {{ reset }}
+    {{ c.pending }}
   {%- endif -%}
   {{ entry.desc | firstline }}
 {%- endset -%}

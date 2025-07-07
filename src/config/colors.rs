@@ -1,4 +1,4 @@
-use crate::templates::colors::{bg, fg};
+use crate::templates::colors::{RESET, bg, fg};
 use serde_derive::Deserialize;
 
 use super::Config;
@@ -78,6 +78,8 @@ impl Config {
     /// Provide key-value list of default colors.
     pub const fn default_colors(&self) -> &[(&'static str, &'static str)] {
         const BLOCKED: &str = fg(1);
+        const COMPLETED: &str = fg(2);
+        const DELETED: &str = fg(8);
         const DIVIDER: &str = fg(4);
         const DUE: &str = fg(15);
         const END: &str = fg(6);
@@ -88,14 +90,18 @@ impl Config {
         const TAG: &str = fg(13);
         const URGENCY: &str = fg(2);
         const WHEN: &str = fg(12);
+        const PENDING: &str = RESET;
 
         &[
             ("blocked", BLOCKED),
+            ("completed", COMPLETED),
+            ("deleted", DELETED),
             ("divider", DIVIDER),
             ("due", DUE),
             ("end", END),
             ("header", HEADER),
             ("overdue", OVERDUE),
+            ("pending", PENDING),
             ("spacer", SPACER),
             ("started", STARTED),
             ("tag", TAG),
