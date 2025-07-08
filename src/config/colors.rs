@@ -92,7 +92,10 @@ impl Config {
         const DESC_DELETED: &str = fg(8);
         const DESC_PENDING: &str = RESET;
         const DIVIDER: &str = fg(4);
-        const FIELD: &str = fg(12);
+        const ENTRY_DATE: &str = fg(15);
+        const ENTRY_FIELD: &str = fg(12);
+        const ENTRY_NO_VALUE: &str = fg(8);
+        const ENTRY_VALUE: &str = RESET;
         const HEADER: &str = fg(15);
         const MARK_BLOCKED: &str = fg(1);
         const MARK_NOTE: &str = fg(6);
@@ -117,13 +120,16 @@ impl Config {
             ("desc_deleted", DESC_DELETED),
             ("desc_pending", DESC_PENDING),
             ("divider", DIVIDER),
-            ("field", FIELD),
+            ("entry_date", ENTRY_DATE),
+            ("entry_field", ENTRY_FIELD),
+            ("entry_no_value", ENTRY_NO_VALUE),
+            ("entry_value", ENTRY_VALUE),
             ("header", HEADER),
             ("mark_blocked", MARK_BLOCKED),
             ("mark_note", MARK_NOTE),
+            ("mark_repeat", MARK_REPEAT),
             ("mark_started", MARK_STARTED),
             ("more", MORE),
-            ("repeat", MARK_REPEAT),
             ("sid_pending", SID_PENDING),
             ("spacer", SPACER),
             ("tag", TAG),

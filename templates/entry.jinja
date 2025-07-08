@@ -1,18 +1,18 @@
 {#- Date display macro -#}
 {% macro entry_date(date) %}
   {%- if date -%}
-    {{ fg(lightwhite) }}
+    {{ c.entry_date }}
       {%- if cols > 42 -%}
         {{ date | datefmt('long') }}
       {%- else -%}
         {{ date | datefmt }}
       {%- endif -%}
-    {{ reset }}
+    {{ c.entry_value }}
     {%- if cols > 60 -%}
       {#- #} ({{ date | longreldate }})
     {%- endif -%}
   {%- else -%}
-    {{ fg(lightblack) }}--{{ reset }}
+    {{ c.entry_no_value }}--{{ reset }}
   {%- endif -%}
 {% endmacro %}
 
@@ -23,7 +23,7 @@
       {{ tc[tag] | default(c.tag) }}+{{ tag }} {# -#}
     {%- endfor -%}
   {%- else -%}
-    {{ fg(lightblack) }}--
+    {{ c.entry_no_value }}--
   {%- endif -%}
   {{ reset }}
 {%- endset -%}
@@ -35,20 +35,20 @@
 {{ c.divider }}{{ fill('-', maxw) }}{{ reset }}
 {{ entry.desc }}
 {{ c.divider }}{{ fill('-', maxw) }}{{ reset }}
-{{ c.field }} status:   {{ reset }}{{ entry.status }}
-{{ c.field }} when:     {{ reset }}{{ entry_date(entry.when) }}
-{{ c.field }} due:      {{ reset }}{{ entry_date(entry.due) }}
-{{ c.field }} end:      {{ reset }}{{ entry_date(entry.end) }}
-{{ c.field }} repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
-{{ c.field }} tags:     {{ reset }}{{ tags }}
+{{ c.entry_field }} status:   {{ c.entry_value }}{{ entry.status }}
+{{ c.entry_field }} when:     {{ c.entry_value }}{{ entry_date(entry.when) }}
+{{ c.entry_field }} due:      {{ c.entry_value }}{{ entry_date(entry.due) }}
+{{ c.entry_field }} end:      {{ c.entry_value }}{{ entry_date(entry.end) }}
+{{ c.entry_field }} repeat:   {{ c.entry_value }}{{ entry.repeat | default(c.entry_no_value ~ "--") }}
+{{ c.entry_field }} tags:     {{ c.entry_value }}{{ tags }}
 
-{{ c.field }} created:  {{ reset }}{{ entry_date(entry.created) }}
-{{ c.field }} modified: {{ reset }}{{ entry_date(entry.modified) }}
-{{ c.field }} urgency:  {{ reset }}{{ entry.urgency | numfmt('{:.3}') }}
+{{ c.entry_field }} created:  {{ c.entry_value }}{{ entry_date(entry.created) }}
+{{ c.entry_field }} modified: {{ c.entry_value }}{{ entry_date(entry.modified) }}
+{{ c.entry_field }} urgency:  {{ c.urgency }}{{ entry.urgency | numfmt('{:.3}') }}
 
 {% if entry.sid -%}
-  {{ c.field }} sid:      {{ reset }}{{ entry.sid }}
+  {{ c.entry_field }} sid:      {{ c.entry_value }}{{ entry.sid }}
 {% endif -%}
-{{ c.field }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 11, '…') }}
-{{ c.field }} path:     {{ reset }}{{ entry.path }}
+{{ c.entry_field }} uuid:     {{ c.entry_value }}{{ break }}{{ entry.id | trunc(maxw - 11, '…') }}
+{{ c.entry_field }} path:     {{ c.entry_value }}{{ entry.path }}
 {{ c.divider }}{{ fill('-', min(cols, 96)) }}{{ reset }}
