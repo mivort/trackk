@@ -1,7 +1,10 @@
+use std::fmt::Write;
+
 use crate::templates::colors::{RESET, bg, fg};
 use serde_derive::Deserialize;
 
 use super::Config;
+use crate::prelude::*;
 
 #[derive(Deserialize)]
 #[serde(untagged)]
@@ -12,23 +15,52 @@ pub enum ColorConfig {
     Custom(Box<str>),
 }
 
-#[derive(Deserialize, Default)]
+#[derive(Deserialize)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub struct ColorOptions {
     #[serde(default)]
-    pub fg: ColorValue,
+    pub fg: Option<u8>,
+
     #[serde(default)]
-    pub bg: ColorValue,
+    pub bg: Option<u8>,
+
+    #[serde(default)]
+    pub fg_rgb: i32,
+
+    #[serde(default)]
+    pub bg_rgb: i32,
+
     #[serde(default)]
     _bold: bool,
+
     #[serde(default)]
     _italic: bool,
+
     #[serde(default)]
     _underscore: bool,
+
     #[serde(default)]
     _inversed: bool,
+
     #[serde(default)]
     _crossed_out: bool,
+}
+
+impl Default for ColorOptions {
+    fn default() -> Self {
+        Self {
+            fg: None,
+            bg: None,
+            fg_rgb: -1,
+            bg_rgb: -1,
+
+            _bold: false,
+            _italic: false,
+            _underscore: false,
+            _inversed: false,
+            _crossed_out: false,
+        }
+    }
 }
 
 #[derive(Deserialize)]
@@ -46,32 +78,32 @@ impl ColorConfig {
         match self {
             ColorConfig::Options(options) => {
                 let mut res = String::new();
-                options.fg.format_fg(&mut res);
-                options.bg.format_bg(&mut res);
+                Self::format_fg(options, &mut res);
+                Self::format_bg(options, &mut res);
                 res
             }
             ColorConfig::Custom(_) => Default::default(),
         }
     }
-}
 
-impl ColorValue {
-    /// Copy format value to output string.
-    pub fn format_fg(&self, out: &mut String) {
-        match self {
-            ColorValue::Indexed(Some(v)) => out.push_str(fg(*v)),
-            ColorValue::Rgb(_) => todo!(),
-            _ => {}
+    /// Check if RGB value is not defined and set indexed fg color.
+    fn format_fg(options: &ColorOptions, out: &mut String) {
+        if options.fg_rgb > 0 {
+            let [b, g, r, _] = options.fg_rgb.to_le_bytes();
+            let _ = write!(out, "{}", anstyle::RgbColor(r, g, b).render_fg());
+            return;
         }
+        out.push_str(fg(unwrap_some_or!(options.fg, { return })));
     }
 
-    /// Copy format value to output string.
-    pub fn format_bg(&self, out: &mut String) {
-        match self {
-            ColorValue::Indexed(Some(v)) => out.push_str(bg(*v)),
-            ColorValue::Rgb(_) => todo!(),
-            _ => {}
+    /// Check if RGB value is not defined and set indexed bg color.
+    fn format_bg(options: &ColorOptions, out: &mut String) {
+        if options.bg_rgb > 0 {
+            let [b, g, r, _] = options.bg_rgb.to_le_bytes();
+            let _ = write!(out, "{}", anstyle::RgbColor(r, g, b).render_bg());
+            return;
         }
+        out.push_str(bg(unwrap_some_or!(options.bg, { return })));
     }
 }
 

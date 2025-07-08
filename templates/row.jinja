@@ -17,7 +17,7 @@
   {#- Tag list -#}
   {%- if cols > 32 -%}
     {%- for tag in entry.tags | batch(taglimit) | first -%}
-      {{ tc[tag] | default(c.tag) }}+{{ tag }} {# -#}
+      {{ tc[tag] | default(c.tag) }}+{{ tag }}{{ reset }} {# -#}
     {%- endfor -%}
     {% if entry.tags | length > taglimit -%}
       {{ c.tag }}+{{ entry.tags | length - taglimit }} {# -#}
@@ -33,9 +33,9 @@
       {%- else -%}
         / {{ c.date_overdue }}
       {%- endif -%}
-      {{ entry.due | reldate }} {{ reset }}
+      {{ entry.due | reldate }}{{ reset }} {# -#}
     {%- elif entry.when -%}
-      / {{ c.date_when }}{{ entry.when | reldate }} {{ reset }}
+      / {{ c.date_when }}{{ entry.when | reldate }}{{ reset }} {# -#}
     {%- endif -%}
   {%- endif -%}
 
