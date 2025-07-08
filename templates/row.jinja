@@ -29,19 +29,19 @@
   {%- if cols > 36 and not entry.end -%}
     {%- if entry.due -%}
       {%- if entry.due >= now -%}
-        / {{ c.due }}
+        / {{ c.date_due }}
       {%- else -%}
-        / {{ c.overdue }}
+        / {{ c.date_overdue }}
       {%- endif -%}
       {{ entry.due | reldate }} {{ reset }}
     {%- elif entry.when -%}
-      / {{ c.when }}{{ entry.when | reldate }} {{ reset }}
+      / {{ c.date_when }}{{ entry.when | reldate }} {{ reset }}
     {%- endif -%}
   {%- endif -%}
 
   {#- End date -#}
   {%- if entry.end and cols > 36 -%}
-    / {{ c.end }}{{ (2 * now - entry.end) | reldate }}{{ reset }} {# -#}
+    / {{ c.date_end }}{{ (2 * now - entry.end) | reldate }}{{ reset }} {# -#}
   {%- endif -%}
 
   {#- Urgency -#}
@@ -54,15 +54,15 @@
 {#- Entry status -#}
 {%- set status -%}
   {%- if entry.status == 'blocked' -%}
-    {{ c.blocked }} ||
+    {{ c.mark_blocked }} ||
   {%- elif entry.status == 'started' -%}
-    {{ c.started }} >>
+    {{ c.mark_started }} >>
   {%- endif -%}
   {%- if entry.repeat -%}
-    {{ fg(cyan) }} &
+    {{ c.mark_repeat }} &
   {%- endif -%}
   {%- if cols > 64 and entry.desc | hasnote -%}
-    {{ fg(cyan) }} #
+    {{ c.mark_note }} #
   {%- endif -%}
 {%- endset -%}
 {%- set statusw = status | width -%}
@@ -73,11 +73,11 @@
 -#}
 {%- set title | trunc(maxw - statusw - metaw - 6, '…') -%}
   {%- if entry.status == 'deleted' -%}
-    {{ c.deleted }}
+    {{ c.desc_deleted }}
   {%- elif entry.status == 'completed' -%}
-    {{ c.completed }}
+    {{ c.desc_completed }}
   {%- else -%}
-    {{ c.pending }}
+    {{ c.desc_pending }}
   {%- endif -%}
   {{ entry.desc | firstline }}
 {%- endset -%}
@@ -101,13 +101,13 @@
 -#}
 {%- set numbercolor -%}
   {%- if entry.status == 'deleted' -%}
-    {{ fg(lightblack) }}
+    {{ c.uuid_deleted }}
   {%- elif entry.status == 'completed' -%}
-    {{ fg(lightgreen) }}
+    {{ c.uuid_completed }}
   {%- elif entry.sid -%}
-    {{ fg(lightblue) }}
+    {{ c.sid_pending }}
   {%- else -%}
-    {{ fg(blue) }}
+    {{ c.uuid }}
   {%- endif -%}
 {%- endset -%}
 
@@ -129,6 +129,6 @@
 {%- if lineno == limit - 1 %}
 {# #}
   {%- if lineno != count - 1 -%}
-    {# #}     {{ fg(lightblack) }}+{{ count - limit }} more{{ reset }}
+    {# #}     {{ c.more }}+{{ count - limit }} more{{ reset }}
   {%- endif -%}
 {%- endif %}

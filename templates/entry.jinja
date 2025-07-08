@@ -35,20 +35,20 @@
 {{ c.divider }}{{ fill('-', maxw) }}{{ reset }}
 {{ entry.desc }}
 {{ c.divider }}{{ fill('-', maxw) }}{{ reset }}
-{{ fg(lightblue) }} status:   {{ reset }}{{ entry.status }}
-{{ fg(lightblue) }} when:     {{ reset }}{{ entry_date(entry.when) }}
-{{ fg(lightblue) }} due:      {{ reset }}{{ entry_date(entry.due) }}
-{{ fg(lightblue) }} end:      {{ reset }}{{ entry_date(entry.end) }}
-{{ fg(lightblue) }} repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
-{{ fg(lightblue) }} tags:     {{ reset }}{{ tags }}
+{{ c.field }} status:   {{ reset }}{{ entry.status }}
+{{ c.field }} when:     {{ reset }}{{ entry_date(entry.when) }}
+{{ c.field }} due:      {{ reset }}{{ entry_date(entry.due) }}
+{{ c.field }} end:      {{ reset }}{{ entry_date(entry.end) }}
+{{ c.field }} repeat:   {{ reset }}{{ entry.repeat | default(fg(lightblack) ~ "--") }}
+{{ c.field }} tags:     {{ reset }}{{ tags }}
 
-{{ fg(lightblue) }} created:  {{ reset }}{{ entry_date(entry.created) }}
-{{ fg(lightblue) }} modified: {{ reset }}{{ entry_date(entry.modified) }}
-{{ fg(lightblue) }} urgency:  {{ reset }}{{ entry.urgency | numfmt('{:.3}') }}
+{{ c.field }} created:  {{ reset }}{{ entry_date(entry.created) }}
+{{ c.field }} modified: {{ reset }}{{ entry_date(entry.modified) }}
+{{ c.field }} urgency:  {{ reset }}{{ entry.urgency | numfmt('{:.3}') }}
 
 {% if entry.sid -%}
-  {{ fg(lightblue) }} sid:      {{ reset }}{{ entry.sid }}
+  {{ c.field }} sid:      {{ reset }}{{ entry.sid }}
 {% endif -%}
-{{ fg(lightblue) }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 11, '…') }}
-{{ fg(lightblue) }} path:     {{ reset }}{{ entry.path }}
+{{ c.field }} uuid:     {{ reset }}{{ break }}{{ entry.id | trunc(maxw - 11, '…') }}
+{{ c.field }} path:     {{ reset }}{{ entry.path }}
 {{ c.divider }}{{ fill('-', min(cols, 96)) }}{{ reset }}

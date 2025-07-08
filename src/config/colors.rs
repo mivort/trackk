@@ -84,36 +84,53 @@ impl Default for ColorValue {
 impl Config {
     /// Provide key-value list of default colors.
     pub const fn default_colors(&self) -> &[(&'static str, &'static str)] {
-        const BLOCKED: &str = fg(1);
-        const COMPLETED: &str = fg(2);
-        const DELETED: &str = fg(8);
+        const DATE_DUE: &str = fg(15);
+        const DATE_END: &str = fg(6);
+        const DATE_OVERDUE: &str = fg(9);
+        const DATE_WHEN: &str = fg(12);
+        const DESC_COMPLETED: &str = fg(2);
+        const DESC_DELETED: &str = fg(8);
+        const DESC_PENDING: &str = RESET;
         const DIVIDER: &str = fg(4);
-        const DUE: &str = fg(15);
-        const END: &str = fg(6);
+        const FIELD: &str = fg(12);
         const HEADER: &str = fg(15);
-        const OVERDUE: &str = fg(9);
+        const MARK_BLOCKED: &str = fg(1);
+        const MARK_NOTE: &str = fg(6);
+        const MARK_REPEAT: &str = fg(6);
+        const MARK_STARTED: &str = fg(12);
+        const MORE: &str = fg(8);
+        const SID_PENDING: &str = fg(12);
         const SPACER: &str = fg(8);
-        const STARTED: &str = fg(12);
         const TAG: &str = fg(5);
         const URGENCY: &str = fg(2);
-        const WHEN: &str = fg(12);
-        const PENDING: &str = RESET;
+        const UUID: &str = fg(4);
+        const UUID_COMPLETED: &str = fg(10);
+        const UUID_DELETED: &str = fg(8);
 
         &[
-            ("blocked", BLOCKED),
-            ("completed", COMPLETED),
-            ("deleted", DELETED),
+            ("date_due", DATE_DUE),
+            ("date_end", DATE_END),
+            ("date_overdue", DATE_OVERDUE),
+            ("date_when", DATE_WHEN),
+            ("desc_completed", DESC_COMPLETED),
+            ("desc_deleted", DESC_DELETED),
+            ("desc_deleted", DESC_DELETED),
+            ("desc_pending", DESC_PENDING),
             ("divider", DIVIDER),
-            ("due", DUE),
-            ("end", END),
+            ("field", FIELD),
             ("header", HEADER),
-            ("overdue", OVERDUE),
-            ("pending", PENDING),
+            ("mark_blocked", MARK_BLOCKED),
+            ("mark_note", MARK_NOTE),
+            ("mark_started", MARK_STARTED),
+            ("more", MORE),
+            ("repeat", MARK_REPEAT),
+            ("sid_pending", SID_PENDING),
             ("spacer", SPACER),
-            ("started", STARTED),
             ("tag", TAG),
             ("urgency", URGENCY),
-            ("when", WHEN),
+            ("uuid", UUID),
+            ("uuid_completed", UUID_COMPLETED),
+            ("uuid_deleted", UUID_DELETED),
         ]
 
         // TODO: P3: add default colors here and to templates
