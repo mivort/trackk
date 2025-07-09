@@ -50,8 +50,8 @@ impl ValuesConfig {
             return concat!(
                 concat!(
                     "(",
-                    stringify!(sig((now - (due or when or someday)) / 10mil) * (10 if due else 5)),
-                    concat!(" + ", stringify!(sig((now - created) / 10mil) * 0.5)),
+                    stringify!(sig((now - (due or when or someday)) / 1y) * (5 if due else 4.5)),
+                    concat!(" + ", stringify!(sig((now - created) / 5y) * 0.5)),
                     ")",
                     " * ",
                     stringify!((0 if end else 1)), // Only apply due/created if end is not set
@@ -59,7 +59,7 @@ impl ValuesConfig {
                 concat!(
                     " - ",
                     // Reduce urgency for older complete tasks
-                    stringify!((sig((now - (end or now)) / 10mil) * 2 - 0.5 if end else 0))
+                    stringify!((sig((now - (end or now)) / 10y) * 2 - 0.5 if end else 0))
                 ),
                 " + (1 if status == started else 0)",
                 " + (-1 if status == blocked else 0)",

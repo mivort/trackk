@@ -332,3 +332,9 @@ fn weekday() {
     assert_eq!(as_f64(eval_test("weekday(2025-07-05+24h)")), 6.);
     assert_eq!(as_f64(eval_test("weekday(2025-07-05+2d)")), 0.);
 }
+
+#[test]
+fn ternary() {
+    assert_eq!(as_f64(eval_test("10 if due else 5")), 5.);
+    assert_eq!(as_f64(eval_test("10 if (5 if due) else 5")), 5.);
+}

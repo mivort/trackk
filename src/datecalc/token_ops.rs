@@ -160,8 +160,8 @@ impl Token {
     /// always selects the right branch.
     pub fn r#if(self, rhs: Self) -> Self {
         match rhs {
-            Self::Bool(true) => self,
-            _ => Self::Else,
+            Self::Bool(false) | Self::Else => Self::Else,
+            _ => self,
         }
     }
 
