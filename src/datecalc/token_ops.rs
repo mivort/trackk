@@ -58,7 +58,7 @@ impl Token {
             (Duration(lhs), Date(rhs)) => Ok(Date(*lhs as i64 + rhs)),
             _ => {
                 bail!(
-                    "Unsupported '+' operator arguments ({} and {})",
+                    "Type error: unsupported operand types for '+': {} and {}",
                     self.ttype(),
                     rhs.ttype()
                 )
@@ -75,7 +75,7 @@ impl Token {
             (Date(lhs), Duration(rhs)) => Ok(Date(lhs - *rhs as i64)),
             (Date(lhs), Date(rhs)) => Ok(Duration((lhs - rhs) as f64)),
             _ => bail!(
-                "Unsupported '-' operator arguments ({} and {})",
+                "Type error: unsupported operand types for '-': {} and {}",
                 self.ttype(),
                 rhs.ttype()
             ),
@@ -89,7 +89,7 @@ impl Token {
         match (&self, &rhs) {
             (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs * rhs)),
             _ => bail!(
-                "Unsupported '*' operator arguments ({} and {})",
+                "Type error: unsupported operand types for '*': {} and {}",
                 self.ttype(),
                 rhs.ttype()
             ),
@@ -109,7 +109,7 @@ impl Token {
                 Ok(Duration(lhs / rhs))
             }
             _ => bail!(
-                "Unsupported '/' operator arguments ({} and {})",
+                "Type error: unsupported operand types for '/': {} and {}",
                 self.ttype(),
                 rhs.ttype()
             ),
@@ -120,9 +120,13 @@ impl Token {
     pub fn modulo(self, rhs: Self) -> Result<Self> {
         use Token::*;
 
-        match (self, rhs) {
+        match (&self, &rhs) {
             (Duration(lhs), Duration(rhs)) => Ok(Duration(lhs % rhs)),
-            _ => bail!("Unsupported '%' operator arguments"),
+            _ => bail!(
+                "Type error: unsupported operand types for '%': {} and {}",
+                self.ttype(),
+                rhs.ttype(),
+            ),
         }
     }
 
@@ -131,7 +135,10 @@ impl Token {
         match &self {
             Self::Duration(duration) => Ok(Self::Duration(-duration)),
             Self::Date(_) => bail!("Date can't be negative"),
-            _ => bail!("Unary '-' applied to the wrong token ({})", self.ttype()),
+            _ => bail!(
+                "Type error: unsupported operand type for '-': {}",
+                self.ttype()
+            ),
         }
     }
 
