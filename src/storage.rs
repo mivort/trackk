@@ -24,13 +24,15 @@ pub fn add_entry(new_entry: Entry, app: &App) -> Result<()> {
     }
 
     let mut index = app.index_mut()?;
-    index.update_status(&app.config, &path, &new_entry);
+    let row = index.update_status(&app.config, &path, &new_entry);
     index.write()?;
 
-    info!(
-        "New entry ({}) added",
-        &new_entry.id[..(new_entry.id.len().min(8))]
-    );
+    let id = &new_entry.id[..(new_entry.id.len().min(8))];
+    if let Some(row) = row {
+        info!("New active entry ({}) added, ID: {id}", row + 1);
+    } else {
+        info!("New inactive entry added, ID: {id}");
+    }
 
     if let Some(idx) = bucket.insert(new_entry) {
         bail!("UUID collisiion detected: {}", bucket.entries[idx].id);

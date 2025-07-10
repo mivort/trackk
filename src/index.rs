@@ -64,25 +64,27 @@ impl Index {
         Ok(())
     }
 
-    /// Append entry to active/shorthand storage.
-    pub fn update_status(&mut self, config: &Config, path: &str, issue: &Entry) {
+    /// Append or remove entry to active/shorthand storage. Return index row number
+    /// if it's present in index.
+    pub fn update_status(&mut self, config: &Config, path: &str, issue: &Entry) -> Option<usize> {
         let id = &issue.id;
         let status = &issue.status;
 
         let entry = format!("{path}/{id}");
 
         if config.values.active_status.contains(status) {
-            if self.active.contains(&entry) {
-                return;
+            if let Some(position) = self.active.iter().position(|e| *e == entry) {
+                return Some(position);
             }
             self.active.push(entry);
-            return;
+            return Some(self.active.len() - 1);
         }
 
         let position = self.active.iter().position(|e| e == &entry);
         if let Some(position) = position {
             self.active.remove(position);
         }
+        None
     }
 
     /// Sort index alphabetically. Note that it may change shorthand IDs.
