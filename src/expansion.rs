@@ -6,7 +6,12 @@ use crate::prelude::*;
 
 /// Perform expansion rules on arguments.
 pub fn pre_process_args(config: &Config) -> Result<Vec<String>> {
-    let mut args = std::env::args();
+    let args = std::env::args();
+    pre_process(config, args)
+}
+
+/// Iterate over arguments and store in output vec.
+fn pre_process(config: &Config, mut args: impl Iterator<Item = String>) -> Result<Vec<String>> {
     let mut output = Vec::new();
     let mut context = CmdContext::Root;
 
@@ -239,3 +244,16 @@ impl Default for CmdContext {
 
 /// Matcher table for different command contexts.
 type RuleIndex = [Vec<(Regex, Vec<String>)>; cmd_contexts()];
+
+#[test]
+fn try_expand() {
+    let config = Config::default();
+    let cmd: Vec<String> = vec!["add".into(), "+test".into(), "test".into(), "entry".into()];
+    let cmp: Vec<String> = vec![
+        "add".into(),
+        "--tag=test".into(),
+        "test".into(),
+        "entry".into(),
+    ];
+    assert_eq!(pre_process(&config, cmd.into_iter()).unwrap(), cmp);
+}
