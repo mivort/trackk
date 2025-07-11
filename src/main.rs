@@ -9,9 +9,7 @@ mod entry;
 mod expansion;
 mod filter;
 mod hooks;
-mod import {
-    pub(crate) mod tw;
-}
+mod import;
 mod index;
 mod input;
 mod merge;
@@ -19,10 +17,7 @@ mod prelude;
 mod repo;
 mod sort;
 mod storage;
-mod sync {
-    pub(crate) mod driver;
-    pub(crate) mod git;
-}
+mod sync;
 mod templates;
 
 use std::borrow::Cow;

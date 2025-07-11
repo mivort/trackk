@@ -3,7 +3,7 @@ use std::fs;
 use crate::app::App;
 use crate::args::InitArgs;
 use crate::config::{Config, SyncDriverMode};
-use crate::sync::driver::SyncDriver;
+use crate::sync::SyncDriver;
 use crate::sync::git::Git;
 use crate::{prelude::*, storage};
 

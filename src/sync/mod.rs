@@ -1,3 +1,5 @@
+pub mod git;
+
 use std::path::Path;
 
 use crate::app::App;

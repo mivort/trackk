@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use crate::app::App;
 use crate::args::InitArgs;
 use crate::index::ACTIVE_INDEX;
-use crate::sync::driver::SyncDriver;
+use crate::sync::SyncDriver;
 use crate::{input, prelude::*};
 
 use std::process::Command;
