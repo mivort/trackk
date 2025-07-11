@@ -26,9 +26,11 @@ pub fn pick_prompt<'a>(
     mut entries: Vec<EntryPath>,
     app: &'a App<'a>,
 ) -> Result<Vec<EntryPath>> {
-    if entries.len() < 2 {
+    if entries.len() < 2 || app.select_all {
         return Ok(entries);
     }
+
+    // TODO: P2: support custom entry pickers
 
     if !stdout().is_terminal() {
         bail!(
@@ -36,8 +38,6 @@ pub fn pick_prompt<'a>(
             entries.len()
         );
     }
-
-    // TODO: P3: support 'auto-select all' option
 
     let template_id = app.config.templates.picker();
 

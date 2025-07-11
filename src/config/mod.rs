@@ -112,7 +112,7 @@ pub struct TemplatesConfig {
 
     /// Template used to display entry changes.
     #[serde(default)]
-    diff: Box<str>,
+    diff: Box<str>, // TODO: P2: support custom diff display
 
     /// Color highlight values. When colors are disabled, those values are ignored.
     #[serde(default)]

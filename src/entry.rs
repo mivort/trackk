@@ -40,7 +40,7 @@ pub struct Entry {
     /// IDs of linked issues.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(default)]
-    pub linked: Vec<Box<str>>,
+    pub linked: Vec<Box<str>>, // TODO: P1: support issue linking
 
     /// Repeat string which is applied to task copy upon completion.
     /// Will be applied to both 'due' and 'when' dates if those are set.

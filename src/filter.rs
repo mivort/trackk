@@ -128,8 +128,6 @@ pub fn merge_filter_args(filter: &mut QueryFilter, args: &FilterArgs, app: &App)
         .with_context(|| format!("Unable to parse modified date: '{modified}'"))?;
     }
 
-    // TODO: P3: add created and modified filters
-
     for title in &args.title {
         let token = if title.starts_with('/') && title.ends_with('/') && title.len() > 1 {
             let slice = &title[1..(title.len() - 1)];

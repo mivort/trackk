@@ -30,6 +30,9 @@ pub struct App<'env> {
     /// Skip provided number of topmost filtered results.
     pub skip: usize,
 
+    /// Apply action to all matching entries, don't show the picker.
+    pub select_all: bool,
+
     /// Tera templates reference.
     pub templates: RefCell<templates::Templates<'env>>,
 
@@ -74,6 +77,7 @@ impl<'env> App<'env> {
 
         self.limit = args.limit.unwrap_or(usize::MAX).min(self.limit);
         self.skip = args.skip.max(self.skip);
+        self.select_all = self.select_all || args.select_all;
 
         Ok(())
     }

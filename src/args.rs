@@ -166,6 +166,10 @@ pub struct FilterArgs {
     /// Skip provided number of topmost filter results.
     #[arg(long, default_value_t = 0)]
     pub skip: usize,
+
+    /// Apply action to all matching entries, don't display the entry picker.
+    #[arg(long)]
+    pub select_all: bool,
 }
 
 /// Args to apply changes to the selected entries.
