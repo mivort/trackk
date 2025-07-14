@@ -116,8 +116,8 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => lhs.r#else(rhs),
                 _ => bail!("'else' operator haven't got enough arguments"),
             },
-            LParen | RParen => {
-                panic!()
+            LParen | RParen | Comma => {
+                panic!("Unexpected token during eval")
             }
         };
         stack.push(res);

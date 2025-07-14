@@ -97,6 +97,21 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                     output.push(tok);
                     mode = Mode::Op;
                 }
+                Comma => {
+                    if !mode.expects_comma() {
+                        bail!(
+                            "Expected {}, got '{}' at position {}",
+                            mode.expected(),
+                            &input[start..end],
+                            start
+                        );
+                    }
+                    #[allow(unused_assignments)]
+                    {
+                        mode = Mode::Arg;
+                    }
+                    todo!()
+                }
                 Func(_) => {
                     op_stack.push(tok);
                     mode = Mode::FnParen;
@@ -200,6 +215,11 @@ impl Mode {
     #[inline]
     fn expects_paren(&self) -> bool {
         matches!(self, Self::Arg | Self::FnParen)
+    }
+
+    #[inline]
+    fn expects_comma(&self) -> bool {
+        matches!(self, Self::Op)
     }
 
     /// Show what to expect in each mode.

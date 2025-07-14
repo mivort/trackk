@@ -186,6 +186,9 @@ pub enum Token {
     #[token("]")]
     RParen,
 
+    #[token(",")]
+    Comma,
+
     #[token("id", |_| FieldRef::Id)]
     #[token("title", |_| FieldRef::Title)]
     #[token("desc", |_| FieldRef::Desc)]
