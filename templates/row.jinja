@@ -45,7 +45,7 @@
   {%- endif -%}
 
   {#- Urgency -#}
-  {%- if cols > 48 and not entry.end -%}
+  {%- if cols > 52 and not entry.end -%}
     / {{ c.urgency }}{{ entry.urgency | numfmt('{:.1}') }}{{ reset }} {# -#}
   {%- endif -%}
 {%- endset -%}
