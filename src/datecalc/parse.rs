@@ -106,11 +106,10 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                             start
                         );
                     }
-                    #[allow(unused_assignments)]
-                    {
-                        mode = Mode::Arg;
+                    while let Some(top) = op_stack.pop_if(|top| !matches!(top, Token::LParen)) {
+                        output.push(top)
                     }
-                    todo!()
+                    mode = Mode::Arg;
                 }
                 Func(_) => {
                     op_stack.push(tok);
