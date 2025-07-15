@@ -173,6 +173,8 @@ pub enum Token {
     #[token("len", |_| FuncRef::Len)]
     #[token("lines", |_| FuncRef::Lines)]
     #[token("ln", |_| FuncRef::Ln)]
+    #[token("max", |_| FuncRef::Max)]
+    #[token("min", |_| FuncRef::Min)]
     #[token("sig", |_| FuncRef::Sig)]
     #[token("sqrt", |_| FuncRef::Sqrt)]
     #[token("weekday", |_| FuncRef::Weekday)]

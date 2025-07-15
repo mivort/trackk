@@ -13,6 +13,8 @@ pub enum FuncRef {
     Len,
     Lines,
     Ln,
+    Max,
+    Min,
     Sig,
     Sqrt,
     Weekday,
@@ -33,6 +35,9 @@ impl FuncRef {
             Len => length(stack.pop(), entry),
             Lines => lines(stack.pop(), entry),
 
+            Min => min(stack.pop(), stack.pop()),
+            Max => max(stack.pop(), stack.pop()),
+
             Weekday => weekday(stack.pop(), ts),
         }
     }
@@ -45,6 +50,28 @@ fn unary_func(tok: Option<Token>, f: impl Fn(f64) -> f64) -> Result<Token> {
         Some(Token::Duration(val)) => Ok(Token::Duration(f(val))),
         Some(tok) => bail!("Unary function got incompatible argument ({})", tok.ttype()),
         None => bail!("Function argument is not provided"),
+    }
+}
+
+/// Find minimum between two values.
+#[inline]
+fn min(lhs: Option<Token>, rhs: Option<Token>) -> Result<Token> {
+    use Token::*;
+
+    match (lhs, rhs) {
+        (Some(Duration(lhs)), Some(Duration(rhs))) => Ok(Duration(lhs.min(rhs))),
+        _ => bail!("'max' function required two arguments"),
+    }
+}
+
+/// Find minimum between two values.
+#[inline]
+fn max(lhs: Option<Token>, rhs: Option<Token>) -> Result<Token> {
+    use Token::*;
+
+    match (lhs, rhs) {
+        (Some(Duration(lhs)), Some(Duration(rhs))) => Ok(Duration(lhs.max(rhs))),
+        _ => bail!("'max' function required two arguments"),
     }
 }
 
