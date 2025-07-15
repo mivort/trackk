@@ -116,7 +116,7 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => lhs.r#else(rhs),
                 _ => bail!("'else' operator haven't got enough arguments"),
             },
-            LParen | RParen | Comma => {
+            LParen | RParen | Comma | Dot => {
                 panic!("Unexpected token during eval")
             }
         };
@@ -290,6 +290,9 @@ fn functions() {
     assert_eq!(as_bool(eval_test("empty(tag)")), true);
     assert_eq!(as_bool(eval_test("empty('')")), true);
     assert_eq!(as_f64(eval_test("+2-sqrt(4)*15")), -28.);
+
+    assert_eq!(as_f64(eval_test("250.min(100).max(50)")), 100.);
+    assert_eq!(as_f64(eval_test("75.min(100).max(50)")), 75.);
 }
 
 #[test]

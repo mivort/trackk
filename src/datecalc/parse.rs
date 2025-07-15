@@ -111,8 +111,19 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                     }
                     mode = Mode::Arg;
                 }
+                Dot => {
+                    if !mode.expects_op() {
+                        bail!(
+                            "Expected {}, got '{}' at position {}",
+                            mode.expected(),
+                            &input[start..end],
+                            start
+                        );
+                    }
+                    mode = Mode::Fn;
+                }
                 Func(_) => {
-                    if !mode.expects_arg() {
+                    if !mode.expects_function() {
                         bail!(
                             "Expected {}, got '{}' at position {}",
                             mode.expected(),
@@ -205,6 +216,7 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
 enum Mode {
     Arg,
     Op,
+    Fn,
     FnParen,
 }
 
@@ -217,6 +229,11 @@ impl Mode {
     #[inline]
     fn expects_arg(&self) -> bool {
         matches!(self, Self::Arg)
+    }
+
+    #[inline]
+    fn expects_function(&self) -> bool {
+        matches!(self, Self::Arg | Self::Fn)
     }
 
     #[inline]
@@ -234,6 +251,7 @@ impl Mode {
         match self {
             Self::Arg => "argument, function, unary op or '('",
             Self::Op => "operator",
+            Self::Fn => "function",
             Self::FnParen => "'('",
         }
     }

@@ -191,6 +191,9 @@ pub enum Token {
     #[token(",")]
     Comma,
 
+    #[token(".")]
+    Dot,
+
     #[token("id", |_| FieldRef::Id)]
     #[token("title", |_| FieldRef::Title)]
     #[token("desc", |_| FieldRef::Desc)]
