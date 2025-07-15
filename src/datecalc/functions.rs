@@ -44,7 +44,7 @@ fn unary_func(tok: Option<Token>, f: impl Fn(f64) -> f64) -> Result<Token> {
     match tok {
         Some(Token::Duration(val)) => Ok(Token::Duration(f(val))),
         Some(tok) => bail!("Unary function got incompatible argument ({})", tok.ttype()),
-        None => bail!(""),
+        None => bail!("Function argument is not provided"),
     }
 }
 

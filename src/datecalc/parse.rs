@@ -112,6 +112,14 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                     mode = Mode::Arg;
                 }
                 Func(_) => {
+                    if !mode.expects_arg() {
+                        bail!(
+                            "Expected {}, got '{}' at position {}",
+                            mode.expected(),
+                            &input[start..end],
+                            start
+                        );
+                    }
                     op_stack.push(tok);
                     mode = Mode::FnParen;
                 }
@@ -224,7 +232,7 @@ impl Mode {
     /// Show what to expect in each mode.
     fn expected(&self) -> &'static str {
         match self {
-            Self::Arg => "argument, unary op or '('",
+            Self::Arg => "argument, function, unary op or '('",
             Self::Op => "operator",
             Self::FnParen => "'('",
         }
