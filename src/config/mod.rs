@@ -1,4 +1,5 @@
 pub mod colors;
+pub mod fields;
 pub mod query;
 pub mod reports;
 pub mod values;
@@ -16,6 +17,7 @@ use crate::templates::colors::{RESET, fg};
 use crate::{expansion, prelude::*};
 
 use colors::ColorConfig;
+use fields::FieldType;
 use query::QueryConfig;
 use reports::ReportConfig;
 use values::ValuesConfig;
@@ -43,7 +45,7 @@ pub struct Config {
 
     /// User-defined fields.
     #[serde(default)]
-    pub _fields: HashMap<String, FieldType>, // TODO: P2: perform custom fields resolution
+    pub fields: HashMap<String, FieldType>, // TODO: P2: perform custom fields resolution
 
     /// Entry values config.
     #[serde(default)]
@@ -240,15 +242,6 @@ impl TemplatesConfig {
     pub fn entry(&self) -> &str {
         if self.entry.is_empty() { "issue" } else { &self.entry }
     }
-}
-
-/// Custom field type.
-#[derive(Hash, PartialEq, Eq, Deserialize)]
-#[cfg_attr(test, derive(Debug, Clone))]
-pub enum FieldType {
-    String,
-    Number,
-    Date,
 }
 
 #[derive(Deserialize, Default)]
@@ -459,6 +452,7 @@ fn merge_config(target: &mut Config, source: Config) {
 
     merge_maps(&mut target.queries, source.queries);
     merge_maps(&mut target.reports, source.reports);
+    merge_maps(&mut target.fields, source.fields);
 
     merge_non_default(
         &mut target.values.urgency_formula,
@@ -482,7 +476,7 @@ fn ensure_all_merged() {
         editor_on_add: Some(true),
         macros_style: Some(ExpansionStyle::None),
         color_mode: ColorMode::Always,
-        _fields: Default::default(),
+        fields: [("f1".into(), FieldType::String)].into(),
         date_formats: Default::default(),
         macros: vec![ExpansionConfig::default()],
         queries: HashMap::from([("test".into(), QueryConfig::default())]),
