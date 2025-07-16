@@ -25,6 +25,10 @@ pub struct Args {
     #[command(flatten)]
     pub filter_args: FilterArgs,
 
+    /// Configuration override given as JSON5.
+    #[arg(long, global = true)]
+    pub config: Vec<Box<str>>,
+
     /// Enable verbose output.
     #[arg(long, short, global = true, action = ArgAction::Count)]
     pub verbose: u8,

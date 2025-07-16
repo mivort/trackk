@@ -138,7 +138,12 @@ impl Config {
     ///
     /// Also, check if stdout if terminal and in case if color is 'auto',
     /// disable it.
-    pub fn override_from_args(&mut self, args: &Args) {
+    pub fn override_from_args(&mut self, args: &Args) -> Result<()> {
+        for config in &args.config {
+            let config: Config = serde_json5::from_str(config)?;
+            merge_config(self, config);
+        }
+
         if !matches!(args.color, ColorMode::Auto) {
             self.color_mode = args.color;
         } else {
@@ -151,6 +156,8 @@ impl Config {
         if matches!(self.color_mode, ColorMode::Auto) && !stdout().is_terminal() {
             self.color_mode = ColorMode::Never;
         }
+
+        Ok(())
     }
 
     /// Fill the empty values with default ones.

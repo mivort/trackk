@@ -35,7 +35,7 @@ fn main() -> Result<()> {
     let exp_args = expansion::pre_process_args(&config)?;
 
     let args = Args::parse_from(&exp_args);
-    config.override_from_args(&args);
+    config.override_from_args(&args)?;
 
     setup_logging(config.no_color(), &args)?;
     debug!("Command expanded to: {:?}", exp_args);
