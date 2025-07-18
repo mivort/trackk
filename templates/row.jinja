@@ -89,7 +89,7 @@
 -#}
 {%- set number -%}
   {%- if entry.sid -%}
-    {{ entry.sid | numfmt('{:3}. ') }}
+    {{ entry.sid | lpad('   ') }}. {# -#}
   {%- else -%}
     {{ entry.id[0:4] }} {# -#}
   {%- endif -%}

@@ -44,7 +44,7 @@
 
 {{ c.entry_field }} created:  {{ c.entry_value }}{{ entry_date(entry.created) }}
 {{ c.entry_field }} modified: {{ c.entry_value }}{{ entry_date(entry.modified) }}
-{{ c.entry_field }} urgency:  {{ c.urgency }}{{ entry.urgency | numfmt('{:.3}') }}
+{{ c.entry_field }} urgency:  {{ c.urgency }}{{ entry.urgency | round(3) }}
 
 {% if entry.sid -%}
   {{ c.entry_field }} sid:      {{ c.entry_value }}{{ entry.sid }}

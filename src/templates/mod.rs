@@ -44,6 +44,7 @@ impl<'env> Templates<'env> {
         j2.set_auto_escape_callback(|_| mj::AutoEscape::None);
 
         j2.add_filter("numfmt", strings::numfmt);
+        j2.add_filter("lpad", strings::lpad);
         j2.add_filter("firstline", strings::firstline);
         j2.add_filter("hasnote", strings::hasnote);
 
