@@ -25,7 +25,18 @@ pub fn numfmt(value: f64, fmt: &str) -> Result<String, mj::Error> {
 pub fn lpad(mut value: String, filler: &str) -> Result<String, mj::Error> {
     if filler.len() > value.len() {
         let range = filler.len() - value.len();
-        value.insert_str(0, &filler[0..range]);
+        value.insert_str(0, &filler[..range]);
+    }
+    Ok(value)
+}
+
+/// Add padding on the right side using provided filler string.
+///
+/// Same as [lpad], this method works on byte level, for non-ASCII characters
+/// 'width' method usage is needed.
+pub fn rpad(mut value: String, filler: &str) -> Result<String, mj::Error> {
+    if filler.len() > value.len() {
+        value.push_str(&filler[value.len()..]);
     }
     Ok(value)
 }
