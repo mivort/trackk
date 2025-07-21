@@ -7,6 +7,21 @@ and allow to adjust for different terminal sizes.
 
 ## Coloring
 
+Named colors can be accessed using variables in `c` namespace: `{{
+c.desc_pending }}`. Here are some built-in named color categories:
+
+* `date_due`
+* `date_end`
+* `date_overdue`
+* `date_when`
+* `desc_completed`
+* `desc_deleted`
+* `desc_deleted`
+* `desc_pending`
+* `divider`
+
+Own named color entries can be defined in `colors` section of configuration.
+
 Functions:
 * `fg(color: number)`
 * `bg(color: number)`
@@ -29,3 +44,11 @@ Filters:
 
 Functions:
 * `fill(content: string, width: number)`
+
+## Formatting
+
+Filters:
+* `firstline`: extract the first line for multi-line value. This can be used to
+  extract entry title from the entry description.
+* `lpad(filler: string)`.
+* `rpad(filler: string)`.
