@@ -8,7 +8,12 @@ use crate::prelude::*;
 #[derive(Deserialize, Default, Clone)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct ReportConfig {
+    /// Template sections, each with its own query and template.
     pub sections: Vec<SectionConfig>,
+
+    /// List of templates to pre-load (so those can be used for inheritance).
+    #[allow(unused)]
+    pub base_templates: Vec<Box<str>>, // TODO: P2: support list of base templates
 }
 
 /// Report section defined by filter and template.
@@ -99,6 +104,7 @@ impl Config {
                     _grouping: "".into(),
                 },
             ],
+            base_templates: vec![],
         }
     }
 }
@@ -114,6 +120,7 @@ impl Config {
                 template: "all".into(),
                 _grouping: "".into(),
             }],
+            base_templates: vec![],
         }
     }
 
@@ -127,6 +134,7 @@ impl Config {
                 template: "all".into(),
                 _grouping: "".into(),
             }],
+            base_templates: vec![],
         }
     }
 
@@ -141,6 +149,7 @@ impl Config {
                 header: "".into(),
                 _grouping: "".into(),
             }],
+            base_templates: vec![],
         }
     }
 }
