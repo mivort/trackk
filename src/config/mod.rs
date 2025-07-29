@@ -5,7 +5,7 @@ pub mod reports;
 pub mod values;
 
 use std::borrow::Cow;
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 use std::io::{self, IsTerminal, stdout};
 use std::path::{Path, PathBuf};
 use std::{env, fs};
@@ -45,7 +45,7 @@ pub struct Config {
 
     /// User-defined fields.
     #[serde(default)]
-    pub fields: BTreeMap<String, FieldType>, // TODO: P2: perform custom fields resolution
+    pub fields: HashMap<String, FieldType>, // TODO: P2: perform custom fields resolution
 
     /// Entry values config.
     #[serde(default)]
@@ -449,20 +449,6 @@ fn merge_config(target: &mut Config, source: Config) {
         }
     }
 
-    /// Merge two btree maps.
-    fn merge_trees<K, V>(target: &mut BTreeMap<K, V>, source: BTreeMap<K, V>)
-    where
-        K: Eq + std::hash::Hash + Ord,
-    {
-        if target.is_empty() {
-            *target = source;
-            return;
-        }
-        for (key, value) in source {
-            target.entry(key).or_insert(value);
-        }
-    }
-
     merge_option(&mut target.editor, source.editor);
     merge_option(&mut target.editor_on_add, source.editor_on_add);
     merge_option(&mut target.macros_style, source.macros_style);
@@ -473,7 +459,7 @@ fn merge_config(target: &mut Config, source: Config) {
 
     merge_maps(&mut target.queries, source.queries);
     merge_maps(&mut target.reports, source.reports);
-    merge_trees(&mut target.fields, source.fields);
+    merge_maps(&mut target.fields, source.fields);
 
     merge_non_default(
         &mut target.values.urgency_formula,

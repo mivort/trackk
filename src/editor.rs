@@ -34,7 +34,7 @@ pub fn edit_entry(entry: &mut Entry, app: &App) -> Result<bool> {
 fn run_edit_entry(entry: &mut Entry, app: &App) -> Result<ExitStatus> {
     let mut tempfile =
         tempfile::NamedTempFile::with_suffix(concat!(".", env!("CARGO_PKG_NAME"), ".md"))?;
-    format_markdown(entry, tempfile.as_file_mut())?;
+    format_markdown(entry, tempfile.as_file_mut(), app)?;
 
     let editor = &*app.config.editor();
     let status = Command::new(editor)
@@ -70,21 +70,21 @@ fn run_edit_entry(entry: &mut Entry, app: &App) -> Result<ExitStatus> {
 /// * __Field 1__: value
 /// * __Field 2__: value
 /// ```
-fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
-    let tags = issue.tags.iter().map(|t| &**t).collect::<Vec<_>>();
+fn format_markdown(entry: &Entry, file: &mut File, app: &App) -> Result<()> {
+    let tags = entry.tags.iter().map(|t| &**t).collect::<Vec<_>>();
 
     let offset = UtcOffset::current_local_offset()?;
 
-    let when = match issue.when {
+    let when = match entry.when {
         Some(when) => format_date(when, offset)?,
         None => String::new(),
     };
 
-    let due = match issue.due {
+    let due = match entry.due {
         Some(due) => format_date(due, offset)?,
         None => String::new(),
     };
-    let end = match issue.end {
+    let end = match entry.end {
         Some(end) => format_date(end, offset)?,
         None => String::new(),
     };
@@ -93,13 +93,13 @@ fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
 
     let created = format!(
         "{} *({})*",
-        format_date(issue.created, offset)?,
-        dates::longreldate(issue.created, now, None)
+        format_date(entry.created, offset)?,
+        dates::longreldate(entry.created, now, None)
     );
     let modified = format!(
         "{} *({})*",
-        format_date(issue.modified, offset)?,
-        dates::longreldate(issue.modified, now, None)
+        format_date(entry.modified, offset)?,
+        dates::longreldate(entry.modified, now, None)
     );
 
     file.write_fmt(format_args!(
@@ -113,23 +113,41 @@ fn format_markdown(issue: &Entry, file: &mut File) -> Result<()> {
             "* __end__     : {end}\n",
             "* __repeat__  : {repeat}\n",
             "--------------------------------------------------------------------------------\n",
+            "{custom}",
+            "--------------------------------------------------------------------------------\n",
             "- __id__      : {id}\n",
             "- __created__ : {created}\n",
             "- __modified__: {modified}\n",
         ),
-        title = issue.desc,
-        status = issue.status,
+        title = entry.desc,
+        status = entry.status,
         when = when,
         due = due,
         end = end,
         tags = tags.join(" "),
-        repeat = unwrap_some_or!(&issue.repeat, { "" }),
+        repeat = unwrap_some_or!(&entry.repeat, { "" }),
         created = created,
         modified = modified,
-        id = issue.id,
+        id = entry.id,
+        custom = format_custom_fields(entry, app),
     ))?;
 
     Ok(())
+}
+
+/// Produce formatted list of custom fields.
+fn format_custom_fields(_issue: &Entry, app: &App) -> String {
+    let mut max_width = 0;
+    let out = String::new();
+
+    let fields = app.config.fields_map();
+    for field in fields.keys() {
+        max_width = field.len().max(max_width);
+
+        // TODO: P3: write custom fields to format string
+    }
+
+    out
 }
 
 /// Apply ISO8601 format to UNIX timestamps.
