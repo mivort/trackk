@@ -1,6 +1,6 @@
 use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 use time::{OffsetDateTime, UtcDateTime};
 use uuid::Uuid;
@@ -76,9 +76,9 @@ pub struct Entry {
     pub urgency: f64,
 
     /// Custom field values.
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    #[serde(skip_serializing_if = "BTreeMap::is_empty")]
     #[serde(default)]
-    pub meta: HashMap<String, Value>,
+    pub meta: BTreeMap<String, Value>,
 }
 
 impl Entry {
