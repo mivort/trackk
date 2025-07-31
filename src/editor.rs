@@ -1,3 +1,4 @@
+use std::fmt::Write as _;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::process::{Command, ExitStatus};
@@ -106,18 +107,18 @@ fn format_markdown(entry: &Entry, file: &mut File, app: &App) -> Result<()> {
         concat!(
             "# {title}\n\n",
             "--------------------------------------------------------------------------------\n",
-            "* __status__  : {status}\n",
-            "* __tags__    : {tags}\n",
-            "* __when__    : {when}\n",
-            "* __due__     : {due}\n",
-            "* __end__     : {end}\n",
-            "* __repeat__  : {repeat}\n",
+            "* __status__      : {status}\n",
+            "* __tags__        : {tags}\n",
+            "* __when__        : {when}\n",
+            "* __due__         : {due}\n",
+            "* __end__         : {end}\n",
+            "* __repeat__      : {repeat}\n",
             "--------------------------------------------------------------------------------\n",
             "{custom}",
             "--------------------------------------------------------------------------------\n",
-            "- __id__      : {id}\n",
-            "- __created__ : {created}\n",
-            "- __modified__: {modified}\n",
+            "- __id__          : {id}\n",
+            "- __created__     : {created}\n",
+            "- __modified__    : {modified}\n",
         ),
         title = entry.desc,
         status = entry.status,
@@ -137,14 +138,13 @@ fn format_markdown(entry: &Entry, file: &mut File, app: &App) -> Result<()> {
 
 /// Produce formatted list of custom fields.
 fn format_custom_fields(_issue: &Entry, app: &App) -> String {
-    let mut max_width = 0;
-    let out = String::new();
-
+    let mut out = String::new();
     let fields = app.config.fields_map();
-    for field in fields.keys() {
-        max_width = field.len().max(max_width);
 
-        // TODO: P3: write custom fields to format string
+    for (field, _type) in fields.iter() {
+        let _ = writeln!(out, "* __{}__{:fill$}:", field, "", fill = 12 - field.len());
+
+        // TODO: P3: output custom field values
     }
 
     out

@@ -22,7 +22,7 @@ pub enum FieldType {
 }
 
 /// Fields which are defined by default.
-mod builtin_fields {
+mod defaults {
     pub(super) const PROJECT: &str = "project";
     pub(super) const PRIORITY: &str = "priority";
 }
@@ -42,8 +42,8 @@ impl Config {
             return out;
         }
 
-        out.insert(builtin_fields::PROJECT.into(), FieldType::String);
-        out.insert(builtin_fields::PRIORITY.into(), FieldType::Number);
+        out.insert(defaults::PROJECT.into(), FieldType::String);
+        out.insert(defaults::PRIORITY.into(), FieldType::Number);
 
         out
     }
