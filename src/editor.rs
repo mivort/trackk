@@ -136,15 +136,24 @@ fn format_markdown(entry: &Entry, file: &mut File, app: &App) -> Result<()> {
     Ok(())
 }
 
-/// Produce formatted list of custom fields.
-fn format_custom_fields(_issue: &Entry, app: &App) -> String {
+/// Produce formatted list of custom fields. In case if value mismatches
+/// declared field type, prefix it with '-' to avoid accidential overwrite.
+fn format_custom_fields(entry: &Entry, app: &App) -> String {
     let mut out = String::new();
     let fields = app.config.fields_map();
 
-    for (field, _type) in fields.iter() {
-        let _ = writeln!(out, "* __{}__{:fill$}:", field, "", fill = 12 - field.len());
+    for (field, field_type) in fields.iter() {
+        let value = entry.meta(field);
+        let (valid, value) = value.map_or((true, String::new()), |v| {
+            field_type.format_value(v).map_or_else(
+                || (false, format!("incompatible value: '{}'", v)),
+                |v| (true, v),
+            )
+        });
 
-        // TODO: P3: output custom field values
+        let prefix = if valid { "*" } else { "-" };
+        let fill = 12 - field.len();
+        let _ = writeln!(out, "{prefix} __{field}__{:fill$}: {value}", "",);
     }
 
     out

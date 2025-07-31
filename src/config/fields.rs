@@ -1,8 +1,10 @@
 use std::collections::BTreeMap;
 
 use serde_derive::Deserialize;
+use serde_json::Value;
 
 use super::Config;
+use crate::prelude::*;
 
 /// Custom field type.
 #[derive(Hash, PartialEq, Eq, Deserialize, Clone, Copy)]
@@ -46,5 +48,15 @@ impl Config {
         out.insert(defaults::PRIORITY.into(), FieldType::Number);
 
         out
+    }
+}
+
+impl FieldType {
+    /// Format provided JSON value depending on the field type.
+    pub fn format_value(&self, value: &Value) -> Option<String> {
+        match self {
+            Self::Number => Some(unwrap_some_or!(value.as_f64(), { return None }).to_string()),
+            _ => None,
+        }
     }
 }
