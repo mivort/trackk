@@ -41,6 +41,10 @@ pub struct ValuesConfig {
     /// Default time string to assign as 'due'.
     #[serde(default)]
     _assign_due: Box<str>, // TODO: P2: support default due value
+
+    /// Disable built-in field defintions.
+    #[serde(default)]
+    pub no_default_fields: bool,
 }
 
 impl ValuesConfig {

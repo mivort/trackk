@@ -5,8 +5,8 @@ use serde_derive::Deserialize;
 use super::Config;
 
 /// Custom field type.
-#[derive(Hash, PartialEq, Eq, Deserialize)]
-#[cfg_attr(test, derive(Debug, Clone))]
+#[derive(Hash, PartialEq, Eq, Deserialize, Clone, Copy)]
+#[cfg_attr(test, derive(Debug))]
 pub enum FieldType {
     /// String field value.
     String,
@@ -21,14 +21,30 @@ pub enum FieldType {
     Date,
 }
 
+/// Fields which are defined by default.
+mod builtin_fields {
+    pub(super) const PROJECT: &str = "project";
+    pub(super) const PRIORITY: &str = "priority";
+}
+
 impl Config {
     /// Check specified field type.
     pub fn _field_type(&self, _field: &str) -> Option<FieldType> {
         None
     }
 
-    /// List of custom field metadata values.
+    /// List of custom field metadata values. It gets expanded with built-in fields
+    /// unless 'no default fields' option is set.
     pub fn fields_map(&self) -> BTreeMap<String, FieldType> {
-        BTreeMap::new()
+        let mut out = BTreeMap::from_iter(self.fields.iter().map(|(k, &v)| (k.clone(), v)));
+
+        if self.values.no_default_fields {
+            return out;
+        }
+
+        out.insert(builtin_fields::PROJECT.into(), FieldType::String);
+        out.insert(builtin_fields::PRIORITY.into(), FieldType::Number);
+
+        out
     }
 }
