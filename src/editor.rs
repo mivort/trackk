@@ -103,23 +103,29 @@ fn format_markdown(entry: &Entry, file: &mut File, app: &App) -> Result<()> {
         dates::longreldate(entry.modified, now, None)
     );
 
+    use terminal_size::{Height, Width, terminal_size};
+    let (Width(cols), _) = terminal_size().unwrap_or((Width(0), Height(0)));
+    let sepw = (cols - 8).clamp(4, 80) as usize;
+
     file.write_fmt(format_args!(
         concat!(
             "# {title}\n\n",
-            "--------------------------------------------------------------------------------\n",
+            "{empty:-^sepw$}\n",
             "* __status__      : {status}\n",
             "* __tags__        : {tags}\n",
             "* __when__        : {when}\n",
             "* __due__         : {due}\n",
             "* __end__         : {end}\n",
             "* __repeat__      : {repeat}\n",
-            "--------------------------------------------------------------------------------\n",
+            "{empty:-^sepw$}\n",
             "{custom}",
-            "--------------------------------------------------------------------------------\n",
+            "{empty:-^sepw$}\n",
             "- __id__          : {id}\n",
             "- __created__     : {created}\n",
             "- __modified__    : {modified}\n",
         ),
+        empty = "",
+        sepw = sepw,
         title = entry.desc,
         status = entry.status,
         when = when,
