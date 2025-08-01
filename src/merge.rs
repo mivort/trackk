@@ -8,9 +8,12 @@ use crate::{bucket::Bucket, prelude::*};
 
 /// Implement 3-way merge driver for once ancestor and two JSON buckets.
 pub fn merge_driver(args: &MergeArgs) -> Result<()> {
-    info!("Merging conflict using 3-way strategy");
+    let ancestor = unwrap_ok_or!(Bucket::from_full_path(&args.ancestor), e, {
+        warn!("Unable to parse ancestor JSON: {:?}", e);
+        Bucket::new()
 
-    let ancestor = Bucket::from_full_path(&args.ancestor)?;
+        // TODO: P2: check if ancestor is empty
+    });
     let ours = Bucket::from_full_path(&args.ours)?;
     let theirs = Bucket::from_full_path(&args.theirs)?;
 
@@ -50,6 +53,8 @@ fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) -> Bucket {
 
 /// Take ancestor, incoming change and write result in the output.
 fn merge_3way(ours: &mut Entry, parent: Entry, theirs: Entry) {
+    info!("Merging conflict using 3-way strategy");
+
     let their_newer = ours.modified < theirs.modified;
 
     merge_field(&mut ours.desc, parent.desc, theirs.desc, their_newer);
@@ -75,6 +80,8 @@ fn merge_3way(ours: &mut Entry, parent: Entry, theirs: Entry) {
 
 /// Select entry with more recent modified timestamp.
 fn merge_2way(ours: &mut Entry, incoming: Entry) {
+    info!("Merging conflict using 2-way strategy");
+
     if ours.modified >= incoming.modified {
         return;
     }
