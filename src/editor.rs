@@ -4,6 +4,7 @@ use std::io::{Read, Write};
 use std::process::{Command, ExitStatus};
 
 use regex::RegexBuilder;
+use serde_json::Value;
 use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
@@ -173,10 +174,10 @@ fn format_date(date: i64, offset: UtcOffset) -> Result<String> {
     Ok(time.format(&format)?)
 }
 
-/// Read edited entry back to the issue struct.
-fn parse_markdown(issue: &mut Entry, file: &mut File, app: &App) -> Result<()> {
-    let mut entry = String::new();
-    file.read_to_string(&mut entry)?;
+/// Read edited entry back to the entry struct.
+fn parse_markdown(entry: &mut Entry, file: &mut File, app: &App) -> Result<()> {
+    let mut data = String::new();
+    file.read_to_string(&mut data)?;
 
     let re = RegexBuilder::new("\\s*#?(.*?)^-{4,}$(.*)")
         .multi_line(true)
@@ -184,11 +185,11 @@ fn parse_markdown(issue: &mut Entry, file: &mut File, app: &App) -> Result<()> {
         .build()
         .unwrap();
     let caps = re
-        .captures(&entry)
+        .captures(&data)
         .context("Unable to find the metadata delimiter ('----')")?;
 
     let (_, [title, meta]) = caps.extract();
-    issue.desc = title.trim().to_owned();
+    entry.desc = title.trim().to_owned();
 
     let meta_re = RegexBuilder::new(r"^\s*\*\s+__(\w+)__\s*:(.*)$")
         .multi_line(true)
@@ -198,46 +199,49 @@ fn parse_markdown(issue: &mut Entry, file: &mut File, app: &App) -> Result<()> {
     for (_, [key, val]) in meta_re.captures_iter(meta).map(|c| c.extract()) {
         let key = key.to_lowercase();
 
-        let mut when = issue.when;
-        let mut due = issue.due;
-        let mut end = issue.end;
+        let mut when = entry.when;
+        let mut due = entry.due;
+        let mut end = entry.end;
 
         match key.as_str() {
             "status" => {
-                issue.update_status(val.trim(), app)?;
+                entry.update_status(val.trim(), app)?;
             }
             "tags" => {
                 let tags = val.split_whitespace().filter(|s| !s.is_empty());
-                issue.tags = tags.map(|s| s.to_string()).collect();
+                entry.tags = tags.map(|s| s.to_string()).collect();
             }
             "when" => {
                 let val = val.trim();
-                when = if val.is_empty() { None } else { parse_date(val, app, issue)? };
+                when = if val.is_empty() { None } else { parse_date(val, app, entry)? };
             }
             "due" => {
                 let val = val.trim();
-                due = if val.is_empty() { None } else { parse_date(val, app, issue)? };
+                due = if val.is_empty() { None } else { parse_date(val, app, entry)? };
             }
             "end" => {
                 let val = val.trim();
-                end = if val.is_empty() { None } else { parse_date(val, app, issue)? };
+                end = if val.is_empty() { None } else { parse_date(val, app, entry)? };
             }
             "repeat" => {
                 let val = val.trim();
                 if val.is_empty() {
-                    issue.repeat = None;
+                    entry.repeat = None;
                 } else {
-                    issue.repeat = Some(val.to_owned());
+                    entry.repeat = Some(val.to_owned());
                 }
             }
-            _ => {
-                // TODO: P2: set custom field value
+            key => {
+                // TODO: P3: set custom field value according to field type
+                entry
+                    .meta
+                    .insert(key.to_owned(), Value::String(val.to_owned()));
             }
         }
 
-        issue.when = when;
-        issue.due = due;
-        issue.end = end;
+        entry.when = when;
+        entry.due = due;
+        entry.end = end;
     }
 
     Ok(())
