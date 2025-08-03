@@ -11,15 +11,23 @@ use crate::prelude::*;
 #[cfg_attr(test, derive(Debug))]
 pub enum FieldType {
     /// String field value.
+    #[serde(rename = "string")]
     String,
 
-    /// Store as numeric, display as number.
-    Number,
+    /// Store as integer number.
+    #[serde(rename = "integer")]
+    Integer,
 
-    /// Store as numeric, display as duration.
+    /// Store as numeric (f64), display as number.
+    #[serde(rename = "float")]
+    Float,
+
+    /// Store as numeric (in seconds), display as duration.
+    #[serde(rename = "duration")]
     Duration,
 
     /// Store as numeric (UNIX timestamp), display as date.
+    #[serde(rename = "date")]
     Date,
 }
 
@@ -38,7 +46,7 @@ impl Config {
 
         match field {
             defaults::PROJECT => Some(FieldType::String),
-            defaults::PRIORITY => Some(FieldType::Number),
+            defaults::PRIORITY => Some(FieldType::Float),
             _ => None,
         }
     }
@@ -53,7 +61,7 @@ impl Config {
         }
 
         out.insert(defaults::PROJECT.into(), FieldType::String);
-        out.insert(defaults::PRIORITY.into(), FieldType::Number);
+        out.insert(defaults::PRIORITY.into(), FieldType::Float);
 
         out
     }
@@ -63,7 +71,7 @@ impl FieldType {
     /// Format provided JSON value depending on the field type.
     pub fn format_value(&self, value: &Value) -> Option<String> {
         match self {
-            Self::Number => Some(unwrap_some_or!(value.as_f64(), { return None }).to_string()),
+            Self::Float => Some(unwrap_some_or!(value.as_f64(), { return None }).to_string()),
             Self::String => value.as_str().map(|v| v.into()),
             // TODO: P3: format dates and durations and dates
             _ => None,
@@ -74,7 +82,7 @@ impl FieldType {
     pub fn parse_value(&self, value: &str) -> Result<Value> {
         // TODO: P3: parse custom field value according to field type
         match self {
-            Self::Number => {
+            Self::Float => {
                 let value = value.parse::<f64>()?;
                 serde_json::Number::from_f64(value)
                     .with_context(|| format!("Unable to store value: {}", value))
