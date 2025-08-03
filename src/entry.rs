@@ -7,7 +7,6 @@ use uuid::Uuid;
 
 use crate::args::EntryArgs;
 use crate::config::Config;
-use crate::config::fields::FieldType;
 use crate::datecalc::token::Token;
 use crate::datecalc::{eval::eval, parse::parse_date};
 use crate::templates::dates;
@@ -305,8 +304,9 @@ impl Entry {
         if self.repeat != other.repeat {
             return true;
         }
-
-        // TODO: P3: compare meta
+        if self.meta != other.meta {
+            return true;
+        }
 
         false
     }
@@ -343,11 +343,6 @@ impl Entry {
     /// Produce a formatted string for the meta value.
     pub fn meta(&self, key: &str) -> Option<&Value> {
         self.meta.get(key)
-    }
-
-    /// Set meta value from string given the specific type.
-    pub fn _set_meta(&mut self, _field_type: FieldType) {
-        // TODO: P3: implement meta setter logic depending on field type
     }
 }
 
