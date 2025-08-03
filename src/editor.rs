@@ -191,7 +191,7 @@ fn parse_markdown(entry: &mut Entry, file: &mut File, app: &App) -> Result<()> {
     let (_, [title, meta]) = caps.extract();
     entry.desc = title.trim().to_owned();
 
-    let meta_re = RegexBuilder::new(r"^\s*\*\s+__(\w+)__\s*:(.*)$")
+    let meta_re = RegexBuilder::new(r"^\s*\*\s+__(\w+)__\s*:\s*(.*)$")
         .multi_line(true)
         .build()
         .unwrap();
@@ -205,26 +205,26 @@ fn parse_markdown(entry: &mut Entry, file: &mut File, app: &App) -> Result<()> {
 
         match key.as_str() {
             "status" => {
-                entry.update_status(val.trim(), app)?;
+                entry.update_status(val.trim_end(), app)?;
             }
             "tags" => {
                 let tags = val.split_whitespace().filter(|s| !s.is_empty());
                 entry.tags = tags.map(|s| s.to_string()).collect();
             }
             "when" => {
-                let val = val.trim();
+                let val = val.trim_end();
                 when = if val.is_empty() { None } else { parse_date(val, app, entry)? };
             }
             "due" => {
-                let val = val.trim();
+                let val = val.trim_end();
                 due = if val.is_empty() { None } else { parse_date(val, app, entry)? };
             }
             "end" => {
-                let val = val.trim();
+                let val = val.trim_end();
                 end = if val.is_empty() { None } else { parse_date(val, app, entry)? };
             }
             "repeat" => {
-                let val = val.trim();
+                let val = val.trim_end();
                 if val.is_empty() {
                     entry.repeat = None;
                 } else {
@@ -233,9 +233,12 @@ fn parse_markdown(entry: &mut Entry, file: &mut File, app: &App) -> Result<()> {
             }
             key => {
                 // TODO: P3: set custom field value according to field type
-                entry
-                    .meta
-                    .insert(key.to_owned(), Value::String(val.to_owned()));
+                let val = val.trim_end();
+                if val.is_empty() {
+                    entry.meta.remove(key);
+                } else {
+                    entry.meta.insert(key.into(), Value::String(val.into()));
+                }
             }
         }
 
