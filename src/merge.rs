@@ -70,8 +70,9 @@ fn merge_3way(ours: &mut Entry, parent: Entry, theirs: Entry) {
     );
     merge_field(&mut ours.due, parent.due, theirs.due, their_newer);
     merge_field(&mut ours.end, parent.end, theirs.end, their_newer);
+    merge_field(&mut ours.meta, parent.meta, theirs.meta, their_newer);
 
-    // TODO: P3: merge meta fields
+    // TODO: P1: merge meta on per-field basis
 
     if their_newer {
         ours.modified = theirs.modified
