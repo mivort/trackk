@@ -64,15 +64,23 @@ impl FieldType {
     pub fn format_value(&self, value: &Value) -> Option<String> {
         match self {
             Self::Number => Some(unwrap_some_or!(value.as_f64(), { return None }).to_string()),
+            Self::String => value.as_str().map(|v| v.into()),
+            // TODO: P3: format dates and durations and dates
             _ => None,
         }
     }
 
     /// Based of field type, produce json_serde Value to store in metadata map.
-    pub fn parse_value(&self, _value: &str) -> Result<Value> {
+    pub fn parse_value(&self, value: &str) -> Result<Value> {
         // TODO: P3: parse custom field value according to field type
         match self {
-            Self::Number => Ok(Value::Null),
+            Self::Number => {
+                let value = value.parse::<f64>()?;
+                serde_json::Number::from_f64(value)
+                    .with_context(|| format!("Unable to store value: {}", value))
+                    .map(Value::Number)
+            }
+            Self::String => Ok(Value::String(value.into())),
             _ => Ok(Value::Null),
         }
     }

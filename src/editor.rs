@@ -190,46 +190,56 @@ fn parse_markdown(entry: &mut Entry, data: &str, app: &App) -> Result<()> {
         .build()
         .unwrap();
     let caps = re
-        .captures(&data)
+        .captures(data)
         .context("Unable to find the metadata delimiter ('----')")?;
 
     let (_, [title, meta]) = caps.extract();
     entry.desc = title.trim().to_owned();
 
-    let meta_re = RegexBuilder::new(r"^\s*\*\s+__(\w+)__\s*:\s*(.*)$")
+    let meta_re = RegexBuilder::new(r"^\s*\*\s+__(\w+)__\s*:(.*)$")
         .multi_line(true)
         .build()
         .unwrap();
 
+    let mut when = entry.when;
+    let mut due = entry.due;
+    let mut end = entry.end;
+
     for (_, [key, val]) in meta_re.captures_iter(meta).map(|c| c.extract()) {
         let key = key.to_lowercase();
-
-        let mut when = entry.when;
-        let mut due = entry.due;
-        let mut end = entry.end;
+        let val = val.trim();
 
         match key.as_str() {
             "status" => {
-                entry.update_status(val.trim_end(), app)?;
+                entry.update_status(val, app)?;
+                end = entry.end; // TODO: P1: consider field set order
             }
             "tags" => {
                 let tags = val.split_whitespace().filter(|s| !s.is_empty());
                 entry.tags = tags.map(|s| s.to_string()).collect();
             }
             "when" => {
-                let val = val.trim_end();
-                when = if val.is_empty() { None } else { parse_date(val, app, entry)? };
+                when = if val.is_empty() {
+                    None
+                } else {
+                    parse_date(val, app, entry).context("Unable to parse 'when' field")?
+                };
             }
             "due" => {
-                let val = val.trim_end();
-                due = if val.is_empty() { None } else { parse_date(val, app, entry)? };
+                due = if val.is_empty() {
+                    None
+                } else {
+                    parse_date(val, app, entry).context("Unable to parse 'due' field")?
+                };
             }
             "end" => {
-                let val = val.trim_end();
-                end = if val.is_empty() { None } else { parse_date(val, app, entry)? };
+                end = if val.is_empty() {
+                    None
+                } else {
+                    parse_date(val, app, entry).context("Unable to parse 'end' field")?
+                };
             }
             "repeat" => {
-                let val = val.trim_end();
                 if val.is_empty() {
                     entry.repeat = None;
                 } else {
@@ -237,7 +247,6 @@ fn parse_markdown(entry: &mut Entry, data: &str, app: &App) -> Result<()> {
                 }
             }
             key => {
-                let val = val.trim_end();
                 if val.is_empty() {
                     entry.meta.remove(key);
                     continue;
@@ -250,11 +259,11 @@ fn parse_markdown(entry: &mut Entry, data: &str, app: &App) -> Result<()> {
                 entry.meta.insert(key.into(), value);
             }
         }
-
-        entry.when = when;
-        entry.due = due;
-        entry.end = end;
     }
+
+    entry.when = when;
+    entry.due = due;
+    entry.end = end;
 
     Ok(())
 }
@@ -264,7 +273,11 @@ const MD_TEXT: &str = r#"
 # test title
 
 ----
-__when__ : 10min
+* __tags__   : a b c
+* __when__   : 10min
+* __due__    : 
+* __priority__ : 3
+* __project__ : abc
 "#;
 
 #[test]
@@ -274,4 +287,7 @@ fn parse_text() {
 
     parse_markdown(&mut entry, MD_TEXT, &app).unwrap();
     assert_eq!(entry.title(), "test title");
+    assert_eq!(entry.tags.len(), 3);
+    assert_eq!(entry.meta["priority"].as_f64(), Some(3.));
+    assert_eq!(entry.meta["project"].as_str(), Some("abc"));
 }
