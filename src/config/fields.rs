@@ -31,8 +31,16 @@ mod defaults {
 
 impl Config {
     /// Check specified field type.
-    pub fn _field_type(&self, _field: &str) -> Option<FieldType> {
-        None
+    pub fn field_type(&self, field: &str) -> Option<FieldType> {
+        if let Some(field_type) = self.fields.get(field) {
+            return Some(*field_type);
+        }
+
+        match field {
+            defaults::PROJECT => Some(FieldType::String),
+            defaults::PRIORITY => Some(FieldType::Number),
+            _ => None,
+        }
     }
 
     /// List of custom field metadata values. It gets expanded with built-in fields
@@ -57,6 +65,15 @@ impl FieldType {
         match self {
             Self::Number => Some(unwrap_some_or!(value.as_f64(), { return None }).to_string()),
             _ => None,
+        }
+    }
+
+    /// Based of field type, produce json_serde Value to store in metadata map.
+    pub fn parse_value(&self, _value: &str) -> Result<Value> {
+        // TODO: P3: parse custom field value according to field type
+        match self {
+            Self::Number => Ok(Value::Null),
+            _ => Ok(Value::Null),
         }
     }
 }

@@ -5,7 +5,6 @@ use std::path::Path;
 use std::process::{Command, ExitStatus};
 
 use regex::RegexBuilder;
-use serde_json::Value;
 use time::macros::format_description;
 use time::{UtcDateTime, UtcOffset};
 
@@ -238,13 +237,17 @@ fn parse_markdown(entry: &mut Entry, data: &str, app: &App) -> Result<()> {
                 }
             }
             key => {
-                // TODO: P3: set custom field value according to field type
                 let val = val.trim_end();
                 if val.is_empty() {
                     entry.meta.remove(key);
-                } else {
-                    entry.meta.insert(key.into(), Value::String(val.into()));
+                    continue;
                 }
+                let field_type = app
+                    .config
+                    .field_type(key)
+                    .with_context(|| format!("Unknown field: {}", key))?;
+                let value = field_type.parse_value(val)?;
+                entry.meta.insert(key.into(), value);
             }
         }
 
