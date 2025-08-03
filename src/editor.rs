@@ -1,6 +1,7 @@
 use std::fmt::Write as _;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::Path;
 use std::process::{Command, ExitStatus};
 
 use regex::RegexBuilder;
@@ -53,8 +54,7 @@ fn run_edit_entry(entry: &mut Entry, app: &App) -> Result<ExitStatus> {
         return Ok(status);
     }
 
-    let mut edited = File::open(tempfile.path())?;
-    parse_markdown(entry, &mut edited, app)?;
+    parse_markdown_file(entry, tempfile.path(), app)?;
     entry.update_ts();
     entry.validate(app)?;
 
@@ -174,11 +174,17 @@ fn format_date(date: i64, offset: UtcOffset) -> Result<String> {
     Ok(time.format(&format)?)
 }
 
-/// Read edited entry back to the entry struct.
-fn parse_markdown(entry: &mut Entry, file: &mut File, app: &App) -> Result<()> {
+/// Read edited entry from file back to the entry struct.
+fn parse_markdown_file(entry: &mut Entry, file: &Path, app: &App) -> Result<()> {
+    let mut file = File::open(file)?;
     let mut data = String::new();
     file.read_to_string(&mut data)?;
 
+    parse_markdown(entry, &data, app)
+}
+
+/// Read edited entry from string back to the entry struct.
+fn parse_markdown(entry: &mut Entry, data: &str, app: &App) -> Result<()> {
     let re = RegexBuilder::new("\\s*#?(.*?)^-{4,}$(.*)")
         .multi_line(true)
         .dot_matches_new_line(true)
