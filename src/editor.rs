@@ -255,3 +255,20 @@ fn parse_markdown(entry: &mut Entry, data: &str, app: &App) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+const MD_TEXT: &str = r#"
+# test title
+
+----
+__when__ : 10min
+"#;
+
+#[test]
+fn parse_text() {
+    let app = App::default();
+    let mut entry = Entry::default();
+
+    parse_markdown(&mut entry, MD_TEXT, &app).unwrap();
+    assert_eq!(entry.title(), "test title");
+}
