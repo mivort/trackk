@@ -162,15 +162,20 @@ fn unexpected_tokens() {
 }
 
 #[cfg(test)]
-fn eval_test(expr: &str) -> Result<Token> {
-    let (app, entry) = (&App::default(), &Entry::default());
+fn eval_test_entry(expr: &str, entry: &Entry) -> Result<Token> {
+    let app = &App::default();
 
     let mut output = Vec::new();
     let mut op_stack = Vec::new();
     let local = app.local_time().unwrap();
     parse_exp(expr, local, &mut output).unwrap();
 
-    eval(&output, local, &mut op_stack, &entry)
+    eval(&output, local, &mut op_stack, &entry, &app)
+}
+
+#[cfg(test)]
+fn eval_test(expr: &str) -> Result<Token> {
+    eval_test_entry(expr, &Entry::default())
 }
 
 #[cfg(test)]
@@ -340,4 +345,20 @@ fn weekday() {
 fn ternary() {
     assert_eq!(as_f64(eval_test("10 if due else 5")), 5.);
     assert_eq!(as_f64(eval_test("10 if (5 if due) else 5")), 5.);
+}
+
+#[test]
+fn metas() {
+    use serde_json::{Number, Value};
+    let entry = Entry {
+        meta: [(
+            "priority".into(),
+            Value::Number(Number::from_f64(5.).unwrap()),
+        )]
+        .into(),
+        ..Default::default()
+    };
+    assert_eq!(as_f64(eval_test_entry("%priority", &entry)), 5.);
+    assert_eq!(as_f64(eval_test_entry("m.priority", &entry)), 5.);
+    assert_eq!(as_f64(eval_test_entry("meta.priority", &entry)), 5.);
 }
