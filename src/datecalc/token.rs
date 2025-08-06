@@ -208,8 +208,9 @@ pub enum Token {
     Reference(FieldRef),
 
     /// Reference to the custom field value.
-    #[regex(r"%[^\d\W]\w*", |l| Rc::from(l.slice()))]
-    #[regex(r"m(eta)?\.[^\d\W]\w*", |l| Rc::from(l.slice()))]
+    #[regex(r"%[^\d\W]\w*", |l| Rc::from(&l.slice()[1..]))]
+    #[regex(r"m\.[^\d\W]\w*", |l| Rc::from(&l.slice()[2..]))]
+    #[regex(r"meta\.[^\d\W]\w*", |l| Rc::from(&l.slice()[5..]))]
     MetaReference(Rc<str>),
 
     /// String value token.
