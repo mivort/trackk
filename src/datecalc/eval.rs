@@ -1,29 +1,28 @@
 use super::token::Token;
+use crate::app::App;
 use crate::entry::{Entry, FieldRef};
 use crate::prelude::*;
 
 use time::OffsetDateTime;
 
 #[cfg(test)]
-use crate::{
-    app::App,
-    datecalc::parse::{parse_date, parse_exp},
-};
+use crate::datecalc::parse::{parse_date, parse_exp};
 
 /// Iterate over stack and calculate the result.
 pub fn eval(
     queue: &[Token],
     ts: OffsetDateTime,
     stack: &mut Vec<Token>,
-    issue: &Entry,
+    entry: &Entry,
+    app: &App,
 ) -> Result<Token> {
     use Token::*;
 
     for tok in queue {
         let res = match tok {
             Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) => tok.clone(),
-            Reference(field) => field.as_token(issue),
-            MetaReference(field) => FieldRef::as_meta_token(field.clone(), issue),
+            Reference(field) => field.as_token(entry),
+            MetaReference(field) => FieldRef::as_meta_token(field.clone(), entry, app),
             Add(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => lhs.sum(rhs)?,
                 _ => bail!("'+' operator haven't got enough arguments"),
@@ -64,7 +63,7 @@ pub fn eval(
                 (Some(rhs), Some(lhs)) => lhs.or(rhs),
                 _ => bail!("'or' ('||') operator haven't got enough arguments"),
             },
-            Func(funcref) => funcref.exec(stack, issue, ts)?,
+            Func(funcref) => funcref.exec(stack, entry, ts)?,
             Greater(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => lhs.greater(rhs, ts)?,
                 _ => bail!("'>' operator haven't got enough arguments"),
@@ -93,19 +92,19 @@ pub fn eval(
             GreaterEq(true) => Token::unary_greater_eq(stack, ts)?,
 
             Eq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => lhs.eq(rhs, issue)?,
+                (Some(rhs), Some(lhs)) => lhs.eq(rhs, entry)?,
                 _ => bail!("'eq' ('==') operator haven't got enough arguments"),
             },
             NotEq => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => lhs.not_eq(rhs, issue)?,
+                (Some(rhs), Some(lhs)) => lhs.not_eq(rhs, entry)?,
                 _ => bail!("'eq' ('!=') operator haven't got enough arguments"),
             },
             Contains => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => lhs.contains(&rhs, issue, ts)?,
+                (Some(rhs), Some(lhs)) => lhs.contains(&rhs, entry, ts)?,
                 _ => bail!("'has' (':') operator haven't got enough arguments"),
             },
             In => match (stack.pop(), stack.pop()) {
-                (Some(rhs), Some(lhs)) => rhs.contains(&lhs, issue, ts)?,
+                (Some(rhs), Some(lhs)) => rhs.contains(&lhs, entry, ts)?,
                 _ => bail!("'in' operator haven't got enough arguments"),
             },
 
@@ -142,36 +141,36 @@ fn full_exp_parsing() {
 
 #[test]
 fn relative_dates() {
-    let (app, issue) = (&App::default(), &Entry::default());
-    let monday = parse_date("monday", app, issue).unwrap().unwrap();
-    let tuesday = parse_date("tuesday", app, issue).unwrap().unwrap();
+    let (app, entry) = (&App::default(), &Entry::default());
+    let monday = parse_date("monday", app, entry).unwrap().unwrap();
+    let tuesday = parse_date("tuesday", app, entry).unwrap().unwrap();
     assert_eq!(tuesday - monday, 86400);
 }
 
 #[test]
 fn unexpected_tokens() {
-    let (app, issue) = (&App::default(), &Entry::default());
-    assert_eq!(parse_date("1d+", app, issue).is_err(), true);
-    assert_eq!(parse_date("1d2d", app, issue).is_err(), true);
-    assert_eq!(parse_date("1d(2d)", app, issue).is_err(), true);
-    assert_eq!(parse_date("(", app, issue).is_err(), true);
-    assert_eq!(parse_date(")", app, issue).is_err(), true);
+    let (app, entry) = (&App::default(), &Entry::default());
+    assert_eq!(parse_date("1d+", app, entry).is_err(), true);
+    assert_eq!(parse_date("1d2d", app, entry).is_err(), true);
+    assert_eq!(parse_date("1d(2d)", app, entry).is_err(), true);
+    assert_eq!(parse_date("(", app, entry).is_err(), true);
+    assert_eq!(parse_date(")", app, entry).is_err(), true);
 
-    assert_eq!(parse_date("sqrt 5", app, issue).is_err(), true);
-    assert_eq!(parse_date("4 5", app, issue).is_err(), true);
-    assert_eq!(parse_date("4 ( 5 )", app, issue).is_err(), true);
+    assert_eq!(parse_date("sqrt 5", app, entry).is_err(), true);
+    assert_eq!(parse_date("4 5", app, entry).is_err(), true);
+    assert_eq!(parse_date("4 ( 5 )", app, entry).is_err(), true);
 }
 
 #[cfg(test)]
 fn eval_test(expr: &str) -> Result<Token> {
-    let (app, issue) = (&App::default(), &Entry::default());
+    let (app, entry) = (&App::default(), &Entry::default());
 
     let mut output = Vec::new();
     let mut op_stack = Vec::new();
     let local = app.local_time().unwrap();
     parse_exp(expr, local, &mut output).unwrap();
 
-    eval(&output, local, &mut op_stack, &issue)
+    eval(&output, local, &mut op_stack, &entry)
 }
 
 #[cfg(test)]

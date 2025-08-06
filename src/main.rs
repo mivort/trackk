@@ -163,8 +163,13 @@ fn main() -> Result<()> {
             let local = app.local_time()?;
 
             datecalc::parse::parse_exp(&expr, local, &mut output)?;
-            let res =
-                datecalc::eval::eval(&output, local, &mut op_stack, &entry::Entry::default())?;
+            let res = datecalc::eval::eval(
+                &output,
+                local,
+                &mut op_stack,
+                &entry::Entry::default(),
+                &app,
+            )?;
 
             println!("{}", res.to_string()?);
         }

@@ -33,7 +33,7 @@ impl QueryFilter {
             return Ok(true);
         }
 
-        let res = eval(&self.expression, app.local_time()?, stack, entry)?;
+        let res = eval(&self.expression, app.local_time()?, stack, entry, app)?;
         match res {
             Token::Bool(res) => Ok(res),
             Token::Date(_) | Token::Duration(_) => Ok(true),

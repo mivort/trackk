@@ -226,7 +226,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<str>
             }
 
             op_stack.clear();
-            issue.calculate_urgency(&mut op_stack, local, urgency)?;
+            issue.calculate_urgency(&mut op_stack, local, urgency, app)?;
 
             if app.config.values.active_status.contains(&issue.status) {
                 issue.sid = index.find_id(&issue.id);
@@ -285,7 +285,7 @@ fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<s
 
             op_stack.clear();
             let mut issue_owned = issue.with_shorthand(idx + 1);
-            issue_owned.calculate_urgency(&mut op_stack, local, urgency)?;
+            issue_owned.calculate_urgency(&mut op_stack, local, urgency, app)?;
 
             result.push((issue_owned, Rc::from(bucket_path)));
         } else {

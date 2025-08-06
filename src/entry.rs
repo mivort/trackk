@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 use crate::args::EntryArgs;
 use crate::config::Config;
+use crate::config::fields::FieldType;
 use crate::datecalc::token::Token;
 use crate::datecalc::{eval::eval, parse::parse_date};
 use crate::templates::dates;
@@ -183,8 +184,9 @@ impl Entry {
         stack: &mut Vec<Token>,
         ts: OffsetDateTime,
         urgency: &[Token],
+        app: &App,
     ) -> Result<()> {
-        let res = eval(urgency, ts, stack, self)?;
+        let res = eval(urgency, ts, stack, self, app)?;
         if let Token::Duration(urg) = res {
             self.urgency = urg;
         }
@@ -378,14 +380,29 @@ impl FieldRef {
 
     /// Try to convert custom field value token. If value is missing, convert it
     /// to 'false'.
-    pub fn as_meta_token(key: Rc<str>, entry: &Entry) -> Token {
+    pub fn as_meta_token(key: Rc<str>, entry: &Entry, app: &App) -> Token {
         let value = entry.meta(&key);
         let value = unwrap_some_or!(value, { return Token::Bool(false) });
 
         match value {
-            Value::Null => Token::Bool(false),
-            Value::Number(_number) => Token::Duration(0.),
-            _ => Token::MetaReference(key),
+            Value::Number(_) => {
+                let field_type = app.config.field_type(&key).unwrap_or(FieldType::Float);
+                match field_type {
+                    FieldType::Duration | FieldType::Float | FieldType::Integer => Token::Duration(
+                        value
+                            .as_f64()
+                            .expect("Value is expected to be convertable to f64"),
+                    ),
+                    FieldType::Date => Token::Date(
+                        value
+                            .as_i64()
+                            .expect("Value is expected to be convertable to i64"),
+                    ),
+                    FieldType::String => Token::Bool(false),
+                }
+            }
+            Value::String(value) => Token::String(Rc::from(value.as_str())),
+            _ => Token::Bool(false),
         }
     }
 
