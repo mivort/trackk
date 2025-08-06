@@ -68,6 +68,7 @@ impl ValuesConfig {
                 " + (1 if status == started else 0)",
                 " + (-1 if status == blocked else 0)",
                 " + (-20 if status == deleted else 0)",
+                " + (meta.priority or 0)",
             );
         }
         &self.urgency_formula
