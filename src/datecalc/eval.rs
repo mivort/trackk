@@ -1,5 +1,5 @@
 use super::token::Token;
-use crate::entry::Entry;
+use crate::entry::{Entry, FieldRef};
 use crate::prelude::*;
 
 use time::OffsetDateTime;
@@ -23,6 +23,7 @@ pub fn eval(
         let res = match tok {
             Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) => tok.clone(),
             Reference(field) => field.as_token(issue),
+            MetaReference(field) => FieldRef::as_meta_token(field.clone(), issue),
             Add(false) => match (stack.pop(), stack.pop()) {
                 (Some(rhs), Some(lhs)) => lhs.sum(rhs)?,
                 _ => bail!("'+' operator haven't got enough arguments"),

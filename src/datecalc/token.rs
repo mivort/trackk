@@ -194,6 +194,7 @@ pub enum Token {
     #[token(".")]
     Dot,
 
+    /// Reference to built-in field value.
     #[token("id", |_| FieldRef::Id)]
     #[token("title", |_| FieldRef::Title)]
     #[token("desc", |_| FieldRef::Desc)]
@@ -205,6 +206,11 @@ pub enum Token {
     #[token("due", |_| FieldRef::Due)]
     #[regex("end", |_| FieldRef::End)]
     Reference(FieldRef),
+
+    /// Reference to the custom field value.
+    #[regex(r"%[^\d\W]\w*", |l| Rc::from(l.slice()))]
+    #[regex(r"m(eta)?\.[^\d\W]\w*", |l| Rc::from(l.slice()))]
+    MetaReference(Rc<str>),
 
     /// String value token.
     #[regex(r"[^\d\W]\w*", |l| Rc::from(l.slice()))]

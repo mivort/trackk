@@ -376,6 +376,19 @@ impl FieldRef {
         }
     }
 
+    /// Try to convert custom field value token. If value is missing, convert it
+    /// to 'false'.
+    pub fn as_meta_token(key: Rc<str>, entry: &Entry) -> Token {
+        let value = entry.meta(&key);
+        let value = unwrap_some_or!(value, { return Token::Bool(false) });
+
+        match value {
+            Value::Null => Token::Bool(false),
+            Value::Number(_number) => Token::Duration(0.),
+            _ => Token::MetaReference(key),
+        }
+    }
+
     /// Perform strict comparison.
     pub fn eq(&self, token: &Token, issue: &Entry) -> Result<bool> {
         match (self, token) {

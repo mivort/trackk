@@ -85,7 +85,8 @@ pub fn parse_exp(mut input: &str, ts: OffsetDateTime, output: &mut Vec<Token>) -
                 tok.with_context(|| format!("Unable to process token at position {}", start))?;
 
             match tok {
-                Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_) => {
+                Duration(_) | Date(_) | Bool(_) | Regex(_) | String(_) | Reference(_)
+                | MetaReference(_) => {
                     if !mode.expects_arg() {
                         bail!(
                             "Expected {}, got argument '{}' at position {}",

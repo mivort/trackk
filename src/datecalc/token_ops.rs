@@ -25,8 +25,10 @@ impl Token {
             And => (2, true),
             Or => (1, true),
             If | Else => (0, true),
-            String(_) | Reference(_) | LParen | RParen | Comma | Dot | Bool(_) | Regex(_)
-            | Duration(_) | Date(_) | Func(_) => panic!("Token {:?} is not operator", self),
+            String(_) | Reference(_) | MetaReference(_) | LParen | RParen | Comma | Dot
+            | Bool(_) | Regex(_) | Duration(_) | Date(_) | Func(_) => {
+                panic!("Token {:?} is not operator", self)
+            }
         }
     }
 
