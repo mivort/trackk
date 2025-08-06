@@ -170,6 +170,21 @@ impl Entry {
             self.repeat = if repeat.is_empty() { None } else { Some(repeat.clone()) };
         }
 
+        for meta in &args.meta {
+            let (key, value) = meta.split_once("=").with_context(|| {
+                format!("Meta should be provided in key=value format (got '{meta}')")
+            })?;
+
+            let field_type = app
+                .config
+                .field_type(key)
+                .with_context(|| format!("Field '{key}' is not defined"))?;
+            let parsed = field_type
+                .parse_value(value)
+                .with_context(|| format!("Unable to parse value for '{key}': '{value}'"))?;
+            self.meta.insert(key.into(), parsed);
+        }
+
         self.when = when;
         self.due = due;
         self.end = end;

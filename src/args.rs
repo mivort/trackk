@@ -214,9 +214,13 @@ pub struct EntryArgs {
     #[clap(long, allow_hyphen_values = true)]
     pub tag: Vec<String>,
 
-    /// Set task recurrence query.
+    /// Set entry recurrence query.
     #[arg(long)]
     pub repeat: Option<String>,
+
+    /// Set entry custom field value (in key=value format).
+    #[arg(long)]
+    pub meta: Vec<Box<str>>,
 }
 
 /// Args specific for entry creation.
