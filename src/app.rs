@@ -42,6 +42,9 @@ pub struct App<'env> {
     /// UTC timestamp during the init.
     pub ts: i64,
 
+    /// Current system-wide local offset.
+    pub offset: OnceCell<time::UtcOffset>,
+
     /// Active entry index.
     index: RefCell<index::Index>,
 
@@ -115,12 +118,18 @@ impl<'env> App<'env> {
         Ok(index)
     }
 
+    /// Lazy-init system-wide local offset.
+    pub fn local_offset(&self) -> Result<&time::UtcOffset> {
+        self.offset
+            .get_or_try_init(time::UtcOffset::current_local_offset)
+            .context("Unable to get local offset")
+    }
+
     /// Convert start timestamp to time with offset.
     pub fn local_time(&self) -> Result<time::OffsetDateTime> {
-        use time::*;
-
-        let utc = UtcDateTime::from_unix_timestamp(self.ts)?;
-        Ok(utc.to_offset(UtcOffset::current_local_offset()?))
+        let offset = self.local_offset()?;
+        let utc = time::UtcDateTime::from_unix_timestamp(self.ts)?;
+        Ok(utc.to_offset(*offset))
     }
 
     /// Give reference to parsed urgency expression.

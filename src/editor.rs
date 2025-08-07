@@ -5,13 +5,12 @@ use std::path::Path;
 use std::process::{Command, ExitStatus};
 
 use regex::RegexBuilder;
-use time::macros::format_description;
-use time::{UtcDateTime, UtcOffset};
+use time::UtcOffset;
 
 use crate::datecalc::parse::parse_date;
 use crate::entry::Entry;
 use crate::input;
-use crate::templates::dates;
+use crate::templates::dates::{self, datefmt_iso8601};
 use crate::{app::App, prelude::*};
 
 /// Run editor in loop until it's not fully valid.
@@ -77,16 +76,16 @@ fn format_markdown(entry: &Entry, file: &mut File, app: &App) -> Result<()> {
     let offset = UtcOffset::current_local_offset()?;
 
     let when = match entry.when {
-        Some(when) => format_date(when, offset)?,
+        Some(when) => datefmt_iso8601(when, offset),
         None => String::new(),
     };
 
     let due = match entry.due {
-        Some(due) => format_date(due, offset)?,
+        Some(due) => datefmt_iso8601(due, offset),
         None => String::new(),
     };
     let end = match entry.end {
-        Some(end) => format_date(end, offset)?,
+        Some(end) => datefmt_iso8601(end, offset),
         None => String::new(),
     };
 
@@ -94,12 +93,12 @@ fn format_markdown(entry: &Entry, file: &mut File, app: &App) -> Result<()> {
 
     let created = format!(
         "{} *({})*",
-        format_date(entry.created, offset)?,
+        datefmt_iso8601(entry.created, offset),
         dates::longreldate(entry.created, now, None)
     );
     let modified = format!(
         "{} *({})*",
-        format_date(entry.modified, offset)?,
+        datefmt_iso8601(entry.modified, offset),
         dates::longreldate(entry.modified, now, None)
     );
 
@@ -151,7 +150,7 @@ fn format_custom_fields(entry: &Entry, app: &App) -> String {
     for (field, field_type) in fields.iter() {
         let value = entry.meta(field);
         let (valid, value) = value.map_or((true, String::new()), |v| {
-            field_type.format_value(v).map_or_else(
+            field_type.format_value(v, app).map_or_else(
                 || (false, format!("incompatible value: '{}'", v)),
                 |v| (true, v),
             )
@@ -163,14 +162,6 @@ fn format_custom_fields(entry: &Entry, app: &App) -> String {
     }
 
     out
-}
-
-/// Apply ISO8601 format to UNIX timestamps.
-fn format_date(date: i64, offset: UtcOffset) -> Result<String> {
-    let date = crate::templates::dates::safe_clamp(date);
-    let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
-    let time = UtcDateTime::from_unix_timestamp(date)?.to_offset(offset);
-    Ok(time.format(&format)?)
 }
 
 /// Read edited entry from file back to the entry struct.

@@ -4,7 +4,9 @@ use serde_derive::Deserialize;
 use serde_json::Value;
 
 use super::Config;
+use crate::app::App;
 use crate::prelude::*;
+use crate::templates::dates::datefmt_iso8601;
 
 /// Custom field type.
 #[derive(Hash, PartialEq, Eq, Deserialize, Clone, Copy)]
@@ -69,12 +71,19 @@ impl Config {
 
 impl FieldType {
     /// Format provided JSON value depending on the field type.
-    pub fn format_value(&self, value: &Value) -> Option<String> {
+    pub fn format_value(&self, value: &Value, app: &App) -> Option<String> {
         match self {
             Self::Integer => Some(unwrap_some_or!(value.as_i64(), { return None }).to_string()),
             Self::Float => Some(unwrap_some_or!(value.as_f64(), { return None }).to_string()),
             Self::String => value.as_str().map(|v| v.into()),
-            // TODO: P3: format dates and durations and dates
+            Self::Date => {
+                let offset = *app.local_offset().ok()?;
+                Some(datefmt_iso8601(
+                    unwrap_some_or!(value.as_i64(), { return None }),
+                    offset,
+                ))
+            }
+            // TODO: P3: format the remaining field types (durations)
             _ => None,
         }
     }
@@ -84,6 +93,7 @@ impl FieldType {
         use serde_json::Number;
 
         // TODO: P3: parse custom field value according to field type
+        // TODO: P1: maybe parse numeric fields using datecalc
         match self {
             Self::Integer => {
                 let value = value.parse::<i128>()?;
@@ -98,7 +108,8 @@ impl FieldType {
                     .map(Value::Number)
             }
             Self::String => Ok(Value::String(value.into())),
-            _ => Ok(Value::Null),
+            Self::Date => todo!(),     // TODO: P3: parse date fields
+            Self::Duration => todo!(), // TODO: P3: parse duration fields
         }
     }
 }

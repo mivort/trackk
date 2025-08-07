@@ -114,6 +114,17 @@ pub fn datefmt(
     }
 }
 
+/// Apply ISO8601 format to UNIX timestamps.
+pub fn datefmt_iso8601(ts: i64, offset: UtcOffset) -> String {
+    let ts = safe_clamp(ts);
+    let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
+    let time = UtcDateTime::from_unix_timestamp(ts)
+        .unwrap_or_else(|_| panic!("Timestamp value is outside of the valid range: {}", ts))
+        .to_offset(offset);
+    let time = time.to_offset(offset);
+    time.format(&format).unwrap()
+}
+
 /// Convert defined parse formats into parsed format items.
 pub fn parse_formats(
     formats: &HashMap<String, String>,
