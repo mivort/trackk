@@ -39,7 +39,8 @@ pub enum IndexType {
 }
 
 impl Config {
-    pub fn query(&self, query_id: &str) -> Result<QueryData> {
+    /// Use query by the ID, or fallback to one of the built-ins.
+    pub fn query(&self, query_id: &str) -> Result<QueryData<'_>> {
         unwrap_none_or!(self.queries.get(query_id), q, {
             return Ok(QueryData {
                 sorting: &q.sorting,
@@ -63,7 +64,7 @@ impl Config {
 }
 
 impl Config {
-    fn query_all(&self) -> QueryData {
+    fn query_all(&self) -> QueryData<'_> {
         QueryData {
             sorting: "end+ created+",
             filter: "",
@@ -71,7 +72,7 @@ impl Config {
         }
     }
 
-    fn query_recent(&self) -> QueryData {
+    fn query_recent(&self) -> QueryData<'_> {
         QueryData {
             sorting: "modified+",
             filter: "modified > -14d",
@@ -79,7 +80,7 @@ impl Config {
         }
     }
 
-    fn query_backlog(&self) -> QueryData {
+    fn query_backlog(&self) -> QueryData<'_> {
         QueryData {
             sorting: "urgency+",
             filter: "(when or someday) >= 365d and (due or someday) >= 365d and status != 'started'",
@@ -87,7 +88,7 @@ impl Config {
         }
     }
 
-    fn query_upcoming(&self) -> QueryData {
+    fn query_upcoming(&self) -> QueryData<'_> {
         QueryData {
             sorting: "urgency+",
             filter: "((when >= 3d and when < 365d and not due) or (due >= 3d and due < 365d)) and status != 'started'",
@@ -95,7 +96,7 @@ impl Config {
         }
     }
 
-    fn query_current(&self) -> QueryData {
+    fn query_current(&self) -> QueryData<'_> {
         QueryData {
             sorting: "urgency+",
             filter: "((when < 3d and not due) or (due >= now and due < 3d)) and status != 'started'",
@@ -103,7 +104,7 @@ impl Config {
         }
     }
 
-    fn query_overdue(&self) -> QueryData {
+    fn query_overdue(&self) -> QueryData<'_> {
         QueryData {
             sorting: "urgency+",
             filter: "after due and status != 'started'",
@@ -111,7 +112,7 @@ impl Config {
         }
     }
 
-    fn query_started(&self) -> QueryData {
+    fn query_started(&self) -> QueryData<'_> {
         QueryData {
             sorting: "urgency+",
             filter: "status == 'started'",
@@ -119,7 +120,7 @@ impl Config {
         }
     }
 
-    fn query_done_today(&self) -> QueryData {
+    fn query_done_today(&self) -> QueryData<'_> {
         QueryData {
             sorting: "end+",
             filter: "end >= today and status == 'completed'",

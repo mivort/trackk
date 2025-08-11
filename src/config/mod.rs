@@ -185,7 +185,7 @@ impl Config {
     }
 
     /// Provide default editor value.
-    pub fn editor(&self) -> Cow<str> {
+    pub fn editor(&self) -> Cow<'_, str> {
         unwrap_none_or!(&self.editor, editor, { return Cow::Borrowed(editor) });
 
         const ENV_VAR: &str = concat!(env!("CARGO_PKG_NAME"), "_EDITOR");
