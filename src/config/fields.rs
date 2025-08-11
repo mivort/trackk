@@ -5,6 +5,8 @@ use serde_json::Value;
 
 use super::Config;
 use crate::app::App;
+use crate::datecalc::parse::parse_date;
+use crate::entry::Entry;
 use crate::prelude::*;
 use crate::templates::dates::datefmt_iso8601;
 
@@ -89,7 +91,7 @@ impl FieldType {
     }
 
     /// Based of field type, produce json_serde Value to store in metadata map.
-    pub fn parse_value(&self, value: &str) -> Result<Value> {
+    pub fn parse_value(&self, value: &str, app: &App, entry: &Entry) -> Result<Value> {
         use serde_json::Number;
 
         // TODO: P3: parse custom field value according to field type
@@ -108,7 +110,14 @@ impl FieldType {
                     .map(Value::Number)
             }
             Self::String => Ok(Value::String(value.into())),
-            Self::Date => todo!(),     // TODO: P3: parse date fields
+            Self::Date => {
+                let date = parse_date(value, app, entry)?;
+                let data = unwrap_some_or!(date, { return Ok(Value::Null) });
+
+                Number::from_i128(data as i128)
+                    .context("Unable to store date as integer")
+                    .map(Value::Number)
+            }
             Self::Duration => todo!(), // TODO: P3: parse duration fields
         }
     }

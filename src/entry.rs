@@ -180,7 +180,7 @@ impl Entry {
                 .field_type(key)
                 .with_context(|| format!("Field '{key}' is not defined"))?;
             let parsed = field_type
-                .parse_value(value)
+                .parse_value(value, app, self)
                 .with_context(|| format!("Unable to parse value for '{key}': '{value}'"))?;
             self.meta.insert(key.into(), parsed);
         }

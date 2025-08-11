@@ -246,7 +246,7 @@ fn parse_markdown(entry: &mut Entry, data: &str, app: &App) -> Result<()> {
                     .config
                     .field_type(key)
                     .with_context(|| format!("Unknown field: {}", key))?;
-                let value = field_type.parse_value(val)?;
+                let value = field_type.parse_value(val, app, entry)?;
                 entry.meta.insert(key.into(), value);
             }
         }
