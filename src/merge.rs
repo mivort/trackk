@@ -31,18 +31,30 @@ fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) -> Bucket {
         merged.insert(entry.id.clone(), entry);
     }
 
+    let mut count_2way = 0;
+    let mut count_3way = 0;
+
     for incoming in theirs.entries.into_iter() {
         let entry = merged.get_mut(&incoming.id);
         if let Some(entry) = entry {
             let ancestor = ancestor.entries.iter_mut().find(|a| a.id == entry.id);
             if let Some(ancestor) = ancestor {
                 merge_3way(entry, std::mem::take(ancestor), incoming);
+                count_3way += 1;
             } else {
                 merge_2way(entry, incoming);
+                count_2way += 1;
             }
         } else {
             merged.insert(incoming.id.clone(), incoming);
         }
+    }
+
+    if count_2way > 0 {
+        info!("Merging {count_2way} entri(es) using 2-way strategy");
+    }
+    if count_3way > 0 {
+        info!("Merging {count_3way} entri(es) using 3-way strategy");
     }
 
     Bucket {
@@ -53,8 +65,6 @@ fn merge_buckets(mut ancestor: Bucket, theirs: Bucket, ours: Bucket) -> Bucket {
 
 /// Take ancestor, incoming change and write result in the output.
 fn merge_3way(ours: &mut Entry, parent: Entry, theirs: Entry) {
-    info!("Merging conflict using 3-way strategy");
-
     let their_newer = ours.modified < theirs.modified;
 
     merge_field(&mut ours.desc, parent.desc, theirs.desc, their_newer);
@@ -81,8 +91,6 @@ fn merge_3way(ours: &mut Entry, parent: Entry, theirs: Entry) {
 
 /// Select entry with more recent modified timestamp.
 fn merge_2way(ours: &mut Entry, incoming: Entry) {
-    info!("Merging conflict using 2-way strategy");
-
     if ours.modified >= incoming.modified {
         return;
     }
