@@ -5,8 +5,7 @@ use crate::{prelude::*, templates};
 
 use std::cmp::PartialOrd;
 use time::ext::NumericalDuration;
-use time::macros::format_description;
-use time::{OffsetDateTime, Time, UtcDateTime, UtcOffset};
+use time::{OffsetDateTime, Time, UtcOffset};
 
 impl Token {
     /// Check token precedence and if it's left associative.
@@ -316,11 +315,8 @@ impl Token {
         use Token::*;
         Ok(match self {
             Date(d) => {
-                let d = templates::dates::safe_clamp(*d);
-                let utc = UtcDateTime::from_unix_timestamp(d)?;
-                let format = format_description!("[year]-[month]-[day]T[hour]:[minute]:[second]");
-                utc.to_offset(UtcOffset::current_local_offset()?);
-                utc.format(format)?
+                let offset = UtcOffset::current_local_offset()?;
+                templates::dates::datefmt_iso8601(*d, offset)
             }
             Duration(v) => format!("{:.0}", v.round()),
             Bool(v) => v.to_string(),
