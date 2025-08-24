@@ -43,7 +43,8 @@ pub enum Token {
     #[regex(r"(?i)\d+(st|nd|rd|th)", parse_st_nd_rd_th)]
     #[regex(r"\d{1,2}:\d{2}", parse_24h)]
     #[regex(r"\d{1,2}:\d{2}:\d{2}", parse_24h_sec)]
-    #[regex(r"\d{1,2}:\d{2}[AaPp][Mm]", parse_12h)]
+    #[regex(r"\d{1,2}[AaPp][Mm]", parse_12h)]
+    #[regex(r"\d{1,2}:\d{2}[AaPp][Mm]", parse_12h_min)]
     #[regex(r"\d{1,2}:\d{2}:\d{2}[AaPp][Mm]", parse_12h_sec)]
     #[regex(r"\d{2}-\d{2}", parse_short_date)]
     #[regex(r"\d{4,}-\d{3}", parse_ordinal)]
@@ -310,6 +311,15 @@ fn parse_24h_sec(lex: &Lexer<Token>) -> Result<i64, LexerError> {
 
 /// Parse time in 12H format.
 fn parse_12h(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    let format = format_description!("[hour repr:12 padding:none][period case_sensitive:false]");
+    let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
+        return Err(LexerError::token_error(lex.slice()));
+    });
+    Ok(relative_time(time, lex.extras))
+}
+
+/// Parse time in 12H format with minutes.
+fn parse_12h_min(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let format =
         format_description!("[hour repr:12 padding:none]:[minute][period case_sensitive:false]");
     let time = unwrap_ok_or!(Time::parse(lex.slice(), &format), _, {
