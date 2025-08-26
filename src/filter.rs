@@ -227,7 +227,7 @@ impl IdFilter {
                 continue;
             });
             let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
-                if shorthand <= 999 {
+                if id.len() < 4 {
                     bail!("Entry with shorthand {shorthand} not found in index");
                 }
                 self.index.push(id);
