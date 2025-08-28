@@ -335,14 +335,16 @@ impl Entry {
             bail!("Entry title should not be empty");
         }
 
-        if self.end.is_some() && app.config.values.active_status.contains(&self.status) {
+        let is_active = app.config.values.active_status.contains(&self.status);
+
+        if self.end.is_some() && is_active {
             bail!("End date should be only set for complete/deleted/inactive entries");
         }
 
         if let Some(repeat) = &self.repeat {
             let date = parse_date(repeat, app, self)
                 .with_context(|| format!("Unable to parse repeat date: '{}'", repeat))?;
-            if date.is_none() {
+            if date.is_none() && is_active {
                 warn!(
                     "Task is set to repeat, but it WON'T be repeated due to non-matching condition"
                 );
