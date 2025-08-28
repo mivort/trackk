@@ -32,6 +32,7 @@ impl Default for Index {
 }
 
 impl Index {
+    /// Load index storage into a cache and keep metadata.
     pub fn load(&mut self, config: &Config) -> Result<()> {
         self.load_path(config)?;
 
@@ -47,12 +48,14 @@ impl Index {
         Ok(())
     }
 
+    /// Reset active entries index.
     #[inline]
     pub fn clear(&mut self) {
         self.active.clear();
         self.mtime = SystemTime::UNIX_EPOCH;
     }
 
+    /// Check if lazy load was performed already.
     pub fn loaded(&self) -> bool {
         self.mtime > SystemTime::UNIX_EPOCH
     }
