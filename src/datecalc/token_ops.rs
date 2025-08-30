@@ -145,7 +145,7 @@ impl Token {
 
     /// Apply time to the date.
     pub fn at(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
-        match (self, rhs) {
+        match (&self, rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => {
                 let ltime = (lhs + ts.offset().whole_seconds() as i64) % 86400;
                 let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
@@ -154,12 +154,15 @@ impl Token {
             (Self::Duration(lhs), Self::Date(rhs)) => {
                 let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
                 let with_offset = ts
-                    .saturating_add((lhs as i64).seconds())
+                    .saturating_add((*lhs as i64).seconds())
                     .replace_time(Time::MIDNIGHT)
                     .saturating_add(rtime.seconds());
                 Ok(Self::Date(with_offset.unix_timestamp()))
             }
-            _ => bail!("'@' can only be applied to spans and dates"),
+            _ => bail!(
+                "Type error: unsupported operand type for '@' ('at'): {}",
+                self.ttype()
+            ),
         }
     }
 
