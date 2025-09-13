@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Write;
 
 use time::format_description::{self, OwnedFormatItem, well_known};
 use time::macros::format_description;
@@ -6,15 +7,28 @@ use time::{UtcDateTime, UtcOffset};
 
 use crate::prelude::*;
 
-const YEAR: f64 = 365. * DAY;
-const MONTH: f64 = 30. * DAY;
-const WEEK: f64 = 7. * DAY;
-const DAY: f64 = 86400.;
-const HOUR: f64 = 3600.;
-const MINUTE: f64 = 60.;
+/// Time durations as i64.
+mod i64d {
+    pub(super) const YEAR: i64 = 365 * DAY;
+    pub(super) const DAY: i64 = 24 * HOUR;
+    pub(super) const HOUR: i64 = 60 * MINUTE;
+    pub(super) const MINUTE: i64 = 60;
+}
+
+/// Time durations as f64.
+mod f64d {
+    pub(super) const YEAR: f64 = 365. * DAY;
+    pub(super) const MONTH: f64 = 30. * DAY;
+    pub(super) const WEEK: f64 = 7. * DAY;
+    pub(super) const DAY: f64 = 86400.;
+    pub(super) const HOUR: f64 = 3600.;
+    pub(super) const MINUTE: f64 = 60.;
+}
 
 /// Format as short relative date adding a unit suffix (y, mo, w, d, h, m, s).
 pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
+    use f64d::*;
+
     let diff = (date - now) as f64;
     let abs = diff.abs();
 
@@ -42,6 +56,8 @@ pub fn reldate(date: i64, now: i64, precision: Option<i32>) -> String {
 
 /// Produce long relative date (e.g. '1 day ago') with integer precision by default.
 pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
+    use f64d::*;
+
     let diff = (date - now) as f64;
     let ago = if diff < 0. { " ago" } else { "" };
 
@@ -75,6 +91,49 @@ pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
         let (val, s) = round(abs);
         format!("{val} second{s}{ago}")
     }
+}
+
+/// Format duration in datecalc-readable format.
+pub fn duration(duration: i64) -> String {
+    use i64d::*;
+    let mut out = String::new();
+
+    let delim = if duration < 0 {
+        out.push('-');
+        "-"
+    } else {
+        "+"
+    };
+
+    let abs = duration.abs();
+
+    let years = abs / YEAR;
+    let days = abs % YEAR / DAY;
+    let hours = abs % DAY / HOUR;
+    let minutes = abs % HOUR / MINUTE;
+    let seconds = abs % MINUTE;
+
+    let mut append = false;
+
+    let mut add_unit = |value: i64, unit: char| {
+        if value <= 0 {
+            return;
+        }
+        if append {
+            let _ = write!(out, "{delim}");
+        } else {
+            append = true;
+        }
+        let _ = write!(out, "{value}{unit}");
+    };
+
+    add_unit(years, 'y');
+    add_unit(days, 'd');
+    add_unit(hours, 'h');
+    add_unit(minutes, 'm');
+    add_unit(seconds, 's');
+
+    out
 }
 
 /// Format date/time using one of the defined formatters.
@@ -143,4 +202,18 @@ pub fn safe_clamp(ts: i64) -> i64 {
         UtcDateTime::MIN.unix_timestamp() + 86400,
         UtcDateTime::MAX.unix_timestamp() - 86400,
     )
+}
+
+#[test]
+pub fn duration_fmt() {
+    use i64d::*;
+
+    assert_eq!(duration(HOUR), "1h");
+    assert_eq!(duration(DAY + HOUR), "1d+1h");
+    assert_eq!(duration(HOUR + 30 * MINUTE), "1h+30m");
+    assert_eq!(duration(YEAR + 1), "1y+1s");
+
+    assert_eq!(duration(-HOUR), "-1h");
+    assert_eq!(duration(-DAY - HOUR), "-1d-1h");
+    assert_eq!(duration(-YEAR - DAY - HOUR - MINUTE), "-1y-1d-1h-1m");
 }

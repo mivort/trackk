@@ -8,7 +8,7 @@ use crate::app::App;
 use crate::datecalc::parse::parse_date;
 use crate::entry::Entry;
 use crate::prelude::*;
-use crate::templates::dates::datefmt_iso8601;
+use crate::templates::dates::{datefmt_iso8601, duration};
 
 /// Custom field type.
 #[derive(Hash, PartialEq, Eq, Deserialize, Clone, Copy)]
@@ -85,8 +85,7 @@ impl FieldType {
                     offset,
                 ))
             }
-            // TODO: P3: format the remaining field types (durations)
-            _ => None,
+            Self::Duration => Some(duration(unwrap_some_or!(value.as_i64(), { return None }))),
         }
     }
 
