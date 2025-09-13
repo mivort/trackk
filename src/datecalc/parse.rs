@@ -12,13 +12,7 @@ use crate::{app::App, prelude::*};
 /// Parse date expression and produce the timestamp.
 /// Convert the incoming token stream using shunting yard algorithm into RPN and eval it.
 pub fn parse_date(input: &str, app: &App, entry: &Entry) -> Result<Option<i64>> {
-    let local = app.local_time()?;
-
-    let mut exp = Vec::<Token>::new();
-    parse_exp(input, local, &mut exp)?;
-
-    let mut arg_stack = Vec::<Token>::new();
-    let res = eval(&exp, local, &mut arg_stack, entry, app)?;
+    let res = parse_value(input, app, entry)?;
 
     match res {
         Token::Date(date) => Ok(Some(date)),
@@ -30,6 +24,17 @@ pub fn parse_date(input: &str, app: &App, entry: &Entry) -> Result<Option<i64>> 
             res.ttype()
         ),
     }
+}
+
+/// Parse/eval expression and produce the value.
+pub fn parse_value(input: &str, app: &App, entry: &Entry) -> Result<Token> {
+    let local = app.local_time()?;
+
+    let mut exp = Vec::<Token>::new();
+    parse_exp(input, local, &mut exp)?;
+
+    let mut arg_stack = Vec::<Token>::new();
+    eval(&exp, local, &mut arg_stack, entry, app)
 }
 
 /// Parse and append to filter expression. If experssion wasn't empty,

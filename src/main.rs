@@ -27,6 +27,7 @@ use args::{Args, Command, ImportMode};
 use clap::{CommandFactory, Parser};
 use clap_complete::{Generator, generate};
 use config::query::IndexType;
+use datecalc::parse::parse_value;
 use log::Level;
 use prelude::*;
 
@@ -158,18 +159,7 @@ fn main() -> Result<()> {
         }
         Some(Command::Calc(exp)) => {
             let expr = exp.expr.join(" ");
-            let mut output = Vec::new();
-            let mut op_stack = Vec::new();
-            let local = app.local_time()?;
-
-            datecalc::parse::parse_exp(&expr, local, &mut output)?;
-            let res = datecalc::eval::eval(
-                &output,
-                local,
-                &mut op_stack,
-                &entry::Entry::default(),
-                &app,
-            )?;
+            let res = parse_value(&expr, &app, &entry::Entry::default())?;
 
             println!("{}", res.to_string()?);
         }
