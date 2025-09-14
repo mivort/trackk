@@ -5,7 +5,8 @@ use serde_json::Value;
 
 use super::Config;
 use crate::app::App;
-use crate::datecalc::parse::parse_date;
+use crate::datecalc::parse::{parse_date, parse_value};
+use crate::datecalc::token::Token;
 use crate::entry::Entry;
 use crate::prelude::*;
 use crate::templates::dates::{datefmt_iso8601, duration};
@@ -117,7 +118,21 @@ impl FieldType {
                     .context("Unable to store date as integer")
                     .map(Value::Number)
             }
-            Self::Duration => todo!(), // TODO: P3: parse duration fields
+            Self::Duration => {
+                use parse_value;
+                let value = parse_value(value, app, entry)?;
+
+                let duration = if let Token::Duration(d) = value {
+                    d
+                } else {
+                    let value = value.to_string()?;
+                    bail!("Duration field value didn't produce numeric result (got '{value}')");
+                };
+
+                Number::from_f64(duration)
+                    .context("Unable to store duration value as f64")
+                    .map(Value::Number)
+            }
         }
     }
 }
