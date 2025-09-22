@@ -7,22 +7,29 @@ use crate::prelude::*;
 #[derive(Deserialize, Default, Clone)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub struct QueryConfig {
-    /// Sorting direction.
+    /// Sorting columns and directions.
     #[serde(default)]
     pub sorting: Box<str>,
 
-    /// Section filter parameters.
+    /// Section filter query.
     #[serde(default)]
     pub filter: Box<str>,
 
+    /// Group datecalc query.
+    #[serde(default)]
+    pub group_by: Box<str>,
+
     /// Index to use when query is called.
+    #[serde(default)]
     pub index: IndexType,
 }
 
 /// Reference to query data.
+#[derive(Default)]
 pub struct QueryData<'a> {
     pub sorting: &'a str,
     pub filter: &'a str,
+    pub group_by: &'a str,
     pub index: IndexType,
 }
 
@@ -45,6 +52,7 @@ impl Config {
             return Ok(QueryData {
                 sorting: &q.sorting,
                 filter: &q.filter,
+                group_by: &q.group_by,
                 index: q.index,
             });
         });
@@ -58,6 +66,7 @@ impl Config {
             "done_today" => self.query_done_today(),
             "recent" => self.query_recent(),
             "all" => self.query_all(),
+
             _ => bail!("Query '{query_id}' not defined"),
         })
     }
@@ -68,6 +77,7 @@ impl Config {
         QueryData {
             sorting: "end+ created+",
             filter: "",
+            group_by: "",
             index: IndexType::All,
         }
     }
@@ -76,6 +86,7 @@ impl Config {
         QueryData {
             sorting: "modified+",
             filter: "modified > -14d",
+            group_by: "",
             index: IndexType::All,
         }
     }
@@ -84,6 +95,7 @@ impl Config {
         QueryData {
             sorting: "urgency+",
             filter: "(when or someday) >= 365d and (due or someday) >= 365d and status != 'started'",
+            group_by: "",
             index: IndexType::Active,
         }
     }
@@ -92,6 +104,7 @@ impl Config {
         QueryData {
             sorting: "urgency+",
             filter: "((when >= 3d and when < 365d and not due) or (due >= 3d and due < 365d)) and status != 'started'",
+            group_by: "",
             index: IndexType::Active,
         }
     }
@@ -100,6 +113,7 @@ impl Config {
         QueryData {
             sorting: "urgency+",
             filter: "((when < 3d and not due) or (due >= now and due < 3d)) and status != 'started'",
+            group_by: "",
             index: IndexType::Active,
         }
     }
@@ -108,6 +122,7 @@ impl Config {
         QueryData {
             sorting: "urgency+",
             filter: "after due and status != 'started'",
+            group_by: "",
             index: IndexType::Active,
         }
     }
@@ -116,6 +131,7 @@ impl Config {
         QueryData {
             sorting: "urgency+",
             filter: "status == 'started'",
+            group_by: "",
             index: IndexType::Active,
         }
     }
@@ -124,6 +140,7 @@ impl Config {
         QueryData {
             sorting: "end+",
             filter: "end >= today and status == 'completed'",
+            group_by: "",
             index: IndexType::All,
         }
     }

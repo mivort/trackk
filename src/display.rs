@@ -94,6 +94,7 @@ fn show_section(
 ) -> Result<usize> {
     let SectionConfig {
         query: query_id,
+        group_header,
         header,
         template,
         title,
@@ -104,6 +105,7 @@ fn show_section(
     let filter = query_data.filter;
     let sorting = query_data.sorting;
     let index = query_data.index;
+    let group_by = query_data.group_by;
 
     query
         .replace(filter, app)
@@ -129,6 +131,16 @@ fn show_section(
             .load_template(header, app)
             .with_context(|| format!("Unable to load header template: {header}"))?;
     }
+
+    if !group_header.is_empty() && !group_by.is_empty() {
+        templates
+            .load_template(group_header, app)
+            .with_context(|| format!("Unable to load group header template: {group_header}"))?;
+
+        query.replace_group(group_by, app)?;
+    } else {
+        query.clear_group();
+    };
 
     if !template.is_empty() {
         templates
@@ -156,6 +168,8 @@ fn show_section(
 
     let template = j2.get_template(&section.template)?;
     for (lineno, (entry, path)) in entries.iter().enumerate() {
+        // TODO: P3: call 'eval_group' and compare to the previous iteration
+
         let context = RowContext {
             entry: &EntryContext {
                 sid: entry.sid,

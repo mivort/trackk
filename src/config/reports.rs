@@ -24,6 +24,10 @@ pub struct SectionConfig {
     #[serde(default)]
     pub header: Box<str>,
 
+    /// Group header template.
+    #[serde(default)]
+    pub group_header: Box<str>,
+
     /// Name of tera template file used for section output.
     #[serde(default)]
     pub template: Box<str>,
@@ -35,10 +39,6 @@ pub struct SectionConfig {
     /// Section title.
     #[serde(default)]
     pub title: Box<str>,
-
-    /// Grouping field.
-    #[serde(default)]
-    pub _grouping: Box<str>,
 }
 
 impl Config {
@@ -65,43 +65,43 @@ impl Config {
                     query: "backlog".into(),
                     title: "Backlog".into(),
                     header: "header".into(),
+                    group_header: "".into(),
                     template: "next".into(),
-                    _grouping: "".into(),
                 },
                 SectionConfig {
                     query: "upcoming".into(),
                     title: "Upcoming".into(),
                     header: "header".into(),
+                    group_header: "".into(),
                     template: "next".into(),
-                    _grouping: "".into(),
                 },
                 SectionConfig {
                     query: "current".into(),
                     title: "Current".into(),
                     header: "header".into(),
+                    group_header: "".into(),
                     template: "next".into(),
-                    _grouping: "".into(),
                 },
                 SectionConfig {
                     query: "overdue".into(),
                     title: "Overdue".into(),
                     header: "header".into(),
+                    group_header: "".into(),
                     template: "next".into(),
-                    _grouping: "".into(),
                 },
                 SectionConfig {
                     query: "started".into(),
                     title: "Started".into(),
                     header: "header".into(),
+                    group_header: "".into(),
                     template: "next".into(),
-                    _grouping: "".into(),
                 },
                 SectionConfig {
                     query: "done_today".into(),
                     title: "Done today".into(),
                     header: "header".into(),
+                    group_header: "".into(),
                     template: "next".into(),
-                    _grouping: "".into(),
                 },
             ],
             base_templates: vec![],
@@ -117,8 +117,8 @@ impl Config {
                 query: "all".into(),
                 title: "All entries".into(),
                 header: "header".into(),
+                group_header: "".into(),
                 template: "all".into(),
-                _grouping: "".into(),
             }],
             base_templates: vec![],
         }
@@ -131,8 +131,8 @@ impl Config {
                 query: "recent".into(),
                 title: "Recent entries".into(),
                 header: "header".into(),
+                group_header: "".into(),
                 template: "all".into(),
-                _grouping: "".into(),
             }],
             base_templates: vec![],
         }
@@ -147,7 +147,7 @@ impl Config {
 
                 title: "".into(),
                 header: "".into(),
-                _grouping: "".into(),
+                group_header: "".into(),
             }],
             base_templates: vec![],
         }

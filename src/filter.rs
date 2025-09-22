@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use crate::args::FilterArgs;
 use crate::config::query::IndexType;
+use crate::datecalc::parse::parse_local_exp;
 use crate::datecalc::token::Token;
 use crate::datecalc::{eval::eval, parse::parse_filter};
 use crate::entry::{Entry, EntryPath, FieldRef};
@@ -21,6 +22,9 @@ pub struct Filter<'a> {
 pub struct QueryFilter {
     /// Match expression to eval on entries.
     expression: Vec<Token>,
+
+    /// Group by calculated value when grouping is enabled in the report.
+    group_by: Vec<Token>,
 
     /// Index type expected to use with expression.
     index: IndexType,
@@ -50,6 +54,23 @@ impl QueryFilter {
     pub fn replace(&mut self, expr: &str, app: &App) -> Result<()> {
         self.expression.clear();
         parse_filter(expr, app, &mut self.expression, |_, _| {})
+    }
+
+    /// Replace group query while re-using the vec.
+    pub fn replace_group(&mut self, expr: &str, app: &App) -> Result<()> {
+        self.group_by.clear();
+        parse_local_exp(expr, app, &mut self.group_by)
+    }
+
+    /// Clear group when grouping is not needed.
+    pub fn clear_group(&mut self) {
+        self.group_by.clear();
+    }
+
+    /// Evaluate group query and produce a value.
+    pub fn _eval_group(&mut self) -> Token {
+        // TODO: P3: produce group value
+        todo!()
     }
 
     /// Append '&&' condition on top of the query.
