@@ -427,3 +427,17 @@ fn relative_weekday(lex: &Lexer<Token>, day: Weekday) -> i64 {
         .replace_time(Time::MIDNIGHT)
         .unix_timestamp()
 }
+
+impl std::cmp::PartialEq for Token {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Duration(a), Self::Duration(b)) => a == b,
+            (Self::Date(a), Self::Date(b)) => a == b,
+            (Self::Bool(a), Self::Bool(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+
+impl std::cmp::Eq for Token {}

@@ -68,9 +68,13 @@ impl QueryFilter {
     }
 
     /// Evaluate group query and produce a value.
-    pub fn _eval_group(&mut self) -> Token {
+    /// Provided stack is cleared on each eval.
+    pub fn eval_group(&mut self, _entry: &Entry, stack: &mut Vec<Token>) -> Token {
+        stack.clear();
+
         // TODO: P3: produce group value
-        todo!()
+
+        Token::Bool(false)
     }
 
     /// Append '&&' condition on top of the query.

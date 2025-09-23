@@ -2,16 +2,19 @@ use std::rc::Rc;
 
 use serde_derive::Serialize;
 
-use crate::config::{
-    query::IndexType,
-    reports::{ReportConfig, SectionConfig},
-};
 use crate::entry::Entry;
 use crate::filter::{Filter, IdFilter, QueryFilter};
 use crate::repo;
 use crate::templates::Templates;
 use crate::templates::dates;
 use crate::{app::App, prelude::*, sort, storage};
+use crate::{
+    config::{
+        query::IndexType,
+        reports::{ReportConfig, SectionConfig},
+    },
+    datecalc::token::Token,
+};
 
 #[derive(Serialize)]
 pub struct RowContext<'a> {
@@ -106,6 +109,7 @@ fn show_section(
     let sorting = query_data.sorting;
     let index = query_data.index;
     let group_by = query_data.group_by;
+    let mut group_stack = Vec::new();
 
     query
         .replace(filter, app)
@@ -167,8 +171,15 @@ fn show_section(
     }
 
     let template = j2.get_template(&section.template)?;
+    let mut group_token = Token::Bool(false);
+
     for (lineno, (entry, path)) in entries.iter().enumerate() {
-        // TODO: P3: call 'eval_group' and compare to the previous iteration
+        let row_token = query.eval_group(entry, &mut group_stack);
+        if group_token != row_token {
+            group_token = row_token;
+
+            // TODO: P3: render group header
+        }
 
         let context = RowContext {
             entry: &EntryContext {
