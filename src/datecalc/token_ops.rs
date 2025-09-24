@@ -3,6 +3,7 @@ use crate::datecalc::{date_to_sod, duration_to_date};
 use crate::entry::Entry;
 use crate::{prelude::*, templates};
 
+use serde_json::{Number, Value};
 use std::cmp::PartialOrd;
 use time::ext::NumericalDuration;
 use time::{OffsetDateTime, Time, UtcOffset};
@@ -346,6 +347,20 @@ impl Token {
     /// Perform unary greater.
     pub fn unary_greater_eq(stack: &mut Vec<Self>, ts: OffsetDateTime) -> Result<Self> {
         Self::unary_cmp::<Greater>(stack.pop(), ts)
+    }
+
+    /// Convert token to JSON value.
+    pub fn as_value(&self) -> Value {
+        match self {
+            Self::Duration(v) => Value::Number(unwrap_some_or!(Number::from_f64(*v), {
+                return Value::Null;
+            })),
+            Self::Date(v) => Value::Number(unwrap_some_or!(Number::from_i128(*v as i128), {
+                return Value::Null;
+            })),
+            Self::String(v) => Value::String(String::from(&**v)),
+            _ => Value::Null,
+        }
     }
 }
 

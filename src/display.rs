@@ -16,6 +16,8 @@ use crate::{
     datecalc::token::Token,
 };
 
+use serde_json::Value;
+
 #[derive(Serialize)]
 pub struct RowContext<'a> {
     /// Flag if current row is odd or even.
@@ -29,6 +31,12 @@ pub struct RowContext<'a> {
 
     /// Entry reference.
     pub entry: &'a EntryContext<'a>,
+}
+
+#[derive(Serialize)]
+pub struct GroupContext {
+    /// Expression result as JSON value.
+    pub group: Value,
 }
 
 #[derive(Serialize)]
@@ -183,8 +191,12 @@ fn show_section(
             }
             group_token = row_token;
 
+            let context = GroupContext {
+                group: group_token.as_value(),
+            };
+
             // TODO: P3: provide template context
-            template.render_to_write((), &out).with_context(|| {
+            template.render_to_write(context, &out).with_context(|| {
                 format!("Unable to render group header: {}", section.group_header)
             })?;
         }
