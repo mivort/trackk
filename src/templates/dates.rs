@@ -63,32 +63,32 @@ pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
 
     let abs = diff.abs();
 
-    let round = |v: f64| -> (f64, &str) {
+    let floor = |v: f64| -> (f64, &str) {
         let mlt = 10_f64.powi(precision.unwrap_or(0));
-        let val = (v * mlt).round() / mlt;
+        let val = (v * mlt).floor() / mlt;
         (val, if val > 1. { "s" } else { "" })
     };
 
     if abs >= MONTH * 11.5 {
-        let (val, s) = round(abs / YEAR);
+        let (val, s) = floor(abs / YEAR);
         format!("{val} year{s}{ago}")
     } else if abs >= MONTH {
-        let (val, s) = round(abs / MONTH);
+        let (val, s) = floor(abs / MONTH);
         format!("{val} month{s}{ago}")
     } else if abs >= WEEK {
-        let (val, s) = round(abs / WEEK);
+        let (val, s) = floor(abs / WEEK);
         format!("{val} week{s}{ago}")
     } else if abs >= DAY {
-        let (val, s) = round(abs / DAY);
+        let (val, s) = floor(abs / DAY);
         format!("{val} day{s}{ago}")
     } else if abs >= HOUR {
-        let (val, s) = round(abs / HOUR);
+        let (val, s) = floor(abs / HOUR);
         format!("{val} hour{s}{ago}")
     } else if abs >= MINUTE {
-        let (val, s) = round(abs / MINUTE);
+        let (val, s) = floor(abs / MINUTE);
         format!("{val} minute{s}{ago}")
     } else {
-        let (val, s) = round(abs);
+        let (val, s) = floor(abs);
         format!("{val} second{s}{ago}")
     }
 }

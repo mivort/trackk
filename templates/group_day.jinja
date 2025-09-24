@@ -1,6 +1,10 @@
 {#- Group by day, with absolute and relative display -#}
-{% if group -%}
-{# #}{{ c.divider }}---- {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}){{ reset }}
+{%- if group -%}
+  {%- if now - group > 86400 -%}
+    {# #}{{ c.divider }}---- {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}){{ reset }}
+  {%- else -%}
+    {# #}{{ c.divider }}---- {{ c.header }}{{ group | datefmt('date') }} (today){{ reset }}
+  {%- endif -%}
 {%- else -%}
 {# #}{{ c.divider }}---- {{ c.header }}Pending{{ reset }}
 {%- endif %}
