@@ -1,5 +1,7 @@
 use std::rc::Rc;
 
+use time::OffsetDateTime;
+
 use crate::args::FilterArgs;
 use crate::config::query::IndexType;
 use crate::datecalc::parse::parse_local_exp;
@@ -69,12 +71,20 @@ impl QueryFilter {
 
     /// Evaluate group query and produce a value.
     /// Provided stack is cleared on each eval.
-    pub fn eval_group(&mut self, _entry: &Entry, stack: &mut Vec<Token>) -> Token {
+    pub fn eval_group(
+        &mut self,
+        entry: &Entry,
+        stack: &mut Vec<Token>,
+        ts: OffsetDateTime,
+        app: &App,
+    ) -> Result<Token> {
+        if self.group_by.is_empty() {
+            return Ok(Token::Bool(false));
+        }
+
         stack.clear();
 
-        // TODO: P3: produce group value
-
-        Token::Bool(false)
+        eval(&self.group_by, ts, stack, entry, app).context("Unable to evaluate group expression")
     }
 
     /// Append '&&' condition on top of the query.

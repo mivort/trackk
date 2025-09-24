@@ -105,7 +105,7 @@ fn show_section(
 ) -> Result<usize> {
     let SectionConfig {
         query: query_id,
-        group_header,
+        group,
         header,
         template,
         title,
@@ -144,10 +144,10 @@ fn show_section(
             .with_context(|| format!("Unable to load header template: {header}"))?;
     }
 
-    if !group_header.is_empty() && !group_by.is_empty() {
+    if !group.is_empty() && !group_by.is_empty() {
         templates
-            .load_template(group_header, app)
-            .with_context(|| format!("Unable to load group header template: {group_header}"))?;
+            .load_template(group, app)
+            .with_context(|| format!("Unable to load group header template: {group}"))?;
 
         query.replace_group(group_by, app)?;
     } else {
@@ -179,26 +179,26 @@ fn show_section(
     }
 
     let template = j2.get_template(&section.template)?;
-    let group_template = j2.get_template(group_header).ok();
+    let group_template = j2.get_template(group).ok();
+    let ts = app.local_time()?;
     let mut group_token = Token::Bool(false);
 
     for (lineno, (entry, path)) in entries.iter().enumerate() {
         'group_header: {
-            let template = unwrap_some_or!(&group_template, { break 'group_header });
-            let row_token = query.eval_group(entry, &mut group_stack);
+            let row_token = query.eval_group(entry, &mut group_stack, ts, app)?;
             if group_token == row_token {
                 break 'group_header;
             }
+            let template = unwrap_some_or!(&group_template, { break 'group_header });
             group_token = row_token;
 
             let context = GroupContext {
                 group: group_token.as_value(),
             };
 
-            // TODO: P3: provide template context
-            template.render_to_write(context, &out).with_context(|| {
-                format!("Unable to render group header: {}", section.group_header)
-            })?;
+            template
+                .render_to_write(context, &out)
+                .with_context(|| format!("Unable to render group header: {}", section.group))?;
         }
 
         let context = RowContext {

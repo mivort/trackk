@@ -333,6 +333,14 @@ fn contains_op() {
 }
 
 #[test]
+fn at_op() {
+    assert!(
+        !as_bool(eval_test("false at 10:00")),
+        "'false' produces 'false' when 'at' is used"
+    );
+}
+
+#[test]
 fn weekday() {
     assert_eq!(as_f64(eval_test("weekday(2025-07-05)")), 5.);
     assert_eq!(as_f64(eval_test("weekday(2025-07-05-1s)")), 4.);

@@ -77,7 +77,7 @@ impl Config {
         QueryData {
             sorting: "end+ created+",
             filter: "",
-            group_by: "",
+            group_by: "end at 0:00",
             index: IndexType::All,
         }
     }

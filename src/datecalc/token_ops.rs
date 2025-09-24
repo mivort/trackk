@@ -160,6 +160,7 @@ impl Token {
                     .saturating_add(rtime.seconds());
                 Ok(Self::Date(with_offset.unix_timestamp()))
             }
+            (Self::Bool(false), Self::Date(_)) => Ok(Self::Bool(false)),
             _ => bail!(
                 "Type error: unsupported operand type for '@' ('at'): {}",
                 self.ttype()
