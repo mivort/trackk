@@ -171,14 +171,22 @@ fn show_section(
     }
 
     let template = j2.get_template(&section.template)?;
+    let group_template = j2.get_template(group_header).ok();
     let mut group_token = Token::Bool(false);
 
     for (lineno, (entry, path)) in entries.iter().enumerate() {
-        let row_token = query.eval_group(entry, &mut group_stack);
-        if group_token != row_token {
+        'group_header: {
+            let template = unwrap_some_or!(&group_template, { break 'group_header });
+            let row_token = query.eval_group(entry, &mut group_stack);
+            if group_token == row_token {
+                break 'group_header;
+            }
             group_token = row_token;
 
-            // TODO: P3: render group header
+            // TODO: P3: provide template context
+            template.render_to_write((), &out).with_context(|| {
+                format!("Unable to render group header: {}", section.group_header)
+            })?;
         }
 
         let context = RowContext {
