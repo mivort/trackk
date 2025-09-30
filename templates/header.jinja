@@ -1,10 +1,10 @@
 {#- Header caption -#}
 {%- set caption -%}
-  {{ c.divider }}---- {{ c.header }}{{ underline }}{{ title }} [{{ count }}]{{ reset }} {# -#}
+  {{ c.divider }}==== {{ c.header }}{{ underline }}{{ title }} [{{ count }}]{{ reset }} {# -#}
 {%- endset -%}
 {%- set capw = caption | width -%}
 
 {#- Max rendering width -#}
 {%- set maxw = min(cols, 96) -%}
 
-{{ caption }}{{ c.divider }}{{ fill('-', maxw - capw) }}{{ reset }}
+{{ caption }}{{ c.divider }}{{ fill('=', maxw - capw) }}{{ reset }}
