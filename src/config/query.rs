@@ -86,7 +86,7 @@ impl Config {
         QueryData {
             sorting: "modified+",
             filter: "modified > -14d",
-            group_by: "",
+            group_by: "created at 0:00",
             index: IndexType::All,
         }
     }

@@ -131,7 +131,7 @@ impl Config {
                 query: "recent".into(),
                 title: "Recent entries".into(),
                 header: "header".into(),
-                group: "".into(),
+                group: "group_day".into(),
                 template: "all".into(),
             }],
             base_templates: vec![],
