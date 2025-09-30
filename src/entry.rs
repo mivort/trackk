@@ -271,9 +271,9 @@ impl Entry {
         }
 
         let date = parse_date(repeat, app, self)
-            .with_context(|| format!("Unable to parse repeat date: '{}'", repeat))?;
+            .with_context(|| format!("Unable to parse repeat expression: '{}'", repeat))?;
         let date = unwrap_some_or!(date, {
-            info!("Task is not repeated: condition is not met");
+            info!("Task is not repeated: condition not met");
             return Ok(None);
         });
 
