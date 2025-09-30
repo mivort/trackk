@@ -104,3 +104,33 @@ pub const ITALIC: &str = "\x1B[3m";
 pub const UNDERLINE: &str = "\x1B[4m";
 pub const INVERSE: &str = "\x1B[7m";
 pub const CROSSEDOUT: &str = "\x1B[9m";
+
+pub mod defaults {
+    use super::*;
+
+    pub const DATE_DUE: &str = fg(15);
+    pub const DATE_END: &str = fg(6);
+    pub const DATE_OVERDUE: &str = fg(9);
+    pub const DATE_WHEN: &str = fg(12);
+    pub const DESC_COMPLETED: &str = fg(2);
+    pub const DESC_DELETED: &str = fg(8);
+    pub const DESC_PENDING: &str = RESET;
+    pub const DIVIDER: &str = fg(4);
+    pub const ENTRY_DATE: &str = fg(15);
+    pub const ENTRY_FIELD: &str = fg(12);
+    pub const ENTRY_NO_VALUE: &str = fg(8);
+    pub const ENTRY_VALUE: &str = RESET;
+    pub const HEADER: &str = concat!(escape!(a16: 97), "\x1B[4m");
+    pub const MARK_BLOCKED: &str = fg(1);
+    pub const MARK_NOTE: &str = fg(6);
+    pub const MARK_REPEAT: &str = fg(6);
+    pub const MARK_STARTED: &str = fg(12);
+    pub const MORE: &str = fg(8);
+    pub const SID_PENDING: &str = fg(12);
+    pub const SPACER: &str = fg(8);
+    pub const TAG: &str = fg(5);
+    pub const URGENCY: &str = fg(2);
+    pub const UUID: &str = fg(4);
+    pub const UUID_COMPLETED: &str = fg(10);
+    pub const UUID_DELETED: &str = fg(8);
+}

@@ -3,13 +3,14 @@
   {{ c.divider }}---- {# #}
   {%- if group -%}
     {%- if now - group > 86400 -%}
-      {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}) {# #}
+      {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}){{ reset }}
     {%- else -%}
-      {{ c.header }}{{ group | datefmt('date') }} (today) {# #}
+      {{ c.header }}{{ group | datefmt('date') }} (today){{ reset }}
     {%- endif -%}
   {%- else -%}
-    {{ c.header }}Pending {# #}
-  {%- endif %}
+    {{ c.header }}Pending{{ reset }}
+  {%- endif -%}
+  {# #} {# #}
 {%- endset -%}
 {%- set capw = caption | width -%}
 

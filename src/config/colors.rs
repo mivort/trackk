@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use crate::templates::colors::{BOLD, ITALIC, RESET, UNDERLINE, bg, fg};
+use crate::templates::colors::{BOLD, ITALIC, UNDERLINE, bg, defaults, fg};
 use serde_derive::Deserialize;
 
 use super::Config;
@@ -130,31 +130,7 @@ impl Default for ColorValue {
 impl Config {
     /// Provide key-value list of default colors.
     pub const fn default_colors(&self) -> &[(&'static str, &'static str)] {
-        const DATE_DUE: &str = fg(15);
-        const DATE_END: &str = fg(6);
-        const DATE_OVERDUE: &str = fg(9);
-        const DATE_WHEN: &str = fg(12);
-        const DESC_COMPLETED: &str = fg(2);
-        const DESC_DELETED: &str = fg(8);
-        const DESC_PENDING: &str = RESET;
-        const DIVIDER: &str = fg(4);
-        const ENTRY_DATE: &str = fg(15);
-        const ENTRY_FIELD: &str = fg(12);
-        const ENTRY_NO_VALUE: &str = fg(8);
-        const ENTRY_VALUE: &str = RESET;
-        const HEADER: &str = fg(15);
-        const MARK_BLOCKED: &str = fg(1);
-        const MARK_NOTE: &str = fg(6);
-        const MARK_REPEAT: &str = fg(6);
-        const MARK_STARTED: &str = fg(12);
-        const MORE: &str = fg(8);
-        const SID_PENDING: &str = fg(12);
-        const SPACER: &str = fg(8);
-        const TAG: &str = fg(5);
-        const URGENCY: &str = fg(2);
-        const UUID: &str = fg(4);
-        const UUID_COMPLETED: &str = fg(10);
-        const UUID_DELETED: &str = fg(8);
+        use defaults::*;
 
         &[
             ("date_due", DATE_DUE),
