@@ -17,4 +17,8 @@
 {#- Max rendering width -#}
 {%- set maxw = min(cols, 96) -%}
 
+{#- Add padding for non-first group -#}
+{%- if lineno > 0 %}
+{% endif -%}
+
 {{ caption }}{{ c.divider }}{{ fill('-', maxw - capw) }}{{ reset }}

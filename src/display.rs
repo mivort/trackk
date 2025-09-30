@@ -20,7 +20,8 @@ use serde_json::Value;
 
 #[derive(Serialize)]
 pub struct RowContext<'a> {
-    /// Flag if current row is odd or even.
+    /// Number of the entry in query output. Can be used to alternate odd and
+    /// even rows rendering.
     pub lineno: usize,
 
     /// Number of items in the section.
@@ -37,6 +38,12 @@ pub struct RowContext<'a> {
 pub struct GroupContext {
     /// Expression result as JSON value.
     pub group: Value,
+
+    /// Number of the entry in query output.
+    pub lineno: usize,
+
+    /// Number of items in the section.
+    pub count: usize,
 }
 
 #[derive(Serialize)]
@@ -193,6 +200,8 @@ fn show_section(
             group_token = row_token;
 
             let context = GroupContext {
+                lineno,
+                count,
                 group: group_token.as_value(),
             };
 
