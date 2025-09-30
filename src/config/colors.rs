@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use crate::templates::colors::{RESET, bg, fg};
+use crate::templates::colors::{BOLD, ITALIC, RESET, UNDERLINE, bg, fg};
 use serde_derive::Deserialize;
 
 use super::Config;
@@ -31,13 +31,13 @@ pub struct ColorOptions {
     pub bg_rgb: i32,
 
     #[serde(default)]
-    _bold: bool,
+    bold: bool,
 
     #[serde(default)]
-    _italic: bool,
+    italic: bool,
 
     #[serde(default)]
-    _underscore: bool,
+    underline: bool,
 
     #[serde(default)]
     _inversed: bool,
@@ -54,9 +54,9 @@ impl Default for ColorOptions {
             fg_rgb: -1,
             bg_rgb: -1,
 
-            _bold: false,
-            _italic: false,
-            _underscore: false,
+            bold: false,
+            italic: false,
+            underline: false,
             _inversed: false,
             _crossed_out: false,
         }
@@ -80,6 +80,7 @@ impl ColorConfig {
                 let mut res = String::new();
                 Self::format_fg(options, &mut res);
                 Self::format_bg(options, &mut res);
+                Self::format_style(options, &mut res);
                 res
             }
             ColorConfig::Custom(_) => Default::default(),
@@ -104,6 +105,19 @@ impl ColorConfig {
             return;
         }
         out.push_str(bg(unwrap_some_or!(options.bg, { return })));
+    }
+
+    /// Write additional drawing options (bold, underline, etc.).
+    fn format_style(options: &ColorOptions, out: &mut String) {
+        if options.bold {
+            let _ = write!(out, "{}", BOLD);
+        }
+        if options.italic {
+            let _ = write!(out, "{}", ITALIC);
+        }
+        if options.underline {
+            let _ = write!(out, "{}", UNDERLINE);
+        }
     }
 }
 
