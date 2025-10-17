@@ -31,6 +31,9 @@ use datecalc::parse::parse_value;
 use log::Level;
 use prelude::*;
 
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 fn main() -> Result<()> {
     let mut config = config::read_config_chain()?;
     let exp_args = expansion::pre_process_args(&config)?;
