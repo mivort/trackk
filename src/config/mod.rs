@@ -309,7 +309,7 @@ pub enum ExpansionStyle {
 }
 
 /// Print all configuration values along with documentation.
-pub fn print_config(config: &Config) -> Result<()> {
+pub fn print_config(config: &Config, _default: bool) -> Result<()> {
     print!("{}", format_config(config)?);
     Ok(())
 }

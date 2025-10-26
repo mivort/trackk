@@ -96,7 +96,7 @@ pub enum Command {
     Completions(CompletionsArgs),
 
     /// Print current configuration values and comments about possible options.
-    Config,
+    Config(ConfigArgs),
 
     /// Show one of the built-in or config-defined report templates.
     #[command(subcommand)]
@@ -238,6 +238,13 @@ pub struct AddArgs {
 pub struct InfoArgs {
     #[command(flatten)]
     pub filter_args: FilterArgs,
+}
+
+#[derive(Parser, Default)]
+pub struct ConfigArgs {
+    /// Output default configuration.
+    #[arg(long)]
+    pub default: bool,
 }
 
 #[derive(Parser)]
