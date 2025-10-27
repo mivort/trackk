@@ -44,4 +44,8 @@
     entry: "{entry}", {c}// Single entry view template.{cl}
     picker: "{picker}", {c}// Picker which is shown when multiple items are matched.{cl}
   }},
+
+  {c}// Use built-in set of command-line macros.
+  // Currently, 'taskwarrior' and 'none' are supported.{cl}
+  macros_style: {macros_style},
 }}

@@ -298,8 +298,8 @@ pub struct ExpansionConfig {
     pub contexts: Vec<expansion::CmdContext>,
 }
 
-#[derive(Deserialize, Default)]
-#[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
+#[derive(Serialize, Deserialize, Default, Clone)]
+#[cfg_attr(test, derive(Debug, PartialEq, Eq))]
 pub enum ExpansionStyle {
     #[default]
     #[serde(rename = "taskwarrior")]
@@ -334,6 +334,7 @@ fn format_config(config: &Config) -> Result<String> {
         initial_status = config.values.initial_status(),
         picker = config.templates.picker(),
         entry = config.templates.entry(),
+        macros_style = serde_json5::to_string(&config.macros_style.clone().unwrap_or_default())?,
     ))
 }
 
