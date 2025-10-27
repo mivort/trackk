@@ -26,7 +26,7 @@ use std::{env, io};
 use args::{Args, Command, ImportMode};
 use clap::{CommandFactory, Parser};
 use clap_complete::{Generator, generate};
-use config::query::IndexType;
+use config::{Config, query::IndexType};
 use datecalc::parse::parse_value;
 use log::Level;
 use prelude::*;
@@ -152,7 +152,11 @@ fn main() -> Result<()> {
         }
 
         Some(Command::Config(args)) => {
-            config::print_config(&app.config, args.default)?;
+            config::print_config(&if args.default {
+                Config::default().default_values()
+            } else {
+                app.config
+            })?;
         }
         Some(Command::Refresh(args)) => {
             storage::refresh_index(&app, args.force)?;
