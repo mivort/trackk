@@ -181,7 +181,7 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
 
     match template {
         "header" => Some(("header", HEADER)),
-        "group_day" => Some(("group_day", GROUP_DAY)),
+        "header_day" => Some(("header_day", GROUP_DAY)),
         "next" => Some(("next", ROW)),
         "all" => Some(("all", ROW)),
         "issue" => Some(("issue", ENTRY)),

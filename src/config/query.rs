@@ -65,6 +65,7 @@ impl Config {
             "started" => self.query_started(),
             "done_today" => self.query_done_today(),
             "recent" => self.query_recent(),
+            "calendar" => self.query_calendar(),
             "all" => self.query_all(),
 
             _ => bail!("Query '{query_id}' not defined"),
@@ -142,6 +143,15 @@ impl Config {
             filter: "end >= today and status == 'completed'",
             group_by: "",
             index: IndexType::All,
+        }
+    }
+
+    fn query_calendar(&self) -> QueryData<'_> {
+        QueryData {
+            sorting: "due+",
+            filter: "due >= -7d and due < 7d",
+            group_by: "due at 0:00",
+            index: IndexType::Active,
         }
     }
 }

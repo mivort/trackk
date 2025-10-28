@@ -51,6 +51,7 @@ impl Config {
         match report {
             "all" => Ok(Cow::Owned(self.report_all())),
             "next" => Ok(Cow::Owned(self.report_next())),
+            "calendar" => Ok(Cow::Owned(self.report_calendar())),
             "recent" => Ok(Cow::Owned(self.report_recent())),
             "info" => Ok(Cow::Owned(self.report_info())),
             _ => bail!("Report '{report}' not found"),
@@ -117,7 +118,7 @@ impl Config {
                 query: "all".into(),
                 title: "All entries".into(),
                 header: "header".into(),
-                group: "group_day".into(),
+                group: "header_day".into(),
                 template: "all".into(),
             }],
             base_templates: vec![],
@@ -131,7 +132,21 @@ impl Config {
                 query: "recent".into(),
                 title: "Recent entries".into(),
                 header: "header".into(),
-                group: "group_day".into(),
+                group: "header_day".into(),
+                template: "all".into(),
+            }],
+            base_templates: vec![],
+        }
+    }
+
+    /// Report which only shows 'due' entries grouped by day.
+    fn report_calendar(&self) -> ReportConfig {
+        ReportConfig {
+            sections: vec![SectionConfig {
+                query: "calendar".into(),
+                title: "Calendar".into(),
+                header: "header".into(),
+                group: "header_day".into(),
                 template: "all".into(),
             }],
             base_templates: vec![],
