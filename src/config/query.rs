@@ -149,7 +149,7 @@ impl Config {
     fn query_calendar(&self) -> QueryData<'_> {
         QueryData {
             sorting: "due+",
-            filter: "due >= -7d and due < 7d",
+            filter: "due >= -14d and due < 14d",
             group_by: "due at 0:00",
             index: IndexType::Active,
         }

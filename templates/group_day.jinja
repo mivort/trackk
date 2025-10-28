@@ -2,10 +2,12 @@
 {%- set caption -%}
   {{ c.divider }}---- {# #}
   {%- if group -%}
-    {%- if now - group > 86400 -%}
-      {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}){{ reset }}
-    {%- else -%}
+    {%- if (now - now % 86400) == group -%}
       {{ c.header }}{{ group | datefmt('date') }} (today){{ reset }}
+    {%- elif (now - now % 86400) + 86400 == group -%}
+      {{ c.header }}{{ group | datefmt('date') }} (tomorrow){{ reset }}
+    {%- else -%}
+      {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}){{ reset }}
     {%- endif -%}
   {%- else -%}
     {{ c.header }}Pending{{ reset }}
