@@ -3,7 +3,7 @@ name = "trackk"
 authors = ["mivort"]
 edition = "2024"
 license = "GPL-2.0-only"
-version = "0.4.13"
+version = "0.4.14"
 
 [[bin]]
 name = "trk"
