@@ -12,8 +12,8 @@ Inspired by [Taskwarrior][1] and [dstask][2].
   custom JSON 3-way merge driver auto-resolves conflicts on synchronization.
 * **Date calculator DSL for natural input and filtering.** [Built-in expression
   syntax][6] allows to enter dates using natural wording (`tomorrow at
-  10:00am`), resolve math expressions (``) or perform context filtering on
-  tasks (`tag:home and status:started`).
+  10:00am`), resolve math expressions (`1y-30d+15h`) or perform context
+  filtering on tasks (`tag:home and status:started`).
 * **Named queries:** in addition to IDs and custom filters, it's possible to
   access task entries using built-in and user-defined named queries
   (`recent~1`, `overdue~0..3` etc.).
@@ -22,12 +22,15 @@ Inspired by [Taskwarrior][1] and [dstask][2].
 * **Flexible recurrent tasks** which also use date calculator syntax, allowing
   to set complex re-occurrence rules (`monday at 7:00am`) and enabling the
   usage as habit tracker.
-* **Highly-customizable reporting** using [Minijinja][3]-based [template syntax][5]
-  with helper methods for screen-size dependent output, quite similar to `PS1`
-  customization in shells.
-* **Reports can perform multiple queries**, with adjustable headers and grouping.
-* **User-defined formula for task urgency** which provides multi-factor task
-  prioritization.
+* **Highly-customizable reporting** using [Minijinja][3]-based [template
+  syntax][5] with helper methods for screen-size dependent output, quite
+  similar to `PS1` customization in shells.
+* **Reports can perform multiple queries**, with adjustable headers and
+  grouping rules.
+* **Type-safe user defined fields**: custom integers/floats, strings, time
+  spans and dates can be attached to entries and be filtered upon.
+* **User-defined formula for task urgency** which provides multi-factor
+  priority between entries.
 * Respects [NO_COLOR][4].
 
 ## Usage
@@ -36,7 +39,8 @@ Initialize new entry repository:
 ``` bash
 trk init
 ```
-Create new entry (scheduled to be done in 30 minutes and tagged as `mytag`):
+Create new entry (scheduled to be done in 30 minutes from now and tagged as
+`mytag`):
 ``` bash
 trk add Create example task +mytag when:30min
 ```
