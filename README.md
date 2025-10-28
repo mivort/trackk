@@ -17,8 +17,8 @@ Inspired by [Taskwarrior][1] and [dstask][2].
 * **Named queries:** in addition to IDs and custom filters, it's possible to
   access task entries using built-in and user-defined named queries
   (`recent~1`, `overdue~0..3` etc.).
-* **CLI argument macros:** regex-based user-defined argument expansion rules to
-  customize the input syntax.
+* **CLI argument macros:** regex-based user-defined arguments [expansion
+  rules][7] to customize the input syntax.
 * **Flexible recurrent tasks** which also use date calculator syntax, allowing
   to set complex re-occurrence rules (`monday at 7:00am`) and enabling the
   usage as habit tracker.
@@ -95,3 +95,4 @@ on entry status.
 [4]: https://no-color.org/
 [5]: docs/FORMATTING.md
 [6]: docs/DATE_CALC.md
+[7]: docs/MACROS.md
