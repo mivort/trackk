@@ -20,8 +20,8 @@ Inspired by [Taskwarrior][1] and [dstask][2].
 * **CLI argument macros:** regex-based user-defined arguments [expansion
   rules][7] to customize the input syntax.
 * **Flexible recurrent tasks** which also use date calculator syntax, allowing
-  to set complex re-occurrence rules (`monday at 7:00am`) and enabling the
-  usage as habit tracker.
+  to set [re-occurrence rules][8] (`monday at 7:00am`) and enabling the usage
+  as a habit tracker.
 * **Highly-customizable reporting** using [Minijinja][3]-based [template
   syntax][5] with helper methods for screen-size dependent output, quite
   similar to `PS1` customization in shells.
@@ -100,3 +100,4 @@ on entry status.
 [5]: docs/FORMATTING.md
 [6]: docs/DATE_CALC.md
 [7]: docs/MACROS.md
+[8]: docs/RECURRENCE.md
