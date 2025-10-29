@@ -29,20 +29,10 @@
       {%- else -%}
         / {{ c.date_overdue }}
       {%- endif -%}
-      {{ entry.due | reldate }}{{ reset }} {# -#}
+      {{ entry.due | datefmt("hhmm") }}{{ reset }} {# -#}
     {%- elif entry.when -%}
       / {{ c.date_when }}{{ entry.when | reldate }}{{ reset }} {# -#}
     {%- endif -%}
-  {%- endif -%}
-
-  {#- End date -#}
-  {%- if entry.end and cols > 36 -%}
-    / {{ c.date_end }}{{ (2 * now - entry.end) | reldate }}{{ reset }} {# -#}
-  {%- endif -%}
-
-  {#- Urgency -#}
-  {%- if cols > 52 and not entry.end -%}
-    / {{ c.urgency }}{{ entry.urgency | round(1) }}{{ reset }} {# -#}
   {%- endif -%}
 {%- endset -%}
 {%- set metaw = meta | width -%}

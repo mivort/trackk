@@ -11,6 +11,7 @@
   {% if entry.tags | length > limit -%}
     {{ c.tag }}+{{ entry.tags | length - limit }} {# -#}
   {% endif -%}
+  {{- reset -}}
 {% endmacro %}
 
 {#-

@@ -147,7 +147,7 @@ impl Config {
                 title: "Calendar".into(),
                 header: "header".into(),
                 group: "header_day".into(),
-                template: "all".into(),
+                template: "calendar".into(),
             }],
             preload: vec!["utils".into()],
         }

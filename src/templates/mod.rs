@@ -175,6 +175,7 @@ impl<'env> Templates<'env> {
 /// Return one of the built-in templates.
 pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> {
     const ROW: &str = include_str!("../../templates/row.jinja");
+    const ROW_TIME: &str = include_str!("../../templates/row_time.jinja");
     const ENTRY: &str = include_str!("../../templates/entry.jinja");
     const HEADER: &str = include_str!("../../templates/header.jinja");
     const GROUP_DAY: &str = include_str!("../../templates/group_day.jinja");
@@ -185,6 +186,7 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
         "header_day" => Some(("header_day", GROUP_DAY)),
         "next" => Some(("next", ROW)),
         "all" => Some(("all", ROW)),
+        "calendar" => Some(("calendar", ROW_TIME)),
         "issue" => Some(("issue", ENTRY)),
         "entry" => Some(("entry", ENTRY)),
         "picker" => Some(("picker", ROW)),

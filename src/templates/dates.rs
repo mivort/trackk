@@ -158,7 +158,8 @@ pub fn datefmt(
             "rfc2822" | "long" => date.format(&well_known::Rfc2822),
             "rfc3339" => date.format(&well_known::Rfc3339),
             "date" => date.format(&Iso8601::DATE),
-            "time" => date.format(format_description!("[hour]:[minute]:[second]")),
+            "time" | "hhmmss" => date.format(format_description!("[hour]:[minute]:[second]")),
+            "hhmm" => date.format(format_description!("[hour]:[minute]")),
             _ => {
                 const CONFIG: u128 = Config::DEFAULT
                     .set_formatted_components(FormattedComponents::DateTime)
