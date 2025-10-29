@@ -34,3 +34,20 @@
     {{ entry.id[0:4] }} {# -#}
   {%- endif -%}
 {% endmacro %}
+
+{#-
+  Render entry status marks.
+-#}
+{% macro status_marks() %}
+  {%- if entry.status == 'blocked' -%}
+    {{ c.mark_blocked }} ||
+  {%- elif entry.status == 'started' -%}
+    {{ c.mark_started }} >>
+  {%- endif -%}
+  {%- if entry.repeat -%}
+    {{ c.mark_repeat }} &
+  {%- endif -%}
+  {%- if cols > 64 and entry.desc | hasnote -%}
+    {{ c.mark_note }} #
+  {%- endif -%}
+{% endmacro %}

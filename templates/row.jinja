@@ -1,4 +1,4 @@
-{%- from "utils" import tag_list, entry_id -%}
+{%- from "utils" import tag_list, entry_id, status_marks -%}
 
 {#-
   Max rendering width depending on terminal width ('cols').
@@ -49,17 +49,7 @@
 
 {#- Entry status -#}
 {%- set status -%}
-  {%- if entry.status == 'blocked' -%}
-    {{ c.mark_blocked }} ||
-  {%- elif entry.status == 'started' -%}
-    {{ c.mark_started }} >>
-  {%- endif -%}
-  {%- if entry.repeat -%}
-    {{ c.mark_repeat }} &
-  {%- endif -%}
-  {%- if cols > 64 and entry.desc | hasnote -%}
-    {{ c.mark_note }} #
-  {%- endif -%}
+  {{ status_marks() }}
 {%- endset -%}
 {%- set statusw = status | width -%}
 
