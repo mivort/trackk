@@ -1,0 +1,35 @@
+{#- Utility macros -#}
+
+{#-
+  Render tag list using tag colors defined in config.
+  Limit defines how many are visible.
+-#}
+{% macro tag_list(limit) %}
+  {%- for tag in entry.tags | batch(limit) | first -%}
+    {{ tc[tag] | default(c.tag) }}+{{ tag }}{{ reset }} {# -#}
+  {%- endfor -%}
+  {% if entry.tags | length > limit -%}
+    {{ c.tag }}+{{ entry.tags | length - limit }} {# -#}
+  {% endif -%}
+{% endmacro %}
+
+{#-
+  Render entry short ID or numeric handle, with color depending on status.
+-#}
+{% macro entry_id() %}
+  {%- if entry.status == 'deleted' -%}
+    {{ c.uuid_deleted }}
+  {%- elif entry.status == 'completed' -%}
+    {{ c.uuid_completed }}
+  {%- elif entry.sid -%}
+    {{ c.sid_pending }}
+  {%- else -%}
+    {{ c.uuid }}
+  {%- endif -%}
+
+  {%- if entry.sid -%}
+    {{ entry.sid | lpad('   ') }}. {# -#}
+  {%- else -%}
+    {{ entry.id[0:4] }} {# -#}
+  {%- endif -%}
+{% endmacro %}

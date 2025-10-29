@@ -178,6 +178,7 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
     const ENTRY: &str = include_str!("../../templates/entry.jinja");
     const HEADER: &str = include_str!("../../templates/header.jinja");
     const GROUP_DAY: &str = include_str!("../../templates/group_day.jinja");
+    const UTILS: &str = include_str!("../../templates/utils.jinja");
 
     match template {
         "header" => Some(("header", HEADER)),
@@ -187,6 +188,7 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
         "issue" => Some(("issue", ENTRY)),
         "entry" => Some(("entry", ENTRY)),
         "picker" => Some(("picker", ROW)),
+        "utils" => Some(("utils", UTILS)),
         "none" => Some(("none", "")),
         _ => None,
     }

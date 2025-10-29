@@ -1,3 +1,5 @@
+{%- from "utils" import tag_list, entry_id -%}
+
 {#-
   Max rendering width depending on terminal width ('cols').
 -#}
@@ -16,12 +18,7 @@
 {%- set meta -%}
   {#- Tag list -#}
   {%- if cols > 32 -%}
-    {%- for tag in entry.tags | batch(taglimit) | first -%}
-      {{ tc[tag] | default(c.tag) }}+{{ tag }}{{ reset }} {# -#}
-    {%- endfor -%}
-    {% if entry.tags | length > taglimit -%}
-      {{ c.tag }}+{{ entry.tags | length - taglimit }} {# -#}
-    {% endif -%}
+    {{- tag_list(taglimit) -}}
   {%- endif -%}
   {{- reset -}}
 
@@ -88,28 +85,9 @@
   If no shorthand is available, trimmed version of UUID is shown.
 -#}
 {%- set number -%}
-  {%- if entry.sid -%}
-    {{ entry.sid | lpad('   ') }}. {# -#}
-  {%- else -%}
-    {{ entry.id[0:4] }} {# -#}
-  {%- endif -%}
+  {{ entry_id() }}
 {%- endset -%}
 {%- set numberw = number | width -%}
-
-{#-
-  ID color depending on the entry's status.
--#}
-{%- set numbercolor -%}
-  {%- if entry.status == 'deleted' -%}
-    {{ c.uuid_deleted }}
-  {%- elif entry.status == 'completed' -%}
-    {{ c.uuid_completed }}
-  {%- elif entry.sid -%}
-    {{ c.sid_pending }}
-  {%- else -%}
-    {{ c.uuid }}
-  {%- endif -%}
-{%- endset -%}
 
 {#-
   Row output.
@@ -117,8 +95,7 @@
 
   [ number ] [ title ] [ status icons ] [ ....... filler ....... ] [ meta ]
 -#}
-{{- numbercolor -}}{{- number -}}
-{{- title -}}{{ reset }}{{ status -}}
+{{- number -}}{{- title -}}{{ reset }}{{ status -}}
 {{- c.spacer }}{{ fill('.', maxw - statusw - titlew - metaw - numberw - 1) }} {# -#}
 {{- meta -}}
 

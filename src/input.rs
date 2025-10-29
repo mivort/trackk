@@ -44,6 +44,13 @@ pub fn pick_prompt<'a>(
     let mut templates = app.templates.borrow_mut();
 
     templates.init(app.ts, &app.config)?;
+
+    app.config.templates.preload(|id| {
+        templates
+            .load_template(id, app)
+            .with_context(|| format!("Unable to preload template: {id}"))
+    })?;
+
     templates
         .load_template(app.config.templates.picker(), app)
         .with_context(|| format!("Unable to load picker template: {template_id}"))?;

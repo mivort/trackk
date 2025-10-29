@@ -123,7 +123,10 @@ pub struct TemplatesConfig {
     /// Color highlight values. When colors are disabled, those values are ignored.
     #[serde(default)]
     pub tags: HashMap<String, ColorConfig>, // TODO: P2: add tags coloring
-                                            // TODO: P2: add template variables
+    // TODO: P2: add template variables
+    /// Shared templates to parse before rendering.
+    #[serde(default)]
+    preload: Option<Vec<Box<str>>>,
 }
 
 #[derive(Deserialize, Default)]
@@ -248,6 +251,19 @@ impl TemplatesConfig {
     /// Single entry template with default value.
     pub fn entry(&self) -> &str {
         if self.entry.is_empty() { "issue" } else { &self.entry }
+    }
+
+    /// Iterate over preload templates and apply the mapping method.
+    /// If no templates were specified by users, use 'utils' template.
+    pub fn preload(&self, mut load: impl FnMut(&str) -> Result<()>) -> Result<()> {
+        if let Some(preload) = &self.preload {
+            for p in preload.iter() {
+                load(p)?;
+            }
+            Ok(())
+        } else {
+            load("utils")
+        }
     }
 }
 
@@ -470,6 +486,7 @@ fn merge_config(target: &mut Config, source: Config) {
     merge_non_default(&mut target.templates.entry, source.templates.entry);
     merge_non_default(&mut target.templates.picker, source.templates.picker);
     merge_non_default(&mut target.templates.diff, source.templates.diff);
+    merge_non_default(&mut target.templates.preload, source.templates.preload);
     merge_maps(&mut target.templates.colors, source.templates.colors);
     merge_maps(&mut target.templates.tags, source.templates.tags);
 }
@@ -496,6 +513,7 @@ fn ensure_all_merged() {
             diff: "test".into(),
             colors: [("a".into(), ColorConfig::Custom("b".into()))].into(),
             tags: [("t1".into(), ColorConfig::Custom("t2".into()))].into(),
+            preload: Some(vec!["test".into()]),
         },
         values: Default::default(),
     };

@@ -80,6 +80,12 @@ pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'
     let query = &mut QueryFilter::default();
     let mut shown = 0;
 
+    for preload in &report.preload {
+        templates
+            .load_template(preload, app)
+            .with_context(|| format!("Unable to preload report base template: {preload}"))?;
+    }
+
     for section in &report.sections {
         shown += show_section(ids, query, section, app, &mut templates)?;
     }
@@ -233,6 +239,12 @@ fn show_section(
 pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Result<()> {
     let mut templates = app.templates.borrow_mut();
     templates.init(app.ts, &app.config)?;
+
+    app.config.templates.preload(|id| {
+        templates
+            .load_template(id, app)
+            .with_context(|| format!("Unable to preload template: {id}"))
+    })?;
 
     let template_id = app.config.templates.entry();
     templates.load_template(template_id, app)?;

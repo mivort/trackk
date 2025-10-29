@@ -13,7 +13,7 @@ pub struct ReportConfig {
 
     /// List of templates to pre-load (so those can be used for inheritance).
     #[allow(unused)]
-    pub base_templates: Vec<Box<str>>, // TODO: P2: support list of base templates
+    pub preload: Vec<Box<str>>, // TODO: P2: support list of base templates
 }
 
 /// Report section defined by filter and template.
@@ -105,7 +105,7 @@ impl Config {
                     template: "next".into(),
                 },
             ],
-            base_templates: vec![],
+            preload: vec!["utils".into()],
         }
     }
 }
@@ -121,7 +121,7 @@ impl Config {
                 group: "header_day".into(),
                 template: "all".into(),
             }],
-            base_templates: vec![],
+            preload: vec!["utils".into()],
         }
     }
 
@@ -135,7 +135,7 @@ impl Config {
                 group: "header_day".into(),
                 template: "all".into(),
             }],
-            base_templates: vec![],
+            preload: vec!["utils".into()],
         }
     }
 
@@ -149,7 +149,7 @@ impl Config {
                 group: "header_day".into(),
                 template: "all".into(),
             }],
-            base_templates: vec![],
+            preload: vec!["utils".into()],
         }
     }
 
@@ -164,7 +164,7 @@ impl Config {
                 header: "".into(),
                 group: "".into(),
             }],
-            base_templates: vec![],
+            preload: vec!["utils".into()],
         }
     }
 }
