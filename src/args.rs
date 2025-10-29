@@ -77,6 +77,9 @@ pub enum Command {
     /// Import data from one of the supported formats.
     Import(ImportArgs),
 
+    /// Export the data as JSON stream.
+    Export(ExportArgs),
+
     /// Sync local repository with remote.
     Sync,
 
@@ -315,6 +318,12 @@ pub struct ImportArgs {
 
     /// Input file (read from stdin if not specified).
     pub input: PathBuf,
+}
+
+#[derive(Parser)]
+pub struct ExportArgs {
+    #[command(flatten)]
+    pub filter_args: FilterArgs,
 }
 
 /// Merge driver arguments.

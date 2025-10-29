@@ -225,6 +225,7 @@ macro_rules! cmd_context {
 
 cmd_context! {
     Root: "root";
+    Init: "init";
     Add: "add";
     Mod: "mod";
     List: "list";
@@ -233,6 +234,8 @@ cmd_context! {
     Config: "config";
     Sync: "sync";
     Calc: "calc";
+    Import: "import";
+    Export: "export";
 }
 
 impl Default for CmdContext {

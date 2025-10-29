@@ -213,6 +213,9 @@ fn main() -> Result<()> {
                 todo!()
             }
         },
+        Some(Command::Export(_export)) => {
+            todo!()
+        }
         None => {
             if ids.enabled {
                 let filters = filter::Filter {
