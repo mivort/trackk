@@ -146,6 +146,7 @@ impl Token {
 
     /// Apply time to the date.
     pub fn at(self, rhs: Self, ts: OffsetDateTime) -> Result<Self> {
+        // TODO: P2: use 'local_offset_at' method to take DST into account?
         match (&self, rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => {
                 let ltime = (lhs + ts.offset().whole_seconds() as i64) % 86400;
