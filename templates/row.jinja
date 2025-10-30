@@ -23,16 +23,15 @@
 
   {#- When/due date -#}
   {%- if cols > 36 and not entry.end -%}
-    / {# -#}
     {%- if entry.due -%}
       {%- if entry.due >= now -%}
-        {{ c.date_due }}
+        / {{ c.date_due }}
       {%- else -%}
-        {{ c.date_overdue }}
+        / {{ c.date_overdue }}
       {%- endif -%}
       {{ entry.due | reldate }}{{ reset }} {# -#}
     {%- elif entry.when -%}
-      {{ c.date_when }}{{ entry.when | reldate }}{{ reset }} {# -#}
+      / {{ c.date_when }}{{ entry.when | reldate }}{{ reset }} {# -#}
     {%- endif -%}
   {%- endif -%}
 
