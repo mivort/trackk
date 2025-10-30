@@ -36,6 +36,21 @@
 {% endmacro %}
 
 {#-
+  Render entry depending on its status.
+-#}
+{% macro entry_title(truncate) %}
+  {%- if entry.status == 'deleted' -%}
+    {{ c.desc_deleted }}
+  {%- elif entry.status == 'completed' -%}
+    {{ c.desc_completed }}
+  {%- else -%}
+    {{ c.desc_pending }}
+  {%- endif -%}
+  {{- entry.desc | firstline | trunc(truncate, '…') -}}
+  {{- reset -}}
+{% endmacro %}
+
+{#-
   Render entry status marks.
 -#}
 {% macro status_marks() %}

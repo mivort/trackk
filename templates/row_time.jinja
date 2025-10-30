@@ -1,4 +1,4 @@
-{%- from "utils" import tag_list, entry_id, status_marks -%}
+{%- from "utils" import tag_list, entry_id, entry_title, status_marks -%}
 
 {#-
   Max rendering width depending on terminal width ('cols').
@@ -44,22 +44,6 @@
 {%- set statusw = status | width -%}
 
 {#-
-  Entry title.
-  Color depends on the current status.
--#}
-{%- set title | trunc(maxw - statusw - metaw - 6, '…') -%}
-  {%- if entry.status == 'deleted' -%}
-    {{ c.desc_deleted }}
-  {%- elif entry.status == 'completed' -%}
-    {{ c.desc_completed }}
-  {%- else -%}
-    {{ c.desc_pending }}
-  {%- endif -%}
-  {{ entry.desc | firstline }}
-{%- endset -%}
-{%- set titlew = title | width -%}
-
-{#-
   Shorthand ID ('sid').
   If no shorthand is available, trimmed version of UUID is shown.
 -#}
@@ -67,6 +51,15 @@
   {{ entry_id() }}
 {%- endset -%}
 {%- set numberw = number | width -%}
+
+{#-
+  Entry title.
+  Color depends on the current status.
+-#}
+{%- set title -%}
+  {{ entry_title(maxw - statusw - metaw - numberw - 1) }}
+{%- endset -%}
+{%- set titlew = title | width -%}
 
 {#-
   Row output.
