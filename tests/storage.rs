@@ -70,3 +70,23 @@ fn repeat_task() {
     cmd.args(&["--id=1", "mod", "--status=completed"]);
     cmd.assert().failure();
 }
+
+/// Try to run different report types to check if templates are valid.
+#[test]
+fn show_reports() {
+    prepare_storage();
+
+    // Create test task
+    let mut cmd = cmd_base();
+    cmd.args(&["add", "test entry", "--due=3d"]);
+    cmd.assert().success();
+
+    // Check regular report.
+    let mut cmd = cmd_base();
+    cmd.assert().success();
+
+    // Check calendar report.
+    let mut cmd = cmd_base();
+    cmd.args(&["list", "calendar"]);
+    cmd.assert().success();
+}
