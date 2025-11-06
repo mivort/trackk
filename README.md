@@ -1,7 +1,8 @@
 # Trackk
 
-Command-line task, notes, event and project tracker which provides Git-based
-conflict-free synchronization and versioning of its plain-text storage.
+Command-line local-first task, notes, event and project tracker which provides
+VCS-based conflict-free synchronization and versioning of the human-readable
+storage format.
 
 Inspired by [Taskwarrior][1] and [dstask][2].
 
@@ -18,13 +19,14 @@ Inspired by [Taskwarrior][1] and [dstask][2].
   access task entries using built-in and user-defined named queries
   (`recent~1`, `overdue~0..3` etc.).
 * **CLI argument macros:** regex-based user-defined arguments [expansion
-  rules][7] to customize the input syntax.
+  rules][7] to customize the input syntax. Commonly used arguments can be baked
+  into parametric aliases with capture groups.
 * **Flexible recurrent tasks** which also use date calculator syntax, allowing
   to set [re-occurrence rules][8] (`monday at 7:00am`) and enabling the usage
   as a habit tracker.
 * **Highly-customizable reporting** using [Minijinja][3]-based [template
-  syntax][5] with helper methods for screen-size dependent output, quite
-  similar to `PS1` customization in shells.
+  syntax][5] with helper methods for screen-size dependent output, akin to
+  `PS1` customization in shells.
 * **Reports can perform multiple queries**, with adjustable headers and
   grouping rules.
 * **Type-safe user defined fields**: custom integers/floats, strings, time
