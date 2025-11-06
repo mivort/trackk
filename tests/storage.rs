@@ -1,14 +1,12 @@
 use std::fs;
 
-use assert_cmd::Command;
+use assert_cmd::{Command, cargo_bin};
 use testdir::testdir;
-
-const BIN_NAME: &str = "trk";
 
 #[cfg(test)]
 fn cmd_base() -> Command {
     let dir = testdir!();
-    let mut cmd = Command::cargo_bin(BIN_NAME).unwrap();
+    let mut cmd = Command::new(cargo_bin!("trk"));
     cmd.env("TRACKK_DATA", dir)
         .env("TRACKK_CONFIG", "")
         .env("RUST_BACKTRACE", "1");
