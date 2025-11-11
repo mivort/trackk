@@ -115,6 +115,7 @@ pub mod defaults {
     pub const DESC_COMPLETED: &str = fg(2);
     pub const DESC_DELETED: &str = fg(8);
     pub const DESC_PENDING: &str = RESET;
+    pub const DESC_OVERDUE: &str = fg(9);
     pub const DIVIDER: &str = fg(4);
     pub const ENTRY_DATE: &str = fg(15);
     pub const ENTRY_FIELD: &str = fg(12);
