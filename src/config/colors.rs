@@ -143,6 +143,7 @@ impl Config {
             ("desc_due", DESC_DUE),
             ("desc_overdue", DESC_OVERDUE),
             ("desc_pending", DESC_PENDING),
+            ("desc_started", DESC_STARTED),
             ("divider", DIVIDER),
             ("entry_date", ENTRY_DATE),
             ("entry_field", ENTRY_FIELD),

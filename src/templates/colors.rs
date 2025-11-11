@@ -117,6 +117,7 @@ pub mod defaults {
     pub const DESC_DUE: &str = DATE_DUE;
     pub const DESC_OVERDUE: &str = DATE_OVERDUE;
     pub const DESC_PENDING: &str = "";
+    pub const DESC_STARTED: &str = fg(12);
     pub const DIVIDER: &str = fg(4);
     pub const ENTRY_DATE: &str = fg(15);
     pub const ENTRY_FIELD: &str = fg(12);

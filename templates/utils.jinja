@@ -50,6 +50,8 @@
     {%- else -%}
       {{ c.desc_due }}
     {%- endif -%}
+  {%- elif entry.status == 'started' -%}
+    {{ c.desc_started }}
   {%- else -%}
     {{ c.desc_pending }}
   {%- endif -%}
