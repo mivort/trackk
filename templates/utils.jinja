@@ -4,8 +4,8 @@
   Render tag list using tag colors defined in config.
   Limit defines how many are visible.
 -#}
-{% macro tag_list(limit) %}
-  {%- for tag in entry.tags | batch(limit) | first -%}
+{% macro tag_list(limit = 32) %}
+  {%- for tag in entry.tags[0:limit] -%}
     {{ tc[tag] | default(c.tag) }}+{{ tag }}{{ reset }} {# -#}
   {%- endfor -%}
   {% if entry.tags | length > limit -%}

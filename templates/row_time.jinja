@@ -38,9 +38,7 @@
 {%- set metaw = meta | width -%}
 
 {#- Entry status -#}
-{%- set status -%}
-  {{ status_marks() }}
-{%- endset -%}
+{%- set status = status_marks() -%}
 {%- set statusw = status | width -%}
 
 {#-

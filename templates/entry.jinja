@@ -1,3 +1,5 @@
+{%- from "utils" import tag_list, entry_title -%}
+
 {#- Date display macro -#}
 {% macro entry_date(date) %}
   {%- if date -%}
@@ -17,16 +19,7 @@
 {% endmacro %}
 
 {#- Tag list -#}
-{%- set tags -%}
-  {%- if entry.tags | length > 0 -%}
-    {%- for tag in entry.tags -%}
-      {{ tc[tag] | default(c.tag) }}+{{ tag }} {# -#}
-    {%- endfor -%}
-  {%- else -%}
-    {{ c.entry_no_value }}--
-  {%- endif -%}
-  {{ reset }}
-{%- endset -%}
+{%- set tags = tag_list() -%}
 
 {#- Max width -#}
 {%- set maxw = min(cols, 96) -%}

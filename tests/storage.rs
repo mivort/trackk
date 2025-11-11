@@ -87,4 +87,9 @@ fn show_reports() {
     let mut cmd = cmd_base();
     cmd.args(&["list", "calendar"]);
     cmd.assert().success();
+
+    // Check single entry report.
+    let mut cmd = cmd_base();
+    cmd.args(&["1"]);
+    cmd.assert().success();
 }
