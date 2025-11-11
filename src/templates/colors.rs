@@ -114,13 +114,14 @@ pub mod defaults {
     pub const DATE_WHEN: &str = fg(12);
     pub const DESC_COMPLETED: &str = fg(2);
     pub const DESC_DELETED: &str = fg(8);
-    pub const DESC_PENDING: &str = RESET;
-    pub const DESC_OVERDUE: &str = fg(9);
+    pub const DESC_DUE: &str = DATE_DUE;
+    pub const DESC_OVERDUE: &str = DATE_OVERDUE;
+    pub const DESC_PENDING: &str = "";
     pub const DIVIDER: &str = fg(4);
     pub const ENTRY_DATE: &str = fg(15);
     pub const ENTRY_FIELD: &str = fg(12);
     pub const ENTRY_NO_VALUE: &str = fg(8);
-    pub const ENTRY_VALUE: &str = RESET;
+    pub const ENTRY_VALUE: &str = "";
     pub const HEADER: &str = concat!(escape!(a16: 97), "\x1B[4m");
     pub const MARK_BLOCKED: &str = fg(1);
     pub const MARK_NOTE: &str = fg(6);

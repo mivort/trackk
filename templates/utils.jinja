@@ -33,6 +33,7 @@
   {%- else -%}
     {{ entry.id[0:4] }} {# -#}
   {%- endif -%}
+  {{- reset -}}
 {% endmacro %}
 
 {#-
@@ -43,8 +44,12 @@
     {{ c.desc_deleted }}
   {%- elif entry.status == 'completed' -%}
     {{ c.desc_completed }}
-  {%- elif entry.due and entry.due < now -%}
-    {{ c.desc_overdue }}
+  {%- elif entry.due -%}
+    {%- if entry.due < now -%}
+      {{ c.desc_overdue }}
+    {%- else -%}
+      {{ c.desc_due }}
+    {%- endif -%}
   {%- else -%}
     {{ c.desc_pending }}
   {%- endif -%}
