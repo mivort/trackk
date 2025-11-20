@@ -44,6 +44,10 @@ pub struct Args {
     /// Sync local repository with remote.
     #[arg(long, global = true)]
     pub sync: bool,
+
+    /// Output results as JSON.
+    #[arg(long, global = true)]
+    pub json: bool,
 }
 
 #[derive(Subcommand)]
@@ -79,9 +83,6 @@ pub enum Command {
 
     /// Export the data as JSON stream.
     Export(ExportArgs),
-
-    /// Sync local repository with remote.
-    Sync,
 
     /// Produce commit in data repository using selected VCS, but don't sync.
     Commit,
@@ -270,10 +271,6 @@ pub struct ListArgs {
     /// Override output format with template string.
     #[arg(long)]
     pub format: Option<Box<str>>,
-
-    /// Output in JSON format.
-    #[arg(long)]
-    pub json: bool,
 
     #[command(flatten)]
     pub filter_args: FilterArgs,

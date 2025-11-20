@@ -303,8 +303,8 @@ pub fn show_format_override<'a>(fmt: &str, ids: &IdFilter, app: &'a App<'a>) -> 
     Ok(())
 }
 
-/// Export entries as JSON.
-pub fn _show_json(entries: &[(Entry, Rc<str>)]) -> Result<()> {
+/// Render entries as JSON array.
+pub fn show_json(entries: &[(Entry, Rc<str>)]) -> Result<()> {
     // TODO: P2: support JSON in regular reports
     print!("[");
     for (i, (e, _)) in entries.iter().enumerate() {

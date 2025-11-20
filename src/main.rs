@@ -72,7 +72,7 @@ fn main() -> Result<()> {
                 Cow::Owned(app.config.report_next())
             };
 
-            display::show_entries(&ids, &report, &app)?;
+            display::show_entries(&ids, &report, &app)
         }
 
         Some(Command::Count) => {
@@ -82,6 +82,8 @@ fn main() -> Result<()> {
             };
             let entries = storage::fetch_entries(&filters, IndexType::All, &app)?;
             println!("{}", entries.len());
+
+            Ok(())
         }
 
         Some(Command::Info(info)) => {
@@ -101,9 +103,15 @@ fn main() -> Result<()> {
                 entries
             };
 
+            if args.json {
+                return display::show_json(&entries);
+            }
+
             for entry in &entries {
                 display::show_entry(entry, &app)?;
             }
+
+            Ok(())
         }
 
         Some(Command::Add(a)) => {
@@ -139,7 +147,7 @@ fn main() -> Result<()> {
             }
 
             entry.validate(&app)?;
-            storage::add_entry(entry, &app)?;
+            storage::add_entry(entry, &app)
         }
 
         Some(Command::_Copy) => {
@@ -147,46 +155,31 @@ fn main() -> Result<()> {
             // TODO: P2: implement context copy command
         }
 
-        Some(Command::Mod(e)) => {
-            storage::modify_entries(&ids, &e.entry, &app)?;
-        }
+        Some(Command::Mod(e)) => storage::modify_entries(&ids, &e.entry, &app),
 
-        Some(Command::Config(args)) => {
-            config::print_config(&if args.default {
-                Config::default().default_values()
-            } else {
-                app.config
-            })?;
-        }
-        Some(Command::Refresh(args)) => {
-            storage::refresh_index(&app, args.force)?;
-        }
+        Some(Command::Config(args)) => config::print_config(&if args.default {
+            Config::default().default_values()
+        } else {
+            app.config
+        }),
+        Some(Command::Refresh(args)) => storage::refresh_index(&app, args.force),
         Some(Command::Completions(shell)) => {
             print_completions(shell.shell, &mut Args::command());
+
+            Ok(())
         }
         Some(Command::Calc(exp)) => {
             let expr = exp.expr.join(" ");
             let res = parse_value(&expr, &app, &entry::Entry::default())?;
 
             println!("{}", res.to_string()?);
+
+            Ok(())
         }
-        Some(Command::Init(init)) => {
-            repo::init_repo(&app, &init)?;
-        }
-        Some(Command::Check) => {
-            repo::check_repo(&app.config)?;
-        }
-        Some(Command::Commit) => {
-            repo::commit_repo(&app.config)?;
-        }
-        Some(Command::Sync) => {
-            if !args.sync {
-                repo::sync_repo(&app)?;
-            }
-        }
-        Some(Command::Merge(merge)) => {
-            merge::merge_driver(&merge)?;
-        }
+        Some(Command::Init(init)) => repo::init_repo(&app, &init),
+        Some(Command::Check) => repo::check_repo(&app.config),
+        Some(Command::Commit) => repo::commit_repo(&app.config),
+        Some(Command::Merge(merge)) => merge::merge_driver(&merge),
 
         Some(Command::Template(args)) => {
             let template = match args {
@@ -205,9 +198,11 @@ fn main() -> Result<()> {
                 print!("{}", content);
                 println!("{color}{{#- END OF TEMPLATE -#}}{reset}");
             }
+
+            Ok(())
         }
         Some(Command::Import(import)) => match import.format {
-            ImportMode::Taskwarrior => import::tw::import_from_file(import.input, &app)?,
+            ImportMode::Taskwarrior => import::tw::import_from_file(import.input, &app),
             ImportMode::Native => {
                 // TODO: P2: implement native format import
                 todo!()
@@ -233,14 +228,14 @@ fn main() -> Result<()> {
                 for entry in &entries {
                     display::show_entry(entry, &app)?;
                 }
+
+                Ok(())
             } else {
                 let report = &app.config.report_next();
-                display::show_entries(&ids, report, &app)?;
+                display::show_entries(&ids, report, &app)
             }
         }
     }
-
-    Ok(())
 }
 
 /// Use Fern to setup colored logging output.
