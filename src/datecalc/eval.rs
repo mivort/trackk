@@ -82,7 +82,7 @@ pub fn eval(
             },
 
             Not => match stack.pop() {
-                Some(val) => val.not(),
+                Some(val) => val.not(entry),
                 _ => bail!("'not' ('!') operator haven't got the argument"),
             },
 
@@ -298,6 +298,15 @@ fn functions() {
 
     assert_eq!(as_f64(eval_test("250.min(100).max(50)")), 100.);
     assert_eq!(as_f64(eval_test("75.min(100).max(50)")), 75.);
+}
+
+#[test]
+fn field_refs() {
+    assert!(as_bool(eval_test("when == false")));
+    assert!(as_bool(eval_test("due == false")));
+    assert!(as_bool(eval_test("repeat == ''")));
+    assert!(as_bool(eval_test("repeat == false")));
+    assert!(as_bool(eval_test("not repeat")));
 }
 
 #[test]

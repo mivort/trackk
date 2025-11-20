@@ -206,6 +206,7 @@ pub enum Token {
     #[token("when", |_| FieldRef::When)]
     #[token("due", |_| FieldRef::Due)]
     #[regex("end", |_| FieldRef::End)]
+    #[regex("repeat", |_| FieldRef::Repeat)]
     Reference(FieldRef),
 
     /// Reference to the custom field value.

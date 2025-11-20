@@ -378,6 +378,7 @@ pub enum FieldRef {
     When,
     Due,
     End,
+    Repeat,
 }
 
 impl FieldRef {
@@ -391,7 +392,9 @@ impl FieldRef {
             Self::Due => issue.due.map(Token::Date).unwrap_or(Token::Bool(false)),
             Self::End => issue.end.map(Token::Date).unwrap_or(Token::Bool(false)),
             Self::Tag if issue.tags.is_empty() => Token::Bool(false),
-            _ => Token::Reference(*self),
+            Self::Id | Self::Desc | Self::Status | Self::Title | Self::Tag | Self::Repeat => {
+                Token::Reference(*self)
+            }
         }
     }
 
@@ -431,14 +434,26 @@ impl FieldRef {
             }
             (Self::Desc, Token::String(rhs)) => Ok(issue.desc == rhs.as_ref()),
             (Self::Status, Token::String(rhs)) => Ok(issue.status == rhs.as_ref()),
+            (Self::Repeat, Token::String(rhs)) => {
+                Ok(issue.repeat.as_ref().map_or("", |r| r.as_str()) == rhs.as_ref())
+            }
+            (Self::Repeat, Token::Bool(rhs)) => Ok(issue.repeat.is_some() == *rhs),
             (Self::Tag, _) => bail!(
-                "':' got incompatible arguments (tags and {})",
+                "'==' got incompatible arguments (tags and {})",
                 token.ttype()
             ),
             _ => bail!(
-                "':' got incompatible arguments (reference and {})",
+                "'==' got incompatible arguments (reference and {})",
                 token.ttype()
             ),
+        }
+    }
+
+    /// Perform negation. Only nullable fields can return 'true'.
+    pub fn not(&self, entry: &Entry) -> bool {
+        match self {
+            Self::Repeat => entry.repeat.is_none(),
+            _ => false,
         }
     }
 

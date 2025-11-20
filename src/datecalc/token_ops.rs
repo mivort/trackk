@@ -214,6 +214,7 @@ impl Token {
             (Self::Bool(lhs), Self::Date(_rhs)) => Ok(Self::Bool(*lhs)),
             (Self::Duration(lhs), Self::Duration(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Date(lhs), Self::Date(rhs)) => Ok(Self::Bool(lhs == rhs)),
+            (Self::String(lhs), Self::String(rhs)) => Ok(Self::Bool(lhs == rhs)),
             (Self::Reference(lhs), rhs) => Ok(Self::Bool(lhs.eq(rhs, entry)?)),
             (lhs, Self::Reference(rhs)) => Ok(Self::Bool(rhs.eq(lhs, entry)?)),
             _ => bail!(
@@ -275,9 +276,10 @@ impl Token {
     }
 
     /// Perform logical NOT.
-    pub fn not(self) -> Self {
+    pub fn not(self, entry: &Entry) -> Self {
         match self {
             Self::Bool(false) | Self::Else => Self::Bool(true),
+            Self::Reference(field) => Self::Bool(field.not(entry)),
             _ => Self::Bool(false),
         }
     }
