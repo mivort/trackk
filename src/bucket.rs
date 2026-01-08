@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::{BufReader, ErrorKind};
+use std::fs;
+use std::io::ErrorKind;
 use std::path::Path;
 use std::rc::Rc;
 
@@ -40,13 +40,13 @@ impl Bucket {
 
     /// Open file from the provided full path and parse as bucket.
     pub fn from_full_path(path: impl AsRef<Path>) -> Result<Self> {
-        let file = File::open(&path).with_context(|| {
+        let data = fs::read_to_string(&path).with_context(|| {
             format!(
                 "Unable to open the bucket: {}",
                 path.as_ref().to_string_lossy()
             )
         })?;
-        Self::from_file(&file, &path)
+        Self::from_data(&data, &path)
     }
 
     /// Check cache and read from file system if not yet cached.
@@ -72,8 +72,8 @@ impl Bucket {
     /// Open file from the provided path and parse as bucket. If file doesn't
     /// exist return the empty bucket.
     pub fn from_full_path_or_default(path: impl AsRef<Path>) -> Result<Self> {
-        let file = File::open(&path);
-        let file = unwrap_ok_or!(file, e, {
+        let data = fs::read_to_string(&path);
+        let data = unwrap_ok_or!(data, e, {
             match e.kind() {
                 ErrorKind::NotFound => return Ok(Bucket::new()),
                 _ => {
@@ -81,7 +81,7 @@ impl Bucket {
                 }
             }
         });
-        Self::from_file(&file, path)
+        Self::from_data(&data, path)
     }
 
     /// Insert new entry at the sorted position.
@@ -114,10 +114,9 @@ impl Bucket {
 }
 
 impl Bucket {
-    /// Read bucket file and deserialize the data.
-    fn from_file(file: &File, path: impl AsRef<Path>) -> Result<Self> {
-        let reader = BufReader::new(file);
-        let bucket: Self = serde_json::from_reader(reader).with_context(|| {
+    /// Read bucket data and deserialize.
+    fn from_data(data: &str, path: impl AsRef<Path>) -> Result<Self> {
+        let bucket: Self = serde_json::from_str(data).with_context(|| {
             format!(
                 "Unable to parse bucket: {}",
                 path.as_ref().to_string_lossy()
