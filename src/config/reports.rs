@@ -84,8 +84,8 @@ impl Config {
                     template: "next".into(),
                 },
                 SectionConfig {
-                    query: "overdue".into(),
-                    title: "Overdue".into(),
+                    query: "due_today".into(),
+                    title: "Due today".into(),
                     header: "header".into(),
                     group: "".into(),
                     template: "next".into(),

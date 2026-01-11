@@ -61,7 +61,7 @@ impl Config {
             "backlog" => self.query_backlog(),
             "upcoming" => self.query_upcoming(),
             "current" => self.query_current(),
-            "overdue" => self.query_overdue(),
+            "due_today" => self.query_due_today(),
             "started" => self.query_started(),
             "done_today" => self.query_done_today(),
             "recent" => self.query_recent(),
@@ -113,16 +113,16 @@ impl Config {
     fn query_current(&self) -> QueryData<'_> {
         QueryData {
             sorting: "urgency+",
-            filter: "((when < 3d and not due) or (due >= now and due < 3d)) and status != 'started'",
+            filter: "((when < 3d and not due) or (due >= tomorrow and due < 3d)) and status != 'started'",
             group_by: "",
             index: IndexType::Active,
         }
     }
 
-    fn query_overdue(&self) -> QueryData<'_> {
+    fn query_due_today(&self) -> QueryData<'_> {
         QueryData {
             sorting: "urgency+",
-            filter: "after due and status != 'started'",
+            filter: "due < tomorrow and status != 'started'",
             group_by: "",
             index: IndexType::Active,
         }
