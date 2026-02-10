@@ -15,9 +15,9 @@ use crate::{prelude::*, storage};
 
 /// Taskwarrior export data format schema.
 #[derive(Deserialize)]
-#[allow(unused)]
 struct TWData {
     #[serde(default)]
+    #[expect(unused)]
     id: Option<i64>,
 
     uuid: Box<str>,
@@ -75,11 +75,11 @@ struct TWData {
     extra: HashMap<Box<str>, Value>,
 
     #[serde(default)]
+    #[expect(unused)]
     urgency: Option<f64>,
 }
 
 #[derive(Deserialize)]
-#[allow(unused)]
 struct TWAnnotation {
     #[serde(default)]
     entry: Box<str>,

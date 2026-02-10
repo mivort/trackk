@@ -8,11 +8,10 @@ use crate::prelude::*;
 
 #[derive(Deserialize)]
 #[serde(untagged)]
-#[allow(unused)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub enum ColorConfig {
     Options(ColorOptions),
-    Custom(Box<str>),
+    Custom(#[cfg_attr(not(test), expect(unused))] Box<str>),
 }
 
 #[derive(Deserialize)]
@@ -65,7 +64,7 @@ impl Default for ColorOptions {
 
 #[derive(Deserialize)]
 #[serde(untagged)]
-#[allow(unused)]
+#[expect(unused)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
 pub enum ColorValue {
     Indexed(Option<u8>),

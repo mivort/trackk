@@ -77,7 +77,6 @@ pub struct Config {
 
     /// Aliases which provide regex-based input argument expansion rules.
     #[serde(default)]
-    #[allow(unused)]
     pub macros: Vec<ExpansionConfig>,
 }
 

@@ -6,7 +6,6 @@ use crate::prelude::*;
 
 /// Supported built-in functions.
 #[derive(Debug, Clone)]
-#[allow(unused)]
 pub enum FuncRef {
     Abs,
     Empty,

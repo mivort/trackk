@@ -12,7 +12,6 @@ pub struct ReportConfig {
     pub sections: Vec<SectionConfig>,
 
     /// List of templates to pre-load (so those can be used for inheritance).
-    #[allow(unused)]
     pub preload: Vec<Box<str>>, // TODO: P2: support list of base templates
 }
 
