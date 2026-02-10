@@ -48,5 +48,5 @@ echo "[Run clippy]"
 cargo clippy -- -D warnings
 
 echo "[Run tests]"
-cargo test
+RUSTFLAGS='-D warnings' cargo test
 """
