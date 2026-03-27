@@ -189,7 +189,7 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<str>
 
     if !path.exists() {
         bail!(
-            "Path {} doesn't exist. Run '{} init' to initiate task repository.",
+            "Path {} doesn't exist. Run '{} init' to initiate task repository. Add '--clone [url]' to fetch existing repository.",
             path.to_string_lossy(),
             env!("CARGO_BIN_NAME")
         );
