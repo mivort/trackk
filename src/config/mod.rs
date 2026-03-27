@@ -343,17 +343,24 @@ fn format_config(config: &Config) -> Result<String> {
         c = color,
         cl = clear,
         data_path = config.data_path_fallback(),
-        data_path_prefix = serde_json::to_string(&config.local.data_prefix)?,
+        data_path_prefix = format_value(&config.local.data_prefix)?,
         editor = &config.editor(),
-        date_formats = serde_json::to_string(&config.date_formats)?,
-        active_status = serde_json::to_string(&config.values.active_status)?,
-        permit_status = serde_json::to_string(&config.values.permit_status)?,
+        date_formats = format_value(&config.date_formats)?,
+        active_status = format_value(&config.values.active_status)?,
+        permit_status = format_value(&config.values.permit_status)?,
         urgency_formula = config.values.urgency_formula(),
         initial_status = config.values.initial_status(),
         picker = config.templates.picker(),
         entry = config.templates.entry(),
-        macros_style = serde_json::to_string(&config.macros_style.clone().unwrap_or_default())?,
+        macros_style = format_value(&config.macros_style.clone().unwrap_or_default())?,
     ))
+}
+
+/// Format single TOML value.
+fn format_value(value: &impl serde::Serialize) -> Result<String> {
+    let mut out = String::new();
+    serde::Serialize::serialize(value, toml::ser::ValueSerializer::new(&mut out))?;
+    Ok(out)
 }
 
 /// Produce a hash set from slice.
