@@ -1,6 +1,6 @@
 # Command-line argument macros
 
-Trackk uses [clap-rs][1] library to perform single and double hyphen argument
+Trackk uses [clap-rs][clap] library to perform single and double hyphen argument
 parsing which is highly discoverable (`--help` will produce the list of
 possible options, both common and subcommand-specific) and unambiguous. While
 there's a big consistency benefit in supporting this convention, it leads to
@@ -30,25 +30,23 @@ default, `none` will toggle off all built-in macros).
 
 ## Custom rules
 
-Custom macros can be added using the `macros` option in `config.json5`:
-``` json5
-{
-  macros: [
-    {
-      // Match the rule on the specified regex pattern.
-      find: "regex-rule-to-find",
+Custom macros can be added using the `macros` option in `config.toml`:
+``` toml
+macros = [
+  {
+    # Match the rule on the specified regex pattern.
+    find = "regex-rule-to-find",
 
-      // Value to replace the pattern match. It can reference capture groups
-      // via $1, $2 etc. (only numeric references are supported).
-      replace: ["replace-with"],
+    # Value to replace the pattern match. It can reference capture groups
+    # via $1, $2 etc. (only numeric references are supported).
+    replace = ["replace-with"],
 
-      // One or several subcommands which would use this rule.
-      // Run `trk --help` to see the available subcommands.
-      // "Root" context gets expanded for arguments placed before the subcommand.
-      contexts: ["root", "add", "mod"],
-    },
-  ],
-}
+    # One or several subcommands which would use this rule.
+    # Run `trk --help` to see the available subcommands.
+    # "Root" context gets expanded for arguments placed before the subcommand.
+    contexts = ["root", "add", "mod"],
+  },
+],
 ```
 Rules are processed one by one, the first match wins, so ordering is important:
 more specific rules should be placed before the broader ones. Custom macros are
@@ -64,4 +62,4 @@ $ trk all +mytag --verbose
 [...]
 ```
 
-[1]: https://github.com/clap-rs/clap
+[clap]: https://github.com/clap-rs/clap

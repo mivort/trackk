@@ -23,7 +23,7 @@ use reports::ReportConfig;
 use values::ValuesConfig;
 
 /// Configuration file name to look in config directories.
-pub const CONFIG_FILE: &str = "config.json5";
+pub const CONFIG_FILE: &str = "config.toml";
 
 #[derive(Deserialize, Default)]
 #[cfg_attr(test, derive(Debug, PartialEq, Eq, Clone))]
@@ -142,7 +142,7 @@ impl Config {
     /// disable it.
     pub fn override_from_args(&mut self, args: &Args) -> Result<()> {
         for config in &args.config {
-            let config: Config = serde_json5::from_str(config)?;
+            let config: Config = toml::from_str(config)?;
             merge_config(self, config);
         }
 
@@ -325,7 +325,10 @@ pub enum ExpansionStyle {
 
 /// Print all configuration values along with documentation.
 pub fn print_config(config: &Config) -> Result<()> {
-    print!("{}", format_config(config)?);
+    print!(
+        "{}",
+        format_config(config).context("Unable to format example config")?
+    );
     Ok(())
 }
 
@@ -340,16 +343,16 @@ fn format_config(config: &Config) -> Result<String> {
         c = color,
         cl = clear,
         data_path = config.data_path_fallback(),
-        data_path_prefix = serde_json5::to_string(&config.local.data_prefix)?,
+        data_path_prefix = serde_json::to_string(&config.local.data_prefix)?,
         editor = &config.editor(),
-        date_formats = serde_json5::to_string(&config.date_formats)?,
-        active_status = serde_json5::to_string(&config.values.active_status)?,
-        permit_status = serde_json5::to_string(&config.values.permit_status)?,
+        date_formats = serde_json::to_string(&config.date_formats)?,
+        active_status = serde_json::to_string(&config.values.active_status)?,
+        permit_status = serde_json::to_string(&config.values.permit_status)?,
         urgency_formula = config.values.urgency_formula(),
         initial_status = config.values.initial_status(),
         picker = config.templates.picker(),
         entry = config.templates.entry(),
-        macros_style = serde_json5::to_string(&config.macros_style.clone().unwrap_or_default())?,
+        macros_style = serde_json::to_string(&config.macros_style.clone().unwrap_or_default())?,
     ))
 }
 
@@ -362,14 +365,14 @@ fn hash_set(items: &[&str]) -> HashSet<String> {
         .collect::<HashSet<String>>()
 }
 
-/// Ensure that config produced by 'config' command is valid JSON5 and follows the schema.
+/// Ensure that config produced by 'config' command is valid TOML and follows the schema.
 #[test]
 fn config_doc_is_sane() {
     let mut config = Config::default();
     config.color_mode = crate::config::ColorMode::Never;
 
     let format = format_config(&config).unwrap();
-    serde_json5::from_str::<'_, Config>(format.as_str()).unwrap();
+    toml::from_str::<'_, Config>(format.as_str()).unwrap();
 }
 
 /// Read config from storage directory (if there's any) and merge it with config
@@ -410,10 +413,10 @@ pub fn read_config_chain() -> Result<Config> {
     Ok(local_config.default_values())
 }
 
-/// Read JSON5 config from file.
+/// Read TOML config from file.
 fn read_config(path: &impl AsRef<Path>) -> Result<Config> {
     Ok(match fs::read_to_string(path) {
-        Ok(data) => serde_json5::from_str(data.as_str())?,
+        Ok(data) => toml::from_str(data.as_str())?,
         Err(e) => match e.kind() {
             io::ErrorKind::NotFound => Config::default(),
             _ => bail!("Unable to read config: {}", path.as_ref().to_string_lossy()),

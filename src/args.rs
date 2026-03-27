@@ -25,7 +25,7 @@ pub struct Args {
     #[command(flatten)]
     pub filter_args: FilterArgs,
 
-    /// Configuration override given as JSON5.
+    /// Configuration override given as TOML string.
     #[arg(long, global = true)]
     pub config: Vec<Box<str>>,
 
