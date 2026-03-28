@@ -179,7 +179,7 @@ fn show_section(
     if !header.is_empty() {
         let header = j2.get_template(&section.header)?;
         let context = HeaderContext { title, count };
-        header.render_to_write(context, &out).with_context(|| {
+        header.render_captured_to(context, &out).with_context(|| {
             format!(
                 "Unable to render report header template: {}",
                 section.header
@@ -212,7 +212,7 @@ fn show_section(
             };
 
             template
-                .render_to_write(context, &out)
+                .render_captured_to(context, &out)
                 .with_context(|| format!("Unable to render group header: {}", section.group))?;
         }
 
@@ -228,7 +228,7 @@ fn show_section(
             limit,
         };
         template
-            .render_to_write(context, &out)
+            .render_captured_to(context, &out)
             .with_context(|| format!("Unable to render report template: {}", section.template))?;
     }
 
@@ -265,7 +265,7 @@ pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Res
         limit: 1,
     };
     template
-        .render_to_write(context, &out)
+        .render_captured_to(context, &out)
         .with_context(|| format!("Unable to render entry template: {}", template_id))?;
 
     Ok(())

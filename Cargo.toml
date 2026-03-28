@@ -10,39 +10,39 @@ name = "trk"
 path = "src/main.rs"
 
 [dependencies]
-anstyle = "1.0.13"
-anyhow = "1.0.100"
-clap = "4.5.51"
-clap_complete = "4.5.60"
-clap_derive = "4.5.49"
-dirs = "6.0.0"
-fern = "0.7.1"
-formatx = "0.2.4" # TODO: P2: check if formatx dependency is still needed
-log = "0.4.28"
-logos = "0.15.1"
-memchr = "2.7.6"
-mimalloc = "0.1.48"
-minijinja = "2.12.0"
-once_cell = { version = "1.21.3", default-features = false }
-regex = "1.12.2"
-serde = "1.0.228"
-serde_derive = "1.0.228"
-serde_json = "1.0.145"
-tempfile = "3.23.0"
-terminal_size = "0.4.3"
-thiserror = "2.0.17"
-time = { version = "0.3.44", features = ["macros", "local-offset", "parsing", "formatting"] }
-toml = "1.1.0"
-unicode-segmentation = "1.12.0"
-unicode-width = "0.2.2"
-unwrap_or = "1.0.1"
-uuid = { version = "1.18.1", features = ["v4", "serde"] }
-vte = "0.15.0"
-walkdir = "2.5.0"
+anstyle = "1.0"
+anyhow = "1.0"
+clap = "4.5"
+clap_complete = "4.5"
+clap_derive = "4.5"
+dirs = "6.0"
+fern = "0.7"
+formatx = "0.2" # TODO: P2: check if formatx dependency is still needed
+log = "0.4"
+logos = "0.15"
+memchr = "2.7"
+mimalloc = "0.1"
+minijinja = "2.12"
+once_cell = { version = "1.21", default-features = false }
+regex = "1.12"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
+tempfile = "3.23"
+terminal_size = "0.4"
+thiserror = "2.0"
+time = { version = "0.3", features = ["macros", "local-offset", "parsing", "formatting"] }
+toml = "1.1"
+unicode-segmentation = "1.12"
+unicode-width = "0.2"
+unwrap_or = "1.0"
+uuid = { version = "1.18", features = ["v4", "serde"] }
+vte = "0.15"
+walkdir = "2.5"
 
 [dev-dependencies]
-assert_cmd = "2.1.1"
-testdir = "0.9.3"
+assert_cmd = "2.1"
+testdir = "0.9"
 
 [profile.release]
 lto = true

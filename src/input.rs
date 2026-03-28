@@ -124,7 +124,7 @@ fn render_entries(
             limit,
         };
         template
-            .render_to_write(context, &out)
+            .render_captured_to(context, &out)
             .with_context(|| format!("Unable to render picker template: {}", template_id))?;
     }
 
