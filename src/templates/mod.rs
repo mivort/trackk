@@ -172,6 +172,14 @@ impl<'env> Templates<'env> {
     }
 }
 
+/// Builtin template names.
+pub mod builtin_templates {
+    pub const HEADER: &str = "header";
+    pub const HEADER_DAY: &str = "header_day";
+    pub const UTILS: &str = "utils";
+    pub const NEXT: &str = "next";
+}
+
 /// Return one of the built-in templates.
 pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> {
     const ROW: &str = include_str!("../../templates/row.jinja");
@@ -182,22 +190,32 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
     const UTILS: &str = include_str!("../../templates/utils.jinja");
 
     match template {
-        "header" => Some(("header", HEADER)),
-        "header_day" => Some(("header_day", GROUP_DAY)),
-        "next" => Some(("next", ROW)),
+        builtin_templates::HEADER => Some((builtin_templates::HEADER, HEADER)),
+        builtin_templates::HEADER_DAY => Some((builtin_templates::HEADER_DAY, GROUP_DAY)),
+        builtin_templates::NEXT => Some((builtin_templates::NEXT, ROW)),
         "all" => Some(("all", ROW)),
         "calendar" => Some(("calendar", ROW_TIME)),
         "issue" => Some(("issue", ENTRY)),
         "entry" => Some(("entry", ENTRY)),
         "picker" => Some(("picker", ROW)),
-        "utils" => Some(("utils", UTILS)),
+        builtin_templates::UTILS => Some((builtin_templates::UTILS, UTILS)),
         "none" => Some(("none", "")),
         _ => None,
     }
 }
 
 /// List of built-in templates.
-const BUILTIN_TEMPLATES: [&str; 7] = ["header", "next", "all", "issue", "entry", "picker", "none"];
+const BUILTIN_TEMPLATES: [&str; 9] = [
+    builtin_templates::HEADER,
+    builtin_templates::HEADER_DAY,
+    "next",
+    "all",
+    "issue",
+    "entry",
+    "picker",
+    "none",
+    builtin_templates::UTILS,
+];
 
 /// Print the list of available templates.
 pub fn print_builtin_templates() {

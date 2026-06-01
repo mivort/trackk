@@ -3,6 +3,7 @@ use std::borrow::Cow;
 
 use super::Config;
 use crate::prelude::*;
+use crate::templates::builtin_templates;
 
 /// Report configuration which contains array of report sections.
 #[derive(Deserialize, Default, Clone)]
@@ -64,44 +65,44 @@ impl Config {
                 SectionConfig {
                     query: "backlog".into(),
                     title: "Backlog".into(),
-                    header: "header".into(),
+                    header: builtin_templates::HEADER.into(),
                     group: "".into(),
-                    template: "next".into(),
+                    template: builtin_templates::NEXT.into(),
                 },
                 SectionConfig {
                     query: "upcoming".into(),
                     title: "Upcoming".into(),
-                    header: "header".into(),
+                    header: builtin_templates::HEADER.into(),
                     group: "".into(),
-                    template: "next".into(),
+                    template: builtin_templates::NEXT.into(),
                 },
                 SectionConfig {
                     query: "current".into(),
                     title: "Current".into(),
-                    header: "header".into(),
+                    header: builtin_templates::HEADER.into(),
                     group: "".into(),
-                    template: "next".into(),
+                    template: builtin_templates::NEXT.into(),
                 },
                 SectionConfig {
                     query: "due_today".into(),
                     title: "Due today".into(),
-                    header: "header".into(),
+                    header: builtin_templates::HEADER.into(),
                     group: "".into(),
-                    template: "next".into(),
+                    template: builtin_templates::NEXT.into(),
                 },
                 SectionConfig {
                     query: "started".into(),
                     title: "Started".into(),
-                    header: "header".into(),
+                    header: builtin_templates::HEADER.into(),
                     group: "".into(),
-                    template: "next".into(),
+                    template: builtin_templates::NEXT.into(),
                 },
                 SectionConfig {
                     query: "done_today".into(),
                     title: "Done today".into(),
-                    header: "header".into(),
+                    header: builtin_templates::HEADER.into(),
                     group: "".into(),
-                    template: "next".into(),
+                    template: builtin_templates::NEXT.into(),
                 },
             ],
             preload: vec!["utils".into()],
@@ -117,7 +118,7 @@ impl Config {
                 query: "all".into(),
                 title: "All entries".into(),
                 header: "header".into(),
-                group: "header_day".into(),
+                group: builtin_templates::HEADER_DAY.into(),
                 template: "all".into(),
             }],
             preload: vec!["utils".into()],
@@ -131,7 +132,7 @@ impl Config {
                 query: "recent".into(),
                 title: "Recent entries".into(),
                 header: "header".into(),
-                group: "header_day".into(),
+                group: builtin_templates::HEADER_DAY.into(),
                 template: "all".into(),
             }],
             preload: vec!["utils".into()],
