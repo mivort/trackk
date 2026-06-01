@@ -28,6 +28,9 @@ values = {{
   {c}# List of valid status values.{cl}
   permit_status = {permit_status},
 
+  {c}# List of permitted entry tags - only applied when non-empty.{cl}
+  permit_tags = {permit_tags},
+
   {c}# Urgency formula used for dynamic entry sorting.{cl}
   urgency_formula = "{urgency_formula}",
 }}

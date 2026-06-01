@@ -349,6 +349,7 @@ fn format_config(config: &Config) -> Result<String> {
         date_formats = format_value(&config.date_formats)?,
         active_status = format_value(&config.values.active_status)?,
         permit_status = format_value(&config.values.permit_status)?,
+        permit_tags = format_value(&config.values.permit_tags)?,
         urgency_formula = config.values.urgency_formula(),
         initial_status = config.values.initial_status(),
         picker = config.templates.picker(),

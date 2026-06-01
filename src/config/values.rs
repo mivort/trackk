@@ -18,13 +18,13 @@ pub struct ValuesConfig {
     #[serde(default)]
     pub repeat_status: Vec<Box<str>>,
 
-    /// Only allow to assign tags from this list. Allow any tag if empty.
-    #[serde(default)]
-    pub _permit_tags: HashSet<String>, // TODO: P1: support list of permitted tags
-
     /// Only allow one of the provided statuses. Don't check status if empty.
     #[serde(default)]
     pub permit_status: Vec<Box<str>>,
+
+    /// Only allow to assign tags from this list. Allow any tag if empty.
+    #[serde(default)]
+    pub permit_tags: HashSet<Box<str>>,
 
     /// Urgency formula to use on entries.
     #[serde(default)]
