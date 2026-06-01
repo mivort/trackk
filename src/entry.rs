@@ -354,7 +354,10 @@ impl Entry {
         if !self.tags.is_empty() {
             for tag in &self.tags {
                 if !app.config.values.permit_tags.contains(tag.as_str()) {
-                    bail!("Tag should be prevent in the permitted tags list");
+                    bail!(
+                        "Tag should be present in the permitted tags list: {:?}",
+                        app.config.values.permit_tags
+                    );
                 }
             }
         }
