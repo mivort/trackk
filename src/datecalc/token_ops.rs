@@ -149,8 +149,9 @@ impl Token {
         // TODO: P2: use 'local_offset_at' method to take DST into account?
         match (&self, rhs) {
             (Self::Date(lhs), Self::Date(rhs)) => {
-                let ltime = (lhs + ts.offset().whole_seconds() as i64) % 86400;
-                let rtime = (rhs + ts.offset().whole_seconds() as i64) % 86400;
+                let offset = ts.offset().whole_seconds() as i64;
+                let ltime = (lhs + offset) % 86400;
+                let rtime = (rhs + offset) % 86400;
                 Ok(Self::Date(lhs - ltime + rtime))
             }
             (Self::Duration(lhs), Self::Date(rhs)) => {

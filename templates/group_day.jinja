@@ -2,9 +2,9 @@
 {%- set caption -%}
   {{ c.divider }}---- {# #}
   {%- if group -%}
-    {%- if (now - now % 86400) == group -%}
+    {%- if group == today -%}
       {{ c.header }}{{ group | datefmt('date') }} (today){{ reset }}
-    {%- elif (now - now % 86400) + 86400 == group -%}
+    {%- elif group == today + 86400 -%}
       {{ c.header }}{{ group | datefmt('date') }} (tomorrow){{ reset }}
     {%- else -%}
       {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}){{ reset }}

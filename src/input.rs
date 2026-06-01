@@ -43,7 +43,7 @@ pub fn pick_prompt<'a>(
 
     let mut templates = app.templates.borrow_mut();
 
-    templates.init(app.ts, &app.config)?;
+    templates.init(app.local_time()?, &app.config)?;
 
     app.config.templates.preload(|id| {
         templates

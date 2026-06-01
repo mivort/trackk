@@ -75,7 +75,7 @@ struct HeaderContext<'a> {
 /// Render the list of filtered entries.
 pub fn show_entries<'a>(ids: &IdFilter, report: &'a ReportConfig, app: &'a App<'a>) -> Result<()> {
     let mut templates = app.templates.borrow_mut();
-    templates.init(app.ts, &app.config)?;
+    templates.init(app.local_time()?, &app.config)?;
 
     let query = &mut QueryFilter::default();
     let mut shown = 0;
@@ -238,7 +238,7 @@ fn show_section(
 /// Render single entry.
 pub fn show_entry<'a>((entry, path): &(Entry, Rc<str>), app: &'a App<'a>) -> Result<()> {
     let mut templates = app.templates.borrow_mut();
-    templates.init(app.ts, &app.config)?;
+    templates.init(app.local_time()?, &app.config)?;
 
     app.config.templates.preload(|id| {
         templates
@@ -280,7 +280,7 @@ pub fn show_format_override<'a>(fmt: &str, ids: &IdFilter, app: &'a App<'a>) -> 
     let entries = storage::fetch_entries(&filter, IndexType::All, app)?;
 
     let mut templates = app.templates.borrow_mut();
-    templates.init(app.ts, &app.config)?;
+    templates.init(app.local_time()?, &app.config)?;
 
     for (lineno, (entry, path)) in entries.iter().enumerate() {
         let out = templates.j2.render_str(

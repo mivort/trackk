@@ -8,6 +8,7 @@ use minijinja as mj;
 use std::collections::HashMap;
 use std::fs;
 use std::io::ErrorKind;
+use time::OffsetDateTime;
 use unicode_width::UnicodeWidthStr;
 
 use crate::app::App;
@@ -33,7 +34,7 @@ impl<'env> Default for Templates<'env> {
 
 impl<'env> Templates<'env> {
     /// Initialize the templating environment.
-    pub fn init(&mut self, ts: i64, config: &'env Config) -> Result<()> {
+    pub fn init(&mut self, ts: OffsetDateTime, config: &'env Config) -> Result<()> {
         use terminal_size::*;
 
         if self.init {
@@ -53,12 +54,18 @@ impl<'env> Templates<'env> {
         j2.add_filter("hasnote", strings::hasnote);
 
         j2.add_filter("reldate", move |d: i64, p: Option<i32>| {
-            dates::reldate(d, ts, p)
+            dates::reldate(d, ts.unix_timestamp(), p)
         });
         j2.add_filter("longreldate", move |d: i64, p: Option<i32>| {
-            dates::longreldate(d, ts, p)
+            dates::longreldate(d, ts.unix_timestamp(), p)
         });
-        j2.add_global("now", ts);
+        j2.add_global("now", ts.unix_timestamp());
+
+        let offset = ts.offset().whole_seconds() as i64;
+        j2.add_global(
+            "today",
+            ts.unix_timestamp() - (ts.unix_timestamp() + offset) % 86400,
+        );
 
         let formats = dates::parse_formats(&config.date_formats)?;
         let offset = time::UtcOffset::current_local_offset()?;
