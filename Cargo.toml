@@ -19,10 +19,10 @@ dirs = "6.0"
 fern = "0.7"
 formatx = "0.2" # TODO: P2: check if formatx dependency is still needed
 log = "0.4"
-logos = "0.15"
+logos = "0.16"
 memchr = "2.7"
 mimalloc = "0.1"
-minijinja = "2.12"
+minijinja = "2.20"
 once_cell = { version = "1.21", default-features = false }
 regex = "1.12"
 serde = "1.0"
@@ -33,7 +33,7 @@ terminal_size = "0.4"
 thiserror = "2.0"
 time = { version = "0.3", features = ["macros", "local-offset", "parsing", "formatting"] }
 toml = "1.1"
-unicode-segmentation = "1.12"
+unicode-segmentation = "1.13"
 unicode-width = "0.2"
 unwrap_or = "1.0"
 uuid = { version = "1.18", features = ["v4", "serde"] }
