@@ -262,7 +262,7 @@ impl TemplatesConfig {
             }
             Ok(())
         } else {
-            load("utils")
+            load(bt::UTILS)
         }
     }
 }

@@ -1,3 +1,4 @@
+use builtin_queries as bq;
 use serde_derive::Deserialize;
 
 use super::Config;
@@ -45,6 +46,18 @@ pub enum IndexType {
     All,
 }
 
+pub mod builtin_queries {
+    pub const BACKLOG: &str = "backlog";
+    pub const UPCOMING: &str = "upcoming";
+    pub const CURRENT: &str = "current";
+    pub const DUE_TODAY: &str = "due_today";
+    pub const STARTED: &str = "started";
+    pub const DONE_TODAY: &str = "done_today";
+    pub const RECENT: &str = "recent";
+    pub const CALENDAR: &str = "calendar";
+    pub const ALL: &str = "all";
+}
+
 impl Config {
     /// Use query by the ID, or fallback to one of the built-ins.
     pub fn query(&self, query_id: &str) -> Result<QueryData<'_>> {
@@ -58,15 +71,15 @@ impl Config {
         });
 
         Ok(match query_id {
-            "backlog" => self.query_backlog(),
-            "upcoming" => self.query_upcoming(),
-            "current" => self.query_current(),
-            "due_today" => self.query_due_today(),
-            "started" => self.query_started(),
-            "done_today" => self.query_done_today(),
-            "recent" => self.query_recent(),
-            "calendar" => self.query_calendar(),
-            "all" => self.query_all(),
+            bq::BACKLOG => self.query_backlog(),
+            bq::UPCOMING => self.query_upcoming(),
+            bq::CURRENT => self.query_current(),
+            bq::DUE_TODAY => self.query_due_today(),
+            bq::STARTED => self.query_started(),
+            bq::DONE_TODAY => self.query_done_today(),
+            bq::RECENT => self.query_recent(),
+            bq::CALENDAR => self.query_calendar(),
+            bq::ALL => self.query_all(),
 
             _ => bail!("Query '{query_id}' not defined"),
         })

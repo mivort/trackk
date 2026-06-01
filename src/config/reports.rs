@@ -2,8 +2,9 @@ use serde_derive::Deserialize;
 use std::borrow::Cow;
 
 use super::Config;
+use crate::config::query::builtin_queries as bq;
 use crate::prelude::*;
-use crate::templates::builtin_templates;
+use crate::templates::builtin_templates as bt;
 
 /// Report configuration which contains array of report sections.
 #[derive(Deserialize, Default, Clone)]
@@ -63,49 +64,49 @@ impl Config {
         ReportConfig {
             sections: vec![
                 SectionConfig {
-                    query: "backlog".into(),
                     title: "Backlog".into(),
-                    header: builtin_templates::HEADER.into(),
+                    query: bq::BACKLOG.into(),
+                    header: bt::HEADER.into(),
                     group: "".into(),
-                    template: builtin_templates::NEXT.into(),
+                    template: bt::NEXT.into(),
                 },
                 SectionConfig {
-                    query: "upcoming".into(),
                     title: "Upcoming".into(),
-                    header: builtin_templates::HEADER.into(),
+                    query: bq::UPCOMING.into(),
+                    header: bt::HEADER.into(),
                     group: "".into(),
-                    template: builtin_templates::NEXT.into(),
+                    template: bt::NEXT.into(),
                 },
                 SectionConfig {
-                    query: "current".into(),
                     title: "Current".into(),
-                    header: builtin_templates::HEADER.into(),
+                    query: bq::CURRENT.into(),
+                    header: bt::HEADER.into(),
                     group: "".into(),
-                    template: builtin_templates::NEXT.into(),
+                    template: bt::NEXT.into(),
                 },
                 SectionConfig {
-                    query: "due_today".into(),
                     title: "Due today".into(),
-                    header: builtin_templates::HEADER.into(),
+                    query: bq::DUE_TODAY.into(),
+                    header: bt::HEADER.into(),
                     group: "".into(),
-                    template: builtin_templates::NEXT.into(),
+                    template: bt::NEXT.into(),
                 },
                 SectionConfig {
-                    query: "started".into(),
                     title: "Started".into(),
-                    header: builtin_templates::HEADER.into(),
+                    query: bq::STARTED.into(),
+                    header: bt::HEADER.into(),
                     group: "".into(),
-                    template: builtin_templates::NEXT.into(),
+                    template: bt::NEXT.into(),
                 },
                 SectionConfig {
-                    query: "done_today".into(),
                     title: "Done today".into(),
-                    header: builtin_templates::HEADER.into(),
+                    query: bq::DONE_TODAY.into(),
+                    header: bt::HEADER.into(),
                     group: "".into(),
-                    template: builtin_templates::NEXT.into(),
+                    template: bt::NEXT.into(),
                 },
             ],
-            preload: vec!["utils".into()],
+            preload: vec![bt::UTILS.into()],
         }
     }
 }
@@ -117,11 +118,11 @@ impl Config {
             sections: vec![SectionConfig {
                 query: "all".into(),
                 title: "All entries".into(),
-                header: "header".into(),
-                group: builtin_templates::HEADER_DAY.into(),
-                template: "all".into(),
+                header: bt::HEADER.into(),
+                group: bt::HEADER_DAY.into(),
+                template: bt::ALL.into(),
             }],
-            preload: vec!["utils".into()],
+            preload: vec![bt::UTILS.into()],
         }
     }
 
@@ -129,13 +130,13 @@ impl Config {
     fn report_recent(&self) -> ReportConfig {
         ReportConfig {
             sections: vec![SectionConfig {
-                query: "recent".into(),
                 title: "Recent entries".into(),
-                header: "header".into(),
-                group: builtin_templates::HEADER_DAY.into(),
-                template: "all".into(),
+                query: bq::RECENT.into(),
+                header: bt::HEADER.into(),
+                group: bt::HEADER_DAY.into(),
+                template: bt::ALL.into(),
             }],
-            preload: vec!["utils".into()],
+            preload: vec![bt::UTILS.into()],
         }
     }
 
@@ -143,13 +144,13 @@ impl Config {
     fn report_calendar(&self) -> ReportConfig {
         ReportConfig {
             sections: vec![SectionConfig {
-                query: "calendar".into(),
                 title: "Calendar".into(),
-                header: "header".into(),
-                group: builtin_templates::HEADER_DAY.into(),
-                template: "calendar".into(),
+                query: bq::CALENDAR.into(),
+                header: bt::HEADER.into(),
+                group: bt::HEADER_DAY.into(),
+                template: bt::CALENDAR.into(),
             }],
-            preload: vec!["utils".into()],
+            preload: vec![bt::UTILS.into()],
         }
     }
 
@@ -157,14 +158,14 @@ impl Config {
     fn report_info(&self) -> ReportConfig {
         ReportConfig {
             sections: vec![SectionConfig {
-                query: "all".into(),
-                template: "entry".into(),
+                query: bt::ALL.into(),
+                template: bt::ENTRY.into(),
 
                 title: "".into(),
                 header: "".into(),
                 group: "".into(),
             }],
-            preload: vec!["utils".into()],
+            preload: vec![bt::UTILS.into()],
         }
     }
 }
