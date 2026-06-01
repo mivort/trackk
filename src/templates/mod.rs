@@ -3,6 +3,7 @@ pub mod dates;
 pub mod layout;
 pub mod strings;
 
+use builtin_templates as bt;
 use minijinja as mj;
 use std::collections::HashMap;
 use std::fs;
@@ -178,10 +179,18 @@ pub mod builtin_templates {
     pub const HEADER_DAY: &str = "header_day";
     pub const UTILS: &str = "utils";
     pub const NEXT: &str = "next";
+    pub const ALL: &str = "all";
+    pub const CALENDAR: &str = "calendar";
+    pub const ISSUE: &str = "issue";
+    pub const ENTRY: &str = "entry";
+    pub const PICKER: &str = "picker";
+    pub const NONE: &str = "none";
 }
 
 /// Return one of the built-in templates.
 pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> {
+    use builtin_templates as bt;
+
     const ROW: &str = include_str!("../../templates/row.jinja");
     const ROW_TIME: &str = include_str!("../../templates/row_time.jinja");
     const ENTRY: &str = include_str!("../../templates/entry.jinja");
@@ -190,31 +199,32 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
     const UTILS: &str = include_str!("../../templates/utils.jinja");
 
     match template {
-        builtin_templates::HEADER => Some((builtin_templates::HEADER, HEADER)),
-        builtin_templates::HEADER_DAY => Some((builtin_templates::HEADER_DAY, GROUP_DAY)),
-        builtin_templates::NEXT => Some((builtin_templates::NEXT, ROW)),
-        "all" => Some(("all", ROW)),
-        "calendar" => Some(("calendar", ROW_TIME)),
-        "issue" => Some(("issue", ENTRY)),
-        "entry" => Some(("entry", ENTRY)),
-        "picker" => Some(("picker", ROW)),
-        builtin_templates::UTILS => Some((builtin_templates::UTILS, UTILS)),
-        "none" => Some(("none", "")),
+        bt::HEADER => Some((bt::HEADER, HEADER)),
+        bt::HEADER_DAY => Some((bt::HEADER_DAY, GROUP_DAY)),
+        bt::NEXT => Some((bt::NEXT, ROW)),
+        bt::ALL => Some((bt::ALL, ROW)),
+        bt::CALENDAR => Some((bt::CALENDAR, ROW_TIME)),
+        bt::ISSUE => Some((bt::ISSUE, ENTRY)),
+        bt::ENTRY => Some((bt::ENTRY, ENTRY)),
+        bt::PICKER => Some((bt::PICKER, ROW)),
+        bt::UTILS => Some((bt::UTILS, UTILS)),
+        bt::NONE => Some((bt::NONE, "")),
         _ => None,
     }
 }
 
 /// List of built-in templates.
-const BUILTIN_TEMPLATES: [&str; 9] = [
-    builtin_templates::HEADER,
-    builtin_templates::HEADER_DAY,
-    "next",
-    "all",
-    "issue",
-    "entry",
-    "picker",
-    "none",
-    builtin_templates::UTILS,
+const BUILTIN_TEMPLATES: [&str; 10] = [
+    bt::HEADER,
+    bt::HEADER_DAY,
+    bt::NEXT,
+    bt::ALL,
+    bt::CALENDAR,
+    bt::ISSUE,
+    bt::ENTRY,
+    bt::PICKER,
+    bt::NONE,
+    bt::UTILS,
 ];
 
 /// Print the list of available templates.

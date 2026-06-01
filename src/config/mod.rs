@@ -13,6 +13,7 @@ use std::{env, fs};
 use serde_derive::{Deserialize, Serialize};
 
 use crate::args::{Args, ColorMode};
+use crate::templates::builtin_templates as bt;
 use crate::templates::colors::{RESET, fg};
 use crate::{expansion, prelude::*};
 
@@ -244,12 +245,12 @@ impl Config {
 impl TemplatesConfig {
     /// Picker template with default value.
     pub fn picker(&self) -> &str {
-        if self.picker.is_empty() { "picker" } else { &self.picker }
+        if self.picker.is_empty() { bt::PICKER } else { &self.picker }
     }
 
     /// Single entry template with default value.
     pub fn entry(&self) -> &str {
-        if self.entry.is_empty() { "issue" } else { &self.entry }
+        if self.entry.is_empty() { bt::ENTRY } else { &self.entry }
     }
 
     /// Iterate over preload templates and apply the mapping method.

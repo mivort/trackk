@@ -146,7 +146,7 @@ impl Config {
                 query: "calendar".into(),
                 title: "Calendar".into(),
                 header: "header".into(),
-                group: "header_day".into(),
+                group: builtin_templates::HEADER_DAY.into(),
                 template: "calendar".into(),
             }],
             preload: vec!["utils".into()],
