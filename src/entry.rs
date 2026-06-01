@@ -272,10 +272,10 @@ impl Entry {
 
         let date = parse_date(repeat, app, self)
             .with_context(|| format!("Unable to parse repeat expression: '{}'", repeat))?;
-        let date = unwrap_some_or!(date, {
+        let Some(date) = date else {
             info!("Task is not repeated: condition not met");
             return Ok(None);
-        });
+        };
 
         let mut new_entry = self.clone();
         new_entry.copy(app);

@@ -62,10 +62,10 @@ fn apply_captures(value: &str, captures: &regex::Captures) -> String {
             output.push(char);
             continue;
         }
-        let next = unwrap_some_or!(chars.next(), {
+        let Some(next) = chars.next() else {
             output.push(char);
             continue;
-        });
+        };
         match next {
             '$' => {
                 output.push('$');

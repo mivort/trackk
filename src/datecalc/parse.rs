@@ -278,9 +278,9 @@ fn tilt(stack: &mut Vec<Token>, output: &mut Vec<Token>) -> bool {
 /// Find the the boundaries of regex.
 fn parse_regex(input: &str) -> Result<(Rc<regex::Regex>, &str)> {
     // TODO: P2: support escaped backslashes
-    let end = unwrap_some_or!(input.find("/"), {
+    let Some(end) = input.find("/") else {
         bail!("Non-terminated regex: {}", input);
-    });
+    };
 
     let regex = Rc::new(regex::Regex::new(&input[..end])?);
     Ok((regex, &input[end + 1..]))

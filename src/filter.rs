@@ -261,18 +261,18 @@ impl IdFilter {
                 self.only_active = false;
                 continue;
             });
-            let pointer = unwrap_some_or!(index.active().get(shorthand - 1), {
+            let Some(pointer) = index.active().get(shorthand - 1) else {
                 if id.len() < 4 {
                     bail!("Entry with shorthand {shorthand} not found in index");
                 }
                 self.index.push(id);
                 self.only_active = false;
                 continue;
-            });
-            let (_, resolved) = unwrap_some_or!(pointer.rsplit_once("/"), {
+            };
+            let Some((_, resolved)) = pointer.rsplit_once("/") else {
                 warn!("Index entry with missing path: {pointer}");
                 continue;
-            });
+            };
 
             self.index.push(resolved.into());
         }

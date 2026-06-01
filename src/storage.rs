@@ -250,10 +250,10 @@ fn filter_active_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<s
     let mut op_stack = Vec::new();
 
     for (idx, e) in index.active().iter().enumerate() {
-        let (bucket_path, id) = unwrap_some_or!(e.rsplit_once("/"), {
+        let Some((bucket_path, id)) = e.rsplit_once("/") else {
             warn!("Active index entry has broken reference: {e}");
             continue;
-        });
+        };
 
         let bucket = Bucket::from_cache(bucket_path, cache, app).with_context(|| {
             format!(
