@@ -116,8 +116,8 @@ impl Config {
     fn report_all(&self) -> ReportConfig {
         ReportConfig {
             sections: vec![SectionConfig {
-                query: "all".into(),
                 title: "All entries".into(),
+                query: bq::ALL.into(),
                 header: bt::HEADER.into(),
                 group: bt::HEADER_DAY.into(),
                 template: bt::ALL.into(),
