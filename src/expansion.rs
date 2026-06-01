@@ -124,6 +124,10 @@ fn expansions_tw(idx: &mut RuleIndex) -> Result<()> {
     idx[root].push((rg("^all$")?, vec!["list".into(), "all".into()]));
     idx[root].push((rg("^ls$")?, vec!["list".into()]));
     idx[root].push((rg("^recent$")?, vec!["list".into(), "recent".into()]));
+    idx[root].push((
+        rg("^cal(?:endar)?$")?,
+        vec!["list".into(), "calendar".into()],
+    ));
 
     idx[root].push((rg("^dup$")?, vec!["add".into(), "--copy".into()]));
 
