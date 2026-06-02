@@ -3,11 +3,11 @@
   {{ c.divider }}---- {# #}
   {%- if group -%}
     {%- if group == today -%}
-      {{ c.header }}{{ group | datefmt('date') }} (today){{ reset }}
+      {{ c.header }}{{ group | datefmt('calendar') }} (today){{ reset }}
     {%- elif group == today + 86400 -%}
-      {{ c.header }}{{ group | datefmt('date') }} (tomorrow){{ reset }}
+      {{ c.header }}{{ group | datefmt('calendar') }} (tomorrow){{ reset }}
     {%- else -%}
-      {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreltoday }}){{ reset }}
+      {{ c.header }}{{ group | datefmt('calendar') }} ({{ group | longreltoday }}){{ reset }}
     {%- endif -%}
   {%- else -%}
     {{ c.header }}Pending{{ reset }}

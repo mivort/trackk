@@ -5,9 +5,9 @@
   {%- if date -%}
     {{ c.entry_date }}
       {%- if cols > 42 -%}
-        {{ date | datefmt('long') }}
+        {{ date | datefmt('entry') }}
       {%- else -%}
-        {{ date | datefmt }}
+        {{ date | datefmt('entryshort') }}
       {%- endif -%}
     {{ c.entry_value }}
     {%- if cols > 60 -%}

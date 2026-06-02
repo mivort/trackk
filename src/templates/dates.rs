@@ -155,9 +155,12 @@ pub fn datefmt(
         date.format(fmt).unwrap()
     } else {
         match fmt {
-            "rfc2822" | "long" => date.format(&well_known::Rfc2822),
+            "rfc2822" | "long" | "entry" => date.format(&well_known::Rfc2822),
             "rfc3339" => date.format(&well_known::Rfc3339),
             "iso8601" | "date" => date.format(&Iso8601::DATE),
+            "calendar" => date.format(format_description!(
+                "[weekday repr:short], [day] [month repr:short] [year]"
+            )),
             "time" | "hhmmss" => date.format(format_description!("[hour]:[minute]:[second]")),
             "hhmm" => date.format(format_description!("[hour]:[minute]")),
             _ => {
