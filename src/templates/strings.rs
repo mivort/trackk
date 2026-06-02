@@ -40,3 +40,17 @@ pub fn rpad(mut value: String, filler: &str) -> Result<String, mj::Error> {
     }
     Ok(value)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pad_fmt() {
+        assert_eq!(lpad(String::from("abc"), "----").unwrap(), "-abc");
+        assert_eq!(rpad(String::from("abc"), "----").unwrap(), "abc-");
+
+        assert_eq!(lpad(String::from("abcde"), "----").unwrap(), "abcde");
+        assert_eq!(rpad(String::from("abcde"), "----").unwrap(), "abcde");
+    }
+}
