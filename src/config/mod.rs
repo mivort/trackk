@@ -463,6 +463,16 @@ fn merge_config(target: &mut Config, source: Config) {
         target.append(&mut source);
     }
 
+    fn merge_sets<T: std::hash::Hash + Eq>(target: &mut HashSet<T>, source: HashSet<T>) {
+        if target.is_empty() {
+            *target = source;
+            return;
+        }
+        for value in source {
+            target.insert(value);
+        }
+    }
+
     /// Merge two hash maps.
     fn merge_maps<K, V>(target: &mut HashMap<K, V>, source: HashMap<K, V>)
     where
@@ -493,6 +503,8 @@ fn merge_config(target: &mut Config, source: Config) {
         &mut target.values.urgency_formula,
         source.values.urgency_formula,
     );
+
+    merge_sets(&mut target.values.permit_tags, source.values.permit_tags);
 
     merge_non_default(&mut target.templates.entry, source.templates.entry);
     merge_non_default(&mut target.templates.picker, source.templates.picker);
@@ -526,7 +538,12 @@ fn ensure_all_merged() {
             tags: [("t1".into(), ColorConfig::Custom("t2".into()))].into(),
             preload: Some(vec!["test".into()]),
         },
-        values: Default::default(),
+        values: ValuesConfig {
+            urgency_formula: "test_formula".into(),
+            permit_tags: ["foo", "bar"].iter().map(|s| Box::from(*s)).collect(),
+            // TODO: P1: check other fields
+            ..Default::default()
+        },
     };
 
     merge_config(&mut a, b.clone());

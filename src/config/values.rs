@@ -8,7 +8,7 @@ use serde_derive::Deserialize;
 pub struct ValuesConfig {
     /// Default status to assign upon creation.
     #[serde(default)]
-    initial_status: Box<str>,
+    pub initial_status: Box<str>,
 
     /// List of statuses which are considered as 'active'.
     #[serde(default)]
@@ -32,15 +32,15 @@ pub struct ValuesConfig {
 
     /// Perform validation query when entry is created or modified.
     #[serde(default)]
-    _validation_query: Box<str>, // TODO: P1: support validaton queries.
+    pub _validation_query: Box<str>, // TODO: P1: support validaton queries.
 
     /// Default time string to assign as 'when'.
     #[serde(default)]
-    _assign_when: Box<str>, // TODO: P2: support default when value
+    pub _assign_when: Box<str>, // TODO: P2: support default when value
 
     /// Default time string to assign as 'due'.
     #[serde(default)]
-    _assign_due: Box<str>, // TODO: P2: support default due value
+    pub _assign_due: Box<str>, // TODO: P2: support default due value
 
     /// Disable built-in field defintions.
     #[serde(default)]
