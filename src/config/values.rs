@@ -12,7 +12,7 @@ pub struct ValuesConfig {
 
     /// List of statuses which are considered as 'active'.
     #[serde(default)]
-    pub active_status: HashSet<String>,
+    pub active_status: HashSet<Box<str>>,
 
     /// When task is marked this status, check if it should be repeated.
     #[serde(default)]
@@ -44,7 +44,7 @@ pub struct ValuesConfig {
 
     /// Disable built-in field defintions.
     #[serde(default)]
-    pub no_default_fields: bool,
+    pub no_default_fields: Option<bool>,
 }
 
 impl ValuesConfig {

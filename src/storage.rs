@@ -228,7 +228,12 @@ fn filter_all_entries(filters: &Filter, app: &App) -> Result<Vec<(Entry, Rc<str>
             op_stack.clear();
             issue.calculate_urgency(&mut op_stack, local, urgency, app)?;
 
-            if app.config.values.active_status.contains(&issue.status) {
+            if app
+                .config
+                .values
+                .active_status
+                .contains(issue.status.as_str())
+            {
                 issue.sid = index.find_id(&issue.id);
             }
             output.push((issue, path.clone()));

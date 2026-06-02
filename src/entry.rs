@@ -235,7 +235,7 @@ impl Entry {
     /// Update entry end timestamp if it's empty and status is not in active list.
     /// If status is updated to one of the active states, clear the timestamp.
     pub fn update_end(&mut self, config: &Config) {
-        if config.values.active_status.contains(&self.status) {
+        if config.values.active_status.contains(self.status.as_str()) {
             self.end = None;
         } else {
             if self.end.is_some() {
@@ -335,7 +335,11 @@ impl Entry {
             bail!("Entry title should not be empty");
         }
 
-        let is_active = app.config.values.active_status.contains(&self.status);
+        let is_active = app
+            .config
+            .values
+            .active_status
+            .contains(self.status.as_str());
 
         if self.end.is_some() && is_active {
             bail!("End date should be only set for complete/deleted/inactive entries");

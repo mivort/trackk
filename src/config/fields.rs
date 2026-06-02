@@ -61,7 +61,7 @@ impl Config {
     pub fn fields_map(&self) -> BTreeMap<String, FieldType> {
         let mut out = BTreeMap::from_iter(self.fields.iter().map(|(k, &v)| (k.clone(), v)));
 
-        if self.values.no_default_fields {
+        if let Some(true) = self.values.no_default_fields {
             return out;
         }
 

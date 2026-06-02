@@ -367,11 +367,8 @@ fn format_value(value: &impl serde::Serialize) -> Result<String> {
 
 /// Produce a hash set from slice.
 #[inline]
-fn hash_set(items: &[&str]) -> HashSet<String> {
-    items
-        .iter()
-        .map(|v| v.to_string())
-        .collect::<HashSet<String>>()
+fn hash_set(items: &[&str]) -> HashSet<Box<str>> {
+    items.iter().map(|v| Box::from(*v)).collect()
 }
 
 /// Ensure that config produced by 'config' command is valid TOML and follows the schema.
@@ -487,31 +484,70 @@ fn merge_config(target: &mut Config, source: Config) {
         }
     }
 
-    merge_option(&mut target.editor, source.editor);
-    merge_option(&mut target.editor_on_add, source.editor_on_add);
-    merge_option(&mut target.macros_style, source.macros_style);
-    merge_non_default(&mut target.color_mode, source.color_mode);
+    let Config {
+        editor,
+        editor_on_add,
+        macros_style,
+        local: _,
+        color_mode,
+        fields,
+        values,
+        queries,
+        reports,
+        templates,
+        sync: _, // TODO: P2: merge sync options
+        date_formats,
+        macros,
+    } = source;
 
-    merge_vecs(&mut target.macros, source.macros);
-    merge_maps(&mut target.date_formats, source.date_formats);
+    merge_option(&mut target.editor, editor);
+    merge_option(&mut target.editor_on_add, editor_on_add);
+    merge_option(&mut target.macros_style, macros_style);
+    merge_non_default(&mut target.color_mode, color_mode);
 
-    merge_maps(&mut target.queries, source.queries);
-    merge_maps(&mut target.reports, source.reports);
-    merge_maps(&mut target.fields, source.fields);
+    merge_vecs(&mut target.macros, macros);
+    merge_maps(&mut target.date_formats, date_formats);
 
-    merge_non_default(
-        &mut target.values.urgency_formula,
-        source.values.urgency_formula,
-    );
+    merge_maps(&mut target.queries, queries);
+    merge_maps(&mut target.reports, reports);
+    merge_maps(&mut target.fields, fields);
 
-    merge_sets(&mut target.values.permit_tags, source.values.permit_tags);
+    let ValuesConfig {
+        initial_status,
+        active_status,
+        repeat_status,
+        permit_status,
+        permit_tags,
+        urgency_formula,
+        _validation_query,
+        _assign_when,
+        _assign_due,
+        no_default_fields,
+    } = values;
 
-    merge_non_default(&mut target.templates.entry, source.templates.entry);
-    merge_non_default(&mut target.templates.picker, source.templates.picker);
-    merge_non_default(&mut target.templates.diff, source.templates.diff);
-    merge_non_default(&mut target.templates.preload, source.templates.preload);
-    merge_maps(&mut target.templates.colors, source.templates.colors);
-    merge_maps(&mut target.templates.tags, source.templates.tags);
+    merge_option(&mut target.values.no_default_fields, no_default_fields);
+    merge_non_default(&mut target.values.initial_status, initial_status);
+    merge_non_default(&mut target.values.urgency_formula, urgency_formula);
+    merge_sets(&mut target.values.active_status, active_status);
+    merge_vecs(&mut target.values.repeat_status, repeat_status);
+    merge_vecs(&mut target.values.permit_status, permit_status);
+    merge_sets(&mut target.values.permit_tags, permit_tags);
+
+    let TemplatesConfig {
+        entry,
+        picker,
+        diff,
+        preload,
+        colors,
+        tags,
+    } = templates;
+
+    merge_non_default(&mut target.templates.entry, entry);
+    merge_non_default(&mut target.templates.picker, picker);
+    merge_non_default(&mut target.templates.diff, diff);
+    merge_non_default(&mut target.templates.preload, preload);
+    merge_maps(&mut target.templates.colors, colors);
+    merge_maps(&mut target.templates.tags, tags);
 }
 
 /// Ensure all fields which require merging are merged.

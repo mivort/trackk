@@ -75,7 +75,7 @@ impl Index {
 
         let entry = format!("{path}/{id}");
 
-        if config.values.active_status.contains(status) {
+        if config.values.active_status.contains(status.as_str()) {
             if let Some(position) = self.active.iter().position(|e| *e == entry) {
                 return Some(position);
             }
