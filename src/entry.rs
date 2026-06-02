@@ -351,7 +351,7 @@ impl Entry {
             }
         }
 
-        if !self.tags.is_empty() {
+        if !app.config.values.permit_tags.is_empty() {
             for tag in &self.tags {
                 if !app.config.values.permit_tags.contains(tag.as_str()) {
                     bail!(
