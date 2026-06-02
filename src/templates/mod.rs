@@ -41,6 +41,10 @@ impl<'env> Templates<'env> {
             return Ok(());
         }
 
+        let offset = ts.offset().whole_seconds() as i64;
+        let now = ts.unix_timestamp();
+        let today = now - (now + offset) % 86400;
+
         let j2 = &mut self.j2;
         j2.set_keep_trailing_newline(true);
         j2.set_auto_escape_callback(|_| mj::AutoEscape::None);
@@ -54,18 +58,20 @@ impl<'env> Templates<'env> {
         j2.add_filter("hasnote", strings::hasnote);
 
         j2.add_filter("reldate", move |d: i64, p: Option<i32>| {
-            dates::reldate(d, ts.unix_timestamp(), p)
+            dates::reldate(d, now, p)
+        });
+        j2.add_filter("reltoday", move |d: i64, p: Option<i32>| {
+            dates::reldate(d, today, p)
         });
         j2.add_filter("longreldate", move |d: i64, p: Option<i32>| {
-            dates::longreldate(d, ts.unix_timestamp(), p)
+            dates::longreldate(d, now, p)
         });
-        j2.add_global("now", ts.unix_timestamp());
+        j2.add_filter("longreltoday", move |d: i64, p: Option<i32>| {
+            dates::longreldate(d, today, p)
+        });
 
-        let offset = ts.offset().whole_seconds() as i64;
-        j2.add_global(
-            "today",
-            ts.unix_timestamp() - (ts.unix_timestamp() + offset) % 86400,
-        );
+        j2.add_global("now", now);
+        j2.add_global("today", today);
 
         let formats = dates::parse_formats(&config.date_formats)?;
         let offset = time::UtcOffset::current_local_offset()?;

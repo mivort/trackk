@@ -7,7 +7,7 @@
     {%- elif group == today + 86400 -%}
       {{ c.header }}{{ group | datefmt('date') }} (tomorrow){{ reset }}
     {%- else -%}
-      {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreldate }}){{ reset }}
+      {{ c.header }}{{ group | datefmt('date') }} ({{ group | longreltoday }}){{ reset }}
     {%- endif -%}
   {%- else -%}
     {{ c.header }}Pending{{ reset }}

@@ -63,32 +63,32 @@ pub fn longreldate(date: i64, now: i64, precision: Option<i32>) -> String {
 
     let abs = diff.abs();
 
-    let floor = |v: f64| -> (f64, &str) {
+    let round = |v: f64| {
         let mlt = 10_f64.powi(precision.unwrap_or(0));
-        let val = (v * mlt).floor() / mlt;
+        let val = (v * mlt).round() / mlt;
         (val, if val > 1. { "s" } else { "" })
     };
 
     if abs >= MONTH * 11.5 {
-        let (val, s) = floor(abs / YEAR);
+        let (val, s) = round(abs / YEAR);
         format!("{val} year{s}{ago}")
     } else if abs >= MONTH {
-        let (val, s) = floor(abs / MONTH);
+        let (val, s) = round(abs / MONTH);
         format!("{val} month{s}{ago}")
     } else if abs >= WEEK {
-        let (val, s) = floor(abs / WEEK);
+        let (val, s) = round(abs / WEEK);
         format!("{val} week{s}{ago}")
     } else if abs >= DAY {
-        let (val, s) = floor(abs / DAY);
+        let (val, s) = round(abs / DAY);
         format!("{val} day{s}{ago}")
     } else if abs >= HOUR {
-        let (val, s) = floor(abs / HOUR);
+        let (val, s) = round(abs / HOUR);
         format!("{val} hour{s}{ago}")
     } else if abs >= MINUTE {
-        let (val, s) = floor(abs / MINUTE);
+        let (val, s) = round(abs / MINUTE);
         format!("{val} minute{s}{ago}")
     } else {
-        let (val, s) = floor(abs);
+        let (val, s) = round(abs);
         format!("{val} second{s}{ago}")
     }
 }
@@ -205,16 +205,28 @@ pub fn safe_clamp(ts: i64) -> i64 {
     )
 }
 
-#[test]
-pub fn duration_fmt() {
-    use i64d::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq!(duration(HOUR), "1h");
-    assert_eq!(duration(DAY + HOUR), "1d+1h");
-    assert_eq!(duration(HOUR + 30 * MINUTE), "1h+30m");
-    assert_eq!(duration(YEAR + 1), "1y+1s");
+    #[test]
+    pub fn duration_fmt() {
+        use i64d::*;
 
-    assert_eq!(duration(-HOUR), "-1h");
-    assert_eq!(duration(-DAY - HOUR), "-1d-1h");
-    assert_eq!(duration(-YEAR - DAY - HOUR - MINUTE), "-1y-1d-1h-1m");
+        assert_eq!(duration(HOUR), "1h");
+        assert_eq!(duration(DAY + HOUR), "1d+1h");
+        assert_eq!(duration(HOUR + 30 * MINUTE), "1h+30m");
+        assert_eq!(duration(YEAR + 1), "1y+1s");
+
+        assert_eq!(duration(-HOUR), "-1h");
+        assert_eq!(duration(-DAY - HOUR), "-1d-1h");
+        assert_eq!(duration(-YEAR - DAY - HOUR - MINUTE), "-1y-1d-1h-1m");
+    }
+
+    #[test]
+    pub fn longreldate_fmt() {
+        assert_eq!(longreldate(0, 0, None), "0 second"); // TODO: P3: handle '0 seconds'?
+        assert_eq!(longreldate(2, 0, None), "2 seconds");
+        assert_eq!(longreldate(0, 2, None), "2 seconds ago");
+    }
 }
