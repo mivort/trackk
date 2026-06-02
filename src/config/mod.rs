@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use serde_derive::{Deserialize, Serialize};
+use std::hash::Hash;
 
 use crate::args::{Args, ColorMode};
 use crate::templates::builtin_templates as bt;
@@ -442,10 +443,7 @@ fn merge_config(target: &mut Config, source: Config) {
     }
 
     /// Check if value is non-default and update otherwise.
-    fn merge_non_default<T>(target: &mut T, source: T)
-    where
-        T: Default + Eq,
-    {
+    fn merge_non_default<T: Default + Eq>(target: &mut T, source: T) {
         if *target == T::default() {
             *target = source
         }
@@ -460,7 +458,7 @@ fn merge_config(target: &mut Config, source: Config) {
         target.append(&mut source);
     }
 
-    fn merge_sets<T: std::hash::Hash + Eq>(target: &mut HashSet<T>, source: HashSet<T>) {
+    fn merge_sets<T: Hash + Eq>(target: &mut HashSet<T>, source: HashSet<T>) {
         if target.is_empty() {
             *target = source;
             return;
@@ -471,10 +469,7 @@ fn merge_config(target: &mut Config, source: Config) {
     }
 
     /// Merge two hash maps.
-    fn merge_maps<K, V>(target: &mut HashMap<K, V>, source: HashMap<K, V>)
-    where
-        K: Eq + std::hash::Hash,
-    {
+    fn merge_maps<K: Eq + Hash, V>(target: &mut HashMap<K, V>, source: HashMap<K, V>) {
         if target.is_empty() {
             *target = source;
             return;
@@ -491,10 +486,30 @@ fn merge_config(target: &mut Config, source: Config) {
         local: _,
         color_mode,
         fields,
-        values,
+        values:
+            ValuesConfig {
+                initial_status,
+                active_status,
+                repeat_status,
+                permit_status,
+                permit_tags,
+                urgency_formula,
+                _validation_query,
+                _assign_when,
+                _assign_due,
+                no_default_fields,
+            },
         queries,
         reports,
-        templates,
+        templates:
+            TemplatesConfig {
+                entry,
+                picker,
+                diff,
+                preload,
+                colors,
+                tags,
+            },
         sync: _, // TODO: P2: merge sync options
         date_formats,
         macros,
@@ -512,19 +527,6 @@ fn merge_config(target: &mut Config, source: Config) {
     merge_maps(&mut target.reports, reports);
     merge_maps(&mut target.fields, fields);
 
-    let ValuesConfig {
-        initial_status,
-        active_status,
-        repeat_status,
-        permit_status,
-        permit_tags,
-        urgency_formula,
-        _validation_query,
-        _assign_when,
-        _assign_due,
-        no_default_fields,
-    } = values;
-
     merge_option(&mut target.values.no_default_fields, no_default_fields);
     merge_non_default(&mut target.values.initial_status, initial_status);
     merge_non_default(&mut target.values.urgency_formula, urgency_formula);
@@ -532,15 +534,6 @@ fn merge_config(target: &mut Config, source: Config) {
     merge_vecs(&mut target.values.repeat_status, repeat_status);
     merge_vecs(&mut target.values.permit_status, permit_status);
     merge_sets(&mut target.values.permit_tags, permit_tags);
-
-    let TemplatesConfig {
-        entry,
-        picker,
-        diff,
-        preload,
-        colors,
-        tags,
-    } = templates;
 
     merge_non_default(&mut target.templates.entry, entry);
     merge_non_default(&mut target.templates.picker, picker);
