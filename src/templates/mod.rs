@@ -189,7 +189,7 @@ impl<'env> Templates<'env> {
 /// Builtin template names.
 pub mod builtin_templates {
     pub const HEADER: &str = "header";
-    pub const HEADER_DAY: &str = "header_day";
+    pub const GROUP_DAY: &str = "group_day";
     pub const UTILS: &str = "utils";
     pub const NEXT: &str = "next";
     pub const ALL: &str = "all";
@@ -213,7 +213,7 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
 
     match template {
         bt::HEADER => Some((bt::HEADER, HEADER)),
-        bt::HEADER_DAY => Some((bt::HEADER_DAY, GROUP_DAY)),
+        bt::GROUP_DAY => Some((bt::GROUP_DAY, GROUP_DAY)),
         bt::NEXT => Some((bt::NEXT, ROW)),
         bt::ALL => Some((bt::ALL, ROW)),
         bt::CALENDAR => Some((bt::CALENDAR, ROW_TIME)),
@@ -229,7 +229,7 @@ pub fn builtin_template(template: &str) -> Option<(&'static str, &'static str)> 
 /// List of built-in templates.
 const BUILTIN_TEMPLATES: [&str; 10] = [
     bt::HEADER,
-    bt::HEADER_DAY,
+    bt::GROUP_DAY,
     bt::NEXT,
     bt::ALL,
     bt::CALENDAR,
