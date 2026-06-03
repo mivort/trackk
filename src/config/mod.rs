@@ -124,6 +124,7 @@ pub struct TemplatesConfig {
     /// Color highlight values. When colors are disabled, those values are ignored.
     #[serde(default)]
     pub tags: HashMap<String, ColorConfig>, // TODO: P2: add tags coloring
+
     // TODO: P2: add template variables
     /// Shared templates to parse before rendering.
     #[serde(default)]
@@ -257,14 +258,13 @@ impl TemplatesConfig {
     /// Iterate over preload templates and apply the mapping method.
     /// If no templates were specified by users, use 'utils' template.
     pub fn preload(&self, mut load: impl FnMut(&str) -> Result<()>) -> Result<()> {
-        if let Some(preload) = &self.preload {
-            for p in preload.iter() {
-                load(p)?;
-            }
-            Ok(())
-        } else {
-            load(bt::UTILS)
+        let Some(preload) = &self.preload else {
+            return load(bt::UTILS);
+        };
+        for p in preload.iter() {
+            load(p)?;
         }
+        Ok(())
     }
 }
 
@@ -355,6 +355,13 @@ fn format_config(config: &Config) -> Result<String> {
         initial_status = config.values.initial_status(),
         picker = config.templates.picker(),
         entry = config.templates.entry(),
+        preload = format_value(
+            &config
+                .templates
+                .preload
+                .as_deref()
+                .unwrap_or(&[Box::from(bt::UTILS)])
+        )?,
         macros_style = format_value(&config.macros_style.clone().unwrap_or_default())?,
     ))
 }

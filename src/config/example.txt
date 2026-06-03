@@ -44,6 +44,7 @@ defaults = {{
 templates = {{
   entry = "{entry}", {c}# Single entry view template.{cl}
   picker = "{picker}", {c}# Picker which is shown when multiple items are matched.{cl}
+  preload = {preload}, {c}# Templates to preload in all cases.{cl}
 }}
 
 {c}# Use built-in set of command-line macros.
