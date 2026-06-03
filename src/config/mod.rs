@@ -542,6 +542,10 @@ fn merge_config(target: &mut Config, source: Config) {
     merge_vecs(&mut target.values.permit_status, permit_status);
     merge_sets(&mut target.values.permit_tags, permit_tags);
 
+    merge_non_default(&mut target.values._validation_query, _validation_query);
+    merge_non_default(&mut target.values._assign_when, _assign_when);
+    merge_non_default(&mut target.values._assign_due, _assign_due);
+
     merge_non_default(&mut target.templates.entry, entry);
     merge_non_default(&mut target.templates.picker, picker);
     merge_non_default(&mut target.templates.diff, diff);
@@ -564,7 +568,7 @@ fn ensure_all_merged() {
         date_formats: Default::default(),
         macros: vec![ExpansionConfig::default()],
         queries: HashMap::from([("test".into(), QueryConfig::default())]),
-        reports: Default::default(),
+        reports: HashMap::from([("test".into(), ReportConfig::default())]),
         sync: Default::default(),
         templates: TemplatesConfig {
             entry: "test".into(),
@@ -577,8 +581,14 @@ fn ensure_all_merged() {
         values: ValuesConfig {
             urgency_formula: "test_formula".into(),
             permit_tags: ["foo", "bar"].iter().map(|s| Box::from(*s)).collect(),
-            // TODO: P1: check other fields
-            ..Default::default()
+            initial_status: "test_status".into(),
+            active_status: ["test"].iter().map(|s| Box::from(*s)).collect(),
+            repeat_status: ["test"].iter().map(|s| Box::from(*s)).collect(),
+            permit_status: ["foo", "bar"].iter().map(|s| Box::from(*s)).collect(),
+            _validation_query: "test".into(),
+            _assign_when: "test".into(),
+            _assign_due: "test".into(),
+            no_default_fields: Some(true),
         },
     };
 

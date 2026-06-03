@@ -99,17 +99,17 @@ impl Bucket {
 
     /// Fetch the reference to a bucket entry.
     pub fn find_by_id(&self, id: &str) -> Option<&Entry> {
-        // TODO: P1: bucket is sorted by id in most cases - attempt to find the issue
-        // with a binary search.
+        // TODO: P1: bucket is sorted by id in most cases - try to find the entry
+        // with a binary search?
 
-        self.entries.iter().find(|&issue| issue.id.starts_with(id))
+        self.entries.iter().find(|&entry| entry.id.starts_with(id))
     }
 
     /// Fetch the mutable reference to a bucket entry.
     pub fn find_by_id_mut(&mut self, id: &str) -> Option<&mut Entry> {
         self.entries
             .iter_mut()
-            .find(|issue| issue.id.starts_with(id))
+            .find(|entry| entry.id.starts_with(id))
     }
 }
 
