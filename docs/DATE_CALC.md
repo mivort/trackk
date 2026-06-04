@@ -50,8 +50,14 @@ certain amount:
 
 Exact or relative date can be specified as one of the supported formats:
 
-* ISO-8601: `YYYY-MM-DD`.
-* TODO: describe more supported formats.
+* ISO-8601 date: `YYYY-MM-DD`, ordinal date: `YYYY-DDD`.
+* Dates relative to the current one:
+  * Zero-padded month and day: `MM-DD`.
+  * Nearest day of the month: `1st`, `2nd`, `3rd`, `4th` etc.
+  * Relative keywords: `now`, `today`, `tomorrow`, `yesterday`.
+  * Nearest day of the week: `monday` (`mon`), `tuesday` (`tue`) etc.
+  * Start of the month: `january` (`jan`), `february` (`feb`) etc..
+* TODO: P2: describe more supported formats.
 
 ## Operators
 
