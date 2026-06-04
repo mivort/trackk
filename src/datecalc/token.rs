@@ -53,6 +53,8 @@ pub enum Token {
     #[regex(r"\d{1,2}:\d{2}[AaPp][Mm]", parse_12h_min)]
     #[regex(r"\d{1,2}:\d{2}:\d{2}[AaPp][Mm]", parse_12h_sec)]
     #[regex(r"\d{2}-\d{2}", relative_short_date)]
+    #[regex(r"\d{4,}-W\d{2}", parse_week)]
+    #[regex(r"\d{4,}-W\d{2}-\d", parse_weekday)]
     #[regex(r"\d{4,}-\d{3}", parse_ordinal)]
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
@@ -376,6 +378,18 @@ fn relative_short_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
         .assume_offset(now.offset())
         .unix_timestamp(),
     )
+}
+
+/// Parse ordinal ISO 8601 week format (`[year]-W[week]`).
+fn parse_week(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    // TODO: P2: implement week number parsing
+    todo!("Week parsing is not implemented yet");
+}
+
+/// Parse ordinal ISO 8601 week day format (`[year]-W[week]-[weekday]`).
+fn parse_weekday(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    // TODO: P2: implement week day parsing
+    todo!("Week day parsing is not implemented yet");
 }
 
 /// Parse ordinal date format (`[year]-[ordinal]`).
