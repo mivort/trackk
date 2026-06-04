@@ -33,7 +33,7 @@ calculator.
 
 **Durations**
 
-Durations are entered as number with a wide array of suffxes supported. Default
+Durations are entered as number with a wide array of suffixes supported. Default
 unit is seconds. When specified, each suffix provides a multiplier to the
 certain amount:
 
@@ -50,8 +50,10 @@ certain amount:
 
 Exact or relative date can be specified as one of the supported formats:
 
-* ISO-8601 date: `YYYY-MM-DD`, ordinal date: `YYYY-DDD`.
-* Dates relative to the current one:
+* Absolute ISO-8601 date: `YYYY-MM-DD`, ordinal date: `YYYY-DDD`, date and
+  time: `YYYY-MM-DDTHH:MM:SS`.
+* Date and time relative to the current one:
+  * Closest time of the day: `HH:MM`, `HH:MM:SS`.
   * Zero-padded month and day: `MM-DD`.
   * Nearest day of the month: `1st`, `2nd`, `3rd`, `4th` etc.
   * Relative keywords: `now`, `today`, `tomorrow`, `yesterday`.
@@ -89,7 +91,7 @@ Exact or relative date can be specified as one of the supported formats:
   * `len`: string value length in bytes, number of issue tags.
     Example: `len(tag) > 2`.
 
-When writing experssions, operator precedence needs to be considered. Higher
+When writing expressions, operator precedence needs to be considered. Higher
 precedence means that it gets evaluated earlier. For instance, in `a + b * c`
 expression, `*` operator will be processed before `+`. To process sum operation
 first, use braces: `(a + b) * c`.
@@ -108,10 +110,5 @@ Precedence and associativity for supported operators:
 | `or`                      | 1          | left          |
 | `if`, `else`              | 0          | left          |
 
-## Absolute date input
-
-## Relative inputs and aliases
-
----
 [1]: https://taskwarrior.org/docs/dates/
 [2]: RECURRENCE.md
