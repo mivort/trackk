@@ -368,16 +368,16 @@ fn relative_short_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
     let now = &lex.extras;
     let month = Month::try_from(month)?;
 
-    Ok(
-        if month > now.month() || (month == now.month() && day > now.day()) {
-            Date::from_calendar_date(now.year(), month, day)?
-        } else {
-            Date::from_calendar_date(now.year() + 1, month, day)?
-        }
+    let year = if month > now.month() || (month == now.month() && day > now.day()) {
+        now.year()
+    } else {
+        now.year() + 1
+    };
+
+    Ok(Date::from_calendar_date(year, month, day)?
         .with_time(ZERO_HMS)
         .assume_offset(now.offset())
-        .unix_timestamp(),
-    )
+        .unix_timestamp())
 }
 
 /// Parse ordinal ISO 8601 week format (`[year]-W[week]`).
