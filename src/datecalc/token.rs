@@ -14,6 +14,12 @@ use crate::prelude::*;
 /// Max date value supported by time-rs.
 pub const SOMEDAY: i64 = UtcDateTime::MAX.unix_timestamp();
 
+/// Zero time constant.
+const ZERO_HMS: Time = match Time::from_hms(0, 0, 0) {
+    Ok(h) => h,
+    Err(_) => panic!(),
+};
+
 /// Parsed token types.
 ///
 /// When operator token is added, it needs to be acounted in four places:
@@ -46,7 +52,7 @@ pub enum Token {
     #[regex(r"\d{1,2}[AaPp][Mm]", parse_12h)]
     #[regex(r"\d{1,2}:\d{2}[AaPp][Mm]", parse_12h_min)]
     #[regex(r"\d{1,2}:\d{2}:\d{2}[AaPp][Mm]", parse_12h_sec)]
-    #[regex(r"\d{2}-\d{2}", parse_short_date)]
+    #[regex(r"\d{2}-\d{2}", relative_short_date)]
     #[regex(r"\d{4,}-\d{3}", parse_ordinal)]
     #[regex(r"\d{4,}-\d{2}-\d{2}", parse_full_date)]
     #[regex(r"\d{4,}-\d{2}-\d{2}T\d{2}:\d{2}", parse_date_time)]
@@ -352,9 +358,24 @@ fn relative_time(time: Time, date: OffsetDateTime) -> i64 {
 }
 
 /// Parse date in `[month]-[day]` format (non-ISO 8601).
-fn parse_short_date(_lex: &Lexer<Token>) -> Result<i64, LexerError> {
-    // TODO: P2: parse short relative dates?
-    todo!()
+fn relative_short_date(lex: &Lexer<Token>) -> Result<i64, LexerError> {
+    let slice = lex.slice();
+    let month = slice[0..2].parse::<u8>()?;
+    let day = slice[3..5].parse::<u8>()?;
+
+    let now = &lex.extras;
+    let month = Month::try_from(month)?;
+
+    Ok(
+        if month > now.month() || (month == now.month() && now.day() > day) {
+            Date::from_calendar_date(now.year(), month, day)?
+        } else {
+            Date::from_calendar_date(now.year() + 1, month, day)?
+        }
+        .with_time(ZERO_HMS)
+        .assume_offset(now.offset())
+        .unix_timestamp(),
+    )
 }
 
 /// Parse ordinal date format (`[year]-[ordinal]`).
